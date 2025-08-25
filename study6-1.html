@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-1: 画像認識 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-1: 画像認識</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-1</h1>
+                <h2 class="content-subtitle">画像認識</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>画像認識タスクの種類とその概要について理解する</li>
+                        <li>代表的な画像認識モデルについて理解する</li>
+                        <li>画像認識が実世界において、どのように活用されているか理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>AlexNet</strong></li>
+                        <li><strong>DeepLab</strong></li>
+                        <li><strong>DenseNet</strong></li>
+                        <li><strong>EfficientNet</strong></li>
+                        <li><strong>Fast R-CNN</strong></li>
+                        <li><strong>Faster R-CNN</strong></li>
+                        <li><strong>FCN (Fully Convolutional Network)</strong></li>
+                        <li><strong>FPN (Feature Pyramid Network)</strong></li>
+                        <li><strong>GoogLeNet</strong></li>
+                        <li><strong>Mask R-CNN</strong></li>
+                        <li><strong>MnasNet</strong></li>
+                        <li><strong>MobileNet</strong></li>
+                        <li><strong>NAS (Neural Architecture Search)</strong></li>
+                        <li><strong>OpenPose</strong></li>
+                        <li><strong>PSPNet</strong></li>
+                        <li><strong>ResNet</strong></li>
+                        <li><strong>SegNet</strong></li>
+                        <li><strong>SENet</strong></li>
+                        <li><strong>SSD</strong></li>
+                        <li><strong>U-Net</strong></li>
+                        <li><strong>VGG</strong></li>
+                        <li><strong>Vision Transformer</strong></li>
+                        <li><strong>Wide ResNet</strong></li>
+                        <li><strong>YOLO</strong></li>
+                        <li><strong>一般物体認識</strong></li>
+                        <li><strong>インスタンスセグメンテーション</strong></li>
+                        <li><strong>姿勢推定</strong></li>
+                        <li><strong>セマンティックセグメンテーション</strong></li>
+                        <li><strong>物体検出</strong></li>
+                        <li><strong>物体識別</strong></li>
+                        <li><strong>パノプティックセグメンテーション</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">画像認識とは何か</h1>
+                
+                <p>画像認識（Computer Vision）は、デジタル画像や動画から意味のある情報を抽出し、理解するコンピュータ技術です。人間の視覚システムを模倣し、画像内の物体、シーン、パターンを自動的に識別・解析します。</p>
+
+                <p>深層学習の登場により飛躍的に発展し、現在では自動運転、医療診断、監視システム、ARアプリケーション、製造業での品質検査など、社会のあらゆる分野で活用されています。特に2012年のAlexNet以降、CNNベースの手法が主流となっています。</p>
+
+                <h1 id="task-types">画像認識タスクの分類</h1>
+
+                <h2 id="classification-tasks">分類系タスク</h2>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 画像分類タスクの階層</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>物体識別（Image Classification）</strong>:
+・画像全体に対して1つのクラスラベルを予測
+・例: 「この画像は猫である」
+・出力: 単一クラス確率分布
+
+<strong>一般物体認識（Object Recognition）</strong>:
+・より広義の概念、複数物体の同時認識
+・自然画像内の様々な物体を識別
+・複数クラスの同時存在可能
+
+<strong>多ラベル分類（Multi-label Classification）</strong>:
+・1つの画像に複数のクラスラベル
+・例: 「猫と犬と車が写っている」
+・出力: 各クラスの独立した確率
+                    </pre>
+                </div>
+
+                <h2 id="detection-tasks">検出・位置推定系タスク</h2>
+
+                <p>物体の存在だけでなく、位置情報も同時に推定するタスク：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 物体検出系タスク</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>物体検出（Object Detection）</strong>:
+・物体の位置（Bounding Box）とクラスを予測
+・出力: [x, y, w, h, class, confidence]
+・応用: 自動運転、監視カメラ
+
+<strong>姿勢推定（Pose Estimation）</strong>:
+・人体の関節点位置を推定
+・2D: 画像平面での関節座標
+・3D: 3次元空間での姿勢復元
+・応用: スポーツ解析、VR/AR
+
+<strong>顔認識（Face Recognition）</strong>:
+・顔検出 → 顔識別の2段階処理
+・特徴点抽出とマッチング
+・応用: セキュリティ、写真整理
+                    </pre>
+                </div>
+
+                <h2 id="segmentation-tasks">セグメンテーション系タスク</h2>
+
+                <p>画像をピクセルレベルで分割・理解するタスク：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Semantic Segmentation}: f: \mathbb{R}^{H \times W \times 3} \rightarrow \{1,2,...,C\}^{H \times W}$$
+                    $$\text{Instance Segmentation}: f: \mathbb{R}^{H \times W \times 3} \rightarrow \{(c_i, m_i)\}_{i=1}^{N}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎨 セグメンテーションの種類</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>セマンティックセグメンテーション</strong>:
+・各ピクセルにクラスラベルを割り当て
+・同じクラスの物体は区別しない
+・例: すべての「車」ピクセルを同一色で塗る
+
+<strong>インスタンスセグメンテーション</strong>:
+・個々の物体インスタンスを分離
+・同じクラスでも異なるインスタンスは区別
+・例: 車1、車2、車3として個別にマスク
+
+<strong>パノプティックセグメンテーション</strong>:
+・セマンティック + インスタンスを統合
+・Thing（可算物体）はインスタンス分離
+・Stuff（背景要素）はセマンティック分割
+                    </pre>
+                </div>
+
+                <h1 id="historical-models">歴史的画像認識モデル</h1>
+
+                <h2 id="alexnet">AlexNet（2012）</h2>
+
+                <p>深層学習ブームの火付け役となった革命的モデル：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🚀 AlexNetの革新</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>アーキテクチャ</strong>:
+Conv(11×11) → MaxPool → Conv(5×5) → MaxPool 
+→ Conv(3×3) → Conv(3×3) → Conv(3×3) → MaxPool
+→ FC(4096) → FC(4096) → FC(1000)
+
+<strong>革新的技術</strong>:
+✓ ReLU活性化関数の導入
+✓ Dropout（0.5）による正則化
+✓ データ拡張（反転、切り抜き）
+✓ GPU並列処理（2-GPU）
+✓ Local Response Normalization
+
+<strong>ImageNet結果</strong>:
+・Top-5エラー率: 15.3%（従来手法26.2%）
+・圧倒的性能差による深層学習ブーム
+                    </pre>
+                </div>
+
+                <h2 id="vgg">VGG（2014）</h2>
+
+                <p>シンプルで深いアーキテクチャを提案：</p>
+
+                <ul>
+                    <li><strong>小さなフィルタ</strong>：3×3畳み込みフィルタのみ使用</li>
+                    <li><strong>深い構造</strong>：VGG-16（16層）、VGG-19（19層）</li>
+                    <li><strong>設計思想</strong>：小さなフィルタを重ねることで受容野拡大</li>
+                    <li><strong>影響</strong>：後のCNNアーキテクチャの基本設計に影響</li>
+                </ul>
+
+                <h2 id="googlenet">GoogLeNet（2014）</h2>
+
+                <p>Inception moduleを導入した効率的アーキテクチャ：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Inception Module} = \text{Concat}([1×1, 3×3, 5×5, MaxPool])$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔥 GoogLeNetの特徴</h3>
+                    <ul>
+                        <li><strong>Inception Module</strong>：複数スケールの特徴を並列抽出</li>
+                        <li><strong>1×1畳み込み</strong>：チャネル数削減による計算量削減</li>
+                        <li><strong>Global Average Pooling</strong>：FC層の削減</li>
+                        <li><strong>Auxiliary Classifiers</strong>：中間層での勾配補強</li>
+                        <li><strong>パラメータ効率</strong>：AlexNetの1/12のパラメータ数</li>
+                    </ul>
+                </div>
+
+                <h1 id="modern-cnn">現代CNNアーキテクチャ</h1>
+
+                <h2 id="resnet">ResNet（2015）</h2>
+
+                <p>スキップ結合による革命的な深層化を実現：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$y = F(x, \{W_i\}) + x$$
+                    $$\text{where } F(x, \{W_i\}) = W_2 \sigma(W_1 x)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ ResNetの革新</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>残差学習（Residual Learning）</strong>:
+・スキップ結合: y = F(x) + x
+・勾配消失問題の根本的解決
+・恒等マッピングの学習簡素化
+
+<strong>深層化の実現</strong>:
+・ResNet-50, 101, 152層の成功
+・従来の限界（20-30層）を大幅突破
+・超深層でも性能向上を維持
+
+<strong>バリエーション</strong>:
+・Wide ResNet: 幅を広げる設計
+・ResNeXt: グループ畳み込み導入  
+・DenseNet: すべての層を接続
+                    </pre>
+                </div>
+
+                <h2 id="densenet">DenseNet（2017）</h2>
+
+                <p>Dense Connectivity による特徴再利用：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$x_l = H_l([x_0, x_1, ..., x_{l-1}])$$
+                </div>
+
+                <ul>
+                    <li><strong>Dense Connection</strong>：すべての前層からの入力を結合</li>
+                    <li><strong>特徴再利用</strong>：低レベル特徴の効果的活用</li>
+                    <li><strong>パラメータ効率</strong>：ResNetより少ないパラメータで高性能</li>
+                    <li><strong>勾配流改善</strong>：Dense接続による勾配伝播促進</li>
+                </ul>
+
+                <h2 id="senet">SENet（2017）</h2>
+
+                <p>Squeeze-and-Excitation blockによる注意機構：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{SE}(x) = x \odot \sigma(W_2 \delta(W_1 \text{GAP}(x)))$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔍 SE-Blockの動作</h3>
+                    <ul>
+                        <li><strong>Squeeze</strong>：Global Average Poolingで各チャネルを要約</li>
+                        <li><strong>Excitation</strong>：FC層でチャネル重要度を学習</li>
+                        <li><strong>Scale</strong>：重要度で元特徴マップを重み付け</li>
+                        <li><strong>適応性</strong>：既存アーキテクチャに容易に組み込み可能</li>
+                    </ul>
+                </div>
+
+                <h1 id="object-detection">物体検出モデル</h1>
+
+                <h2 id="rcnn-family">R-CNN系列</h2>
+
+                <p>領域提案ベースの物体検出手法：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔍 R-CNN系列の進化</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>R-CNN（2014）</strong>:
+1. Selective Search → 候補領域生成（~2000個）
+2. CNN → 各候補をCNNで特徴抽出
+3. SVM → 分類、回帰で位置調整
+問題: 遅い（各候補でCNN実行）
+
+<strong>Fast R-CNN（2015）</strong>:
+1. CNN → 画像全体の特徴マップ生成
+2. RoI Pooling → 候補領域から固定サイズ特徴抽出
+3. FC → 分類・回帰の統合学習
+改善: 約10倍高速化
+
+<strong>Faster R-CNN（2015）</strong>:
+1. RPN → CNNベースの候補領域生成
+2. Fast R-CNNと統合した end-to-end 学習
+3. Anchor box 概念の導入
+改善: 完全CNN化、さらなる高速化
+                    </pre>
+                </div>
+
+                <h2 id="yolo">YOLO（You Only Look Once）</h2>
+
+                <p>リアルタイム物体検出を実現した革命的手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{YOLO Output} = S \times S \times (B \times 5 + C)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ YOLO系列の特徴</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>YOLO v1（2016）</strong>:
+・グリッドベース検出（7×7分割）
+・1回の順伝播で全物体検出
+・リアルタイム処理（45 FPS）
+
+<strong>YOLO v2（2017）</strong>:
+・Anchor boxの導入
+・Batch Normalization追加
+・高解像度分類器の事前学習
+
+<strong>YOLO v3（2018）</strong>:
+・FPN的マルチスケール検出
+・3つの異なるスケールで予測
+・Darknet-53バックボーン
+
+<strong>YOLO v4, v5, v8...</strong>:
+・継続的な精度・速度改善
+・Data Augmentation強化
+・アーキテクチャ最適化
+                    </pre>
+                </div>
+
+                <h2 id="ssd">SSD（Single Shot MultiBox Detector）</h2>
+
+                <p>マルチスケール特徴マップを活用した高速検出：</p>
+
+                <ul>
+                    <li><strong>Multi-scale Detection</strong>：異なる解像度の特徴マップで検出</li>
+                    <li><strong>Default Boxes</strong>：各位置で複数のアスペクト比</li>
+                    <li><strong>速度と精度</strong>：YOLOより高精度、Faster R-CNNより高速</li>
+                    <li><strong>小物体対応</strong>：高解像度特徴での小物体検出改善</li>
+                </ul>
+
+                <h1 id="segmentation-models">セグメンテーションモデル</h1>
+
+                <h2 id="fcn">FCN（Fully Convolutional Network）</h2>
+
+                <p>セマンティックセグメンテーションの基礎を築いたモデル：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎨 FCNの革新</h3>
+                    <ul>
+                        <li><strong>全畳み込み化</strong>：FC層を1×1畳み込みで置換</li>
+                        <li><strong>アップサンプリング</strong>：転置畳み込みで解像度復元</li>
+                        <li><strong>Skip Connection</strong>：低レベル特徴との融合</li>
+                        <li><strong>Dense Prediction</strong>：すべてのピクセルに対する予測</li>
+                    </ul>
+                </div>
+
+                <h2 id="unet">U-Net（2015）</h2>
+
+                <p>医療画像セグメンテーションで大成功したアーキテクチャ：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{U-Net} = \text{Encoder} + \text{Decoder} + \text{Skip Connections}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏥 U-Netの設計</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>エンコーダ（収縮パス）</strong>:
+・畳み込み + Max Pooling
+・特徴抽出とダウンサンプリング
+・文脈情報の獲得
+
+<strong>デコーダ（拡張パス）</strong>:
+・アップサンプリング + 畳み込み
+・空間解像度の復元
+・位置情報の回復
+
+<strong>Skip Connection</strong>:
+・同レベルの特徴を直接結合
+・低レベル詳細の保持
+・U字形状の由来
+                    </pre>
+                </div>
+
+                <h2 id="mask-rcnn">Mask R-CNN（2017）</h2>
+
+                <p>インスタンスセグメンテーションの決定版：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Loss} = L_{cls} + L_{box} + L_{mask}$$
+                </div>
+
+                <ul>
+                    <li><strong>マスク分岐</strong>：Faster R-CNNにセグメンテーション分岐追加</li>
+                    <li><strong>RoIAlign</strong>：RoI Poolingの量子化誤差を解決</li>
+                    <li><strong>多タスク学習</strong>：検出とセグメンテーションの同時学習</li>
+                    <li><strong>高品質</strong>：ピクセルレベルの高精度インスタンス分割</li>
+                </ul>
+
+                <h1 id="efficient-models">効率的モデル</h1>
+
+                <h2 id="mobilenet">MobileNet（2017）</h2>
+
+                <p>モバイルデバイス向け軽量モデル：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Depthwise Separable Conv} = \text{Depthwise Conv} + \text{Pointwise Conv}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📱 MobileNetの効率化</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Depthwise Separable Convolution</strong>:
+・標準畳み込みを2段階に分離
+・Depthwise: チャネル別の空間畳み込み
+・Pointwise: 1×1畳み込みでチャネル混合
+・計算量: 約1/8に削減
+
+<strong>Width Multiplier α</strong>:
+・各層のチャネル数を α倍に調整
+・α ∈ [0.25, 0.5, 0.75, 1.0]
+・精度と効率のトレードオフ調整
+
+<strong>Resolution Multiplier ρ</strong>:
+・入力解像度の調整
+・計算量の二次的削減効果
+                    </pre>
+                </div>
+
+                <h2 id="efficientnet">EfficientNet（2019）</h2>
+
+                <p>複合スケーリングによる効率的モデル設計：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{depth} = \alpha^\phi, \text{width} = \beta^\phi, \text{resolution} = \gamma^\phi$$
+                    $$\text{s.t. } \alpha \cdot \beta^2 \cdot \gamma^2 \approx 2$$
+                </div>
+
+                <ul>
+                    <li><strong>複合スケーリング</strong>：深さ・幅・解像度を同時最適化</li>
+                    <li><strong>NAS設計</strong>：Neural Architecture Searchによる基礎設計</li>
+                    <li><strong>高効率</strong>：従来モデルより大幅な効率改善</li>
+                    <li><strong>スケールファミリー</strong>：B0からB7まで段階的展開</li>
+                </ul>
+
+                <h1 id="modern-architectures">最新アーキテクチャ</h1>
+
+                <h2 id="vision-transformer">Vision Transformer（ViT）</h2>
+
+                <p>画像認識にTransformerを適用した革命的手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$x_{patch} = [x_p^1 E; x_p^2 E; ...; x_p^N E] + E_{pos}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 ViTの仕組み</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>パッチ分割</strong>:
+・画像を16×16パッチに分割
+・各パッチをベクトルに線形変換
+・[CLS]トークンの追加
+
+<strong>位置エンコーディング</strong>:
+・学習可能な位置埋め込み
+・空間的位置情報の付与
+
+<strong>Transformer Encoder</strong>:
+・Multi-Head Self-Attention
+・Feed-Forward Network
+・Layer Normalization
+
+<strong>分類ヘッド</strong>:
+・[CLS]トークンから分類
+・MLP Head による最終予測
+                    </pre>
+                </div>
+
+                <h2 id="neural-architecture-search">NAS（Neural Architecture Search）</h2>
+
+                <p>自動でアーキテクチャを設計する技術：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔍 NASの成果</h3>
+                    <ul>
+                        <li><strong>MnasNet</strong>：モバイル向けNASの成功例</li>
+                        <li><strong>EfficientNet</strong>：NASで見つけた高効率アーキテクチャ</li>
+                        <li><strong>NASNet</strong>：強化学習による設計自動化</li>
+                        <li><strong>DARTS</strong>：微分可能なアーキテクチャ探索</li>
+                        <li><strong>人間超越</strong>：手設計を上回る性能の実現</li>
+                    </ul>
+                </div>
+
+                <h1 id="real-world-applications">実世界での活用</h1>
+
+                <h2 id="autonomous-driving">自動運転</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🚗 自動運転の画像認識</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>物体検出</strong>:
+・車両、歩行者、信号機、道路標識の検出
+・YOLO、SSD等のリアルタイム手法
+
+<strong>セグメンテーション</strong>:
+・車道、歩道、白線のピクセル分割
+・DeepLab、PSPNet等の高精度手法
+
+<strong>深度推定</strong>:
+・ステレオカメラからの距離計測
+・単眼深度推定の研究発展
+
+<strong>統合システム</strong>:
+・複数タスクの同時処理
+・センサーフュージョン
+・リアルタイム制約下での高精度実現
+                    </pre>
+                </div>
+
+                <h2 id="medical-imaging">医療画像診断</h2>
+
+                <ul>
+                    <li><strong>放射線診断</strong>：X線、CT、MRIの異常検出</li>
+                    <li><strong>病理診断</strong>：組織切片の癌細胞検出</li>
+                    <li><strong>眼科診断</strong>：網膜症、緑内障の早期発見</li>
+                    <li><strong>皮膚科診断</strong>：皮膚癌の良悪性判定</li>
+                    <li><strong>専門医レベル</strong>：一部領域で人間医師を上回る精度</li>
+                </ul>
+
+                <h2 id="industrial-applications">産業応用</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🏭 産業界での活用</h3>
+                    <ul>
+                        <li><strong>品質検査</strong>：製品欠陥の自動検出</li>
+                        <li><strong>農業</strong>：作物の成長監視、病害虫検出</li>
+                        <li><strong>小売業</strong>：商品認識、在庫管理</li>
+                        <li><strong>セキュリティ</strong>：顔認証、行動解析</li>
+                        <li><strong>エンターテイメント</strong>：AR/VRアプリケーション</li>
+                    </ul>
+                </div>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>タスク分類</strong>：物体検出、セマンティック/インスタンスセグメンテーション</li>
+                        <li><strong>歴史的モデル</strong>：AlexNet（2012革命）、VGG、GoogLeNet</li>
+                        <li><strong>ResNet</strong>：スキップ結合、勾配消失解決、残差学習</li>
+                        <li><strong>物体検出</strong>：R-CNN系列、YOLO、SSD</li>
+                        <li><strong>セグメンテーション</strong>：FCN、U-Net、Mask R-CNN</li>
+                        <li><strong>効率化手法</strong>：MobileNet、EfficientNet</li>
+                        <li><strong>最新動向</strong>：Vision Transformer、NAS</li>
+                        <li><strong>実世界応用</strong>：自動運転、医療、産業での活用例</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>タスクの混同</strong>：分類・検出・セグメンテーションの違い</li>
+                        <li><strong>R-CNN系列順序</strong>：R-CNN → Fast R-CNN → Faster R-CNN</li>
+                        <li><strong>ResNetの核心</strong>：スキップ結合による残差学習</li>
+                        <li><strong>セグメンテーション区別</strong>：セマンティック vs インスタンス</li>
+                        <li><strong>YOLO特徴</strong>：リアルタイム、シングルショット検出</li>
+                        <li><strong>AlexNet年代</strong>：2012年、深層学習ブームの起点</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>画像認識は、深層学習の最も成功した応用分野の一つです。2012年のAlexNetから始まり、VGG、GoogLeNet、ResNet等の歴史的発展を経て、現在はVision TransformerやNASによる自動設計まで到達しています。</p>
+                
+                <p>物体検出、セグメンテーション、姿勢推定など多様なタスクがあり、各々に特化したアーキテクチャが開発されています。効率化手法（MobileNet、EfficientNet）により、モバイルデバイスでも高性能な画像認識が可能になりました。</p>
+                
+                <p>G検定では、基本的なタスク分類の理解、主要モデルの特徴（特にAlexNet、ResNet、YOLO等）、実世界での応用例について出題される可能性が高く、画像認識技術の発展史と現状を体系的に理解することが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">AlexNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2012年ImageNet優勝モデル。深層学習ブームの火付け役。ReLU、Dropout導入。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ResNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">スキップ結合による残差学習で勾配消失問題を解決。超深層ネットワークを実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">YOLO（You Only Look Once）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">リアルタイム物体検出の代表手法。1回の順伝播で全物体を検出。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">R-CNN</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Region-based CNN。物体検出の基礎手法。Fast R-CNN、Faster R-CNNへ発展。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">U-Net</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">医療画像セグメンテーションの決定版。Encoder-Decoder + Skip Connection構造。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">セマンティックセグメンテーション</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各ピクセルにクラスラベルを割り当て。同じクラスの物体は区別しない。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">インスタンスセグメンテーション</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">個々の物体インスタンスを分離してピクセル分割。Mask R-CNNが代表的。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">物体検出（Object Detection）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像内の物体の位置（Bounding Box）とクラスを同時に予測するタスク。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">MobileNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Depthwise Separable Convolutionによるモバイル向け軽量モデル。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">EfficientNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複合スケーリング（深さ・幅・解像度の同時最適化）による効率的モデル。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Vision Transformer（ViT）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像をパッチに分割してTransformerを適用。CNNの代替として注目。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">NAS（Neural Architecture Search）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">機械学習でネットワーク構造を自動設計する技術。人間設計を超える性能。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">FCN（Fully Convolutional Network）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">セマンティックセグメンテーションの基礎。FC層を畳み込み層で置換。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">姿勢推定（Pose Estimation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">人体の関節点位置を推定するタスク。OpenPoseが代表的手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">一般物体認識（Object Recognition）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">自然画像内の様々な物体を識別する広義の画像認識タスク。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-9.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-9
+                        </a>
+                        <a href="study6-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-2
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

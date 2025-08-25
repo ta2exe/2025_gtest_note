@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2-3: 機械学習 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-cyan">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 2-3: 機械学習</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 2-3</h1>
+                <p class="content-subtitle">機械学習</p>
+            </div>
+
+            <div class="content">
+                <h1 id="learning-objectives">学習目標</h1>
+                <p>この章では以下の内容を学習します：</p>
+                <ul>
+                    <li><strong>機械学習とは何か</strong>説明できる</li>
+                    <li><strong>機械学習とルールベース手法の差異、およびメリットデメリット</strong>について説明できる</li>
+                    <li><strong>機械学習が注目されるようになった背景</strong>を説明できる</li>
+                    <li><strong>機械学習がどのような場面において、効果を発揮するのか</strong>理解する</li>
+                    <li><strong>機械学習の代表的な応用例</strong>について理解する</li>
+                </ul>
+
+                <h2 id="keywords">キーワード</h2>
+                <p><strong>次元の呪い</strong>, <strong>スパムフィルター</strong>, <strong>ビッグデータ</strong>, <strong>レコメンデーションエンジン</strong></p>
+
+                <h1 id="what-is-ml">機械学習とは</h1>
+                <p><strong>機械学習（Machine Learning）</strong>は、明示的にプログラムされることなく、データからパターンを学習し、新しいデータに対して予測や判断を行う技術です。</p>
+
+                <h2 id="ml-definition">アーサー・サミュエルの定義</h2>
+                <blockquote style="border-left: 3px solid #00ffff; padding-left: 20px; margin: 20px 0; font-style: italic;">
+                "機械学習は、明示的にプログラムされることなく、コンピュータに学習能力を与える研究分野である"
+                <br><strong>- Arthur Samuel (1959)</strong>
+                </blockquote>
+
+                <h2 id="ml-vs-traditional">従来手法との違い</h2>
+
+                <h3 id="traditional-programming">従来のプログラミング</h3>
+                <ul>
+                    <li><strong>手法</strong>: 人間がルールを明示的に記述</li>
+                    <li><strong>処理</strong>: データ + プログラム → 結果</li>
+                    <li><strong>例</strong>: if文による条件分岐</li>
+                    <li><strong>適用範囲</strong>: 明確なルールがある問題</li>
+                </ul>
+
+                <h3 id="machine-learning-approach">機械学習アプローチ</h3>
+                <ul>
+                    <li><strong>手法</strong>: データからルールを自動学習</li>
+                    <li><strong>処理</strong>: データ + 結果 → プログラム</li>
+                    <li><strong>例</strong>: 統計的モデル、ニューラルネットワーク</li>
+                    <li><strong>適用範囲</strong>: 複雑で明示化困難な問題</li>
+                </ul>
+
+                <h1 id="ml-vs-rule-based">機械学習 vs ルールベース</h1>
+
+                <h2 id="rule-based-systems">ルールベースシステム</h2>
+                
+                <h3 id="rule-based-advantages">メリット</h3>
+                <ul>
+                    <li><strong>透明性</strong>: 判断過程が明確</li>
+                    <li><strong>予測可能性</strong>: 同じ入力で常に同じ出力</li>
+                    <li><strong>専門知識活用</strong>: 既存の専門知識を直接利用</li>
+                    <li><strong>少ないデータ</strong>: 大量のデータが不要</li>
+                </ul>
+
+                <h3 id="rule-based-disadvantages">デメリット</h3>
+                <ul>
+                    <li><strong>スケーラビリティ</strong>: 複雑な問題では ルール数が爆発的増加</li>
+                    <li><strong>保守困難</strong>: ルール追加・修正が困難</li>
+                    <li><strong>例外処理</strong>: 想定外の状況への対応が困難</li>
+                    <li><strong>知識獲得のボトルネック</strong>: 専門家からの知識抽出が困難</li>
+                </ul>
+
+                <h2 id="machine-learning-systems">機械学習システム</h2>
+
+                <h3 id="ml-advantages">メリット</h3>
+                <ul>
+                    <li><strong>自動化</strong>: データからのルール自動生成</li>
+                    <li><strong>適応性</strong>: 新しいデータに対する継続学習</li>
+                    <li><strong>複雑パターン発見</strong>: 人間が気づかないパターン抽出</li>
+                    <li><strong>大規模データ活用</strong>: ビッグデータからの知識抽出</li>
+                </ul>
+
+                <h3 id="ml-disadvantages">デメリット</h3>
+                <ul>
+                    <li><strong>ブラックボックス</strong>: 判断根拠が不明確</li>
+                    <li><strong>データ依存</strong>: 大量の質の高いデータが必要</li>
+                    <li><strong>バイアス</strong>: 学習データの偏りの影響</li>
+                    <li><strong>計算コスト</strong>: 学習に時間・リソースが必要</li>
+                </ul>
+
+                <h1 id="ml-background">機械学習が注目される背景</h1>
+
+                <h2 id="big-data">ビッグデータの出現</h2>
+                <p><strong>ビッグデータ</strong>は、従来のデータベース管理システムでは処理困難な大規模データセットです。</p>
+
+                <h3 id="big-data-3v">ビッグデータの3V</h3>
+                <ul>
+                    <li><strong>Volume（量）</strong>: テラバイト〜エクサバイト規模</li>
+                    <li><strong>Velocity（速度）</strong>: 高速でリアルタイムなデータ生成</li>
+                    <li><strong>Variety（多様性）</strong>: 構造化・非構造化データの混在</li>
+                </ul>
+
+                <h3 id="data-sources">データ源の多様化</h3>
+                <ul>
+                    <li><strong>ウェブ</strong>: 検索ログ、ソーシャルメディア</li>
+                    <li><strong>センサー</strong>: IoTデバイス、GPS、監視カメラ</li>
+                    <li><strong>取引記録</strong>: ECサイト、金融取引</li>
+                    <li><strong>科学計測</strong>: 気象観測、宇宙観測</li>
+                </ul>
+
+                <h2 id="computational-power">計算能力の向上</h2>
+                <ul>
+                    <li><strong>ムーアの法則</strong>: プロセッサ性能の指数的向上</li>
+                    <li><strong>GPUコンピューティング</strong>: 並列処理による高速化</li>
+                    <li><strong>クラウドコンピューティング</strong>: スケーラブルな計算リソース</li>
+                    <li><strong>分散処理</strong>: Hadoop、Sparkによる大規模データ処理</li>
+                </ul>
+
+                <h2 id="algorithm-advances">アルゴリズムの進歩</h2>
+                <ul>
+                    <li><strong>深層学習</strong>: 多層ニューラルネットワークの復活</li>
+                    <li><strong>カーネル法</strong>: SVM等の高性能手法</li>
+                    <li><strong>アンサンブル学習</strong>: 複数モデルの組み合わせ</li>
+                    <li><strong>最適化手法</strong>: 効率的な学習アルゴリズム</li>
+                </ul>
+
+                <h1 id="curse-of-dimensionality">次元の呪い</h1>
+                <p><strong>次元の呪い（Curse of Dimensionality）</strong>は、高次元データ処理において生じる困難を表す概念です。</p>
+
+                <h2 id="dimensionality-problems">高次元データの問題</h2>
+
+                <h3 id="distance-concentration">距離の集中</h3>
+                <p>高次元空間では、全てのデータ点間の距離が似たような値になる現象：</p>
+                $$\lim_{d \to \infty} \frac{\text{max}_i \|x_i - y\| - \text{min}_i \|x_i - y\|}{\text{min}_i \|x_i - y\|} = 0$$
+
+                <h3 id="data-sparsity">データの希薄性</h3>
+                <ul>
+                    <li><strong>指数的増加</strong>: 必要データ数が次元数に対して指数的増加</li>
+                    <li><strong>計算例</strong>: 各次元10分割→ d次元で $10^d$ 個のセルが必要</li>
+                    <li><strong>実例</strong>: 10次元→100億セル、20次元→ $10^{20}$ セル</li>
+                </ul>
+
+                <h3 id="computational-complexity">計算量の爆発</h3>
+                <ul>
+                    <li><strong>メモリ使用量</strong>: データ保存に必要な容量が激増</li>
+                    <li><strong>計算時間</strong>: 距離計算等の処理時間が増大</li>
+                    <li><strong>最適化困難</strong>: 局所最適解に陥りやすい</li>
+                </ul>
+
+                <h2 id="dimensionality-solutions">次元の呪い対策</h2>
+                <ul>
+                    <li><strong>次元削減</strong>: PCA、t-SNE等による次元圧縮</li>
+                    <li><strong>特徴選択</strong>: 重要な特徴量のみを使用</li>
+                    <li><strong>正則化</strong>: L1/L2正則化による過学習抑制</li>
+                    <li><strong>カーネル法</strong>: 非線形変換による効率的処理</li>
+                </ul>
+
+                <h1 id="ml-applications">機械学習の応用例</h1>
+
+                <h2 id="spam-filter">スパムフィルター</h2>
+                <p><strong>スパムフィルター</strong>は、機械学習の代表的成功例です。</p>
+
+                <h3 id="spam-filter-features">特徴量</h3>
+                <ul>
+                    <li><strong>単語頻度</strong>: 特定単語の出現頻度</li>
+                    <li><strong>送信者情報</strong>: 送信者のドメイン、IP</li>
+                    <li><strong>メール構造</strong>: HTML比率、画像/テキスト比</li>
+                    <li><strong>時間情報</strong>: 送信時刻、送信間隔</li>
+                </ul>
+
+                <h3 id="spam-filter-algorithms">使用アルゴリズム</h3>
+                <ul>
+                    <li><strong>ナイーブベイズ</strong>: 単語出現確率に基づく分類</li>
+                    <li><strong>SVM</strong>: サポートベクターマシンによる分類</li>
+                    <li><strong>決定木</strong>: ルールベース分類</li>
+                    <li><strong>ランダムフォレスト</strong>: 複数決定木の集合</li>
+                </ul>
+
+                <h3 id="spam-bayes">ナイーブベイズの数式</h3>
+                $$P(\text{spam}|\text{words}) = \frac{P(\text{words}|\text{spam}) \cdot P(\text{spam})}{P(\text{words})}$$
+
+                <h2 id="recommendation-engine">レコメンデーションエンジン</h2>
+                <p><strong>レコメンデーションエンジン</strong>は、ユーザーの嗜好に基づいて商品やコンテンツを推薦するシステムです。</p>
+
+                <h3 id="recommendation-types">推薦手法の分類</h3>
+
+                <h4 id="content-based">コンテンツベース推薦</h4>
+                <ul>
+                    <li><strong>原理</strong>: アイテムの特徴とユーザー嗜好のマッチング</li>
+                    <li><strong>特徴</strong>: ユーザーの過去行動に基づく</li>
+                    <li><strong>利点</strong>: 新規アイテムにも対応可能</li>
+                    <li><strong>欠点</strong>: 推薦の多様性が低い</li>
+                </ul>
+
+                <h4 id="collaborative-filtering">協調フィルタリング</h4>
+                <ul>
+                    <li><strong>原理</strong>: 類似ユーザーの行動パターンを活用</li>
+                    <li><strong>ユーザーベース</strong>: 類似ユーザーの嗜好から推薦</li>
+                    <li><strong>アイテムベース</strong>: 類似アイテムから推薦</li>
+                    <li><strong>課題</strong>: コールドスタート問題</li>
+                </ul>
+
+                <h3 id="cold-start-problem">コールドスタート問題</h3>
+                <ul>
+                    <li><strong>新規ユーザー</strong>: 履歴がないユーザーへの推薦困難</li>
+                    <li><strong>新規アイテム</strong>: 評価がないアイテムの推薦困難</li>
+                    <li><strong>解決策</strong>: ハイブリッド手法、人気度ベース推薦</li>
+                </ul>
+
+                <h3 id="recommendation-evaluation">評価指標</h3>
+                <ul>
+                    <li><strong>RMSE</strong>: 評価値予測の精度</li>
+                    <li><strong>Precision@K</strong>: 上位K件の適合率</li>
+                    <li><strong>Recall@K</strong>: 上位K件の再現率</li>
+                    <li><strong>多様性</strong>: 推薦リストの多様性度合い</li>
+                </ul>
+
+                <h1 id="ml-effective-scenarios">機械学習が効果を発揮する場面</h1>
+
+                <h2 id="pattern-recognition">パターン認識タスク</h2>
+                <ul>
+                    <li><strong>画像認識</strong>: 顔認識、物体検出、医療画像診断</li>
+                    <li><strong>音声認識</strong>: 音声テキスト変換、話者識別</li>
+                    <li><strong>自然言語処理</strong>: 感情分析、機械翻訳</li>
+                    <li><strong>時系列パターン</strong>: 株価予測、需要予測</li>
+                </ul>
+
+                <h2 id="high-dimensional-data">高次元データ処理</h2>
+                <ul>
+                    <li><strong>ゲノム解析</strong>: 数万次元の遺伝子発現データ</li>
+                    <li><strong>テキストマイニング</strong>: 数万〜数十万次元の単語ベクトル</li>
+                    <li><strong>センサーデータ</strong>: 多数センサーからの時系列データ</li>
+                </ul>
+
+                <h2 id="large-scale-data">大規模データ活用</h2>
+                <ul>
+                    <li><strong>ウェブ検索</strong>: 数億ページからの関連度計算</li>
+                    <li><strong>ソーシャルネットワーク</strong>: 数億ユーザーの行動分析</li>
+                    <li><strong>IoT</strong>: 数千万デバイスからのデータ解析</li>
+                </ul>
+
+                <h2 id="complex-nonlinear">複雑・非線形関係</h2>
+                <ul>
+                    <li><strong>金融リスク</strong>: 多要因の複雑な相互作用</li>
+                    <li><strong>気象予測</strong>: 非線形力学系の挙動予測</li>
+                    <li><strong>生物学的システム</strong>: 遺伝子-タンパク質相互作用</li>
+                </ul>
+
+                <h1 id="key-points">試験対策キーポイント</h1>
+                
+                <h2 id="exam-essentials">必須暗記ポイント</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📝 基本概念</h3>
+                    <ul>
+                        <li><strong>機械学習定義</strong>: データからパターンを自動学習</li>
+                        <li><strong>従来手法との違い</strong>: ルール明示 vs データ学習</li>
+                        <li><strong>背景要因</strong>: ビッグデータ・計算能力・アルゴリズム進歩</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📊 次元の呪い</h3>
+                    <ul>
+                        <li><strong>問題</strong>: 高次元での距離集中・データ希薄性</li>
+                        <li><strong>データ数</strong>: 次元数に対して指数的増加必要</li>
+                        <li><strong>対策</strong>: 次元削減・特徴選択・正則化</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🎯 代表的応用</h3>
+                    <ul>
+                        <li><strong>スパムフィルター</strong>: ナイーブベイズ・SVM活用</li>
+                        <li><strong>レコメンデーション</strong>: 協調フィルタリング・コンテンツベース</li>
+                        <li><strong>コールドスタート問題</strong>: 新規ユーザー・アイテムの課題</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>次元の呪い</strong>を単なる計算量問題と誤解</li>
+                        <li><strong>ビッグデータの3V</strong>を混同（Volume・Velocity・Variety）</li>
+                        <li><strong>協調フィルタリング</strong>の種類を区別できない</li>
+                        <li><strong>機械学習の限界</strong>（データ品質・バイアス）を軽視</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+                <ul>
+                    <li><strong>機械学習</strong>はデータからパターンを自動学習する技術</li>
+                    <li><strong>ルールベース手法</strong>との違いは明示的知識の必要性</li>
+                    <li><strong>ビッグデータ・計算能力向上</strong>が発展の背景</li>
+                    <li><strong>次元の呪い</strong>は高次元データ処理の重要課題</li>
+                    <li><strong>スパムフィルター・レコメンデーション</strong>が代表的応用例</li>
+                </ul>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">次元の呪い</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">高次元データ処理における困難。距離の集中・データ希薄性・計算量爆発が主な問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">スパムフィルター</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">迷惑メール判定システム。ナイーブベイズ・SVM等を活用。機械学習の代表的成功例。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ビッグデータ</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">従来システムで処理困難な大規模データ。3V（Volume・Velocity・Variety）が特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">レコメンデーションエンジン</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">個人化推薦システム。協調フィルタリング・コンテンツベース推薦を活用。コールドスタート問題が課題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">協調フィルタリング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">類似ユーザーの行動パターンを活用する推薦手法。ユーザーベース・アイテムベースに分類。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">コールドスタート問題</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">新規ユーザー・アイテムに対する推薦困難の問題。履歴・評価データ不足が原因。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">知識獲得のボトルネック</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">専門家から知識を抽出・体系化することの困難。機械学習発展の重要な背景要因。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study2-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #00ffff;"></i>
+                            Back: 2-2
+                        </a>
+
+                        <a href="study2-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 2-4
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #00ffff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-7: Attention - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-7: Attention</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-7</h1>
+                <h2 class="content-subtitle">Attention</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>Attentionの基礎的な知識を理解する</li>
+                        <li>Attentionがどのような役割を果たすのか説明できる</li>
+                        <li>RNNの問題点をAttentionはどのように解決できるか説明できる</li>
+                        <li>Attentionを用いた代表的モデルのTransformerについて理解する</li>
+                        <li>Self-AttentionとEncoder-Decoder Attention (Source Target Attention)について理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Attention</strong></li>
+                        <li><strong>Encoder-Decoder Attention</strong></li>
+                        <li><strong>Multi-Head Attention</strong></li>
+                        <li><strong>Self-Attention</strong></li>
+                        <li><strong>Seq2Seq</strong></li>
+                        <li><strong>Source Target Attention</strong></li>
+                        <li><strong>Transformer</strong></li>
+                        <li><strong>位置エンコーディング</strong></li>
+                        <li><strong>キー</strong></li>
+                        <li><strong>クエリ</strong></li>
+                        <li><strong>バリュー</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">Attentionメカニズムとは何か</h1>
+                
+                <p>Attention（注意機構）は、入力系列の特定部分に「注意を向ける」ことで、関連性の高い情報を選択的に利用する仕組みです。2015年頃から自然言語処理分野で注目され、2017年のTransformerにより深層学習の主要技術となりました。</p>
+
+                <p>人間が文章を読む際に重要な単語に注意を向けるように、AIモデルも入力データの重要部分を動的に特定し、その情報を重点的に利用することで性能を大幅に向上させます。</p>
+
+                <h1 id="rnn-problems">RNNの問題点とAttentionの解決策</h1>
+
+                <h2 id="rnn-limitations">RNNの根本的限界</h2>
+                
+                <p>従来のRNNやLSTMには以下の構造的問題がありました：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚠️ RNNの主要な問題</h3>
+                    <ul>
+                        <li><strong>情報ボトルネック</strong>：最終隠れ状態に全情報を圧縮</li>
+                        <li><strong>長距離依存性</strong>：長い系列での情報伝達困難</li>
+                        <li><strong>並列化不可能</strong>：逐次処理によるスピード制限</li>
+                        <li><strong>コンテキスト喪失</strong>：系列が長くなると初期情報が劣化</li>
+                        <li><strong>固定長表現</strong>：可変長入力を固定長ベクトルに圧縮</li>
+                    </ul>
+                </div>
+
+                <h2 id="attention-solution">Attentionによる革命的解決</h2>
+
+                <p>Attentionメカニズムはこれらの問題を根本的に解決します：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">✅ Attentionの解決策</h3>
+                    <ul>
+                        <li><strong>全系列アクセス</strong>：エンコーダの全ての隠れ状態を利用</li>
+                        <li><strong>動的情報選択</strong>：必要な情報を文脈に応じて選択</li>
+                        <li><strong>並列計算可能</strong>：各位置を独立に計算</li>
+                        <li><strong>解釈可能性</strong>：注意重みの可視化が可能</li>
+                        <li><strong>長距離依存性</strong>：直接的な接続による情報伝達</li>
+                    </ul>
+                </div>
+
+                <h1 id="basic-attention">基本的なAttentionメカニズム</h1>
+
+                <h2 id="attention-formula">Attentionの基本計算</h2>
+                
+                <p>Attentionの基本的な計算は以下の手順で行われます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$Q$ (Query)</strong>：「何を探しているか」を表すベクトル</li>
+                    <li><strong>$K$ (Key)</strong>：「どんな情報があるか」を表すベクトル</li>
+                    <li><strong>$V$ (Value)</strong>：「実際の情報内容」を表すベクトル</li>
+                    <li><strong>$d_k$</strong>：Keyベクトルの次元数</li>
+                </ul>
+
+                <h2 id="attention-steps">計算手順の詳細</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 Attention計算の4ステップ</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>ステップ1: スコア計算</strong>
+score = Q × K^T (内積で類似度を計算)
+
+<strong>ステップ2: スケーリング</strong>  
+scaled_score = score / √(d_k) (勾配安定化)
+
+<strong>ステップ3: 正規化</strong>
+attention_weights = softmax(scaled_score)
+
+<strong>ステップ4: 重み付き和</strong>
+output = attention_weights × V
+                    </pre>
+                </div>
+
+                <h2 id="attention-intuition">直感的理解</h2>
+
+                <p>Attentionメカニズムを日常的な例で理解：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 図書館での情報検索の例</h3>
+                    <ul>
+                        <li><strong>Query（検索クエリ）</strong>：「深層学習について知りたい」</li>
+                        <li><strong>Key（本のタイトル・目次）</strong>：各本の内容を示すラベル</li>
+                        <li><strong>Value（本の中身）</strong>：実際の情報が書かれた内容</li>
+                        <li><strong>Attention Weight</strong>：どの本がどの程度関連するかのスコア</li>
+                        <li><strong>Output</strong>：関連度に応じて重み付けした情報の総和</li>
+                    </ul>
+                </div>
+
+                <h1 id="seq2seq-attention">Seq2SeqにおけるAttention</h1>
+
+                <h2 id="seq2seq-overview">Sequence-to-Sequence模型</h2>
+
+                <p>Seq2Seqは2つのRNNを組み合わせた構造で、2014年にGoogle等が提案しました：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$h_t^{enc} = \text{RNN}_{enc}(x_t, h_{t-1}^{enc})$$
+                    $$s_t^{dec} = \text{RNN}_{dec}(y_{t-1}, s_{t-1}^{dec}, c_t)$$
+                </div>
+
+                <p>従来のSeq2Seqでは最終エンコーダ状態$h_T^{enc}$のみを使用していました。</p>
+
+                <h2 id="encoder-decoder-attention">Encoder-Decoder Attention</h2>
+
+                <p>2015年にBahdanauらが提案したAttention機構付きSeq2Seq：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔗 Encoder-Decoder Attentionの計算</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>エンコーダ側</strong>：
+全ての隠れ状態を保存: H = [h₁, h₂, ..., hₜ]
+
+<strong>デコーダ側</strong>（各時刻で）：
+1. 前の隠れ状態: s_{t-1}
+2. Attention重み: α_t = softmax(score(s_{t-1}, H))  
+3. コンテキストベクトル: c_t = Σα_{ti} × h_i
+4. 新しい隠れ状態: s_t = RNN(y_{t-1}, s_{t-1}, c_t)
+
+<strong>利点</strong>：
+✓ 入力系列全体の情報を活用
+✓ 長い文でも品質維持
+✓ 翻訳のアライメント可視化
+                    </pre>
+                </div>
+
+                <h1 id="self-attention">Self-Attention</h1>
+
+                <h2 id="self-attention-concept">Self-Attentionの概念</h2>
+
+                <p>Self-Attentionは、同一系列内の要素同士でAttentionを計算する手法です。「自分自身に注意を向ける」ことで、文内の単語間の関係性を直接モデル化できます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{SelfAttention}(X) = \text{softmax}\left(\frac{XW_QW_K^TX^T}{\sqrt{d_k}}\right)XW_V$$
+                </div>
+
+                <p>ここで$X$は入力系列、$W_Q, W_K, W_V$は学習可能な重み行列です。</p>
+
+                <h2 id="self-attention-advantages">Self-Attentionの革新性</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🚀 Self-Attentionの革新的特徴</h3>
+                    <ul>
+                        <li><strong>位置に依存しない</strong>：遠く離れた単語も直接関連づけ</li>
+                        <li><strong>完全並列化</strong>：全ての位置を同時に計算可能</li>
+                        <li><strong>文脈理解</strong>：「bank（銀行）」vs「bank（土手）」を文脈で判断</li>
+                        <li><strong>構文解析</strong>：主語・述語関係などを自動学習</li>
+                        <li><strong>コンピュータビジョン応用</strong>：画像内の関連領域を特定</li>
+                    </ul>
+                </div>
+
+                <h1 id="multi-head-attention">Multi-Head Attention</h1>
+
+                <h2 id="multi-head-motivation">Multi-Headの動機</h2>
+
+                <p>単一のAttention Headでは表現能力に限界があるため、複数の「注意の向け方」を並列に学習するMulti-Head Attentionが提案されました：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1,...,\text{head}_h)W^O$$
+                    $$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
+                </div>
+
+                <h2 id="multi-head-benefits">Multi-Headの利点</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 Multi-Head Attentionの効果</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>異なる種類の関係を捉える</strong>：
+Head 1: 構文的関係 (主語-述語)
+Head 2: 意味的関係 (類義語関係)  
+Head 3: 位置的関係 (隣接単語)
+Head 4: 長距離依存 (照応関係)
+
+<strong>表現能力の向上</strong>：
+・複数の表現部分空間を学習
+・異なるスケールの特徴を捕捉
+・アンサンブル効果による性能向上
+
+<strong>実装の利点</strong>：
+・各Headは小さな次元で計算効率◎
+・並列処理で高速化
+・解釈可能性（各Headの役割分析）
+                    </pre>
+                </div>
+
+                <h1 id="transformer">Transformer</h1>
+
+                <h2 id="transformer-architecture">Transformerアーキテクチャ</h2>
+
+                <p>2017年にVaswaniらが発表した「Attention Is All You Need」は、RNNを完全に排除し、Attentionのみでseq2seqを実現した画期的アーキテクチャです。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ Transformerの構成要素</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>エンコーダ（6層）</strong>：
+├── Multi-Head Self-Attention
+├── Residual Connection + Layer Norm
+├── Position-wise Feed-Forward Network  
+└── Residual Connection + Layer Norm
+
+<strong>デコーダ（6層）</strong>：
+├── Masked Multi-Head Self-Attention
+├── Residual Connection + Layer Norm
+├── Multi-Head Cross-Attention (to Encoder)
+├── Residual Connection + Layer Norm
+├── Position-wise Feed-Forward Network
+└── Residual Connection + Layer Norm
+
+<strong>その他の重要要素</strong>：
+・位置エンコーディング
+・入力埋め込み（Embedding）
+・出力線形変換 + Softmax
+                    </pre>
+                </div>
+
+                <h2 id="positional-encoding">位置エンコーディング</h2>
+
+                <p>Attentionには位置情報が含まれないため、位置エンコーディングが必要です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$PE_{(pos,2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)$$
+                    $$PE_{(pos,2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)$$
+                </div>
+
+                <p>この設計により：</p>
+                <ul>
+                    <li><strong>絶対位置情報</strong>：各位置に固有のパターン</li>
+                    <li><strong>相対位置関係</strong>：位置差による規則的パターン</li>
+                    <li><strong>外挿可能性</strong>：訓練時より長い系列にも対応</li>
+                </ul>
+
+                <h1 id="attention-types">Attentionの種類と比較</h1>
+
+                <h2 id="attention-taxonomy">Attentionの分類</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 Attention手法の比較</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+種類                    Query    Key      Value    用途
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Self-Attention         同一系列  同一系列  同一系列  文内関係モデル化
+Cross-Attention        異系列   異系列   異系列   系列間の関連づけ  
+Source-Target Attention デコーダ  エンコーダ エンコーダ 翻訳・要約
+Global Attention       全位置   全位置   全位置   全体的な関連性
+Local Attention        近傍     近傍     近傍     局所的な関連性
+
+<strong>計算複雑度</strong>:
+Self-Attention: O(n²)
+Sparse Attention: O(n√n) 
+Linear Attention: O(n)
+                    </pre>
+                </div>
+
+                <h2 id="source-target-attention">Source-Target Attention</h2>
+
+                <p>Source-Target Attention（Encoder-Decoder Attentionと同義）は、機械翻訳における入力文（Source）と出力文（Target）の対応関係を学習します：</p>
+
+                <ul>
+                    <li><strong>Query</strong>：デコーダの隠れ状態（翻訳したい部分）</li>
+                    <li><strong>Key & Value</strong>：エンコーダの隠れ状態（原文の情報）</li>
+                    <li><strong>出力</strong>：翻訳に関連する原文情報の重み付き和</li>
+                </ul>
+
+                <h1 id="modern-applications">現代的応用</h1>
+
+                <h2 id="language-models">大規模言語モデル</h2>
+
+                <p>Transformerを基盤とした大規模言語モデルの発展：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🚀 言語モデルの発展系譜</h3>
+                    <ul>
+                        <li><strong>GPT系</strong>：デコーダのみのTransformer（生成特化）</li>
+                        <li><strong>BERT系</strong>：エンコーダのみのTransformer（理解特化）</li>
+                        <li><strong>T5</strong>：エンコーダ・デコーダ両方活用</li>
+                        <li><strong>ChatGPT/GPT-4</strong>：大規模化と人間フィードバック学習</li>
+                        <li><strong>Claude/Gemini</strong>：Constitutional AI等の安全性強化</li>
+                    </ul>
+                </div>
+
+                <h2 id="vision-transformer">Vision Transformer（ViT）</h2>
+
+                <p>2020年にGoogleが発表したViTは、画像認識にもTransformerを適用：</p>
+
+                <ul>
+                    <li><strong>画像パッチ化</strong>：画像を16×16等のパッチに分割</li>
+                    <li><strong>線形射影</strong>：各パッチをベクトルに変換</li>
+                    <li><strong>位置埋め込み</strong>：パッチの位置情報を付加</li>
+                    <li><strong>Self-Attention</strong>：パッチ間の関連性を学習</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>Attentionの基本概念</strong>：Query, Key, Valueの役割と計算式</li>
+                        <li><strong>RNN vs Attention</strong>：並列化可能性、長距離依存性の違い</li>
+                        <li><strong>Self-Attention</strong>：同一系列内でのAttention計算</li>
+                        <li><strong>Multi-Head Attention</strong>：複数の注意機構を並列実行</li>
+                        <li><strong>Transformer構造</strong>：Encoder-Decoderアーキテクチャ</li>
+                        <li><strong>位置エンコーディング</strong>：正弦波・余弦波による位置情報</li>
+                        <li><strong>Source-Target Attention</strong>：機械翻訳での対応関係学習</li>
+                        <li><strong>現代的応用</strong>：GPT、BERT、ViT等の発展</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>計算複雑度</strong>：Self-AttentionはO(n²)で系列長に二次的に増大</li>
+                        <li><strong>位置情報</strong>：Attentionだけでは位置情報がないため位置エンコーディング必須</li>
+                        <li><strong>Query/Key/Valueの混同</strong>：各々の役割を正確に理解する</li>
+                        <li><strong>Self vs Cross-Attention</strong>：Self（同一系列）とCross（異なる系列）の区別</li>
+                        <li><strong>TransformerとAttention</strong>：TransformerはAttentionを活用したアーキテクチャ</li>
+                        <li><strong>スケーリングファクタ</strong>：1/√d_kは勾配安定化のため（忘れがち）</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>Attentionメカニズムは、深層学習における最も重要な技術の一つです。RNNの情報ボトルネック問題を解決し、並列処理を可能にし、長距離依存性を直接的に捉えることができます。</p>
+                
+                <p>Query、Key、Valueの概念を理解し、Self-AttentionとEncoder-Decoder Attentionの違い、Multi-Head Attentionによる表現力向上、そしてTransformerによる革命的なアーキテクチャ変化について把握することが重要です。</p>
+                
+                <p>G検定では、Attentionの基本計算、RNNとの比較、位置エンコーディングの必要性、現代的な応用（GPT、BERT、ViT等）について出題される可能性が高く、これらの理解が合格への鍵となります。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Attention（注意機構）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力系列の特定部分に動的に注意を向け、関連性の高い情報を選択的に利用するメカニズム。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Query（クエリ）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">「何を探しているか」を表すベクトル。情報検索の検索語に相当。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Key（キー）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">「どんな情報があるか」を表すベクトル。Queryとの類似度計算に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Value（バリュー）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">「実際の情報内容」を表すベクトル。最終的な出力の計算に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Self-Attention</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">同一系列内の要素間でAttentionを計算する手法。文内の単語間関係を直接モデル化。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Multi-Head Attention</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数のAttention Head を並列に実行し、異なる種類の関係性を捉える手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Encoder-Decoder Attention</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エンコーダとデコーダ間のAttention。機械翻訳での原文と訳文の対応関係を学習。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Source-Target Attention</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Encoder-Decoder Attentionの別名。入力系列（Source）と出力系列（Target）の関連づけ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Transformer</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2017年Google提案のAttention のみを使用したseq2seqアーキテクチャ。RNNを完全に排除。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">位置エンコーディング（Positional Encoding）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Attentionに位置情報を付加するための手法。正弦波・余弦波を使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Seq2Seq（Sequence-to-Sequence）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">可変長系列を可変長系列に変換するモデル。機械翻訳、要約、対話生成等で使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">スケーリングファクタ（1/√d_k）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Attention計算でQK^Tを正規化するための係数。勾配の安定化が目的。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Cross-Attention</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">異なる系列間でのAttention計算。Query は一方の系列、Key/Valueは他方の系列から。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Attention Weight（注意重み）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各入力位置への注意の強さを表すスコア。Softmaxで正規化され解釈可能。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Vision Transformer（ViT）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像を パッチに分割してTransformerを適用する手法。2020年Google提案。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-6.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-6
+                        </a>
+                        <a href="study5-8.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-8
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

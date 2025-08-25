@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-2: 自然言語処理 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-2: 自然言語処理</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-2</h1>
+                <h2 class="content-subtitle">自然言語処理</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>自然言語処理タスクの種類とその概要について理解する</li>
+                        <li>自然言語処理タスクにおける特徴表現とその手法について理解する</li>
+                        <li>代表的な自然言語処理モデルについて理解する</li>
+                        <li>自然言語処理が実世界において、どのように活用されているか理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>BERT</strong></li>
+                        <li><strong>BoW (Bag-of-Words)</strong></li>
+                        <li><strong>CBOW</strong></li>
+                        <li><strong>CTC</strong></li>
+                        <li><strong>ChatGPT</strong></li>
+                        <li><strong>ELMo</strong></li>
+                        <li><strong>fastText</strong></li>
+                        <li><strong>GLUE</strong></li>
+                        <li><strong>GPT-n</strong></li>
+                        <li><strong>N-gram</strong></li>
+                        <li><strong>PaLM</strong></li>
+                        <li><strong>Seq2Seq</strong></li>
+                        <li><strong>TF-IDF</strong></li>
+                        <li><strong>word2vec</strong></li>
+                        <li><strong>感情分析</strong></li>
+                        <li><strong>機械翻訳</strong></li>
+                        <li><strong>形態素解析</strong></li>
+                        <li><strong>構文解析</strong></li>
+                        <li><strong>質問応答</strong></li>
+                        <li><strong>情報検索</strong></li>
+                        <li><strong>スキップグラム</strong></li>
+                        <li><strong>単語埋め込み</strong></li>
+                        <li><strong>分散表現</strong></li>
+                        <li><strong>文書要約</strong></li>
+                        <li><strong>ワンホットベクトル</strong></li>
+                        <li><strong>LLM (大規模言語モデル)</strong></li>
+                        <li><strong>統計的機械翻訳</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">自然言語処理とは何か</h1>
+                
+                <p>自然言語処理（Natural Language Processing, NLP）は、人間が日常的に使用する言語をコンピュータに理解・生成・操作させる技術分野です。テキスト解析、機械翻訳、質問応答、文書要約など、言語に関わる幅広いタスクを含みます。</p>
+
+                <p>深層学習の発展により、特に2010年代後半のTransformer登場以降、NLPは革命的な進歩を遂げました。現在はChatGPT、BERT、GPTシリーズなど、人間に匹敵する性能を示すモデルが実用化されています。</p>
+
+                <h1 id="task-taxonomy">自然言語処理タスクの分類</h1>
+
+                <h2 id="basic-analysis-tasks">基本解析タスク</h2>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔍 言語の階層的解析</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>形態素解析（Morphological Analysis）</strong>:
+・文を単語に分割し、品詞を特定
+・例: "学習します" → "学習/名詞 し/動詞 ます/助動詞"
+・日本語: MeCab、KyTea等
+
+<strong>構文解析（Syntactic Analysis）</strong>:
+・単語間の文法的関係を解析
+・依存関係解析、句構造解析
+・例: 主語-述語関係、修飾-被修飾関係
+
+<strong>意味解析（Semantic Analysis）</strong>:
+・文の意味を理解・表現
+・固有表現認識（NER: Named Entity Recognition）
+・語義曖昧性解消（WSD: Word Sense Disambiguation）
+
+<strong>語用論解析（Pragmatic Analysis）</strong>:
+・文脈・状況を考慮した意味理解
+・照応解析、談話解析
+・発話意図の理解
+                    </pre>
+                </div>
+
+                <h2 id="application-tasks">応用タスク</h2>
+
+                <p>基本解析を基盤とした実用的なタスク：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 主要な応用タスク</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>機械翻訳（Machine Translation）</strong>:
+・ある言語から別の言語への自動翻訳
+・統計的機械翻訳 → 神経機械翻訳(NMT)
+
+<strong>質問応答（Question Answering）</strong>:
+・自然言語の質問に対する自動回答
+・検索ベース、知識ベース、生成ベース
+
+<strong>文書要約（Document Summarization）</strong>:
+・長い文書の要点を短く要約
+・抽出型（重要文抜粋） vs 生成型（新文生成）
+
+<strong>感情分析（Sentiment Analysis）</strong>:
+・テキストの感情・意見を分析
+・ポジティブ/ネガティブ分類
+・アスペクトベース感情分析
+
+<strong>情報検索（Information Retrieval）</strong>:
+・クエリに関連する文書の検索・ランキング
+・検索エンジンの基盤技術
+                    </pre>
+                </div>
+
+                <h1 id="feature-representation">特徴表現の発展</h1>
+
+                <h2 id="traditional-features">従来手法</h2>
+
+                <p>深層学習以前の主要な特徴表現：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{TF-IDF}(t,d) = \text{TF}(t,d) \times \text{IDF}(t)$$
+                    $$\text{IDF}(t) = \log\frac{N}{|\{d: t \in d\}|}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 従来の特徴表現手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>ワンホットベクトル（One-hot Vector）</strong>:
+・各単語を1つの次元で表現
+・語彙数 × 1のスパースベクトル
+・単語間の類似性を表現できない
+
+<strong>Bag-of-Words（BoW）</strong>:
+・文書を単語の出現頻度で表現
+・語順情報の喪失
+・次元数 = 語彙サイズ
+
+<strong>TF-IDF</strong>:
+・単語の重要度を統計的に計算
+・TF: 文書内頻度、IDF: 逆文書頻度
+・情報検索で広く利用
+
+<strong>N-gram</strong>:
+・連続するN個の単語/文字の組み合わせ
+・語順情報を部分的に保持
+・例: "machine learning" → 2-gram
+                    </pre>
+                </div>
+
+                <h2 id="word-embeddings">単語埋め込み</h2>
+
+                <p>分散表現による革命的発展：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{word2vec}: p(w_{t+j}|w_t) = \frac{\exp(v_{w_{t+j}}^T v_{w_t})}{\sum_{w=1}^{V} \exp(v_w^T v_{w_t})}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔤 word2vecの革新</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>分散表現（Distributed Representation）</strong>:
+・単語を密なベクトルで表現（例: 300次元）
+・意味の類似性がベクトル空間で表現
+・"king - man + woman = queen" 等の演算可能
+
+<strong>CBOW（Continuous Bag-of-Words）</strong>:
+・周辺単語から中心単語を予測
+・小規模データに適している
+・高速な学習
+
+<strong>Skip-gram</strong>:
+・中心単語から周辺単語を予測  
+・大規模データ・稀な単語に強い
+・より高品質な分散表現
+
+<strong>意味的関係の学習</strong>:
+・国家-首都: "Tokyo" - "Japan" + "France" = "Paris"
+・性別関係: "actor" - "actress" = "waiter" - "waitress" 
+・比較級: "good" - "better" = "bad" - "worse"
+                    </pre>
+                </div>
+
+                <h2 id="advanced-embeddings">発展的埋め込み手法</h2>
+
+                <ul>
+                    <li><strong>fastText</strong>：サブワード情報を活用、未知語対応強化</li>
+                    <li><strong>GloVe</strong>：全体統計情報とローカル情報を結合</li>
+                    <li><strong>ELMo</strong>：文脈依存の動的埋め込み</li>
+                    <li><strong>文レベル埋め込み</strong>：Doc2Vec、Universal Sentence Encoder</li>
+                </ul>
+
+                <h1 id="sequence-models">系列モデルの発展</h1>
+
+                <h2 id="rnn-for-nlp">RNNベース手法</h2>
+
+                <p>初期の深層学習NLPモデル：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 RNN系列モデル</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>言語モデル（Language Model）</strong>:
+・次の単語を予測する確率モデル
+・P(w_t | w_1, w_2, ..., w_{t-1})
+・文章生成、音声認識で活用
+
+<strong>Seq2Seq（Encoder-Decoder）</strong>:
+・可変長入力→固定長表現→可変長出力
+・機械翻訳での大成功
+・Attention機構の導入で性能向上
+
+<strong>双方向LSTM</strong>:
+・前向き・後向き両方向の文脈利用
+・各時刻で完全な文脈情報
+・品詞タグ付け、固有表現認識で活用
+                    </pre>
+                </div>
+
+                <h2 id="attention-revolution">Attention革命</h2>
+
+                <p>2015年頃からのAttention機構導入による変革：</p>
+
+                <ul>
+                    <li><strong>Seq2Seq + Attention</strong>：機械翻訳性能の劇的向上</li>
+                    <li><strong>情報ボトルネック解決</strong>：エンコーダ全隠れ状態の活用</li>
+                    <li><strong>アライメント学習</strong>：入出力の対応関係の可視化</li>
+                    <li><strong>長文処理改善</strong>：長距離依存関係の直接的処理</li>
+                </ul>
+
+                <h1 id="transformer-era">Transformer時代の到来</h1>
+
+                <h2 id="transformer-architecture">Transformerアーキテクチャ</h2>
+
+                <p>2017年「Attention Is All You Need」による革命：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1,...,\text{head}_h)W^O$$
+                    $$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🚀 Transformerの革命的特徴</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Self-Attention機構</strong>:
+・系列内の全ての位置間で直接的関係計算
+・並列処理による高速化
+・長距離依存の効果的捕捉
+
+<strong>Multi-Head Attention</strong>:
+・複数の注意機構を並列実行
+・異なる種類の関係を同時学習
+・表現力の大幅向上
+
+<strong>位置エンコーディング</strong>:
+・正弦波・余弦波による位置情報付加
+・系列の語順情報を保持
+
+<strong>残差接続とLayerNorm</strong>:
+・深い構造での学習安定化
+・勾配消失問題の解決
+                    </pre>
+                </div>
+
+                <h2 id="bert">BERT（2018）</h2>
+
+                <p>双方向Transformerによる事前学習モデル：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{BERT} = \text{Transformer Encoder} + \text{MLM} + \text{NSP}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎭 BERTの革新</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>双方向文脈モデル</strong>:
+・左右両方向の文脈を同時考慮
+・従来の一方向言語モデルを超越
+・より豊かな文脈理解
+
+<strong>マスク言語モデル（MLM）</strong>:
+・15%の単語を[MASK]で隠して予測
+・双方向学習の実現
+・Cloze testに類似
+
+<strong>次文予測（NSP）</strong>:
+・2つの文の連続性を予測
+・文書レベルの理解向上
+・（後にRoBERTaで不要と判明）
+
+<strong>事前学習+ファインチューニング</strong>:
+・大規模コーパスでの教師なし事前学習
+・下流タスクでの教師あり微調整
+・転移学習の威力を実証
+                    </pre>
+                </div>
+
+                <h2 id="gpt-series">GPTシリーズ</h2>
+
+                <p>自己回帰生成モデルの進化：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔤 GPT系列の発展</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>GPT-1（2018）</strong>:
+・Transformer Decoderベースの言語モデル
+・教師なし事前学習の効果実証
+・117Mパラメータ
+
+<strong>GPT-2（2019）</strong>:
+・1.5Bパラメータ、当初は公開見送り
+・Zero-shot学習能力の発見
+・「言語モデルは教師なしマルチタスク学習者」
+
+<strong>GPT-3（2020）</strong>:
+・175Bパラメータの大規模化
+・In-context Learning（文脈内学習）
+・Few-shot学習の驚異的性能
+
+<strong>ChatGPT（2022）</strong>:
+・GPT-3.5をベースとした対話特化
+・RLHF（人間フィードバック強化学習）
+・社会現象レベルの普及
+                    </pre>
+                </div>
+
+                <h1 id="large-language-models">大規模言語モデル（LLM）</h1>
+
+                <h2 id="scaling-laws">スケーリング則</h2>
+
+                <p>モデルサイズと性能の関係：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Performance} \propto \text{Parameters}^{\alpha} \times \text{Data}^{\beta}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📈 LLMの規模進化</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>パラメータ数の指数的増加</strong>:
+・BERT-Base: 110M（2018）
+・GPT-3: 175B（2020）
+・PaLM: 540B（2022）
+・GPT-4: 推定1.76T（2023）
+
+<strong>創発的能力（Emergent Abilities）</strong>:
+・一定規模を超えると突然現れる能力
+・In-context Learning
+・Chain-of-Thought推論
+・コード生成
+
+<strong>汎用性の向上</strong>:
+・多様なタスクを単一モデルで処理
+・専用モデルに迫る性能
+・AGI（汎用人工知能）への期待
+                    </pre>
+                </div>
+
+                <h2 id="modern-llms">現代のLLM</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🌟 主要LLMの特徴</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>PaLM（Google, 2022）</strong>:
+・540Bパラメータ、Pathways基盤
+・多言語・多モーダル能力
+・推論タスクでの高性能
+
+<strong>Claude（Anthropic）</strong>:
+・Constitutional AI による安全性強化
+・長文処理能力（100K tokens）
+・有害出力の大幅削減
+
+<strong>LLaMA（Meta）</strong>:
+・効率的学習による高性能実現
+・オープンソース化（研究用）
+・小規模でも高性能
+
+<strong>GPT-4（OpenAI, 2023）</strong>:
+・マルチモーダル対応（テキスト+画像）
+・専門分野での人間超越性能
+・司法試験、医師国家試験で高得点
+                    </pre>
+                </div>
+
+                <h1 id="evaluation-benchmarks">評価とベンチマーク</h1>
+
+                <h2 id="glue-superglue">GLUE/SuperGLUE</h2>
+
+                <p>NLP標準ベンチマークの発展：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 主要評価ベンチマーク</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>GLUE（2018）</strong>:
+・9つのNLPタスクを統合
+・感情分析、含意認識、類似度判定等
+・BERTが人間レベル性能を初達成
+
+<strong>SuperGLUE（2019）</strong>:
+・GLUEより困難な8タスク
+・常識推論、読解理解等
+・人間 vs AI の競争激化
+
+<strong>日本語ベンチマーク</strong>:
+・JGLUE: 日本語版GLUE
+・多様な日本語NLPタスク
+・日本語特有の課題への対応
+
+<strong>マルチモーダル評価</strong>:
+・VQA（Visual Question Answering）
+・画像説明生成
+・動画理解タスク
+                    </pre>
+                </div>
+
+                <h2 id="ctc">CTC（Connectionist Temporal Classification）</h2>
+
+                <p>系列ラベリングの課題を解決：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{CTC} = -\ln p(y|x) = -\ln \sum_{\pi \in A(y)} \prod_{t=1}^{T} p(\pi_t | x)$$
+                </div>
+
+                <ul>
+                    <li><strong>アライメント不要</strong>：入出力の対応を自動学習</li>
+                    <li><strong>音声認識</strong>：音響信号から文字系列への変換</li>
+                    <li><strong>手書き文字認識</strong>：画像から文字系列の認識</li>
+                    <li><strong>空白ラベル</strong>：重複を避ける特殊ラベル</li>
+                </ul>
+
+                <h1 id="real-world-applications">実世界での活用</h1>
+
+                <h2 id="commercial-applications">商用アプリケーション</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">💼 実用化の成功例</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>検索エンジン</strong>:
+・Google Search: BERT統合で検索品質向上
+・意図理解、クエリ拡張
+・多言語対応の強化
+
+<strong>機械翻訳サービス</strong>:
+・Google Translate: Transformer採用
+・リアルタイム音声翻訳
+・100言語以上の対応
+
+<strong>対話システム</strong>:
+・Siri、Alexa、Google Assistant
+・ChatGPT、Claude等の汎用チャット
+・カスタマーサービス自動化
+
+<strong>文書処理</strong>:
+・自動要約、文書分類
+・契約書解析、法務支援
+・医療記録の構造化
+                    </pre>
+                </div>
+
+                <h2 id="emerging-applications">新興応用分野</h2>
+
+                <ul>
+                    <li><strong>コード生成</strong>：GitHub Copilot、CodeT5等</li>
+                    <li><strong>創作支援</strong>：小説執筆、シナリオ作成</li>
+                    <li><strong>教育</strong>：個別指導、自動採点</li>
+                    <li><strong>研究支援</strong>：論文要約、仮説生成</li>
+                    <li><strong>多言語対応</strong>：リアルタイム通訳、異文化コミュニケーション</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本タスク</strong>：形態素解析、構文解析、感情分析、機械翻訳</li>
+                        <li><strong>特徴表現</strong>：BoW、TF-IDF、word2vec、分散表現</li>
+                        <li><strong>word2vec</strong>：CBOW vs Skip-gram、分散表現の意義</li>
+                        <li><strong>Seq2Seq</strong>：Encoder-Decoder構造、機械翻訳での成功</li>
+                        <li><strong>Transformer</strong>：Self-Attention、並列処理、位置エンコーディング</li>
+                        <li><strong>BERT</strong>：双方向、MLM、事前学習+ファインチューニング</li>
+                        <li><strong>GPT系列</strong>：自己回帰、スケーリング、ChatGPT</li>
+                        <li><strong>LLM</strong>：大規模化、創発的能力、実用化動向</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>word2vecの方式</strong>：CBOW（周辺→中心）vs Skip-gram（中心→周辺）</li>
+                        <li><strong>BERTの双方向性</strong>：左右両方向の文脈を同時利用</li>
+                        <li><strong>GPT vs BERT</strong>：生成（GPT）vs 理解（BERT）の違い</li>
+                        <li><strong>Transformer特徴</strong>：RNN不要、並列処理可能</li>
+                        <li><strong>事前学習の意義</strong>：大規模無教師学習→下流タスク微調整</li>
+                        <li><strong>分散表現の利点</strong>：意味的類似性の表現、演算可能性</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>自然言語処理は、従来の統計的手法から深層学習、特にTransformerの登場により革命的な発展を遂げました。word2vecによる分散表現、Seq2Seqによる生成モデル、BERTによる事前学習パラダイム、GPT系列による大規模化が主要な発展段階です。</p>
+                
+                <p>現在はChatGPT等の大規模言語モデル（LLM）により、人間レベルの言語理解・生成が実現され、検索、翻訳、対話、文書処理等の幅広い分野で実用化が進んでいます。</p>
+                
+                <p>G検定では、基本的なNLPタスクの理解、word2vecやTransformerの仕組み、BERT/GPTの特徴、LLMの動向について出題される可能性が高く、技術発展の歴史的流れと現状を体系的に把握することが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">形態素解析（Morphological Analysis）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">文を単語に分割し、各単語の品詞や活用形を特定する処理。日本語NLPの基盤技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">構文解析（Syntactic Analysis）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">単語間の文法的関係を解析し、文の構造を明らかにする処理。依存関係解析が代表的。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Bag-of-Words（BoW）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">文書を単語の出現頻度で表現する手法。語順情報は失われるが、計算が簡単。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">TF-IDF</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">単語頻度（TF）と逆文書頻度（IDF）を組み合わせた重み付け手法。情報検索で広く使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">word2vec</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">単語を密なベクトル（分散表現）で表現する手法。CBOW とSkip-gramの2つの方式。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CBOW（Continuous Bag-of-Words）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">周辺単語から中心単語を予測するword2vecの学習方式。小規模データに適している。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Skip-gram</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">中心単語から周辺単語を予測するword2vecの学習方式。大規模データで高品質な表現を学習。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">分散表現（Distributed Representation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">単語や文を密なベクトルで表現する手法。意味的類似性がベクトル空間で表現される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Seq2Seq</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Encoder-Decoder構造による系列変換モデル。機械翻訳で大きな成功を収めた。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">BERT</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">双方向TransformerによるGoogleの事前学習モデル。MLM とNSPで学習。NLP性能を大幅向上。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">GPT（Generative Pre-trained Transformer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">OpenAIの自己回帰生成モデル。GPT-3、ChatGPT等に発展し、社会現象となった。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ChatGPT</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">GPT-3.5ベースの対話特化モデル。RLHF により人間の好みに合わせて調整。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">LLM（Large Language Model）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">大規模言語モデル。億〜兆パラメータ規模で、多様なタスクを単一モデルで処理。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">機械翻訳（Machine Translation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ある言語のテキストを別の言語に自動翻訳する技術。統計的手法から神経翻訳へ発展。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">感情分析（Sentiment Analysis）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">テキストに含まれる感情や意見を自動分析する技術。ポジティブ/ネガティブ分類等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">質問応答（Question Answering）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">自然言語の質問に対してシステムが自動回答する技術。検索型と生成型がある。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">GLUE</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">9つのNLPタスクを統合した標準ベンチマーク。モデルの汎用性能評価に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CTC（Connectionist Temporal Classification）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入出力系列の長さが異なる場合のアライメント問題を解決する手法。音声認識で活用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">統計的機械翻訳</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">統計モデルに基づく従来の機械翻訳手法。神経機械翻訳（NMT）に置き換わった。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-1
+                        </a>
+                        <a href="study6-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-3
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

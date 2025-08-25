@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4-4: 正則化 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 4-4: 正則化</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 4-4</h1>
+                <h2 class="content-subtitle">正則化</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>正則化を導入する目的を説明できる</li>
+                        <li>代表的な正則化手法の特徴を説明できる</li>
+                        <li>獲得したいモデルの特性に応じて、適切な正則化手法を選択できる</li>
+                    </ul>
+                    
+                    <h3 style="color: #ffff00; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>L0正則化</strong></li>
+                        <li><strong>L1正則化</strong></li>
+                        <li><strong>L2正則化</strong></li>
+                        <li><strong>正則化</strong></li>
+                        <li><strong>ドロップアウト</strong></li>
+                        <li><strong>ラッソ回帰</strong></li>
+                        <li><strong>リッジ回帰</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">正則化とは何か</h1>
+                
+                <p>正則化（Regularization）は、機械学習における最も重要な概念の一つで、モデルが訓練データに過度に適合する<strong>過学習</strong>を防ぐための技術です。これは、学習の過程で「あえて制約を加える」ことで、新しいデータに対する汎化性能を向上させる手法です。</p>
+
+                <p>正則化を理解するために、語学学習の例を考えてみましょう。試験対策で過去問だけを丸暗記した学生は、同じ問題なら完璧に解けますが、少し変更された問題には対応できません。一方、基本的な文法や単語をしっかり理解した学生は、未知の文章でも意味を把握できます。正則化は、この「基本をしっかり学ぶ」アプローチをモデル学習に適用した手法なのです。</p>
+
+                <h1 id="overfitting-problem">過学習問題の本質</h1>
+
+                <h2 id="overfitting-mechanism">過学習が起こる仕組み</h2>
+
+                <p>過学習は、モデルの表現能力が高すぎるときに発生します。特にディープラーニングでは、数百万から数億のパラメータを持つモデルが珍しくなく、これらのパラメータが訓練データの微細なパターンやノイズまで記憶してしまうことがあります。</p>
+
+                <p>過学習の典型的な兆候は以下の通りです：</p>
+                <ul>
+                    <li><strong>訓練精度は高いが、テスト精度が低い</strong></li>
+                    <li><strong>訓練とテストの性能差が大きい</strong></li>
+                    <li><strong>新しいデータでの予測が不安定</strong></li>
+                </ul>
+
+                <h2 id="bias-variance-tradeoff">バイアス・バリアンス・トレードオフ</h2>
+
+                <p>機械学習の性能は、バイアス（偏り）とバリアンス（分散）のバランスで決まります：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">⚖️ バイアス・バリアンス・トレードオフ</h3>
+                    <ul>
+                        <li><strong>高バイアス・低バリアンス</strong>：シンプルすぎるモデル（過小学習）</li>
+                        <li><strong>低バイアス・高バリアンス</strong>：複雑すぎるモデル（過学習）</li>
+                        <li><strong>適切なバランス</strong>：正則化による最適な複雑さの制御</li>
+                    </ul>
+                </div>
+
+                <p>正則化は、モデルの複雑さを制限することで高バリアンスを抑制し、バイアスとバリアンスの最適なバランスを実現します。</p>
+
+                <h1 id="parameter-regularization">パラメータ正則化</h1>
+
+                <p>パラメータ正則化は、モデルの重み（パラメータ）に直接制約を課す手法です。元の損失関数に正則化項を追加することで実現されます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{\text{total}} = L_{\text{original}} + \lambda R(\theta)$$
+                </div>
+
+                <p>ここで、$L_{\text{original}}$は元の損失関数、$R(\theta)$は正則化項、$\lambda$（ラムダ）は正則化の強さを制御するハイパーパラメータです。</p>
+
+                <h2 id="l0-regularization">L0正則化</h2>
+
+                <p>L0正則化は、0でないパラメータの個数に対してペナルティを課す手法です。理論的には最も直接的なスパース性（疎性）を実現しますが、組み合わせ最適化問題となり、実用的な計算は困難です。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$R_{L0}(\theta) = |\{i : \theta_i \neq 0\}|$$
+                </div>
+
+                <p>L0正則化は微分不可能なため、勾配ベースの学習では直接使用できません。そのため、実際にはL1正則化がその代替として使用されることが多いです。</p>
+
+                <h2 id="l1-regularization">L1正則化（ラッソ回帰）</h2>
+
+                <p>L1正則化は、パラメータの絶対値の和にペナルティを課す手法です。線形回帰と組み合わせた場合、ラッソ回帰（Lasso Regression）と呼ばれます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$R_{L1}(\theta) = \sum_{i} |\theta_i|$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 L1正則化の特徴</h3>
+                    <ul>
+                        <li><strong>スパース解</strong>：多くのパラメータを正確に0にする</li>
+                        <li><strong>特徴選択効果</strong>：重要でない特徴を自動的に排除</li>
+                        <li><strong>解釈性向上</strong>：少数の重要な特徴のみが残る</li>
+                        <li><strong>計算効率</strong>：0になったパラメータは計算不要</li>
+                    </ul>
+                </div>
+
+                <p>L1正則化がスパースな解を生む理由は、L1ノルムの幾何学的性質にあります。L1正則化の制約領域はダイヤモンド形状で、その角（軸との交点）で最適解が見つかりやすく、これらの点では一部のパラメータが正確に0になります。</p>
+
+                <h2 id="l2-regularization">L2正則化（リッジ回帰）</h2>
+
+                <p>L2正則化は、パラメータの二乗和にペナルティを課す手法です。線形回帰と組み合わせた場合、リッジ回帰（Ridge Regression）と呼ばれます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$R_{L2}(\theta) = \sum_{i} \theta_i^2$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 L2正則化の特徴</h3>
+                    <ul>
+                        <li><strong>パラメータ縮小</strong>：大きなパラメータを優先的に小さくする</li>
+                        <li><strong>滑らかな解</strong>：パラメータが急激に変化しない</li>
+                        <li><strong>数値安定性</strong>：計算が安定で実装しやすい</li>
+                        <li><strong>微分可能</strong>：勾配計算が簡単</li>
+                    </ul>
+                </div>
+
+                <p>L2正則化は「重み減衰」（Weight Decay）とも呼ばれ、ディープラーニングで最も広く使用されている正則化手法です。L2正則化の制約領域は円形で、パラメータを0に向かって滑らかに縮小させます。</p>
+
+                <h1 id="structural-regularization">構造的正則化</h1>
+
+                <h2 id="dropout">ドロップアウト（Dropout）</h2>
+
+                <p>ドロップアウトは、2012年にHintonらによって提案された革新的な正則化手法です。学習中にランダムにニューロンを「無効化」することで、過学習を防ぎます。</p>
+
+                <h3 id="dropout-mechanism">ドロップアウトの仕組み</h3>
+
+                <p>ドロップアウトの動作は非常にシンプルです：</p>
+                <ol>
+                    <li><strong>学習時</strong>：各ニューロンを確率$p$（通常0.5）で無効化</li>
+                    <li><strong>無効化されたニューロン</strong>：出力を0にする</li>
+                    <li><strong>有効なニューロン</strong>：出力を$1/(1-p)$倍にスケール</li>
+                    <li><strong>推論時</strong>：すべてのニューロンを使用</li>
+                </ol>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🧠 ドロップアウトが効く理由</h3>
+                    <ul>
+                        <li><strong>アンサンブル効果</strong>：多数の部分ネットワークの平均的効果</li>
+                        <li><strong>共適応防止</strong>：特定のニューロン間の過度な依存を防ぐ</li>
+                        <li><strong>冗長性促進</strong>：複数のニューロンで同じ機能を分担</li>
+                        <li><strong>ノイズ注入</strong>：確率的ノイズによる汎化性能向上</li>
+                    </ul>
+                </div>
+
+                <h3 id="dropout-variants">ドロップアウトの変種</h3>
+
+                <p><strong>DropConnect</strong>：ニューロンではなく、重みをランダムに無効化</p>
+
+                <p><strong>Spatial Dropout</strong>：畳み込み層で特徴マップ全体を無効化</p>
+
+                <p><strong>DropBlock</strong>：連続した領域をブロック単位で無効化</p>
+
+                <h1 id="other-techniques">その他の正則化技術</h1>
+
+                <h2 id="batch-normalization">バッチ正規化</h2>
+
+                <p>バッチ正規化（Batch Normalization）は、各層の入力を正規化することで学習を安定化させる手法です。正則化が主目的ではありませんが、結果として正則化効果も得られます。</p>
+
+                <h2 id="early-stopping">早期停止</h2>
+
+                <p>早期停止（Early Stopping）は、検証データでの性能が悪化し始めたら学習を停止する単純で効果的な手法です。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <p><strong>早期停止の判定条件</strong></p>
+                    <p>検証精度が連続してN回（例：10回）改善しなかったら学習停止</p>
+                </div>
+
+                <h2 id="data-augmentation">データ拡張</h2>
+
+                <p>データ拡張（Data Augmentation）は、元のデータに変換を加えて人工的にデータ量を増やす手法です。画像の回転・反転・ノイズ追加などがあります。</p>
+
+                <h1 id="regularization-selection">正則化手法の選択指針</h1>
+
+                <h2 id="problem-specific-selection">問題特性による選択</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 モデル特性別推奨手法</h3>
+                    <ul>
+                        <li><strong>特徴選択が重要</strong>：L1正則化（ラッソ）</li>
+                        <li><strong>安定した予測</strong>：L2正則化（リッジ）</li>
+                        <li><strong>ディープニューラルネットワーク</strong>：ドロップアウト + L2</li>
+                        <li><strong>少量データ</strong>：強い正則化 + データ拡張</li>
+                        <li><strong>大量データ</strong>：弱い正則化で十分</li>
+                    </ul>
+                </div>
+
+                <h2 id="hyperparameter-tuning">ハイパーパラメータ調整</h2>
+
+                <p>正則化の強さを制御するλ（ラムダ）の適切な値を見つけることが重要です：</p>
+
+                <ul>
+                    <li><strong>λが小さすぎる</strong>：正則化効果が不十分、過学習のリスク</li>
+                    <li><strong>λが大きすぎる</strong>：モデルが単純すぎる、過小学習のリスク</li>
+                </ul>
+
+                <p>一般的には交差検証を使って最適なλ値を探索します。</p>
+
+                <h1 id="practical-implementation">実装上の考慮事項</h1>
+
+                <h2 id="computational-efficiency">計算効率</h2>
+
+                <p>正則化項の計算コストも考慮が必要です：</p>
+                <ul>
+                    <li><strong>L2正則化</strong>：計算コストが小さく、メモリ効率も良い</li>
+                    <li><strong>L1正則化</strong>：絶対値計算でやや計算コスト増</li>
+                    <li><strong>ドロップアウト</strong>：学習時のみ計算コスト増、推論時は影響なし</li>
+                </ul>
+
+                <h2 id="modern-practices">現代の実践</h2>
+
+                <p>現在のディープラーニングでは、複数の正則化手法を組み合わせることが一般的です：</p>
+                <ul>
+                    <li><strong>L2正則化 + ドロップアウト</strong>：最も標準的な組み合わせ</li>
+                    <li><strong>バッチ正規化 + ドロップアウト</strong>：効果が重複する場合もある</li>
+                    <li><strong>データ拡張 + 早期停止</strong>：コンピュータビジョンでの標準</li>
+                </ul>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>正則化の目的</strong>：過学習防止による汎化性能向上</li>
+                        <li><strong>L1 vs L2</strong>：スパース性（L1）vs滑らかさ（L2）</li>
+                        <li><strong>ドロップアウト機構</strong>：ランダムニューロン無効化による効果</li>
+                        <li><strong>バイアス・バリアンス</strong>：正則化による複雑さ制御</li>
+                        <li><strong>実用的組み合わせ</strong>：現代的な正則化手法の使い分け</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>ドロップアウト適用時期</strong>：学習時のみ、推論時は無効</li>
+                        <li><strong>正則化パラメータλ</strong>：大きすぎても小さすぎてもダメ</li>
+                        <li><strong>L0正則化の計算困難性</strong>：実用的にはL1で代替</li>
+                        <li><strong>正則化の万能性</strong>：データ不足は正則化だけでは解決できない</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>正則化は、機械学習において過学習を防ぎ汎化性能を向上させる重要な技術です。パラメータ正則化（L1/L2）は重みに制約を課し、構造的正則化（ドロップアウト）はモデル構造に制約を課します。</p>
+
+                <p><strong>適切な手法選択</strong>が成功の鍵です。特徴選択が重要ならL1正則化、安定した予測が必要ならL2正則化、深いネットワークならドロップアウトを基本として、問題の性質に応じた組み合わせを検討することが重要です。</p>
+
+                <p>現代のディープラーニングでは、複数の正則化手法を同時に使用することが一般的で、バイアス・バリアンス・トレードオフの観点から最適なバランスを見つけることが求められます。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">正則化（Regularization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">過学習を防ぎ汎化性能を向上させるため、モデルの複雑さに制約を加える技術の総称。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">L1正則化</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">パラメータの絶対値の和にペナルティを課す手法。スパース（疎）な解を生成し、特徴選択効果がある。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">L2正則化</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">パラメータの二乗和にペナルティを課す手法。重み減衰とも呼ばれ、滑らかな解を生成。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">ドロップアウト（Dropout）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習中にランダムにニューロンを無効化する正則化手法。アンサンブル効果による汎化性能向上。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">ラッソ回帰（Lasso Regression）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">L1正則化を適用した線形回帰。自動的な特徴選択により解釈しやすいモデルを生成。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">リッジ回帰（Ridge Regression）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">L2正則化を適用した線形回帰。多重共線性問題に対して安定した解を提供。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">L0正則化</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">0でないパラメータの個数にペナルティを課す理論的手法。計算困難なため実用的にはL1で代替。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">スパース性（Sparsity）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">多くのパラメータが0になる性質。L1正則化により実現され、モデルの解釈性と計算効率を向上。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">重み減衰（Weight Decay）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">L2正則化の別名。学習により重みが大きくなりすぎることを防ぐ効果から命名。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">バイアス・バリアンス・トレードオフ</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">モデルの偏り（バイアス）と分散（バリアンス）のバランス。正則化により適切な複雑さを制御。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">早期停止（Early Stopping）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">検証性能の悪化を検知して学習を停止する正則化手法。実装が簡単で効果的。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">正則化パラメータ（λ）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">正則化の強さを制御するハイパーパラメータ。交差検証により最適値を決定。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study4-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ffff00;"></i>
+                            Back: 4-3
+                        </a>
+
+                        <a href="study4-5.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 4-5
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ffff00;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

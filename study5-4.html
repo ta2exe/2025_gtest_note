@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-4: プーリング層 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-4: プーリング層</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-4</h1>
+                <h2 class="content-subtitle">プーリング層</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>プーリング層の基礎的な知識を理解する</li>
+                        <li>代表的なプーリング操作について理解する</li>
+                        <li>プーリング層がディープラーニングモデルの学習において、どのような役割を果たすのか説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>グローバルアベレージプーリング (GAP)</strong></li>
+                        <li><strong>最大値プーリング</strong></li>
+                        <li><strong>不変性の獲得</strong></li>
+                        <li><strong>平均値プーリング</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">プーリング層とは何か</h1>
+                
+                <p>プーリング層（Pooling Layer）は、畳み込みニューラルネットワーク（CNN）において特徴マップのサイズを縮小し、計算量を削減しながら重要な情報を保持するための層です。1980年代のネオコグニトロンから使用され、CNNの標準的な構成要素として発展してきました。</p>
+
+                <p>プーリング操作は、小さな領域内の値を一つの代表値に集約することで、データの次元削減と計算効率の向上を実現します。同時に、小さな位置変化に対する不変性を獲得し、ロバストな特徴表現を可能にします。</p>
+
+                <h1 id="basic-concept">基本概念</h1>
+
+                <h2 id="pooling-principle">プーリングの原理</h2>
+                
+                <p>プーリング操作は、入力特徴マップを小さな領域（プーリングウィンドウ）に分割し、各領域から代表値を抽出する処理です：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 プーリング操作の基本手順</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>入力</strong>: 特徴マップ (H × W × C)
+<strong>プーリングウィンドウ</strong>: k × k (通常2×2)
+<strong>ストライド</strong>: s (通常2)
+
+<strong>処理</strong>:
+1. ウィンドウを入力にスライド
+2. 各ウィンドウ内で代表値を計算
+3. 代表値を出力に配置
+
+<strong>出力サイズ</strong>: ⌊(H-k)/s⌋+1 × ⌊(W-k)/s⌋+1 × C
+
+<strong>例: 4×4 → 2×2プーリング</strong>
+[1 3 2 4]    [max: 3 6]
+[2 1 5 6] →  [max: 4 8]  
+[3 2 4 7]    
+[1 4 6 8]    
+                    </pre>
+                </div>
+
+                <h2 id="key-characteristics">主要な特性</h2>
+
+                <ul>
+                    <li><strong>次元削減</strong>：特徴マップのサイズを削減</li>
+                    <li><strong>計算量削減</strong>：後続層の計算コストを軽減</li>
+                    <li><strong>不変性の獲得</strong>：小さな位置変化に対するロバスト性</li>
+                    <li><strong>受容野の拡大</strong>：より広い領域を間接的に参照</li>
+                    <li><strong>パラメータなし</strong>：学習可能なパラメータを持たない</li>
+                </ul>
+
+                <h1 id="max-pooling">最大値プーリング（Max Pooling）</h1>
+
+                <h2 id="max-pooling-mechanism">動作メカニズム</h2>
+
+                <p>最大値プーリングは、プーリングウィンドウ内の最大値を選択する操作です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MaxPool}(X)_{i,j} = \max_{m=0}^{k-1} \max_{n=0}^{k-1} X_{si+m, sj+n}$$
+                </div>
+
+                <p>ここで、$s$はストライド、$k$はプーリングウィンドウのサイズです。</p>
+
+                <h2 id="max-pooling-advantages">最大値プーリングの利点</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">✅ Max Poolingの特徴</h3>
+                    <ul>
+                        <li><strong>強い特徴の保持</strong>：最も活性化が高い特徴を選択</li>
+                        <li><strong>スパースな表現</strong>：重要でない情報を破棄</li>
+                        <li><strong>位置不変性</strong>：ウィンドウ内での小さな位置変化を無視</li>
+                        <li><strong>ノイズ耐性</strong>：弱いノイズの影響を軽減</li>
+                        <li><strong>計算効率</strong>：単純な最大値選択で高速処理</li>
+                    </ul>
+                </div>
+
+                <h2 id="max-pooling-applications">主要な応用例</h2>
+
+                <ul>
+                    <li><strong>畳み込みネットワーク</strong>：AlexNet、VGGなどの古典的CNN</li>
+                    <li><strong>物体検出</strong>：特徴の位置情報を適度に抽象化</li>
+                    <li><strong>画像分類</strong>：重要な特徴の選択的抽出</li>
+                    <li><strong>エッジ検出</strong>：最も強いエッジ情報の保持</li>
+                </ul>
+
+                <h1 id="average-pooling">平均値プーリング（Average Pooling）</h1>
+
+                <h2 id="average-pooling-mechanism">動作原理</h2>
+
+                <p>平均値プーリングは、プーリングウィンドウ内の平均値を計算する操作です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{AvgPool}(X)_{i,j} = \frac{1}{k^2} \sum_{m=0}^{k-1} \sum_{n=0}^{k-1} X_{si+m, sj+n}$$
+                </div>
+
+                <h2 id="average-pooling-characteristics">平均値プーリングの特性</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 Average Poolingの特徴</h3>
+                    <ul>
+                        <li><strong>滑らかな変化</strong>：急激な変化を緩和</li>
+                        <li><strong>情報保持</strong>：すべての情報を平均で統合</li>
+                        <li><strong>微分可能</strong>：勾配が滑らかに伝播</li>
+                        <li><strong>バックグラウンドの保持</strong>：弱い特徴も考慮</li>
+                        <li><strong>ガウシアンフィルタ的効果</strong>：平滑化作用</li>
+                    </ul>
+                </div>
+
+                <h2 id="max-vs-average">Max Pooling vs Average Pooling</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚖️ 最大値 vs 平均値プーリング比較</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+特性                   Max Pooling       Average Pooling
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+情報の選択性            強い特徴を選択     すべて情報を統合
+位置不変性              高い              中程度
+ノイズ耐性              高い              低い（平均に影響）
+勾配伝播               スパース          均等分散
+計算量                 低い              低い
+テクスチャ保持          弱い              強い
+エッジ検出              得意              不得意
+
+<strong>使い分け</strong>:
+Max Pooling    → 物体検出、分類、特徴選択重視
+Average Pooling → セグメンテーション、回帰、情報保持重視
+                    </pre>
+                </div>
+
+                <h1 id="global-average-pooling">グローバルアベレージプーリング（GAP）</h1>
+
+                <h2 id="gap-concept">概念と革新性</h2>
+
+                <p>Min LinらがNetwork in Network（2013）で提案したGlobal Average Poolingは、各特徴マップ全体の平均値を計算する操作です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{GAP}(X_c) = \frac{1}{H \times W} \sum_{i=1}^{H} \sum_{j=1}^{W} X_{c,i,j}$$
+                </div>
+
+                <p>ここで、$X_c$は$c$番目のチャンネル、$H$と$W$は特徴マップの高さと幅です。</p>
+
+                <h2 id="gap-advantages">GAPの革命的な利点</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🚀 GAPの主要な利点</h3>
+                    <ul>
+                        <li><strong>パラメータ数削減</strong>：全結合層を完全に置き換え</li>
+                        <li><strong>過学習の抑制</strong>：パラメータ削減による正則化効果</li>
+                        <li><strong>入力サイズ不依存</strong>：任意サイズの入力に対応</li>
+                        <li><strong>計算効率</strong>：単純な平均計算で高速処理</li>
+                        <li><strong>解釈可能性</strong>：各チャンネルが分類に直接寄与</li>
+                        <li><strong>空間情報の統合</strong>：全体的な特徴を捉える</li>
+                    </ul>
+                </div>
+
+                <h2 id="gap-impact">モダンアーキテクチャへの影響</h2>
+
+                <p>GAPは現代のCNNアーキテクチャに革命的な影響を与えました：</p>
+
+                <ul>
+                    <li><strong>ResNet</strong>：ImageNet分類での標準採用</li>
+                    <li><strong>DenseNet</strong>：効率的な特徴統合</li>
+                    <li><strong>EfficientNet</strong>：パラメータ効率性の向上</li>
+                    <li><strong>MobileNet</strong>：モバイル環境での軽量化</li>
+                    <li><strong>Vision Transformer</strong>：class tokenとの類似概念</li>
+                </ul>
+
+                <h3 id="gap-comparison">従来手法との比較</h3>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📈 GAP vs 全結合層の比較</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>従来手法（全結合層）</strong>:
+7×7×2048 特徴 → 1000クラス
+パラメータ数: 7×7×2048×1000 = 100,352,000個
+
+<strong>GAP手法</strong>:
+7×7×2048 → GAP → 2048 → 1000クラス  
+パラメータ数: 2048×1000 = 2,048,000個
+
+<strong>削減効果: 約98%のパラメータ削減！</strong>
+                    </pre>
+                </div>
+
+                <h1 id="invariance-acquisition">不変性の獲得</h1>
+
+                <h2 id="types-of-invariance">プーリングによる不変性</h2>
+
+                <p>プーリング層は、異なるタイプの不変性を提供します：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🛡️ プーリングによる不変性の種類</h3>
+                    <ul>
+                        <li><strong>平行移動不変性</strong>：小さな位置変化に対する頑健性</li>
+                        <li><strong>スケール不変性</strong>：異なるスケールでの特徴認識</li>
+                        <li><strong>回転不変性</strong>：軽度な回転に対する耐性（限定的）</li>
+                        <li><strong>ノイズ不変性</strong>：小さなノイズの影響を軽減</li>
+                        <li><strong>変形不変性</strong>：軽微な変形に対するロバスト性</li>
+                    </ul>
+                </div>
+
+                <h2 id="invariance-mechanisms">不変性獲得のメカニズム</h2>
+
+                <p>プーリングが不変性を獲得するメカニズム：</p>
+
+                <ul>
+                    <li><strong>空間的統合</strong>：局所領域の情報を統合して位置依存性を軽減</li>
+                    <li><strong>次元削減</strong>：詳細な位置情報を抽象化</li>
+                    <li><strong>受容野拡大</strong>：より広い領域の文脈情報を考慮</li>
+                    <li><strong>階層的処理</strong>：浅い層で局所、深い層で大域的不変性</li>
+                </ul>
+
+                <h1 id="role-in-deep-learning">ディープラーニングにおける役割</h1>
+
+                <h2 id="architectural-role">アーキテクチャにおける役割</h2>
+
+                <p>プーリング層は、CNNアーキテクチャにおいて以下の重要な役割を果たします：</p>
+
+                <ul>
+                    <li><strong>特徴階層の構築</strong>：低レベルから高レベルへの特徴抽象化</li>
+                    <li><strong>計算効率の向上</strong>：特徴マップサイズの段階的削減</li>
+                    <li><strong>過学習の抑制</strong>：情報の抽象化による正則化効果</li>
+                    <li><strong>受容野の制御</strong>：効率的な受容野拡大</li>
+                </ul>
+
+                <h2 id="computational-benefits">計算上の利点</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 計算量削減の効果例</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>プーリングなしの場合</strong>:
+Conv1: 224×224×64
+Conv2: 224×224×128  
+Conv3: 224×224×256
+総計算量: ≈ 32M operations
+
+<strong>プーリングありの場合</strong>:
+Conv1: 224×224×64  → MaxPool → 112×112×64
+Conv2: 112×112×128 → MaxPool → 56×56×128
+Conv3: 56×56×256   → MaxPool → 28×28×256
+総計算量: ≈ 8M operations
+
+<strong>削減効果: 約75%の計算量削減</strong>
+                    </pre>
+                </div>
+
+                <h2 id="modern-alternatives">現代的な代替手法</h2>
+
+                <p>近年、従来のプーリングに代わる手法も提案されています：</p>
+
+                <ul>
+                    <li><strong>Strided Convolution</strong>：畳み込みでダウンサンプリング</li>
+                    <li><strong>Dilated Convolution</strong>：受容野拡大でプーリング代替</li>
+                    <li><strong>Attention Pooling</strong>：重要度に基づく適応的プーリング</li>
+                    <li><strong>Learnable Pooling</strong>：学習可能なプーリング操作</li>
+                    <li><strong>Adaptive Pooling</strong>：出力サイズ固定のプーリング</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>プーリングの基本概念</strong>：次元削減と代表値抽出の仕組み</li>
+                        <li><strong>Max vs Average Pooling</strong>：それぞれの特徴と使い分け</li>
+                        <li><strong>GAPの革命性</strong>：全結合層との違いとパラメータ削減効果</li>
+                        <li><strong>不変性の獲得</strong>：位置不変性、スケール不変性の概念</li>
+                        <li><strong>計算量削減効果</strong>：特徴マップサイズと計算コストの関係</li>
+                        <li><strong>CNNでの役割</strong>：特徴階層構築と受容野拡大</li>
+                        <li><strong>出力サイズ計算</strong>：プーリング後の特徴マップサイズ</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>パラメータの有無</strong>：プーリング層は学習可能パラメータを持たない</li>
+                        <li><strong>情報の損失</strong>：プーリングは情報を破棄する不可逆操作</li>
+                        <li><strong>GAPの適用範囲</strong>：分類タスクに特化、セグメンテーションには不適</li>
+                        <li><strong>ストライドとの関係</strong>：プーリングサイズとストライドは通常同じ値</li>
+                        <li><strong>現代的潮流</strong>：Strided ConvolutionがMax Poolingを代替する傾向</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>プーリング層は、CNNにおける基本的な構成要素として、次元削減、計算効率向上、不変性獲得という重要な役割を果たしています。最大値プーリングと平均値プーリングはそれぞれ異なる特性を持ち、用途に応じた使い分けが重要です。</p>
+                
+                <p>特に、Global Average Poolingは全結合層に代わる革命的な技術として、現代のCNNアーキテクチャで広く採用されています。パラメータ数の大幅削減と過学習抑制により、効率的な深層ネットワークの構築を可能にしました。</p>
+                
+                <p>G検定では、各プーリング手法の特徴、計算方法、CNNにおける役割、そして不変性獲得のメカニズムについて理解することが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">プーリング層（Pooling Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">特徴マップのサイズを縮小し、重要な情報を保持しながら計算量を削減する層。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">最大値プーリング（Max Pooling）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">プーリングウィンドウ内の最大値を選択するプーリング手法。強い特徴を保持し、位置不変性を提供。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">平均値プーリング（Average Pooling）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">プーリングウィンドウ内の平均値を計算するプーリング手法。滑らかな変化と情報保持に優れる。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">グローバルアベレージプーリング（GAP）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">特徴マップ全体の平均値を計算し、全結合層を置き換える革命的手法。パラメータ数を大幅削減。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">不変性の獲得</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">小さな変化に対してロバストな表現を得る性質。平行移動、スケール、ノイズなどに対する耐性。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">プーリングウィンドウ</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">プーリング操作を行う小さな領域。通常2×2や3×3のサイズを使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">受容野（Receptive Field）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">一つの出力ユニットが影響を受ける入力領域の範囲。プーリングにより効率的に拡大。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ダウンサンプリング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データのサイズや解像度を削減する処理。プーリングの主要な効果の一つ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">平行移動不変性（Translation Invariance）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力の位置が変化しても同じ出力を得る性質。プーリングにより獲得される重要な特性。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Strided Convolution</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ストライド>1の畳み込み。現代的なアーキテクチャでプーリングの代替として使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Network in Network (NiN)</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2013年にMin Linらが提案したアーキテクチャ。Global Average Poolingを初めて導入。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">特徴階層（Feature Hierarchy）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">低レベル特徴から高レベル特徴への段階的抽象化。プーリングが重要な役割を果たす。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Adaptive Pooling</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">出力サイズを固定し、入力サイズに応じて自動的にプーリングサイズを調整する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">次元削減（Dimensionality Reduction）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データの次元数や要素数を削減する処理。プーリングの本質的な機能。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-3
+                        </a>
+                        <a href="study5-5.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-5
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

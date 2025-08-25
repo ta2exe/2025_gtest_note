@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter X-Y: [CHAPTER_TITLE] - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<!-- 
+    TEMPLATE USAGE:
+    1. Replace [CHAPTER_CLASS] with: chapter-cyan (Ch.1-3), chapter-magenta (Ch.4-6), chapter-yellow (Ch.7-9)
+    2. Replace [CHAPTER_TITLE] with the actual chapter title
+    3. Replace [CHAPTER_NUMBER] with the chapter number (e.g., "Chapter 1-1")
+    4. Replace [CHAPTER_SUBTITLE] with the chapter subtitle
+    5. Replace [CONTENT] with the actual learning content
+    6. Update navigation links ([PREV_CHAPTER], [NEXT_CHAPTER])
+-->
+<body class="[CHAPTER_CLASS]">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">[CHAPTER_NUMBER]: [CHAPTER_TITLE]</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">[CHAPTER_NUMBER]</h1>
+                <p class="content-subtitle">[CHAPTER_SUBTITLE]</p>
+            </div>
+
+            <div class="content">
+                <h1 id="learning-objectives">学習目標</h1>
+                <p>この章では以下の内容を学習します：</p>
+                <ul>
+                    <li><strong>[LEARNING_OBJECTIVE_1]</strong></li>
+                    <li><strong>[LEARNING_OBJECTIVE_2]</strong></li>
+                    <li><strong>[LEARNING_OBJECTIVE_3]</strong></li>
+                </ul>
+
+                <h2 id="keywords">キーワード</h2>
+                <p><strong>[KEYWORD_1]</strong>, <strong>[KEYWORD_2]</strong>, <strong>[KEYWORD_3]</strong></p>
+
+                <!-- MAIN CONTENT STARTS HERE -->
+                <h1 id="main-topic">メイントピック</h1>
+                <p>[CONTENT_DESCRIPTION]</p>
+
+                <h2 id="subtopic-1">サブトピック1</h2>
+                <p>[SUBTOPIC_1_CONTENT]</p>
+
+                <h3 id="detail-1">詳細1</h3>
+                <ul>
+                    <li><strong>[DETAIL_POINT_1]</strong>: [EXPLANATION_1]</li>
+                    <li><strong>[DETAIL_POINT_2]</strong>: [EXPLANATION_2]</li>
+                    <li><strong>[DETAIL_POINT_3]</strong>: [EXPLANATION_3]</li>
+                </ul>
+
+                <!-- Code Example Template -->
+                <pre><code># [CODE_DESCRIPTION]
+[CODE_EXAMPLE]</code></pre>
+
+                <!-- Math Formula Template -->
+                <h3 id="formula-example">数式例</h3>
+                <p>インライン数式: $[INLINE_FORMULA]$</p>
+                
+                <p>ディスプレイ数式:</p>
+                $$[DISPLAY_FORMULA]$$
+                
+                <!-- Common Deep Learning Formulas -->
+                <h3 id="common-formulas">よく使用される数式</h3>
+                <p><strong>シグモイド関数</strong>: $\sigma(x) = \frac{1}{1 + e^{-x}}$</p>
+                <p><strong>ReLU関数</strong>: $\text{ReLU}(x) = \max(0, x)$</p>
+                <p><strong>交差エントロピー損失</strong>:</p>
+                $$L = -\sum_{i=1}^{n} y_i \log(\hat{y}_i)$$
+
+                <!-- Table Template -->
+                <h2 id="comparison-table">比較表</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>[HEADER_1]</th>
+                            <th>[HEADER_2]</th>
+                            <th>[HEADER_3]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>[ROW_1_COL_1]</strong></td>
+                            <td>[ROW_1_COL_2]</td>
+                            <td>[ROW_1_COL_3]</td>
+                        </tr>
+                        <tr>
+                            <td><strong>[ROW_2_COL_1]</strong></td>
+                            <td>[ROW_2_COL_2]</td>
+                            <td>[ROW_2_COL_3]</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Key Points Section Template -->
+                <h1 id="key-points">試験対策キーポイント</h1>
+                
+                <h2 id="exam-essentials">必須暗記ポイント</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📝 [KEY_POINTS_TITLE]</h3>
+                    <ul>
+                        <li><strong>[KEY_POINT_1]</strong>: [EXPLANATION_1]</li>
+                        <li><strong>[KEY_POINT_2]</strong>: [EXPLANATION_2]</li>
+                        <li><strong>[KEY_POINT_3]</strong>: [EXPLANATION_3]</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li>[MISTAKE_1]</li>
+                        <li>[MISTAKE_2]</li>
+                        <li>[MISTAKE_3]</li>
+                    </ul>
+                </div>
+
+                <!-- Summary Template -->
+                <h1 id="summary">まとめ</h1>
+                <ul>
+                    <li>[SUMMARY_POINT_1]</li>
+                    <li>[SUMMARY_POINT_2]</li>
+                    <li>[SUMMARY_POINT_3]</li>
+                </ul>
+
+                <!-- Glossary Template -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[TERM_1]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[TERM_1_DEFINITION]</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[TERM_2]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[TERM_2_DEFINITION]</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[TERM_3]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[TERM_3_DEFINITION]</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="[PREV_CHAPTER].html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back
+                        </a>
+
+                        <a href="[NEXT_CHAPTER].html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

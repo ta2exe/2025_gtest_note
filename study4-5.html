@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4-5: 誤差逆伝播法 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 4-5: 誤差逆伝播法</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 4-5</h1>
+                <h2 class="content-subtitle">誤差逆伝播法</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>誤差逆伝播法の概要を説明できる</li>
+                        <li>誤差逆伝播法の適用時に生じる問題とその主たる原因について説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: #ffff00; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>勾配消失問題</strong></li>
+                        <li><strong>勾配爆発問題</strong></li>
+                        <li><strong>信用割当問題</strong></li>
+                        <li><strong>連鎖律</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">誤差逆伝播法とは何か</h1>
+                
+                <p>誤差逆伝播法（Backpropagation、略してBackprop）は、ニューラルネットワークの学習を可能にした革命的なアルゴリズムです。1986年にRumelhart、Hinton、Williamsによって発表されたこの手法は、現代のディープラーニングの基礎となる核心技術です。</p>
+
+                <p>この技術の重要性を理解するために、工場の品質管理に例えてみましょう。多段階の製造工程で不良品が出た場合、どの工程に問題があるかを特定する必要があります。最終製品の検査結果から、各工程にどの程度の責任があるかを「逆算」して判断し、それぞれの工程を改善していく。これが誤差逆伝播法の基本的な考え方です。</p>
+
+                <p>ニューラルネットワークでは、最終的な予測誤差から出発して、各層の重みがその誤差にどの程度寄与したかを逆向きに計算し、すべてのパラメータを効率的に更新することを可能にします。</p>
+
+                <h1 id="historical-significance">歴史的意義と発展</h1>
+
+                <h2 id="before-backprop">逆伝播法以前の困難</h2>
+
+                <p>1980年代以前、多層ニューラルネットワークの学習は事実上不可能でした。単純パーセプトロンは学習アルゴリズムがありましたが、隠れ層を持つネットワークでは「どの重みをどの程度変更すべきか」を決定する効率的な方法が存在しませんでした。</p>
+
+                <p>当時試された手法の問題点：</p>
+                <ul>
+                    <li><strong>総当たり探索</strong>：指数的時間が必要</li>
+                    <li><strong>遺伝的アルゴリズム</strong>：収束が遅く不安定</li>
+                    <li><strong>ランダム重み更新</strong>：学習効率が極めて低い</li>
+                </ul>
+
+                <h2 id="breakthrough-1986">1986年の大革命</h2>
+
+                <p>Rumelhart、Hinton、Williamsの1986年の論文「Learning representations by back-propagating errors」は、人工知能史上の転換点でした。この論文により、多層ネットワークの効率的学習が可能になり、第2次AIブームが始まりました。</p>
+
+                <p>しかし、計算能力の制約により1990年代後半には「AI冬の時代」を迎えます。2000年代後半のGPUによる並列計算と大量データの利用により、誤差逆伝播法は再び脚光を浴び、現在のディープラーニングブームを牽引しています。</p>
+
+                <h1 id="mathematical-foundation">数学的基礎：連鎖律</h1>
+
+                <h2 id="chain-rule">連鎖律（Chain Rule）</h2>
+
+                <p>誤差逆伝播法の数学的基盤は、微分の<strong>連鎖律</strong>です。合成関数の微分を計算する際に使用されるこの原理が、多層ネットワークでの勾配計算を可能にします。</p>
+
+                <p>合成関数 $f(g(x))$ の微分は：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\frac{df}{dx} = \frac{df}{dg} \cdot \frac{dg}{dx}$$
+                </div>
+
+                <p>3層のネットワークでは、これが以下のように拡張されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\frac{\partial L}{\partial w_1} = \frac{\partial L}{\partial y_3} \cdot \frac{\partial y_3}{\partial y_2} \cdot \frac{\partial y_2}{\partial w_1}$$
+                </div>
+
+                <p>ここで、$L$は損失、$y_i$は各層の出力、$w_1$は第1層の重みです。各項は以下を表します：</p>
+                <ul>
+                    <li><strong>$\frac{\partial L}{\partial y_3}$</strong>：最終出力に対する損失の変化率</li>
+                    <li><strong>$\frac{\partial y_3}{\partial y_2}$</strong>：第3層の活性化関数の微分</li>
+                    <li><strong>$\frac{\partial y_2}{\partial w_1}$</strong>：第1層の重みに対する第2層出力の変化率</li>
+                </ul>
+
+                <h2 id="gradient-computation">勾配計算の流れ</h2>
+
+                <p>誤差逆伝播法は、以下の2つのフェーズで構成されます：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📊 2フェーズプロセス</h3>
+                    <ol>
+                        <li><strong>前向き計算（Forward Pass）</strong>：入力から出力まで順次計算</li>
+                        <li><strong>後ろ向き計算（Backward Pass）</strong>：出力から入力へ勾配を逆算</li>
+                    </ol>
+                </div>
+
+                <p><strong>前向き計算</strong>では、入力データをネットワークに通し、各層で線形変換と活性化関数を適用して最終出力を得ます。この際、中間結果をすべて保存しておきます。</p>
+
+                <p><strong>後ろ向き計算</strong>では、損失関数から始めて連鎖律を適用し、各層の勾配を逆向きに計算していきます。前向き計算で保存した中間結果を活用することで、効率的な勾配計算が可能になります。</p>
+
+                <h1 id="practical-algorithm">実践的アルゴリズム</h1>
+
+                <h2 id="step-by-step">ステップバイステップ</h2>
+
+                <p>具体的な誤差逆伝播法のアルゴリズムを、3層ネットワークを例に説明します：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🔄 アルゴリズムの詳細</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Phase 1: Forward Pass</strong>
+1. z₁ = W₁x + b₁         # 第1層の線形変換
+2. a₁ = σ(z₁)           # 第1層の活性化
+3. z₂ = W₂a₁ + b₂       # 第2層の線形変換
+4. a₂ = σ(z₂)           # 第2層の活性化（最終出力）
+5. L = loss(a₂, y)      # 損失計算
+
+<strong>Phase 2: Backward Pass</strong>
+6. ∂L/∂a₂ = ∂loss/∂a₂  # 出力層での勾配
+7. ∂L/∂z₂ = ∂L/∂a₂ ⊙ σ'(z₂)  # 活性化前の勾配
+8. ∂L/∂W₂ = ∂L/∂z₂ × a₁ᵀ     # 重みの勾配
+9. ∂L/∂b₂ = ∂L/∂z₂           # バイアスの勾配
+10. ∂L/∂a₁ = W₂ᵀ × ∂L/∂z₂    # 隠れ層への勾配
+11. ∂L/∂z₁ = ∂L/∂a₁ ⊙ σ'(z₁) # 隠れ層活性化前の勾配
+12. ∂L/∂W₁ = ∂L/∂z₁ × xᵀ     # 入力層重みの勾配
+                    </pre>
+                </div>
+
+                <p>⊙は要素別積（アダマール積）、σ'は活性化関数の微分を表します。</p>
+
+                <h2 id="computational-efficiency">計算効率の要点</h2>
+
+                <p>誤差逆伝播法の効率性は、勾配の「再利用」にあります：</p>
+                <ul>
+                    <li><strong>共通部分計算</strong>：上位層の勾配を下位層で再利用</li>
+                    <li><strong>行列演算</strong>：ベクトル化による並列計算</li>
+                    <li><strong>メモリ効率</strong>：必要な中間値のみ保存</li>
+                </ul>
+
+                <p>この効率性により、数百万パラメータを持つネットワークでも実用的な時間で学習が可能になります。</p>
+
+                <h1 id="major-problems">誤差逆伝播法の主要な問題</h1>
+
+                <h2 id="vanishing-gradient">勾配消失問題（Vanishing Gradient Problem）</h2>
+
+                <p>勾配消失問題は、深いネットワークにおける最も深刻な問題の一つです。連鎖律により勾配を逆算する際、各層で勾配が小さくなり、初期層では学習がほとんど進まなくなる現象です。</p>
+
+                <h3 id="vanishing-mechanism">発生メカニズム</h3>
+
+                <p>数学的に、L層のネットワークでの勾配は以下のような積で表されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\frac{\partial L}{\partial W_1} = \frac{\partial L}{\partial a_L} \prod_{i=2}^{L} \frac{\partial a_i}{\partial a_{i-1}}$$
+                </div>
+
+                <p>各項 $\frac{\partial a_i}{\partial a_{i-1}}$ が1未満の場合、積は指数的に小さくなります：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📉 勾配減衰の例</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+6層ネットワークでシグモイド活性化関数を使用:
+最大微分値: 0.25
+第6層: 勾配 × 0.25 = 0.25 × 元勾配
+第5層: 勾配 × 0.25 = 0.0625 × 元勾配  
+第4層: 勾配 × 0.25 = 0.0156 × 元勾配
+第3層: 勾配 × 0.25 = 0.0039 × 元勾配
+第2層: 勾配 × 0.25 = 0.00098 × 元勾配
+第1層: 勾配 × 0.25 = 0.00024 × 元勾配
+                    </pre>
+                </div>
+
+                <p>第1層の勾配は元の0.024%まで減少してしまいます。</p>
+
+                <h3 id="vanishing-causes">主な原因</h3>
+
+                <ul>
+                    <li><strong>活性化関数</strong>：シグモイド・tanhの飽和による小さな微分値</li>
+                    <li><strong>重み初期化</strong>：不適切な初期値による勾配の拡散</li>
+                    <li><strong>ネットワークの深さ</strong>：層数増加による累積的な勾配減衰</li>
+                </ul>
+
+                <h2 id="exploding-gradient">勾配爆発問題（Exploding Gradient Problem）</h2>
+
+                <p>勾配消失問題と対照的に、勾配が指数的に大きくなる問題も存在します。これは主にRNN（リカレントニューラルネットワーク）や非常に深いネットワークで発生します。</p>
+
+                <h3 id="exploding-symptoms">症状</h3>
+                <ul>
+                    <li><strong>数値オーバーフロー</strong>：勾配が無限大に発散</li>
+                    <li><strong>学習の不安定性</strong>：パラメータが急激に変動</li>
+                    <li><strong>NaN値の発生</strong>：計算が破綻する</li>
+                </ul>
+
+                <h3 id="gradient-clipping">対策：勾配クリッピング</h3>
+
+                <p>勾配爆発問題の最も効果的な対策は勾配クリッピングです：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$g = \begin{cases}
+                    g & \text{if } \|g\| \leq \theta \\
+                    \frac{\theta}{\|g\|} g & \text{if } \|g\| > \theta
+                    \end{cases}$$
+                </div>
+
+                <p>ここで、$g$は勾配、$\theta$は閾値です。勾配ノルムが閾値を超えた場合、勾配を正規化します。</p>
+
+                <h2 id="credit-assignment">信用割当問題（Credit Assignment Problem）</h2>
+
+                <p>信用割当問題は、「成功や失敗の責任を適切に各部分に割り当てる」という根本的な課題です。深いネットワークでは、最終的な出力に対して各層がどの程度寄与したかを正確に判断することが困難になります。</p>
+
+                <h3 id="temporal-credit">時間的信用割当</h3>
+                <p>特にRNNのような時系列データを扱うネットワークでは、過去のどの時点の入力が現在の出力にどの程度影響したかを特定することが困難です。</p>
+
+                <h3 id="structural-credit">構造的信用割当</h3>
+                <p>深い階層構造では、初期層の微細な変化が最終出力にどのような影響を与えるかを正確に評価することが難しく、適切な学習信号が伝わりにくくなります。</p>
+
+                <h1 id="solutions-and-advances">解決策と技術的進歩</h1>
+
+                <h2 id="activation-functions">活性化関数の改良</h2>
+
+                <p><strong>ReLU関数の導入</strong>により、勾配消失問題は大幅に改善されました：</p>
+                <ul>
+                    <li><strong>正の領域での微分</strong>：常に1のため勾配が保たれる</li>
+                    <li><strong>計算効率</strong>：max(0,x)の単純な計算</li>
+                    <li><strong>スパース性</strong>：負の値を0にすることで効率的な表現</li>
+                </ul>
+
+                <h2 id="normalization-techniques">正規化技術</h2>
+
+                <p><strong>バッチ正規化</strong>は、各層の入力を正規化することで学習を安定化：</p>
+                <ul>
+                    <li><strong>勾配フロー改善</strong>：正規化により勾配が適切に伝播</li>
+                    <li><strong>学習率向上</strong>：より高い学習率での安定した学習</li>
+                    <li><strong>初期化依存性軽減</strong>：重み初期化の影響を軽減</li>
+                </ul>
+
+                <h2 id="residual-connections">残差結合（Skip Connections）</h2>
+
+                <p>ResNet（2015年）で導入された残差結合は、勾配の直接的な経路を提供：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$y = F(x) + x$$
+                </div>
+
+                <p>この構造により、勾配が恒等写像 $(+x)$ を通じて直接的に伝播できるようになり、非常に深いネットワーク（100層以上）の学習が可能になりました。</p>
+
+                <h1 id="modern-perspectives">現代的な視点</h1>
+
+                <h2 id="automatic-differentiation">自動微分</h2>
+
+                <p>現代のディープラーニングフレームワーク（TensorFlow、PyTorchなど）では、自動微分により複雑な計算グラフの勾配計算が自動化されています。これにより、研究者は数学的詳細を意識せずに新しいアーキテクチャを設計できます。</p>
+
+                <h2 id="second-order-methods">2次最適化法</h2>
+
+                <p>従来の1次微分（勾配）だけでなく、2次微分（ヘッセ行列）を活用した最適化手法も発展しています：</p>
+                <ul>
+                    <li><strong>L-BFGS</strong>：準ニュートン法の近似</li>
+                    <li><strong>K-FAC</strong>：Kronecker-factored近似</li>
+                    <li><strong>Natural Gradients</strong>：情報幾何学的アプローチ</li>
+                </ul>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本原理</strong>：連鎖律による勾配の逆算過程</li>
+                        <li><strong>歴史的意義</strong>：1986年の発表と多層学習の実現</li>
+                        <li><strong>勾配消失問題</strong>：深いネットワークでの学習困難の原因</li>
+                        <li><strong>勾配爆発問題</strong>：RNNでの不安定性とクリッピング対策</li>
+                        <li><strong>信用割当問題</strong>：責任の適切な分散の困難さ</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>勾配消失vs爆発</strong>：シグモイド/tanhは消失、RNNは爆発が典型</li>
+                        <li><strong>連鎖律の理解</strong>：合成関数の微分法則の適用</li>
+                        <li><strong>ReLUの効果</strong>：正の領域での勾配1が消失問題を緩和</li>
+                        <li><strong>計算順序</strong>：前向き→後ろ向きの2段階処理</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>誤差逆伝播法は、連鎖律を基盤として多層ニューラルネットワークの効率的学習を実現した革命的アルゴリズムです。1986年の発表以来、現代のディープラーニングの基盤技術として進化し続けています。</p>
+
+                <p>この手法の<strong>主要な課題</strong>は勾配消失・爆発問題と信用割当問題です。しかし、ReLU活性化関数、バッチ正規化、残差結合などの技術革新により、これらの問題は大幅に改善され、現在では数百層の超深層ネットワークの学習も可能になっています。</p>
+
+                <p>G検定では、基本原理の理解と主要な問題・解決策の把握が重要です。特に、なぜ深いネットワークの学習が困難だったのか、そしてどのような技術革新がそれを可能にしたのかを理解することが求められます。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">誤差逆伝播法（Backpropagation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">連鎖律を用いて多層ニューラルネットワークの勾配を効率的に計算する学習アルゴリズム。1986年発表。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">連鎖律（Chain Rule）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">合成関数の微分を計算する数学的原理。誤差逆伝播法の理論的基盤。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">勾配消失問題（Vanishing Gradient Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深いネットワークで勾配が層を遡るごとに指数的に小さくなり、初期層の学習が困難になる問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">勾配爆発問題（Exploding Gradient Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">勾配が指数的に大きくなり、学習が不安定になる問題。RNNで特に発生しやすい。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">信用割当問題（Credit Assignment Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">成功や失敗の責任を適切に各部分に割り当てることの困難さ。深いネットワークで顕著。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">前向き計算（Forward Pass）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力から出力へ順次計算を進める段階。中間結果を保存して後ろ向き計算で使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">後ろ向き計算（Backward Pass）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">出力から入力へ勾配を逆算する段階。連鎖律を適用して各層の勾配を計算。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">勾配クリッピング（Gradient Clipping）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">勾配爆発を防ぐため、勾配の大きさに上限を設定する技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">残差結合（Residual Connection）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力を出力に直接加算する構造。勾配の流れを改善し、深いネットワークの学習を可能にする。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">自動微分（Automatic Differentiation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">計算グラフの勾配を自動的に計算する技術。現代のディープラーニングフレームワークの基盤。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">バッチ正規化（Batch Normalization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各層の入力を正規化して学習を安定化する技術。勾配消失問題の緩和にも効果。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">計算グラフ（Computational Graph）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">計算過程をノードとエッジで表現したグラフ。自動微分による勾配計算に使用。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study4-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ffff00;"></i>
+                            Back: 4-4
+                        </a>
+
+                        <a href="study4-6.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 4-6
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ffff00;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

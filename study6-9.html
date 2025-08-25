@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-9: モデルの軽量化 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-9: モデルの軽量化</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-9</h1>
+                <h2 class="content-subtitle">モデルの軽量化</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>モデルの軽量化が必要な背景について理解する</li>
+                        <li>モデルの軽量化が必要なユースケースについて理解する</li>
+                        <li>代表的なモデル軽量化手法について理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>エッジAI</strong></li>
+                        <li><strong>蒸留</strong></li>
+                        <li><strong>宝くじ仮説</strong></li>
+                        <li><strong>プルーニング</strong></li>
+                        <li><strong>モデル圧縮</strong></li>
+                        <li><strong>量子化</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">モデル軽量化の必要性</h1>
+                
+                <p>深層学習モデルの高性能化に伴い、パラメータ数と計算量は指数的に増大しています。一方で、スマートフォン、IoTデバイス、自動車等のエッジ環境では、限られた計算リソース・メモリ・電力で高速推論が要求されます。このギャップを埋めるモデル軽量化技術が重要性を増しています。</p>
+
+                <p>モデル圧縮、プルーニング、量子化、知識蒸留等の手法により、性能劣化を最小に抑えながら大幅なサイズ・速度改善を実現し、AI技術の実用化とエッジAI普及を推進しています。</p>
+
+                <h2 id="motivation">軽量化が必要な背景</h2>
+
+                <h3 id="computational-challenges">計算リソースの制約</h3>
+                <ul>
+                    <li><strong>メモリ制約</strong>：スマートフォン・IoTデバイスの限られたRAM</li>
+                    <li><strong>計算能力制限</strong>：エッジデバイスのCPU/GPU性能</li>
+                    <li><strong>電力消費</strong>：バッテリー駆動デバイスでの省電力要求</li>
+                    <li><strong>リアルタイム性</strong>：自動運転、リアルタイム画像処理での低レイテンシ要求</li>
+                </ul>
+
+                <h3 id="deployment-constraints">デプロイメント制約</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📱 実デプロイでの課題</h3>
+                    <ul>
+                        <li><strong>ストレージ容量</strong>：アプリサイズ制限、ダウンロード時間短縮</li>
+                        <li><strong>ネットワーク帯域</strong>：通信コスト削減、オフライン動作</li>
+                        <li><strong>プライバシー</strong>：クラウド送信回避、ローカル処理優先</li>
+                        <li><strong>コスト効率</strong>：クラウド計算コスト削減</li>
+                        <li><strong>スケーラビリティ</strong>：大量デバイスでの同時利用</li>
+                    </ul>
+                </div>
+
+                <h1 id="edge-ai">エッジAIの重要性</h1>
+
+                <h2 id="edge-computing-paradigm">エッジコンピューティングパラダイム</h2>
+                <p>データ生成地点に近い場所で処理を行う分散コンピューティング：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Cloud Computing} \rightarrow \text{Edge Computing} \rightarrow \text{Device Computing}$$
+                    $$\text{高性能・高遅延} \rightarrow \text{中性能・中遅延} \rightarrow \text{低性能・低遅延}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🌐 エッジAIの利点</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>レイテンシ削減</strong>:
+・クラウド通信の往復時間削除
+・リアルタイム応答実現
+・自動運転、医療機器での重要性
+
+<strong>プライバシー保護</strong>:
+・データのローカル処理
+・個人情報の外部送信回避
+・GDPR等規制への対応
+
+<strong>帯域幅節約</strong>:
+・生データ送信の削減
+・前処理・フィルタリング後の送信
+・通信コスト大幅削減
+
+<strong>可用性向上</strong>:
+・ネットワーク障害時も動作継続
+・オフライン環境での利用可能
+・災害時等での信頼性確保
+                    </pre>
+                </div>
+
+                <h2 id="edge-use-cases">エッジAI応用分野</h2>
+                <ul>
+                    <li><strong>スマートフォンAI</strong>：音声認識、カメラ画像処理、翻訳</li>
+                    <li><strong>自動運転車</strong>：リアルタイム物体検出、経路計画</li>
+                    <li><strong>IoTセンサー</strong>：異常検知、予測保全</li>
+                    <li><strong>ロボティクス</strong>：動作制御、環境認識</li>
+                    <li><strong>AR/VR</strong>：リアルタイム描画、ジェスチャ認識</li>
+                </ul>
+
+                <h1 id="quantization">量子化技術</h1>
+
+                <h2 id="quantization-basics">量子化の基本概念</h2>
+                <p>浮動小数点数（FP32）を低精度整数（INT8等）に変換してモデルサイズと計算量を削減：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$x_{quantized} = \text{round}\left(\frac{x - \text{zero\_point}}{\text{scale}}\right)$$
+                    $$x_{dequantized} = \text{scale} \times x_{quantized} + \text{zero\_point}$$
+                </div>
+
+                <h3 id="quantization-types">量子化方式の分類</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ 量子化手法の種類</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>訓練後量子化（Post-Training Quantization）</strong>:
+・学習済みモデルを直接変換
+・キャリブレーションデータで統計取得
+・実装簡単、精度劣化あり
+
+<strong>量子化認識訓練（Quantization-Aware Training）</strong>:
+・訓練時に量子化誤差を考慮
+・Fake Quantizationによる勾配伝播
+・高精度、計算コスト大
+
+<strong>精度レベル</strong>:
+・INT8: 4倍圧縮、実用的精度
+・INT4: 8倍圧縮、精度劣化大
+・Binary/Ternary: 極限圧縮
+
+<strong>量子化対象</strong>:
+・重み量子化（Weight Quantization）
+・活性化量子化（Activation Quantization）  
+・統合量子化（Both）
+                    </pre>
+                </div>
+
+                <h2 id="quantization-algorithms">代表的量子化アルゴリズム</h2>
+                <ul>
+                    <li><strong>Uniform Quantization</strong>：等間隔量子化、実装簡単</li>
+                    <li><strong>Non-uniform Quantization</strong>：対数量子化等、分布特性考慮</li>
+                    <li><strong>Mixed Precision</strong>：層別に異なる精度使用</li>
+                    <li><strong>Dynamic Quantization</strong>：実行時動的量子化</li>
+                </ul>
+
+                <h1 id="pruning">プルーニング技術</h1>
+
+                <h2 id="pruning-concept">プルーニングの基本思想</h2>
+                <p>重要度の低いパラメータを除去してスパースなモデルを作成：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Sparse Model} = \text{Original Model} - \text{Unimportant Parameters}$$
+                    $$\text{Sparsity} = \frac{\text{Number of Zero Parameters}}{\text{Total Parameters}}$$
+                </div>
+
+                <h3 id="pruning-criteria">プルーニング基準</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">✂️ 重要度評価基準</h3>
+                    <ul>
+                        <li><strong>重み絶対値</strong>：|w| < threshold で除去（Magnitude-based）</li>
+                        <li><strong>勾配情報</strong>：勾配の大きさで重要度判定</li>
+                        <li><strong>2次情報</strong>：Hessian行列による影響度評価</li>
+                        <li><strong>活性化頻度</strong>：使用頻度による重要度判定</li>
+                        <li><strong>構造化基準</strong>：フィルタ・チャンネル単位での除去</li>
+                    </ul>
+                </div>
+
+                <h2 id="pruning-strategies">プルーニング戦略</h2>
+                
+                <h3 id="structured-vs-unstructured">構造化 vs 非構造化</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ プルーニング方式比較</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>非構造化プルーニング（Unstructured）</strong>:
+・個別パラメータ除去
+・高い圧縮率実現
+・不規則なスパース行列
+・専用ハードウェア必要
+
+<strong>構造化プルーニング（Structured）</strong>:
+・フィルタ・チャンネル単位除去
+・規則的な構造保持
+・既存ハードウェアで高速化
+・圧縮率は劣る
+
+<strong>セミ構造化</strong>:
+・N:M スパース（例：2:4）
+・バランスの取れたアプローチ
+・最新GPU（A100等）で最適化
+                    </pre>
+                </div>
+
+                <h3 id="iterative-pruning">反復的プルーニング</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Train} \rightarrow \text{Prune} \rightarrow \text{Fine-tune} \rightarrow \text{Repeat}$$
+                </div>
+
+                <ul>
+                    <li><strong>段階的除去</strong>：急激な性能劣化回避</li>
+                    <li><strong>微調整</strong>：各段階で性能回復</li>
+                    <li><strong>スケジューリング</strong>：除去率の時間変化設計</li>
+                </ul>
+
+                <h1 id="lottery-ticket-hypothesis">宝くじ仮説</h1>
+
+                <h2 id="lottery-ticket-theory">理論的背景</h2>
+                <p>2019年Frankle & Carbinによる発見：「大きなネットワークには、単独で訓練しても同等性能を達成できる小さなサブネットワークが存在する」</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Dense Network} \supseteq \text{Winning Lottery Ticket}$$
+                    $$\text{Performance}(\text{Ticket}) \geq \text{Performance}(\text{Small Random Net})$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎟️ 宝くじチケット発見手順</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+1. <strong>大きなネットワークを訓練</strong>:
+   ・通常の学習プロセス実行
+   ・初期重みθ₀を記録
+
+2. <strong>重要度によるプルーニング</strong>:
+   ・重み絶対値等でマスクm作成
+   ・低重要度パラメータ除去
+
+3. <strong>初期重みでリセット</strong>:
+   ・残存パラメータをθ₀に戻す
+   ・マスク構造は維持
+
+4. <strong>再訓練</strong>:
+   ・スパースネットワークで学習
+   ・元モデルと同等性能実現
+
+<strong>意義</strong>:
+・効率的アーキテクチャ探索の手がかり
+・なぜ大きなモデルが必要かの洞察
+・Neural Architecture Searchへの影響
+                    </pre>
+                </div>
+
+                <h2 id="lottery-ticket-extensions">宝くじ仮説の発展</h2>
+                <ul>
+                    <li><strong>SNIP</strong>：Single-shot Network Pruning、訓練前のプルーニング</li>
+                    <li><strong>GraSP</strong>：勾配信号保持によるプルーニング</li>
+                    <li><strong>Early Bird Tickets</strong>：訓練初期での発見可能性</li>
+                    <li><strong>Supermasks</strong>：重み固定でマスクのみ学習</li>
+                </ul>
+
+                <h1 id="knowledge-distillation">知識蒸留</h1>
+
+                <h2 id="distillation-concept">蒸留の基本概念</h2>
+                <p>大きな教師モデル（Teacher）の知識を小さな生徒モデル（Student）に転移：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{distillation} = \alpha L_{CE}(y, \sigma(z_s)) + (1-\alpha) L_{KL}(\sigma(z_t/T), \sigma(z_s/T))$$
+                    $$\text{where } T \text{ is temperature, } \alpha \text{ is balance parameter}$$
+                </div>
+
+                <h3 id="soft-targets">ソフトターゲットの重要性</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🌡️ 温度スケーリングの効果</h3>
+                    <ul>
+                        <li><strong>Hard Label</strong>：[0, 0, 1, 0] - 正解クラスのみ情報</li>
+                        <li><strong>Soft Label</strong>：[0.1, 0.2, 0.6, 0.1] - クラス間関係情報</li>
+                        <li><strong>温度パラメータT</strong>：大きいほど確率分布が平滑化</li>
+                        <li><strong>暗黙知識</strong>：類似クラス、難易度情報の転移</li>
+                        <li><strong>正則化効果</strong>：過学習抑制、汎化性能向上</li>
+                    </ul>
+                </div>
+
+                <h2 id="distillation-variants">蒸留手法の発展</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📚 蒸留手法の種類</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>特徴量蒸留（Feature Distillation）</strong>:
+・中間層の特徴マップ転移
+・Attention Transfer, FitNet等
+・より細かい知識転移
+
+<strong>関係蒸留（Relation Distillation）</strong>:
+・データ間の関係性転移
+・RKD（Relational Knowledge Distillation）
+・構造的知識の学習
+
+<strong>自己蒸留（Self-Distillation）</strong>:
+・同一アーキテクチャでの蒸留
+・Born Again Networks
+・アンサンブル効果
+
+<strong>オンライン蒸留</strong>:
+・Teacher-Student同時学習
+・相互学習による性能向上
+・訓練効率化
+
+<strong>多段階蒸留</strong>:
+・Large → Medium → Small
+・段階的サイズ削減
+・急激な性能劣化回避
+                    </pre>
+                </div>
+
+                <h1 id="model-compression-techniques">総合的モデル圧縮</h1>
+
+                <h2 id="compression-pipeline">圧縮パイプライン</h2>
+                <p>複数手法の組み合わせによる最大効率化：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Original Model} \xrightarrow{\text{Distillation}} \text{Teacher Model} \xrightarrow{\text{Pruning}} \text{Sparse Model} \xrightarrow{\text{Quantization}} \text{Compact Model}$$
+                </div>
+
+                <h3 id="compression-metrics">圧縮評価指標</h3>
+                <ul>
+                    <li><strong>モデルサイズ圧縮率</strong>：パラメータ数削減比</li>
+                    <li><strong>計算量削減率</strong>：FLOPs削減比</li>
+                    <li><strong>推論速度向上</strong>：実デバイスでの速度測定</li>
+                    <li><strong>精度保持率</strong>：性能劣化の最小化</li>
+                    <li><strong>エネルギー効率</strong>：消費電力削減効果</li>
+                </ul>
+
+                <h2 id="hardware-aware-optimization">ハードウェア最適化</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔧 ハードウェア特化最適化</h3>
+                    <ul>
+                        <li><strong>Neural Processing Unit (NPU)</strong>：スマートフォン専用AI チップ</li>
+                        <li><strong>TensorRT</strong>：NVIDIA GPU最適化フレームワーク</li>
+                        <li><strong>Core ML</strong>：Apple デバイス最適化</li>
+                        <li><strong>TensorFlow Lite</strong>：モバイル・エッジ特化</li>
+                        <li><strong>ONNX Runtime</strong>：クロスプラットフォーム最適化</li>
+                    </ul>
+                </div>
+
+                <h1 id="neural-architecture-search">効率的アーキテクチャ探索</h1>
+
+                <h2 id="efficient-nas">EfficientNet系列</h2>
+                <p>精度とモデルサイズのトレードオフを最適化：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Compound Scaling}: \begin{cases} 
+                    \text{depth: } d = \alpha^\phi \\
+                    \text{width: } w = \beta^\phi \\
+                    \text{resolution: } r = \gamma^\phi
+                    \end{cases}$$
+                </div>
+
+                <ul>
+                    <li><strong>EfficientNet-B0 ~ B7</strong>：段階的スケーリング</li>
+                    <li><strong>MobileNet</strong>：Depthwise Separable Convolution</li>
+                    <li><strong>SqueezeNet</strong>：Fire Moduleによる圧縮</li>
+                    <li><strong>ShuffleNet</strong>：Channel Shuffleによる効率化</li>
+                </ul>
+
+                <h2 id="mobile-optimized-models">モバイル最適化モデル</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📱 軽量アーキテクチャ設計原則</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Depthwise Separable Convolution</strong>:
+・標準畳み込みの分離
+・計算量1/8-1/9に削減
+・MobileNet の基本構成要素
+
+<strong>Inverted Residuals</strong>:
+・低次元→高次元→低次元変換
+・メモリ効率向上
+・MobileNetV2 の革新
+
+<strong>Neural Architecture Search</strong>:
+・自動アーキテクチャ最適化
+・ハードウェア制約考慮
+・MNASNet, EfficientNet等
+
+<strong>Squeeze-and-Excitation</strong>:
+・チャンネル注意機構
+・少ないパラメータで性能向上
+・SENet の核心技術
+                    </pre>
+                </div>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>エッジAIの意義</strong>：レイテンシ削減、プライバシー保護、帯域幅節約</li>
+                        <li><strong>量子化技術</strong>：FP32→INT8変換、訓練後量子化 vs 量子化認識訓練</li>
+                        <li><strong>プルーニング手法</strong>：構造化 vs 非構造化、反復的プルーニング</li>
+                        <li><strong>宝くじ仮説</strong>：サブネットワーク存在理論、初期重み重要性</li>
+                        <li><strong>知識蒸留</strong>：Teacher-Student学習、ソフトターゲット効果</li>
+                        <li><strong>モデル圧縮統合</strong>：複数手法組み合わせによる最大効率化</li>
+                        <li><strong>軽量アーキテクチャ</strong>：MobileNet、EfficientNet等の設計原理</li>
+                        <li><strong>実用化制約</strong>：メモリ、計算量、電力制限への対処</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>軽量化 = 性能劣化必須</strong>：適切な手法で性能維持可能</li>
+                        <li><strong>量子化 = 精度大幅低下</strong>：INT8量子化は実用的精度保持</li>
+                        <li><strong>プルーニング = 不規則化のみ</strong>：構造化プルーニングで規則性保持</li>
+                        <li><strong>蒸留 = 小→大変換</strong>：大型教師から小型生徒への知識転移</li>
+                        <li><strong>宝くじ仮説 = 実用性なし</strong>：効率的学習手法への示唆</li>
+                        <li><strong>エッジAI = 低性能必須</strong>：適切最適化で高性能実現</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>モデル軽量化は、深層学習の実用化とエッジAI普及において必須の技術です。量子化、プルーニング、蒸留等の手法により、性能劣化を最小に抑えながら大幅なサイズ・速度改善を実現し、スマートフォン、IoT、自動車等での AI利用を可能にしています。</p>
+                
+                <p>宝くじ仮説は効率的学習の理論的基盤を提供し、エッジAIはプライバシー保護・レイテンシ削減・帯域幅節約等の重要な利点をもたらします。複数手法の組み合わせとハードウェア特化最適化により、実用的な高性能軽量モデルの実現が可能です。</p>
+                
+                <p>G検定では、軽量化の必要性・背景、主要手法の原理と特徴、エッジAIの意義、実世界での制約と対処法について体系的な理解が求められます。単なる技術知識より、なぜ軽量化が重要で、どの場面でどの手法が有効かの判断能力が重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">エッジAI</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">クラウドではなく、データ生成地点近くのエッジデバイスでAI処理を行う技術・概念。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">量子化</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">浮動小数点数を低精度整数に変換し、モデルサイズと計算量を削減する技術。FP32→INT8等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">プルーニング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">重要度の低いパラメータを除去してスパースなモデルを作成する軽量化手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">蒸留（知識蒸留）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">大きな教師モデルの知識を小さな生徒モデルに転移する学習手法。ソフトターゲットを活用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">宝くじ仮説</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">大きなネットワーク内に単独訓練でも高性能を達成できる小さなサブネットワークが存在するという仮説。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">モデル圧縮</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">量子化、プルーニング、蒸留等の手法を組み合わせてモデルサイズと計算量を削減する総合技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">構造化プルーニング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">フィルタやチャンネル単位でパラメータを除去し、規則的な構造を保持するプルーニング手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">非構造化プルーニング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">個別パラメータレベルで除去を行い、不規則なスパース行列を生成するプルーニング手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">量子化認識訓練（QAT）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">訓練時に量子化誤差を考慮してモデル学習を行う手法。高精度だが計算コスト大。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">訓練後量子化（PTQ）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習済みモデルを直接量子化する手法。実装簡単だが精度劣化の可能性。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ソフトターゲット</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">知識蒸留で用いる確率分布形式の教師信号。クラス間関係等の暗黙知識を含む。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">温度パラメータ</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">知識蒸留でソフトマックス出力を調整するパラメータ。大きいほど確率分布が平滑化。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">MobileNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Depthwise Separable Convolutionを用いた軽量CNN アーキテクチャ。モバイルデバイス向け。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">EfficientNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深さ・幅・解像度の複合スケーリングにより精度と効率を最適化したCNN アーキテクチャ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">スパース行列</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">多数の0要素を含む行列。プルーニング後のモデル重みの特徴。専用最適化で高速化。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-8.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-8
+                        </a>
+                        <a href="study7-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 7-1
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

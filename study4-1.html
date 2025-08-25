@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4-1: ニューラルネットワークとディープラーニング - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 4-1: ニューラルネットワークとディープラーニング</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 4-1</h1>
+                <h2 class="content-subtitle">ニューラルネットワークとディープラーニング</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>ニューラルネットワークの基礎的な知識を理解する</li>
+                        <li>ニューラルネットワークとディープラーニングの関係を説明できる</li>
+                        <li>ディープラーニングの学習に必要なデータ量や計算リソースについて理解し、ディープラーニングが適用可能な場面を挙げることができる</li>
+                        <li>CPU GPU TPUの特徴をそれぞれ説明できる</li>
+                        <li>GPUやTPUがディープラーニングの学習・推論に適する理由を説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: #ffff00; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>CPU</strong></li>
+                        <li><strong>GPU</strong></li>
+                        <li><strong>TPU</strong></li>
+                        <li><strong>隠れ層・入力層・出力層</strong></li>
+                        <li><strong>多層パーセプトロン</strong></li>
+                        <li><strong>単純パーセプトロン</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">ニューラルネットワークとは何か</h1>
+                
+                <p>ニューラルネットワーク（Neural Network）は、人間の脳の神経細胞（ニューロン）の仕組みを模倣して作られた数学的モデルです。1943年にマカロック・ピッツモデルとして提案されて以来、長い研究の歴史を持つこの技術が、21世紀に入って「ディープラーニング」として大きく花開き、現在のAIブームの原動力となっています。</p>
+
+                <p>この技術革命を理解するために、まず基本的な構成要素から見ていきましょう。ニューラルネットワークの最小単位は「パーセプトロン」と呼ばれる計算ユニットです。これは人間の神経細胞が複数の信号を受け取り、それらを統合して次の神経細胞に信号を送るプロセスを数学的に再現したものです。</p>
+
+                <h1 id="perceptron">パーセプトロンの基礎</h1>
+
+                <h2 id="simple-perceptron">単純パーセプトロン</h2>
+
+                <p>単純パーセプトロン（Simple Perceptron）は、1957年にローゼンブラットが提案したニューラルネットワークの最初の実用的なモデルです。構造は非常にシンプルで、複数の入力を受け取り、それぞれに重みを掛けて合計し、ある閾値を超えれば1、超えなければ0を出力します。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$y = \begin{cases} 1 & \text{if } \sum_{i=1}^{n} w_i x_i + b \geq 0 \\ 0 & \text{if } \sum_{i=1}^{n} w_i x_i + b < 0 \end{cases}$$
+                </div>
+
+                <p>ここで、$x_i$は入力、$w_i$は重み、$b$はバイアス（閾値）を表します。この単純な仕組みで、AND演算やOR演算といった基本的な論理演算を実現できます。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">💡 単純パーセプトロンの特徴</h3>
+                    <ul>
+                        <li><strong>線形分離可能な問題のみ解ける</strong>：直線で分けられる分類問題に限定</li>
+                        <li><strong>XOR問題を解けない</strong>：1969年のミンスキー・パパートの指摘で一時期研究が停滞</li>
+                        <li><strong>学習アルゴリズムが単純</strong>：間違いがあれば重みを調整する単純な仕組み</li>
+                        <li><strong>確実な収束保証</strong>：線形分離可能な問題には必ず正解に到達</li>
+                    </ul>
+                </div>
+
+                <h2 id="multi-layer-perceptron">多層パーセプトロン</h2>
+
+                <p>単純パーセプトロンのXOR問題を解決するために登場したのが多層パーセプトロン（Multi-Layer Perceptron, MLP）です。これは単純パーセプトロンを複数層に積み重ねた構造で、より複雑な問題を解けるようになりました。</p>
+
+                <p>多層パーセプトロンは以下の層で構成されます：</p>
+                <ul>
+                    <li><strong>入力層（Input Layer）</strong>：データを受け取る層</li>
+                    <li><strong>隠れ層（Hidden Layer）</strong>：入力と出力の間で計算処理を行う層</li>
+                    <li><strong>出力層（Output Layer）</strong>：最終的な結果を出力する層</li>
+                </ul>
+
+                <p>隠れ層が1層の場合でも、非線形な活性化関数を導入することでXOR問題を含む多くの非線形問題を解けるようになります。これがニューラルネットワークの表現力の源泉です。</p>
+
+                <h1 id="deep-learning">ディープラーニングへの発展</h1>
+
+                <h2 id="definition">ディープラーニングの定義</h2>
+
+                <p>ディープラーニング（Deep Learning）は、隠れ層を多数持つ深いニューラルネットワークを用いた機械学習手法です。「深い（Deep）」の定義は厳密ではありませんが、一般的に隠れ層が3層以上あるネットワークをディープニューラルネットワークと呼びます。</p>
+
+                <p>ディープラーニングが従来の機械学習と根本的に異なる点は、<strong>特徴量の自動抽出</strong>にあります。従来の機械学習では、人間がデータから重要な特徴を手作業で設計する必要がありましたが、ディープラーニングでは多層構造により、データから自動的に有用な特徴を学習できるようになりました。</p>
+
+                <h2 id="breakthrough">2010年代のブレークスルー</h2>
+
+                <p>ディープラーニングが注目されるようになったのは、2010年代の一連の技術的ブレークスルーによるものです。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🚀 主要なブレークスルー</h3>
+                    <ul>
+                        <li><strong>2012年 AlexNet</strong>：ImageNet画像認識コンペで圧勝、CNNの有効性を実証</li>
+                        <li><strong>2016年 AlphaGo</strong>：囲碁で人間のプロ棋士に勝利、強化学習との組み合わせ</li>
+                        <li><strong>2017年 Transformer</strong>：自然言語処理に革命、「Attention is All You Need」</li>
+                        <li><strong>2018年 BERT</strong>：双方向エンコーダーで自然言語理解が大幅向上</li>
+                        <li><strong>2020年 GPT-3</strong>：1750億パラメータの大規模言語モデル</li>
+                    </ul>
+                </div>
+
+                <p>これらのブレークスルーに共通するのは、<strong>大量のデータ</strong>、<strong>強力な計算リソース</strong>、そして<strong>巧妙なアーキテクチャ設計</strong>の組み合わせです。</p>
+
+                <h1 id="data-requirements">ディープラーニングのデータ要件</h1>
+
+                <h2 id="big-data">ビッグデータの必要性</h2>
+
+                <p>ディープラーニングが高い性能を発揮するためには、従来の機械学習手法とは比較にならないほど大量のデータが必要です。これには明確な理由があります。</p>
+
+                <p>深いネットワークは数百万から数十億のパラメータ（重み）を持ちます。例えば、画像認識で有名なResNet-152は約6000万のパラメータを持ちます。これらのパラメータを適切に学習するためには、パラメータ数の数倍から数十倍のデータ点が必要とされています。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📊 データ量の目安</h3>
+                    <ul>
+                        <li><strong>画像認識</strong>：数万〜数百万枚の画像データ</li>
+                        <li><strong>自然言語処理</strong>：数億〜数兆のトークン</li>
+                        <li><strong>音声認識</strong>：数千時間の音声データ</li>
+                        <li><strong>ゲームAI</strong>：数百万〜数十億回の対戦データ</li>
+                    </ul>
+                </div>
+
+                <h2 id="data-challenges">データの課題</h2>
+
+                <p>大量データの要求は、実用化における重要な制約となります：</p>
+                <ul>
+                    <li><strong>収集コスト</strong>：データ収集とラベル付けに莫大な費用</li>
+                    <li><strong>プライバシー</strong>：個人情報を含むデータの取り扱い制約</li>
+                    <li><strong>品質管理</strong>：大量データの品質を保つ困難さ</li>
+                    <li><strong>バイアス</strong>：データの偏りがモデルの性能に直接影響</li>
+                </ul>
+
+                <h1 id="computational-resources">計算リソース：CPU、GPU、TPU</h1>
+
+                <h2 id="cpu">CPU（Central Processing Unit）</h2>
+
+                <p>CPU（中央処理装置）は、コンピュータの「司令塔」として様々な計算を柔軟に処理できる汎用プロセッサです。複雑な条件分岐や逐次処理を得意としますが、ディープラーニングで必要な大規模な並列計算には向いていません。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">💻 CPUの特徴</h3>
+                    <ul>
+                        <li><strong>コア数</strong>：一般的に4〜32コア程度</li>
+                        <li><strong>得意分野</strong>：複雑な制御、逐次処理、分岐処理</li>
+                        <li><strong>ディープラーニング</strong>：小規模モデルや推論には利用可能</li>
+                        <li><strong>メモリ</strong>：大容量メモリへの直接アクセス可能</li>
+                    </ul>
+                </div>
+
+                <h2 id="gpu">GPU（Graphics Processing Unit）</h2>
+
+                <p>GPU（グラフィック処理装置）は、元々3Dグラフィックス処理のために開発されましたが、その並列処理能力がディープラーニングの計算に非常に適していることが発見されました。2007年のNVIDIAのCUDA発表以降、ディープラーニングの標準的な計算基盤となっています。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <p><strong>並列処理の威力</strong></p>
+                    <p>CPU: 8コア × 複雑な計算</p>
+                    <p>GPU: 2000コア × 単純な計算</p>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 GPUがディープラーニングに適する理由</h3>
+                    <ul>
+                        <li><strong>大規模並列処理</strong>：数千のコアで同時計算可能</li>
+                        <li><strong>行列演算最適化</strong>：ディープラーニングの基本操作である行列積を高速化</li>
+                        <li><strong>高メモリバンド幅</strong>：大量のデータを高速で処理</li>
+                        <li><strong>専用ライブラリ</strong>：cuDNN、TensorRTなど最適化されたライブラリ</li>
+                    </ul>
+                </div>
+
+                <p>現代のディープラーニング研究・開発において、GPUは不可欠な存在となっています。NVIDIA Tesla V100では、従来のCPUと比べて数十倍から数百倍の高速化が可能です。</p>
+
+                <h2 id="tpu">TPU（Tensor Processing Unit）</h2>
+
+                <p>TPU（テンソル処理装置）は、Googleが2016年に発表したディープラーニング専用チップです。特にTensorFlowでの推論処理に最適化されており、エネルギー効率と処理速度の両面でGPUを上回る性能を実現しています。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">⚡ TPUの特徴</h3>
+                    <ul>
+                        <li><strong>専用設計</strong>：ディープラーニングの計算パターンに完全特化</li>
+                        <li><strong>低精度演算</strong>：8bit整数演算でメモリ使用量を削減</li>
+                        <li><strong>高エネルギー効率</strong>：同じ計算をGPUより少ない電力で実行</li>
+                        <li><strong>クラウド提供</strong>：Google Cloud Platformで利用可能</li>
+                    </ul>
+                </div>
+
+                <p>TPUは特に大規模な推論処理（例：検索エンジンやレコメンドシステム）で威力を発揮し、Googleの多くのサービスで活用されています。</p>
+
+                <h1 id="applications">ディープラーニングの適用場面</h1>
+
+                <h2 id="suitable-problems">適用可能な問題の特徴</h2>
+
+                <p>ディープラーニングが特に有効な問題には共通の特徴があります：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 ディープラーニング適用の条件</h3>
+                    <ul>
+                        <li><strong>大量データの存在</strong>：数万〜数百万のサンプル</li>
+                        <li><strong>複雑なパターン認識</strong>：人間でも規則化が困難な問題</li>
+                        <li><strong>高次元データ</strong>：画像、音声、テキストなど</li>
+                        <li><strong>非線形関係</strong>：入力と出力の関係が複雑</li>
+                        <li><strong>計算リソース</strong>：GPU/TPUなどの並列計算環境</li>
+                    </ul>
+                </div>
+
+                <h2 id="success-domains">成功している分野</h2>
+
+                <p><strong>コンピュータビジョン</strong>：物体認識、画像分類、顔認識、医療画像診断、自動運転での画像解析</p>
+
+                <p><strong>自然言語処理</strong>：機械翻訳、感情分析、文書要約、質問応答、ChatGPTのような対話システム</p>
+
+                <p><strong>音声処理</strong>：音声認識、音声合成、音楽生成、リアルタイム通訳</p>
+
+                <p><strong>ゲーム・戦略</strong>：囲碁・将棋・チェス、ゲームAI、リアルタイム戦略ゲーム</p>
+
+                <p><strong>科学・研究</strong>：創薬、タンパク質構造予測、気象予測、素粒子物理学</p>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>パーセプトロンの発展</strong>：単純→多層→ディープの進化過程</li>
+                        <li><strong>XOR問題</strong>：単純パーセプトロンの限界と多層化による解決</li>
+                        <li><strong>層の役割</strong>：入力層・隠れ層・出力層の機能分担</li>
+                        <li><strong>CPU vs GPU vs TPU</strong>：各プロセッサの特徴と使い分け</li>
+                        <li><strong>ディープラーニングの条件</strong>：大量データ、計算リソース、適用場面</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>「ディープ」の意味</strong>：層の数であり、ニューロン数ではない</li>
+                        <li><strong>GPU vs TPU</strong>：GPUは汎用、TPUは専用チップ</li>
+                        <li><strong>データ量の誤解</strong>：少数データでは従来手法が有効な場合も多い</li>
+                        <li><strong>万能性の過信</strong>：すべての問題に適用可能ではない</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>ニューラルネットワークは、1943年の理論提案から約80年の発展を経て、ディープラーニングとして現代AIの中核技術となりました。単純パーセプトロンの限界を多層化によって克服し、さらに大量データと強力な計算リソース（特にGPU/TPU）の活用により、従来不可能だった複雑な問題を解けるようになりました。</p>
+
+                <p>成功の鍵は<strong>適切な問題設定</strong>と<strong>十分なリソース確保</strong>です。画像認識、自然言語処理、音声処理など、人間でも規則化が困難な高次元パターン認識問題において、ディープラーニングは従来手法を大幅に上回る性能を実現しています。</p>
+
+                <p>G検定では、この技術の発展過程、適用条件、計算基盤の理解が重要です。特に、なぜGPU/TPUが必要なのか、どのような問題に適用すべきかを明確に説明できるようになりましょう。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">ニューラルネットワーク（Neural Network）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">人間の脳の神経回路を模倣した数学的モデル。複数の計算ユニット（ニューロン）が相互に接続された構造。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">単純パーセプトロン（Simple Perceptron）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1957年にローゼンブラットが提案した最初の実用的なニューラルネットワーク。線形分離可能な問題のみ解ける。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">多層パーセプトロン（Multi-Layer Perceptron, MLP）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数の層を持つニューラルネットワーク。XOR問題など非線形問題を解決可能。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">ディープラーニング（Deep Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">多層（通常3層以上）のニューラルネットワークを用いた機械学習手法。特徴量を自動抽出する能力が特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">入力層（Input Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ニューラルネットワークの最初の層。外部からのデータを受け取る役割。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">隠れ層（Hidden Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力層と出力層の間にある層。特徴抽出や複雑な計算処理を担当。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">出力層（Output Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ニューラルネットワークの最後の層。最終的な予測結果や分類結果を出力。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">CPU（Central Processing Unit）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">中央処理装置。汎用的な計算処理を行うプロセッサ。複雑な制御や逐次処理が得意。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">GPU（Graphics Processing Unit）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">グラフィック処理装置。数千のコアによる大規模並列処理が可能。ディープラーニングの学習・推論に適している。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">TPU（Tensor Processing Unit）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Googleが開発したディープラーニング専用チップ。高いエネルギー効率と処理速度を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">XOR問題</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">排他的論理和の問題。単純パーセプトロンでは解けない代表的な非線形問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">特徴量自動抽出</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ディープラーニングの特徴的能力。生データから有用な特徴を人間の介入なしに自動学習する機能。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study3-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ffff00;"></i>
+                            Back: 3-4
+                        </a>
+
+                        <a href="study4-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 4-2
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ffff00;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

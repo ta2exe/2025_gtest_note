@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-5: データ生成 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-5: データ生成</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-5</h1>
+                <h2 class="content-subtitle">データ生成</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">深層学習の応用</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>データ生成タスクの種類とその概要について理解する</li>
+                        <li>代表的なデータ生成モデルについて理解する</li>
+                        <li>データ生成モデルが実世界において、どのように活用されているか理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>CycleGAN</strong></li>
+                        <li><strong>DCGAN</strong></li>
+                        <li><strong>Diffusion Model</strong></li>
+                        <li><strong>NeRF</strong></li>
+                        <li><strong>Pix2Pix</strong></li>
+                        <li><strong>音声生成</strong></li>
+                        <li><strong>画像生成</strong></li>
+                        <li><strong>敵対的生成ネットワーク (GAN)</strong></li>
+                        <li><strong>文章生成</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">データ生成技術の革命</h1>
+                
+                <p>データ生成は、AIが新しいデータを創造的に作り出す技術領域です。2010年代半ばのGAN登場以来、画像・音声・テキストなど様々なモダリティで人間レベルの品質を実現し、コンテンツ制作や創作活動を根本的に変革しています。</p>
+
+                <h2 id="generation-types">データ生成タスクの分類</h2>
+
+                <h3 id="modality-types">モダリティ別分類</h3>
+                <ul>
+                    <li><strong>画像生成</strong>：写実的画像、芸術作品、顔画像の合成</li>
+                    <li><strong>テキスト生成</strong>：自然言語文章、詩、コード、対話応答</li>
+                    <li><strong>音声生成</strong>：音声合成、楽曲生成、効果音作成</li>
+                    <li><strong>動画生成</strong>：映像コンテンツ、アニメーション</li>
+                    <li><strong>3D生成</strong>：3Dモデル、立体形状、仮想環境</li>
+                </ul>
+
+                <h3 id="task-types">タスク別分類</h3>
+                <ul>
+                    <li><strong>無条件生成</strong>：学習データの分布に基づく自由な生成</li>
+                    <li><strong>条件付き生成</strong>：ラベルや説明文に基づく制御された生成</li>
+                    <li><strong>スタイル変換</strong>：あるドメインから別ドメインへの変換</li>
+                    <li><strong>超解像</strong>：低解像度から高解像度への品質向上</li>
+                    <li><strong>補完・修復</strong>：欠損部分の自動補完</li>
+                </ul>
+
+                <!-- GANの革命 -->
+                <h1 id="gan-revolution">GANによる生成AI革命</h1>
+
+                <h2 id="gan-basics">敵対的生成ネットワーク（GAN）</h2>
+                <p>2014年のIan Goodfellow論文で提案されたGANは、生成器（Generator）と判別器（Discriminator）が敵対的に学習するフレームワークです。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 GANの基本原理</h3>
+                    <p><strong>生成器G</strong>：ランダムノイズzから偽データG(z)を生成</p>
+                    <p><strong>判別器D</strong>：実データと偽データを見分ける</p>
+                    <p><strong>敵対的学習</strong>：Gは判別を困難にし、Dは判別精度を向上</p>
+                </div>
+
+                <h3 id="gan-objective">GAN目的関数</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\min_G \max_D V(D,G) = \mathbb{E}_{x \sim p_{data}(x)}[\log D(x)] + \mathbb{E}_{z \sim p_z(z)}[\log(1 - D(G(z)))]$$
+                </div>
+
+                <h2 id="dcgan">DCGAN：畳み込みGANの革命</h2>
+                <p>2016年のDCGAN（Deep Convolutional GAN）は、CNNをGANに適用し、安定的な高品質画像生成を実現しました。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 DCGAN設計指針</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+1. Pooling層をストライド畳み込みに置換
+2. BatchNormalizationを生成器・判別器に適用
+3. 全結合層を除去、全畳み込み化
+4. 生成器：ReLU（出力層Tanh）
+5. 判別器：LeakyReLU
+                    </pre>
+                </div>
+
+                <!-- 条件付き生成 -->
+                <h1 id="conditional-generation">条件付き生成技術</h1>
+
+                <h2 id="pix2pix">Pix2Pix：画像から画像への変換</h2>
+                <p>2017年のPix2Pixは、ペア画像データを用いて画像から画像への変換を学習するcGANベースの手法です。</p>
+
+                <h3 id="pix2pix-loss">Pix2Pix損失関数</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{cGAN}(G,D) = \mathbb{E}_{x,y}[\log D(x,y)] + \mathbb{E}_{x,z}[\log(1-D(x,G(x,z)))]$$
+                    $$L_{L1}(G) = \mathbb{E}_{x,y,z}[||y - G(x,z)||_1]$$
+                    $$G^* = \arg\min_G \max_D L_{cGAN}(G,D) + \lambda L_{L1}(G)$$
+                </div>
+
+                <h2 id="cyclegan">CycleGAN：非ペア画像変換</h2>
+                <p>2017年のCycleGANは、ペア画像データ不要で異なるドメイン間の画像変換を実現しました。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 Cycle Consistency Loss</h3>
+                    <p>$x \rightarrow G(x) \rightarrow F(G(x)) \approx x$ の一貫性を保証</p>
+                    <p>馬→シマウマ変換で元の馬の形状を維持</p>
+                </div>
+
+                <!-- 最新生成技術 -->
+                <h1 id="latest-technologies">次世代生成技術</h1>
+
+                <h2 id="diffusion-models">Diffusion Model：品質革命</h2>
+                <p>2020年以降のDiffusion Modelは、ノイズから段階的に画像を生成し、GANを超える品質を実現しました。</p>
+
+                <h3 id="ddpm-process">DDPM：ノイズ除去プロセス</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 拡散プロセス</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+Forward Process（拡散）:
+x₀ → x₁ → x₂ → ... → xₜ (純粋ノイズ)
+
+Reverse Process（生成）:
+xₜ → x_{t-1} → ... → x₁ → x₀ (生成画像)
+
+学習目標: ノイズ予測ネットワーク ε_θ(x_t, t)
+                    </pre>
+                </div>
+
+                <h3 id="stable-diffusion">Stable Diffusion：民主化の実現</h3>
+                <ul>
+                    <li><strong>Latent Diffusion</strong>：VAEエンコーダで圧縮空間での拡散</li>
+                    <li><strong>Cross-Attention</strong>：テキスト条件の効果的な統合</li>
+                    <li><strong>オープンソース化</strong>：Midjourney、DALL-E対抗</li>
+                    <li><strong>高速生成</strong>：数秒での高品質画像生成</li>
+                </ul>
+
+                <h2 id="nerf">NeRF：3D表現革命</h2>
+                <p>2020年のNeRF（Neural Radiance Fields）は、多視点画像から3D空間を暗黙的に表現する革新技術です。</p>
+
+                <h3 id="nerf-function">NeRF表現関数</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$F_\Theta : (x, y, z, \theta, \phi) \rightarrow (c, \sigma)$$
+                    $$c = (r, g, b) \text{（色）}, \sigma \text{（密度）}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 NeRFの革新性</h3>
+                    <ul>
+                        <li><strong>暗黙表現</strong>：メッシュ不要の3D表現</li>
+                        <li><strong>フォトリアリスティック</strong>：写真レベル品質</li>
+                        <li><strong>任意視点</strong>：学習していない角度も生成</li>
+                        <li><strong>応用拡張</strong>：Instant-NGP、Mip-NeRF等</li>
+                    </ul>
+                </div>
+
+                <!-- マルチモーダル生成 -->
+                <h1 id="multimodal-generation">マルチモーダル生成</h1>
+
+                <h2 id="text-generation">文章生成の進化</h2>
+                <h3 id="transformer-generation">Transformerベース生成</h3>
+                <ul>
+                    <li><strong>GPT系列</strong>：自己回帰的言語モデル</li>
+                    <li><strong>BERT系列</strong>：マスク言語モデル</li>
+                    <li><strong>T5</strong>：Text-to-Text統合フレームワーク</li>
+                    <li><strong>ChatGPT/GPT-4</strong>：対話特化チューニング</li>
+                </ul>
+
+                <h3 id="controlled-generation">制御可能テキスト生成</h3>
+                <ul>
+                    <li><strong>CTRL</strong>：制御コードによる条件付き生成</li>
+                    <li><strong>PPLM</strong>：プラグアンドプレイ言語モデル</li>
+                    <li><strong>InstructGPT</strong>：指示追従型学習</li>
+                </ul>
+
+                <h2 id="audio-generation">音声生成技術</h2>
+                <h3 id="neural-vocoder">ニューラルボコーダー</h3>
+                <ul>
+                    <li><strong>WaveNet</strong>：原始波形レベル生成</li>
+                    <li><strong>WaveGlow</strong>：Flow-based高速生成</li>
+                    <li><strong>HiFi-GAN</strong>：高品質リアルタイム合成</li>
+                </ul>
+
+                <h3 id="end2end-tts">End-to-End音声合成</h3>
+                <ul>
+                    <li><strong>Tacotron 2</strong>：テキストからメル・スペクトログラム</li>
+                    <li><strong>FastSpeech</strong>：並列非自己回帰合成</li>
+                    <li><strong>VALL-E</strong>：コーデック言語モデル</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>GAN vs VAE</strong>：生成機構の違いと特徴比較</li>
+                        <li><strong>DCGANの設計原則</strong>：安定学習のための5つの指針</li>
+                        <li><strong>CycleGAN vs Pix2Pix</strong>：ペア・非ペアデータの違い</li>
+                        <li><strong>Diffusion Modelの特徴</strong>：ノイズ除去による高品質生成</li>
+                        <li><strong>NeRFの革新性</strong>：暗黙的3D表現とフォトリアリズム</li>
+                        <li><strong>生成品質評価</strong>：IS、FID、LPIPSなどの指標</li>
+                        <li><strong>モード崩壊問題</strong>：GANの典型的な学習困難</li>
+                        <li><strong>潜在空間操作</strong>：StyleGAN等での意味的編集</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>GAN = 画像生成のみ</strong>：テキスト、音声、動画も生成可能</li>
+                        <li><strong>Diffusion = 低速</strong>：現在は高速化技術で実用的</li>
+                        <li><strong>NeRF = 静的のみ</strong>：動的シーンも扱える拡張あり</li>
+                        <li><strong>生成 = 創作のみ</strong>：データ拡張、修復等も重要応用</li>
+                        <li><strong>高品質 = 計算量大</strong>：効率化手法で軽量化進行中</li>
+                        <li><strong>条件付き生成 = 複雑</strong>：cGANで比較的簡単に実現</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>データ生成技術は、GANの登場から始まり、Diffusion Model、NeRF等の革新により、現在では人間レベルの品質を実現しています。画像、テキスト、音声、3Dなど多様なモダリティで実用化が進み、コンテンツ制作業界を根本的に変革しています。</p>
+                
+                <p>G検定では、各手法の基本原理、特徴的な構造、適用ドメインの違いを正確に理解することが重要です。特にGAN、Diffusion Model、NeRFの革新性と実世界応用を押さえることが頻出傾向にあります。</p>
+                
+                <p>生成AIは創作支援、データ拡張、品質向上など多様な用途で社会実装が進んでおり、AI技術者にとって必須の知識領域となっています。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">敵対的生成ネットワーク（GAN）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">生成器と判別器が敵対的に学習し、真のデータ分布から新しいサンプルを生成する深層学習手法</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">DCGAN</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">畳み込みニューラルネットワークを用いたGANの安定化手法。BatchNorm、ストライド畳み込み等を導入</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CycleGAN</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ペアデータ不要でドメイン間画像変換を行うGAN。Cycle Consistency Lossで形状保持</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Pix2Pix</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ペア画像データを用いて条件付き画像生成を行うcGAN。L1損失で詳細保持</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Diffusion Model</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ノイズから段階的にデータを生成する確率的生成モデル。GANを超える高品質生成を実現</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">NeRF</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Neural Radiance Fields。多視点画像から3D空間を暗黙的に表現し、任意視点レンダリングを実現</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">モード崩壊</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">GANで生成器が限定的なパターンのみ生成し、データの多様性が失われる現象</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">FID（Fréchet Inception Distance）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Inception特徴空間での実データと生成データのワッサースタイン距離。生成品質の定量評価指標</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">潜在空間</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">生成モデルの中間表現空間。属性操作や補間により意味的な画像編集が可能</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Stable Diffusion</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">VAE潜在空間でDiffusionを行う効率的な画像生成モデル。オープンソース化で普及拡大</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-4
+                        </a>
+                        <a href="study6-6.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-6
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

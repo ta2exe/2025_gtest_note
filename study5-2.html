@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-2: 畳み込み層 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-2: 畳み込み層</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-2</h1>
+                <h2 class="content-subtitle">畳み込み層</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>畳み込み層の基礎的な知識を理解する</li>
+                        <li>全結合層と畳み込み層の差異について、説明できる</li>
+                        <li>畳み込み層の役割について説明できる</li>
+                        <li>畳み込み層のパラメータ数について理解する</li>
+                        <li>畳み込み層が適用できるデータの特性について理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Atrous Convolution</strong></li>
+                        <li><strong>Depthwise Separable Convolution</strong></li>
+                        <li><strong>Dilation Convolution</strong></li>
+                        <li><strong>カーネル</strong></li>
+                        <li><strong>ストライド</strong></li>
+                        <li><strong>畳み込み操作</strong></li>
+                        <li><strong>畳み込みニューラルネットワーク (CNN)</strong></li>
+                        <li><strong>特徴マップ</strong></li>
+                        <li><strong>パディング</strong></li>
+                        <li><strong>フィルタ</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">畳み込み層とは何か</h1>
+                
+                <p>畳み込み層（Convolutional Layer）は、画像や音声などの格子状データに対して局所的な特徴を抽出する層です。全結合層とは異なり、入力の空間的な構造を保持しながら処理を行うため、コンピュータビジョンや信号処理の分野で革命的な成果をもたらしました。</p>
+
+                <p>1980年代の福島邦彦氏のネオコグニトロンから始まり、1998年のYann LeCunのLeNet-5を経て、現代のResNet、VGG、EfficientNetなど、多くの画像認識アーキテクチャの基盤技術として発展してきました。</p>
+
+                <h1 id="basic-concept">基本概念</h1>
+
+                <h2 id="convolution-operation">畳み込み操作</h2>
+                
+                <p>畳み込み操作は、小さなフィルタ（カーネル）を入力データ上でスライドさせながら内積計算を行う処理です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$(\mathbf{I} * \mathbf{K})_{i,j} = \sum_{m=0}^{M-1} \sum_{n=0}^{N-1} \mathbf{I}_{i+m,j+n} \cdot \mathbf{K}_{m,n}$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$\mathbf{I}$</strong>：入力画像またはデータ</li>
+                    <li><strong>$\mathbf{K}$</strong>：カーネル（フィルタ）($M \times N$サイズ)</li>
+                    <li><strong>$(i,j)$</strong>：出力位置の座標</li>
+                    <li><strong>$*$</strong>：畳み込み演算子</li>
+                </ul>
+
+                <h2 id="core-components">核心要素</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔧 畳み込み層の構成要素</h3>
+                    <ul>
+                        <li><strong>フィルタ/カーネル</strong>：学習可能な重みパラメータからなる小さな行列</li>
+                        <li><strong>特徴マップ</strong>：畳み込み操作の結果として得られる出力</li>
+                        <li><strong>ストライド</strong>：フィルタを移動させる間隔</li>
+                        <li><strong>パディング</strong>：入力の境界を埋める手法</li>
+                        <li><strong>活性化関数</strong>：畳み込み後に適用される非線形関数</li>
+                    </ul>
+                </div>
+
+                <h1 id="vs-fully-connected">全結合層との差異</h1>
+
+                <h2 id="structural-differences">構造的な違い</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚖️ 全結合層 vs 畳み込み層</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>全結合層</strong>                    <strong>畳み込み層</strong>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ 全対全結合                      ✓ 局所結合
+✓ 位置情報なし                    ✓ 空間構造保持
+✓ 大量パラメータ                  ✓ パラメータ共有
+✓ 平坦化された入力                ✓ 多次元入力対応
+✓ 位置不変性なし                  ✓ 平行移動不変性
+✓ O(入力×出力) パラメータ         ✓ O(フィルタサイズ) パラメータ
+
+<strong>例：28×28画像→128出力</strong>
+全結合層: 784×128 = 100,352パラメータ
+畳み込み層: 3×3×128 = 1,152パラメータ
+                    </pre>
+                </div>
+
+                <h2 id="parameter-efficiency">パラメータ効率性</h2>
+
+                <p>畳み込み層の最大の利点は<strong>パラメータ共有</strong>です：</p>
+
+                <ul>
+                    <li><strong>局所性</strong>：画像の局所的な特徴に注目</li>
+                    <li><strong>平行移動不変性</strong>：同じ特徴を位置に関係なく検出</li>
+                    <li><strong>階層的特徴抽出</strong>：浅い層でエッジ、深い層で複雑な形状</li>
+                    <li><strong>計算効率</strong>：同一フィルタを全体に適用</li>
+                </ul>
+
+                <h1 id="parameters-calculation">パラメータ数の計算</h1>
+
+                <h2 id="conv-parameters">畳み込み層のパラメータ数</h2>
+
+                <p>畳み込み層のパラメータ数計算は以下の要素で決まります：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{パラメータ数} = (K_h \times K_w \times C_{in} + 1) \times C_{out}$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$K_h, K_w$</strong>：カーネルの高さと幅</li>
+                    <li><strong>$C_{in}$</strong>：入力チャンネル数</li>
+                    <li><strong>$C_{out}$</strong>：出力チャンネル数（フィルタ数）</li>
+                    <li><strong>+1</strong>：バイアス項</li>
+                </ul>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 具体例でのパラメータ計算</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>例1：RGB画像の最初の畳み込み層</strong>
+入力: 224×224×3 (RGB画像)
+フィルタ: 3×3×3×64 (64個の3×3フィルタ)
+パラメータ数 = (3×3×3 + 1) × 64 = 28 × 64 = 1,792
+
+<strong>例2：中間層の畳み込み</strong>
+入力: 112×112×64
+フィルタ: 3×3×64×128 (128個の3×3フィルタ)
+パラメータ数 = (3×3×64 + 1) × 128 = 577 × 128 = 73,856
+
+<strong>例3：1×1畳み込み（チャンネル調整）</strong>
+入力: 56×56×256
+フィルタ: 1×1×256×128
+パラメータ数 = (1×1×256 + 1) × 128 = 257 × 128 = 32,896
+                    </pre>
+                </div>
+
+                <h1 id="key-operations">重要な操作</h1>
+
+                <h2 id="padding">パディング</h2>
+
+                <p>パディングは入力の境界を拡張する手法で、出力サイズを制御します：</p>
+
+                <ul>
+                    <li><strong>Valid Padding</strong>：パディングなし、出力サイズが縮小</li>
+                    <li><strong>Same Padding</strong>：入力と同じサイズを保持するパディング</li>
+                    <li><strong>Causal Padding</strong>：時系列データで未来の情報を使わない</li>
+                </ul>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{出力サイズ} = \left\lfloor \frac{\text{入力サイズ} + 2P - K}{S} \right\rfloor + 1$$
+                </div>
+
+                <p>$P$：パディングサイズ、$K$：カーネルサイズ、$S$：ストライド</p>
+
+                <h2 id="stride">ストライド</h2>
+
+                <p>ストライドはフィルタを移動させる間隔を制御し、出力のダウンサンプリングを行います：</p>
+
+                <ul>
+                    <li><strong>ストライド=1</strong>：すべての位置で畳み込み（最も詳細）</li>
+                    <li><strong>ストライド=2</strong>：1つ置きに畳み込み（1/4に縮小）</li>
+                    <li><strong>ストライド>1</strong>：プーリング層の代替として使用</li>
+                </ul>
+
+                <h1 id="advanced-convolutions">高度な畳み込み手法</h1>
+
+                <h2 id="dilated-convolution">拡張畳み込み（Dilation/Atrous Convolution）</h2>
+
+                <p>カーネル要素間に隙間を設けることで、パラメータ数を増やすことなく受容野を拡大：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$(\mathbf{I} *_d \mathbf{K})_{i,j} = \sum_{m=0}^{M-1} \sum_{n=0}^{N-1} \mathbf{I}_{i+d \cdot m,j+d \cdot n} \cdot \mathbf{K}_{m,n}$$
+                </div>
+
+                <p>$d$は拡張率（dilation rate）で、$d=1$が通常の畳み込みに対応します。</p>
+
+                <h2 id="separable-convolution">深度分離畳み込み（Depthwise Separable Convolution）</h2>
+
+                <p>計算効率化のため畳み込みを2段階に分離：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 深度分離畳み込みの手順</h3>
+                    <ol>
+                        <li><strong>Depthwise Convolution</strong>：各チャンネルを独立に畳み込み</li>
+                        <li><strong>Pointwise Convolution</strong>：1×1畳み込みでチャンネル間統合</li>
+                    </ol>
+                    <p><strong>計算量削減効果</strong>：標準畳み込みの約1/8〜1/9に削減（MobileNetで採用）</p>
+                </div>
+
+                <h1 id="cnn-architecture">CNN（畳み込みニューラルネットワーク）</h1>
+
+                <h2 id="typical-cnn-structure">典型的なCNN構造</h2>
+
+                <p>一般的なCNNは以下のパターンで構成されます：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ CNN の典型的なアーキテクチャ</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+入力画像 (224×224×3)
+    ↓
+[Conv] → [BN] → [ReLU] → [Pool]  ← 特徴抽出ブロック
+    ↓                               (複数回繰り返し)
+[Conv] → [BN] → [ReLU] → [Pool]
+    ↓
+[Conv] → [BN] → [ReLU] → [Pool]
+    ↓
+[Global Average Pooling]           ← プーリング
+    ↓
+[Fully Connected] → [Softmax]      ← 分類ヘッド
+    ↓
+出力確率 (1000クラス等)
+
+BN: Batch Normalization
+Pool: Max/Average Pooling
+                    </pre>
+                </div>
+
+                <h2 id="famous-architectures">有名なCNNアーキテクチャ</h2>
+
+                <ul>
+                    <li><strong>LeNet-5 (1998)</strong>：最初の実用的CNN、手書き数字認識</li>
+                    <li><strong>AlexNet (2012)</strong>：ImageNet優勝、ディープラーニングブーム</li>
+                    <li><strong>VGG (2014)</strong>：3×3畳み込みの積み重ね</li>
+                    <li><strong>ResNet (2015)</strong>：残差結合により超深層化</li>
+                    <li><strong>EfficientNet (2019)</strong>：NASによる効率的設計</li>
+                </ul>
+
+                <h1 id="data-characteristics">適用可能なデータの特性</h1>
+
+                <h2 id="suitable-data-types">畳み込み層が有効なデータ</h2>
+
+                <p>畳み込み層は以下のような特性を持つデータで威力を発揮します：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">✅ 畳み込み層が有効なデータ特性</h3>
+                    <ul>
+                        <li><strong>格子状構造</strong>：2D（画像）、3D（動画、医療画像）、1D（音声、時系列）</li>
+                        <li><strong>局所的相関</strong>：近隣要素間に強い関係性</li>
+                        <li><strong>平行移動不変性</strong>：同じパターンが異なる位置に出現</li>
+                        <li><strong>階層的構造</strong>：低レベル特徴から高レベル特徴へ</li>
+                        <li><strong>空間的連続性</strong>：隣接要素の値が急激に変化しない</li>
+                    </ul>
+                </div>
+
+                <h3 id="application-examples">具体的な応用例</h3>
+
+                <ul>
+                    <li><strong>画像認識</strong>：物体検出、セグメンテーション、顔認識</li>
+                    <li><strong>音声処理</strong>：音声認識、音楽生成、音源分離</li>
+                    <li><strong>自然言語処理</strong>：文書分類、テキスト生成（1D畳み込み）</li>
+                    <li><strong>時系列予測</strong>：株価予測、気象予測、センサーデータ解析</li>
+                    <li><strong>医療画像</strong>：MRI/CT解析、病理診断、創薬</li>
+                </ul>
+
+                <h1 id="role-and-importance">畳み込み層の役割と重要性</h1>
+
+                <h2 id="feature-extraction">階層的特徴抽出</h2>
+
+                <p>畳み込み層の最も重要な役割は、階層的に特徴を抽出することです：</p>
+
+                <ul>
+                    <li><strong>第1層</strong>：エッジ、線分、色の変化などの低レベル特徴</li>
+                    <li><strong>第2-3層</strong>：コーナー、曲線、テクスチャなどの中レベル特徴</li>
+                    <li><strong>第4-5層</strong>：形状、パーツ、オブジェクト部品の高レベル特徴</li>
+                    <li><strong>深い層</strong>：複雑なオブジェクト、シーン理解</li>
+                </ul>
+
+                <h2 id="computational-advantages">計算上の利点</h2>
+
+                <p>現代のハードウェアで効率的に実行できる特性：</p>
+
+                <ul>
+                    <li><strong>並列計算</strong>：GPU/TPUでの高速処理</li>
+                    <li><strong>メモリ効率</strong>：パラメータ共有によるメモリ節約</li>
+                    <li><strong>最適化ライブラリ</strong>：cuDNN等の高度に最適化された実装</li>
+                    <li><strong>モバイル対応</strong>：軽量化技術との相性が良い</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本的な畳み込み操作</strong>：フィルタとカーネルの概念</li>
+                        <li><strong>全結合層との違い</strong>：パラメータ共有、局所結合、空間構造保持</li>
+                        <li><strong>パディングとストライド</strong>：出力サイズへの影響</li>
+                        <li><strong>パラメータ数計算</strong>：$(K_h \times K_w \times C_{in} + 1) \times C_{out}$</li>
+                        <li><strong>CNN の特徴</strong>：平行移動不変性、階層的特徴抽出</li>
+                        <li><strong>拡張畳み込み</strong>：受容野拡大とパラメータ効率</li>
+                        <li><strong>深度分離畳み込み</strong>：計算量削減の仕組み</li>
+                        <li><strong>適用データの特性</strong>：格子状構造、局所相関</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>フィルタとカーネルの混同</strong>：本質的に同じ意味だが文脈で使い分け</li>
+                        <li><strong>パラメータ数の計算ミス</strong>：チャンネル数とバイアス項を忘れがち</li>
+                        <li><strong>ストライドの効果の誤解</strong>：出力サイズの計算式を正確に理解</li>
+                        <li><strong>拡張畳み込みの理解不足</strong>：パラメータ数は増えずに受容野のみ拡大</li>
+                        <li><strong>畳み込みの適用範囲</strong>：画像以外にも1D/3Dデータで活用可能</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>畳み込み層は、局所的な特徴抽出と空間構造の保持により、画像認識分野に革命をもたらした技術です。全結合層と比較して、パラメータ共有による効率性、平行移動不変性、階層的特徴抽出という独特の特性を持ちます。</p>
+                
+                <p>現代では標準的な畳み込みから、拡張畳み込み、深度分離畳み込みなどの高度な変種まで発展し、効率的な特徴抽出を実現しています。画像だけでなく、音声、時系列、自然言語処理など、格子状構造を持つ様々なデータに適用できる汎用的な技術です。</p>
+                
+                <p>G検定では、畳み込みの基本原理、パラメータ計算、全結合層との違い、そしてCNNアーキテクチャの理解が重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">畳み込み層（Convolutional Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">小さなフィルタを用いて入力の局所的な特徴を抽出する層。空間構造を保持しながら処理。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">カーネル/フィルタ（Kernel/Filter）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">畳み込み操作に使用される小さな重み行列。学習により最適化される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">特徴マップ（Feature Map）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">畳み込み操作により得られる出力。入力の特定の特徴を強調した表現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ストライド（Stride）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">フィルタを移動させる間隔。出力のサイズとダウンサンプリングを制御。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">パディング（Padding）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力の境界を拡張する手法。出力サイズの制御や境界情報の保持に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">畳み込み操作（Convolution Operation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">フィルタと入力の局所領域との内積を計算し、フィルタをスライドさせて適用する操作。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CNN（畳み込みニューラルネットワーク）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">畳み込み層を主体としたニューラルネットワーク。画像認識で広く使用される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Atrous/Dilation Convolution（拡張畳み込み）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">フィルタの要素間に隙間を設けることで、パラメータ数を増やさずに受容野を拡大する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Depthwise Separable Convolution（深度分離畳み込み）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">標準的な畳み込みを深度方向とポイント方向の2段階に分離し、計算量を大幅削減する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">受容野（Receptive Field）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">一つの出力ユニットが影響を受ける入力領域の範囲。深い層ほど広い受容野を持つ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">平行移動不変性（Translation Invariance）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力の位置が変化しても同じ特徴を検出できる性質。パラメータ共有により実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Valid Padding</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">パディングを行わない方式。出力サイズが入力より小さくなる。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Same Padding</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">出力サイズが入力と同じになるようにパディングを調整する方式。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">階層的特徴抽出（Hierarchical Feature Extraction）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">浅い層で低レベル特徴、深い層で高レベル特徴を段階的に抽出する仕組み。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-1
+                        </a>
+                        <a href="study5-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-3
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

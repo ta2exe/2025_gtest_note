@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-4: 深層強化学習 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-4: 深層強化学習</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-4</h1>
+                <h2 class="content-subtitle">深層強化学習</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>代表的な強化学習モデルについて理解する</li>
+                        <li>強化学習が実世界において、どのように活用されているか理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>A3C</strong></li>
+                        <li><strong>Agent57</strong></li>
+                        <li><strong>APE-X</strong></li>
+                        <li><strong>DQN</strong></li>
+                        <li><strong>OpenAI Five</strong></li>
+                        <li><strong>PPO</strong></li>
+                        <li><strong>Rainbow</strong></li>
+                        <li><strong>RLHF</strong></li>
+                        <li><strong>sim2real</strong></li>
+                        <li><strong>アルファスター（AlphaStar）</strong></li>
+                        <li><strong>オフライン強化学習</strong></li>
+                        <li><strong>残差強化学習</strong></li>
+                        <li><strong>状態表現学習</strong></li>
+                        <li><strong>ダブルDQN</strong></li>
+                        <li><strong>デュエリングネットワーク</strong></li>
+                        <li><strong>ドメインランダマイゼーション</strong></li>
+                        <li><strong>ノイジーネットワーク</strong></li>
+                        <li><strong>報酬成形</strong></li>
+                        <li><strong>マルチエージェント強化学習</strong></li>
+                        <li><strong>連続値制御</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">深層強化学習とは何か</h1>
+                
+                <p>深層強化学習（Deep Reinforcement Learning）は、深層学習と強化学習を組み合わせた技術分野です。エージェントが環境との相互作用を通じて最適な行動戦略を学習し、複雑で高次元な問題を解決できます。</p>
+
+                <p>2013年のDQNによるAtariゲーム制覇から始まり、AlphaGo、AlphaStar、OpenAI Five等で人間を超える成果を達成。現在は自動運転、ロボティクス、金融取引、創薬など幅広い分野で実用化が進んでいます。</p>
+
+                <h1 id="rl-fundamentals">強化学習の基本原理</h1>
+
+                <h2 id="mdp-framework">マルコフ決定過程（MDP）</h2>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MDP} = (S, A, P, R, \gamma)$$
+                    $$P(s_{t+1}|s_t, a_t, s_{t-1}, a_{t-1}, ...) = P(s_{t+1}|s_t, a_t)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 強化学習の構成要素</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>エージェント（Agent）</strong>:
+・学習・意思決定を行う主体
+・方策π(a|s): 状態sにおける行動aの選択確率
+・価値関数V(s), Q(s,a): 状態・行動の価値推定
+
+<strong>環境（Environment）</strong>:
+・エージェントが相互作用する外界
+・状態遷移確率P(s'|s,a)
+・報酬関数R(s,a,s')
+
+<strong>学習プロセス</strong>:
+1. 現在状態sを観測
+2. 方策πに基づき行動aを選択  
+3. 環境から報酬rと次状態s'を取得
+4. 経験(s,a,r,s')から方策を改善
+5. 1に戻る（エピソード終了まで）
+
+<strong>目標</strong>:
+期待累積報酬の最大化
+E[∑(γ^t × r_t)] (γ: 割引率)
+                    </pre>
+                </div>
+
+                <h2 id="value-functions">価値関数</h2>
+
+                <p>強化学習における価値の概念：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$V^\pi(s) = E_\pi\left[\sum_{t=0}^{\infty} \gamma^t r_{t+1} \mid s_0 = s\right]$$
+                    $$Q^\pi(s,a) = E_\pi\left[\sum_{t=0}^{\infty} \gamma^t r_{t+1} \mid s_0 = s, a_0 = a\right]$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💎 価値関数の種類</h3>
+                    <ul>
+                        <li><strong>状態価値関数V(s)</strong>：状態sからの期待累積報酬</li>
+                        <li><strong>行動価値関数Q(s,a)</strong>：状態sで行動aを取る価値</li>
+                        <li><strong>アドバンテージ関数A(s,a)</strong>：Q(s,a) - V(s)、行動の相対的価値</li>
+                        <li><strong>ベルマン方程式</strong>：価値関数の再帰的関係</li>
+                        <li><strong>最適価値関数</strong>：最適方策での価値関数</li>
+                    </ul>
+                </div>
+
+                <h1 id="dqn-revolution">DQN革命</h1>
+
+                <h2 id="dqn-breakthrough">DQN（Deep Q-Network）</h2>
+
+                <p>2013年DeepMindによる深層強化学習の突破口：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$Q(s,a;\theta) \approx Q^*(s,a)$$
+                    $$L(\theta) = E[(r + \gamma \max_{a'} Q(s',a';\theta^-) - Q(s,a;\theta))^2]$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎮 DQNの革新技術</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>深層ニューラルネットワーク</strong>:
+・高次元状態空間（画像等）の直接処理
+・畳み込み層による空間特徴抽出
+・従来の線形関数近似の限界突破
+
+<strong>Experience Replay</strong>:
+・過去の経験(s,a,r,s')をバッファに蓄積
+・ランダムサンプリングによる学習
+・データの相関除去、安定化効果
+
+<strong>Target Network</strong>:
+・学習対象とターゲットのネットワーク分離
+・θ^- は周期的にθからコピー
+・学習の発散防止
+
+<strong>成果</strong>:
+・Atari 2600ゲーム49種類
+・29種類で人間を超える性能
+・汎用的な学習アルゴリズムの実証
+                    </pre>
+                </div>
+
+                <h2 id="dqn-improvements">DQNの改良手法</h2>
+
+                <p>DQN以降の主要な改良技術：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ DQN改良シリーズ</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Double DQN（2015）</strong>:
+・行動選択と価値評価の分離
+・過推定バイアスの解決
+・Q_target = r + γQ(s', argmax_a Q(s',a;θ); θ^-)
+
+<strong>Dueling Network（2016）</strong>:
+・価値関数を状態価値V(s)と優位性A(s,a)に分離
+・Q(s,a) = V(s) + A(s,a) - mean_a(A(s,a))
+・状態価値の安定した学習
+
+<strong>Prioritized Experience Replay（2016）</strong>:
+・TD誤差に基づく重要度サンプリング
+・学習効率の大幅向上
+・重要な経験の優先的な学習
+
+<strong>Noisy Networks（2017）</strong>:
+・重みにノイズを直接注入
+・探索の学習による自動化
+・ε-greedy等の手動探索の代替
+                    </pre>
+                </div>
+
+                <h2 id="rainbow">Rainbow DQN</h2>
+
+                <p>6つの改良技術を統合した究極のDQN：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Rainbow} = \text{DQN + Double + Dueling + PER + Multi-step + Noisy + C51}$$
+                </div>
+
+                <ul>
+                    <li><strong>C51</strong>：分布強化学習、価値分布の直接学習</li>
+                    <li><strong>Multi-step Learning</strong>：n-step TD学習による長期依存捕捉</li>
+                    <li><strong>統合効果</strong>：各改良の相乗効果で大幅性能向上</li>
+                    <li><strong>Atari成績</strong>：人間を大幅に上回る汎用性能</li>
+                </ul>
+
+                <h1 id="policy-gradient">方策勾配法</h1>
+
+                <h2 id="policy-based-methods">方策ベース手法</h2>
+
+                <p>価値関数ではなく方策を直接最適化：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\theta_{t+1} = \theta_t + \alpha \nabla_\theta J(\theta_t)$$
+                    $$\nabla_\theta J(\theta) = E_\pi[\nabla_\theta \log \pi(a|s;\theta) \cdot Q^\pi(s,a)]$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📈 方策勾配の利点</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>直接方策最適化</strong>:
+・方策パラメータθの直接更新
+・確率的方策の自然な表現
+・連続行動空間への対応
+
+<strong>REINFORCE</strong>:
+・Monte Carloによる方策勾配
+・高い分散が課題
+・ベースライン導入で分散削減
+
+<strong>Actor-Critic</strong>:
+・Actor: 方策の更新
+・Critic: 価値関数の学習
+・バイアス-分散のトレードオフ改善
+
+<strong>利点</strong>:
+・連続行動・高次元行動への対応
+・確率的最適方策の学習
+・局所最適でも有効解
+                    </pre>
+                </div>
+
+                <h2 id="a3c">A3C（Asynchronous Actor-Critic）</h2>
+
+                <p>DeepMindによる非同期分散強化学習：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\nabla_\theta \log \pi(a_t|s_t;\theta) \cdot A(s_t, a_t)$$
+                    $$A(s_t, a_t) = \sum_{i=0}^{k-1} \gamma^i r_{t+i} + \gamma^k V(s_{t+k}) - V(s_t)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 A3Cの革新</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>非同期学習</strong>:
+・複数のワーカーが並列して環境とやりとり
+・各ワーカーが独立したコピーで学習
+・グローバルネットワークを非同期更新
+
+<strong>Experience Replay不要</strong>:
+・オンライン学習のみで安定化
+・メモリ使用量の大幅削減
+・リアルタイム学習への対応
+
+<strong>3つのC</strong>:
+・Asynchronous: 非同期
+・Actor-Critic: 方策・価値の同時学習  
+・Advantage: アドバンテージ関数使用
+
+<strong>性能</strong>:
+・DQNを上回るAtari性能
+・連続制御タスクでの成功
+・計算効率の大幅改善
+                    </pre>
+                </div>
+
+                <h2 id="ppo">PPO（Proximal Policy Optimization）</h2>
+
+                <p>OpenAIによる安定した方策最適化：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L^{CLIP}(\theta) = E_t[\min(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t)]$$
+                    $$r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 PPOの特徴</h3>
+                    <ul>
+                        <li><strong>クリッピング</strong>：方策比率を制限し、大幅な更新を防止</li>
+                        <li><strong>安定性</strong>：TRPO（Trust Region Policy Optimization）の簡略版</li>
+                        <li><strong>実装容易</strong>：複雑な制約最適化が不要</li>
+                        <li><strong>高性能</strong>：多くのタスクでSOTA性能</li>
+                        <li><strong>汎用性</strong>：離散・連続行動の両方に対応</li>
+                    </ul>
+                </div>
+
+                <h1 id="game-ai-breakthroughs">ゲームAIの突破</h1>
+
+                <h2 id="alphago-series">AlphaGoシリーズ</h2>
+
+                <p>囲碁における人間超越の軌跡：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏆 AlphaGoの進化</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>AlphaGo（2016）</strong>:
+・Monte Carlo Tree Search + 深層学習
+・方策ネットワーク + 価値ネットワーク
+・人間の棋譜データで事前学習
+・李世ドル九段を4-1で撃破
+
+<strong>AlphaGo Zero（2017）</strong>:
+・人間の棋譜データなしで学習
+・自己対戦のみから強化学習
+・残差ネットワークによる性能向上
+・AlphaGoを100-0で圧倒
+
+<strong>AlphaZero（2017）</strong>:
+・汎用版、囲碁・将棋・チェスを制覇
+・ゲームルール以外の知識不要
+・各分野で既存最強AIを圧倒
+・創造的・美しい戦略を発見
+
+<strong>MuZero（2019）</strong>:
+・モデルベース強化学習
+・環境の完全理解なしで学習
+・計画・学習の統合アプローチ
+                    </pre>
+                </div>
+
+                <h2 id="alphastar">AlphaStar</h2>
+
+                <p>リアルタイム戦略ゲームStarCraft IIでの成功：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Multi-Agent RL} + \text{Population-based Training}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚔️ AlphaStarの挑戦</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>複雑性の次元</strong>:
+・リアルタイム戦略（RTS）ゲーム
+・不完全情報環境
+・膨大な行動空間（10^26以上）
+・長期戦略と短期戦術の両立
+
+<strong>技術的解決策</strong>:
+・Transformer + LSTM のハイブリッド
+・Population-based学習
+・Multi-Agent設定での多様性確保
+・Imitation Learning → 強化学習
+
+<strong>成果</strong>:
+・2019年プロプレイヤー撃破
+・Grandmaster級の達成（上位0.2%）
+・長期戦略と即応性の両立実現
+・複雑な協調・競争行動の創発
+                    </pre>
+                </div>
+
+                <h2 id="openai-five">OpenAI Five</h2>
+
+                <p>Dota 2での5vs5チーム戦制覇：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🤝 マルチエージェント学習</h3>
+                    <ul>
+                        <li><strong>チーム協調</strong>：5体エージェントの協調戦略学習</li>
+                        <li><strong>大規模学習</strong>：45,000年分相当のゲーム経験</li>
+                        <li><strong>自己対戦</strong>：自分自身との継続的対戦で改善</li>
+                        <li><strong>長期戦略</strong>：45分のゲームでの長期計画</li>
+                        <li><strong>人間超越</strong>：2018年世界チャンピオン撃破</li>
+                    </ul>
+                </div>
+
+                <h1 id="advanced-techniques">高度な技術</h1>
+
+                <h2 id="distributed-rl">分散強化学習</h2>
+
+                <p>大規模・高速学習のための分散技術：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ 分散RL手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>APE-X（Distributed Prioritized Experience Replay）</strong>:
+・分散データ収集 + 集中学習
+・優先度付き経験再生の分散版
+・数百のアクターが並列データ収集
+
+<strong>IMPALA（Importance Weighted Actor-Learner）</strong>:
+・V-traceによるオフポリシー補正
+・数千CPU並列での大規模学習
+・サンプル効率と計算効率の両立
+
+<strong>Agent57</strong>:
+・全Atariゲームで人間を超越
+・Meta-controller による探索制御
+・Never Give Up (NGU) ベースの内在的動機
+
+<strong>分散の利点</strong>:
+・学習速度の大幅向上
+・経験多様性の確保
+・大規模環境への対応
+                    </pre>
+                </div>
+
+                <h2 id="offline-rl">オフライン強化学習</h2>
+
+                <p>既存データからの学習による安全・効率的RL：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 オフライン強化学習</h3>
+                    <ul>
+                        <li><strong>動機</strong>：環境との相互作用が高コスト・危険な場合</li>
+                        <li><strong>課題</strong>：分布外行動の価値過推定（extrapolation error）</li>
+                        <li><strong>解決策</strong>：保守的Q学習、行動制約、不確実性考慮</li>
+                        <li><strong>応用</strong>：自動運転、ロボティクス、医療、金融</li>
+                        <li><strong>手法例</strong>：CQL、BEAR、AWR、IQL</li>
+                    </ul>
+                </div>
+
+                <h2 id="meta-rl">メタ強化学習</h2>
+
+                <p>学習の学習による高速適応：</p>
+
+                <ul>
+                    <li><strong>概念</strong>：新しいタスクへの高速適応能力の獲得</li>
+                    <li><strong>手法</strong>：MAML、学習された最適化器、文脈バンディット</li>
+                    <li><strong>応用</strong>：少量データでの新環境適応</li>
+                    <li><strong>課題</strong>：メタ学習の安定性、汎化性能</li>
+                </ul>
+
+                <h1 id="continuous-control">連続値制御</h1>
+
+                <h2 id="continuous-action-spaces">連続行動空間の挑戦</h2>
+
+                <p>ロボティクス・制御分野での深層強化学習：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$a \in \mathbb{R}^n, \quad \pi_\theta(a|s) = \mathcal{N}(\mu_\theta(s), \Sigma_\theta(s))$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🤖 連続制御の特徴</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>行動空間の性質</strong>:
+・無限の行動選択肢
+・滑らかな行動変化が必要
+・高次元行動空間（多関節ロボット等）
+
+<strong>主要手法</strong>:
+・DDPG: 決定論的方策勾配
+・TD3: Twin Delayed DDPG
+・SAC: Soft Actor-Critic（確率的）
+
+<strong>課題</strong>:
+・探索の困難さ
+・方策の安定性
+・サンプル効率
+
+<strong>応用分野</strong>:
+・ロボットマニピュレーション
+・歩行制御
+・自動運転
+・工業制御システム
+                    </pre>
+                </div>
+
+                <h1 id="real-world-applications">実世界での活用</h1>
+
+                <h2 id="robotics">ロボティクス</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🦾 ロボット応用</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>マニピュレーション</strong>:
+・物体の把持・操作学習
+・人間レベルの器用性獲得
+・未知物体への汎化能力
+
+<strong>移動ロボット</strong>:
+・動的環境でのナビゲーション
+・障害物回避・経路計画
+・四足歩行・二足歩行制御
+
+<strong>sim2real問題</strong>:
+・シミュレーションと実世界のギャップ
+・ドメインランダマイゼーション
+・転移学習による実世界適応
+
+<strong>安全性</strong>:
+・制約付き強化学習
+・セーフティクリティカルシステム
+・人間との協働安全性
+                    </pre>
+                </div>
+
+                <h2 id="autonomous-vehicles">自動運転</h2>
+
+                <ul>
+                    <li><strong>経路計画</strong>：動的環境での最適経路生成</li>
+                    <li><strong>行動決定</strong>：交差点、車線変更での判断</li>
+                    <li><strong>マルチエージェント</strong>：他車両との相互作用理解</li>
+                    <li><strong>安全性確保</strong>：制約下での強化学習</li>
+                </ul>
+
+                <h2 id="finance-trading">金融・トレーディング</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💰 金融RL応用</h3>
+                    <ul>
+                        <li><strong>アルゴリズム取引</strong>：市場データからの最適売買戦略</li>
+                        <li><strong>ポートフォリオ最適化</strong>：リスク・リターンバランス</li>
+                        <li><strong>高頻度取引</strong>：ミリ秒レベルの意思決定</li>
+                        <li><strong>リスク管理</strong>：動的ヘッジ戦略</li>
+                        <li><strong>制約</strong>：規制遵守、流動性制約</li>
+                    </ul>
+                </div>
+
+                <h2 id="rlhf">RLHF（人間フィードバック強化学習）</h2>
+
+                <p>ChatGPT等で注目の人間価値観への整合技術：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$r_\phi(s,a) = \text{Reward Model trained on Human Preferences}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">👥 RLHFのプロセス</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>3段階学習</strong>:
+1. 教師ありファインチューニング（SFT）
+2. 報酬モデル学習（人間の好み学習）
+3. 強化学習による方策最適化（PPO）
+
+<strong>応用例</strong>:
+・ChatGPT: 対話の有用性・安全性向上
+・InstructGPT: 指示に従う言語モデル
+・Constitutional AI: 憲法的原則の学習
+
+<strong>課題</strong>:
+・人間フィードバックの収集コスト
+・好みの多様性・主観性
+・報酬ハッキング問題
+
+<strong>意義</strong>:
+・AI安全性・アライメント問題への回答
+・人間価値観の機械学習への統合
+・責任あるAI開発の基盤技術
+                    </pre>
+                </div>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>DQN</strong>：深層強化学習の出発点、Experience Replay、Target Network</li>
+                        <li><strong>DQN改良</strong>：Double DQN、Dueling Network、Rainbow統合</li>
+                        <li><strong>方策勾配</strong>：A3C、PPO等の方策ベース手法</li>
+                        <li><strong>ゲームAI</strong>：AlphaGo系列、AlphaStar、OpenAI Five</li>
+                        <li><strong>分散学習</strong>：APE-X、大規模並列学習</li>
+                        <li><strong>連続制御</strong>：ロボティクス応用、連続行動空間</li>
+                        <li><strong>RLHF</strong>：ChatGPT等での人間フィードバック学習</li>
+                        <li><strong>実用化</strong>：自動運転、ロボティクス、金融応用</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>価値 vs 方策</strong>：Q学習（価値ベース）vs 方策勾配（方策ベース）</li>
+                        <li><strong>オン vs オフポリシー</strong>：学習方策と行動方策の同異</li>
+                        <li><strong>AlphaGo進化</strong>：AlphaGo → AlphaGo Zero → AlphaZero の違い</li>
+                        <li><strong>A3CのC</strong>：Asynchronous + Actor-Critic + Advantage</li>
+                        <li><strong>DQNの工夫</strong>：Experience Replay と Target Network の意義</li>
+                        <li><strong>sim2real</strong>：シミュレーション→実世界への転移問題</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>深層強化学習は、2013年のDQNから始まり、AlphaGo、AlphaStar等でゲーム分野の人間超越を実現し、現在は自動運転、ロボティクス、RLHF等で実世界応用が拡大している革命的技術です。</p>
+                
+                <p>価値ベース（DQN系列）と方策ベース（A3C、PPO）の両アプローチ、分散学習による大規模化、連続制御への展開など、多様な技術発展を遂げています。特にRLHFはChatGPT等で社会的インパクトを与えています。</p>
+                
+                <p>G検定では、DQNの基本技術、主要な改良手法、ゲームAIでの成果、実世界での応用例について出題される可能性が高く、強化学習の基本概念から最新動向まで体系的な理解が重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">DQN（Deep Q-Network）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深層強化学習の出発点。Q学習に深層ニューラルネットワークを適用。Experience Replay、Target Network を導入。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Double DQN</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">行動選択と価値評価を分離してQ値の過推定バイアスを解決するDQNの改良手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Dueling Network</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Q値を状態価値V(s)と優位性A(s,a)に分離するネットワーク構造。状態価値の安定学習が可能。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">A3C（Asynchronous Actor-Critic）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">非同期・方策価値同時学習・アドバンテージ使用の3つのCを特徴とする分散強化学習手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">PPO（Proximal Policy Optimization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">方策比率をクリッピングして安定した方策更新を実現するOpenAI開発の手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">AlphaStar</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">StarCraft IIで人間を超えたDeepMindのRTSゲームAI。Multi-Agent学習と長期戦略が特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">OpenAI Five</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Dota 2で世界チャンピオンを破ったOpenAIの5対5チーム戦AI。協調戦略学習を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Rainbow</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">6つのDQN改良技術を統合した手法。各改良の相乗効果で大幅性能向上を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">APE-X</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">分散優先経験再生。数百のアクターが並列データ収集し、学習効率を大幅向上。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Agent57</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">全Atariゲームで初めて人間を超えたDeepMindのエージェント。メタ学習による探索制御。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">RLHF（Reinforcement Learning from Human Feedback）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">人間フィードバック強化学習。ChatGPT等で使用される人間価値観への整合技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">オフライン強化学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">既存データのみから学習する手法。環境との相互作用が困難・危険な場合に有効。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">連続値制御</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">連続行動空間での制御問題。ロボティクス、自動運転等で重要。DDPG、SAC等が代表手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">sim2real</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">シミュレーションで学習したモデルを実世界に転移する問題。ドメインランダマイゼーション等で解決。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">マルチエージェント強化学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数エージェントが相互作用する環境での学習。協調・競争戦略の創発が課題。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">報酬成形（Reward Shaping）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習効率向上のため報酬関数を設計・調整する技術。過度な成形は意図しない行動を誘発。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">状態表現学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">高次元観測から有効な状態表現を学習する技術。画像・センサーデータからの特徴抽出。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-3
+                        </a>
+                        <a href="study6-5.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-5
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

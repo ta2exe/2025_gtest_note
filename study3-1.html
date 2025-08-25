@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3-1: 教師あり学習 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-magenta">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 3-1: 教師あり学習</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 3-1</h1>
+                <h2 class="content-subtitle">教師あり学習</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">機械学習の概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">📋 学習目標</h3>
+                    <p>機械学習の概要について理解し、教師あり学習の基本的な考え方と主要な手法について説明できる。</p>
+                    
+                    <h3 style="color: #ff00ff; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>教師あり学習</strong></li>
+                        <li><strong>分類</strong></li>
+                        <li><strong>回帰</strong></li>
+                        <li><strong>訓練データ</strong></li>
+                        <li><strong>線形回帰</strong></li>
+                        <li><strong>ロジスティック回帰</strong></li>
+                        <li><strong>決定木</strong></li>
+                        <li><strong>過学習</strong></li>
+                        <li><strong>汎化</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">教師あり学習とは何か</h1>
+                
+                <p>教師あり学習（Supervised Learning）は、機械学習の最も基本的で重要な手法の一つです。人間が先生となって「正解」を教えながら、コンピュータに予測や分類の方法を学習させる手法です。</p>
+
+                <p>この手法が画期的だった理由を理解するために、少し歴史を振り返ってみましょう。従来のプログラミングでは、プログラマーがすべての処理手順を詳細に指定する必要がありました。例えば「メールがスパムかどうかを判定する」プログラムを作る場合、「特定のキーワードが含まれていたらスパム」「送信者のドメインが怪しければスパム」など、すべてのルールを人間が考えて書く必要がありました。</p>
+
+                <p>しかし、教師あり学習では発想が逆転します。大量のメールデータとその正解ラベル（スパム/非スパム）をコンピュータに与えることで、コンピュータが自動的にスパム判定のルールを見つけ出すのです。これは、人間の経験に基づく学習プロセスを機械で再現したものと考えることができます。</p>
+
+                <h1 id="basic-concept">基本的な考え方</h1>
+
+                <h2 id="supervised-paradigm">教師あり学習のパラダイム</h2>
+                
+                <p>教師あり学習の基本的な流れは、以下のようになります：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">📚 学習プロセス</h3>
+                    <ol>
+                        <li><strong>データ準備</strong>: 入力データ（特徴量）と正解ラベルのペアを大量に用意</li>
+                        <li><strong>学習</strong>: アルゴリズムが入力と正解の関係性を分析</li>
+                        <li><strong>モデル構築</strong>: 見つけた関係性を数式やルールとして表現</li>
+                        <li><strong>予測</strong>: 新しい入力データに対して予測を実行</li>
+                    </ol>
+                </div>
+
+                <p>この過程は、人間の学習に非常に似ています。子どもが動物を覚える過程を考えてみてください。親が「これは犬だよ」「これは猫だよ」と教える（訓練データ）ことで、子どもは犬と猫の特徴を覚え（学習）、新しい動物を見たときに正しく分類できるようになる（予測）のです。</p>
+
+                <h2 id="key-elements">重要な構成要素</h2>
+
+                <h3 id="training-data">訓練データ（Training Data）</h3>
+                <p>教師あり学習の成否を決める最も重要な要素が訓練データです。訓練データは以下の要素で構成されます：</p>
+
+                <ul>
+                    <li><strong>入力（特徴量、Feature）</strong>：予測の根拠となるデータ。メール分類なら「件名」「本文」「送信者」など</li>
+                    <li><strong>出力（ラベル、Target）</strong>：予測したい正解データ。メール分類なら「スパム」「非スパム」</li>
+                </ul>
+
+                <p>訓練データの質と量が学習結果を大きく左右するため、「機械学習プロジェクトの8割はデータ整備」と言われることもあります。</p>
+
+                <h3 id="algorithms">アルゴリズム</h3>
+                <p>データから関係性を見つけ出す手法のことです。代表的なものには線形回帰、決定木、サポートベクターマシン、ランダムフォレスト、ニューラルネットワークなどがあります。それぞれに特徴があり、問題に応じて最適な手法を選択する必要があります。</p>
+
+                <h1 id="types">教師あり学習の種類</h1>
+
+                <p>教師あり学習は、予測したい対象によって大きく2つの種類に分けられます。</p>
+
+                <h2 id="classification">分類（Classification）</h2>
+
+                <p>分類は、データをいくつかのカテゴリー（クラス）に分ける問題です。出力が離散的な値（カテゴリーラベル）になるのが特徴です。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 分類の具体例</h3>
+                    <ul>
+                        <li><strong>スパムメール検出</strong>：メールを「スパム」「正常」に分類</li>
+                        <li><strong>画像認識</strong>：写真を「犬」「猫」「鳥」などに分類</li>
+                        <li><strong>医療診断</strong>：症状から「健康」「病気」を判定</li>
+                        <li><strong>感情分析</strong>：テキストを「ポジティブ」「ネガティブ」「中性」に分類</li>
+                        <li><strong>音声認識</strong>：音声を特定の単語やフレーズに分類</li>
+                    </ul>
+                </div>
+
+                <p>分類問題は、クラス数によってさらに細分化されます：</p>
+                <ul>
+                    <li><strong>二値分類（Binary Classification）</strong>：2つのクラス（スパム/非スパムなど）</li>
+                    <li><strong>多値分類（Multi-class Classification）</strong>：3つ以上のクラス（動物の種類分類など）</li>
+                </ul>
+
+                <h2 id="regression">回帰（Regression）</h2>
+
+                <p>回帰は、連続的な数値を予測する問題です。出力が実数値になるのが特徴です。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">📈 回帰の具体例</h3>
+                    <ul>
+                        <li><strong>不動産価格予測</strong>：立地や間取りから家の価格を予測</li>
+                        <li><strong>売上予測</strong>：過去のデータから将来の売上を予測</li>
+                        <li><strong>気温予測</strong>：気象データから翌日の気温を予測</li>
+                        <li><strong>株価予測</strong>：市場データから株価の変動を予測</li>
+                        <li><strong>需要予測</strong>：過去の購買パターンから商品需要を予測</li>
+                    </ul>
+                </div>
+
+                <h1 id="key-algorithms">主要アルゴリズム詳解</h1>
+
+                <h2 id="linear-regression">線形回帰（Linear Regression）</h2>
+
+                <p>線形回帰は、回帰問題の最も基本的なアルゴリズムです。データの関係性を一次関数（直線）で表現しようとします。</p>
+
+                <p>例えば、家の面積（x）から価格（y）を予測する場合、以下のような式で表現されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$y = ax + b$$
+                </div>
+
+                <p>ここで、aは傾き（面積1平方メートル当たりの価格）、bは切片（基本価格）を表します。線形回帰の学習では、訓練データに最もよく適合する直線の傾きと切片を見つけ出します。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">💡 線形回帰の特徴</h3>
+                    <ul>
+                        <li><strong>解釈しやすい</strong>：結果が直線なので、どの要因がどの程度影響するかが明確</li>
+                        <li><strong>高速</strong>：計算が単純で、大量データでも短時間で処理可能</li>
+                        <li><strong>限界</strong>：複雑な関係は表現できない（直線では表現できない曲線関係など）</li>
+                    </ul>
+                </div>
+
+                <h2 id="logistic-regression">ロジスティック回帰（Logistic Regression）</h2>
+
+                <p>ロジスティック回帰は分類問題、特に二値分類に使われるアルゴリズムです。線形回帰と名前が似ていますが、こちらは分類のための手法です。</p>
+
+                <p>線形回帰との違いは、出力を確率に変換する点です。シグモイド関数という特殊な関数を使って、任意の実数値を0から1の間の確率値に変換します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(y=1|x) = \frac{1}{1 + e^{-(ax + b)}}$$
+                </div>
+
+                <p>この式により、入力xに対して「クラス1に属する確率」を計算できます。通常、確率が0.5以上ならクラス1、未満ならクラス0に分類します。</p>
+
+                <h2 id="decision-tree">決定木（Decision Tree）</h2>
+
+                <p>決定木は、人間の思考プロセスに近い形で分類や回帰を行うアルゴリズムです。一連のYes/No質問を通じて、最終的な予測に到達します。</p>
+
+                <p>例えば、テニスをするかどうかを決める決定木を考えてみましょう：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <pre style="color: #ffffff; margin: 0;">
+天気は晴れ？
+├─ Yes: 湿度は高い？
+│   ├─ Yes: やらない
+│   └─ No: やる
+└─ No: 風は強い？
+    ├─ Yes: やらない
+    └─ No: やる
+                    </pre>
+                </div>
+
+                <p>決定木の最大の利点は<strong>解釈しやすさ</strong>です。予測結果の理由を明確に説明できるため、医療診断や金融審査など、説明責任が重要な分野でよく使われます。</p>
+
+                <h2 id="svm">サポートベクターマシン（SVM）</h2>
+
+                <p>SVMは、データを異なるクラスに分ける「境界線」を見つけるアルゴリズムです。特徴的なのは、最も判断が困難な境界付近のデータ（サポートベクター）に注目して境界線を決定する点です。</p>
+
+                <p>2次元平面上のデータ分類を例に考えてみましょう。赤い点と青い点を分ける直線を引く場合、SVMは「どちらのクラスからも最も遠い直線」を選択します。これにより、新しいデータが来た時の分類精度を向上させようとします。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 SVMの強み</h3>
+                    <ul>
+                        <li><strong>高次元データに強い</strong>：特徴量が多い問題でも性能が落ちにくい</li>
+                        <li><strong>過学習しにくい</strong>：境界付近のデータのみに注目するため、ノイズに惑わされにくい</li>
+                        <li><strong>カーネル関数</strong>：非線形な境界も表現可能</li>
+                    </ul>
+                </div>
+
+                <h1 id="evaluation">性能評価</h1>
+
+                <p>機械学習モデルを作った後、その性能を適切に評価することが重要です。評価指標は問題の種類によって異なります。</p>
+
+                <h2 id="classification-metrics">分類問題の評価指標</h2>
+
+                <h3 id="accuracy">正解率（Accuracy）</h3>
+                <p>最も直感的な指標で、全体の予測のうち正解した割合を表します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Accuracy} = \frac{\text{正解数}}{\text{全予測数}}$$
+                </div>
+
+                <h3 id="precision-recall">適合率と再現率</h3>
+                <p>特に重要なクラスの予測精度を詳細に評価する指標です：</p>
+
+                <ul>
+                    <li><strong>適合率（Precision）</strong>：「ポジティブ」と予測したもののうち、実際にポジティブだった割合</li>
+                    <li><strong>再現率（Recall）</strong>：実際のポジティブのうち、正しく「ポジティブ」と予測できた割合</li>
+                </ul>
+
+                <p>医療診断を例に考えると、適合率は「がんと診断した患者のうち本当にがんだった割合」、再現率は「がん患者のうち正しくがんと診断できた割合」になります。</p>
+
+                <h2 id="regression-metrics">回帰問題の評価指標</h2>
+
+                <h3 id="mse">平均二乗誤差（MSE）</h3>
+                <p>予測値と実際値の差の二乗の平均を計算します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y_i})^2$$
+                </div>
+
+                <p>ここで、$y_i$は実際値、$\hat{y_i}$は予測値、nはデータ数です。MSEが小さいほど予測精度が高いことを意味します。</p>
+
+                <h1 id="challenges">教師あり学習の課題</h1>
+
+                <h2 id="overfitting">過学習（Overfitting）</h2>
+
+                <p>過学習は教師あり学習における最大の落とし穴の一つです。訓練データに過度に適合してしまい、新しいデータに対する予測性能が悪化する現象です。</p>
+
+                <p>これは学校のテスト勉強に例えることができます。過去問だけを丸暗記した学生は、同じ問題なら完璧に解けますが、少し変更された問題には対応できません。機械学習でも同様で、訓練データの特徴を暗記してしまうと、新しいデータでは性能が落ちてしまいます。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">⚠️ 過学習の対策</h3>
+                    <ul>
+                        <li><strong>交差検証</strong>：データを分割して複数回評価</li>
+                        <li><strong>正則化</strong>：モデルの複雑さにペナルティを課す</li>
+                        <li><strong>早期停止</strong>：性能向上が止まったら学習を終了</li>
+                        <li><strong>データ拡張</strong>：訓練データを人工的に増加</li>
+                    </ul>
+                </div>
+
+                <h2 id="data-quality">データ品質の問題</h2>
+
+                <p>「ゴミを入れればゴミが出る（Garbage In, Garbage Out）」という格言通り、低品質なデータからは良いモデルは作れません。</p>
+
+                <p>よくある問題として以下があります：</p>
+                <ul>
+                    <li><strong>欠損データ</strong>：一部の情報が抜けている</li>
+                    <li><strong>ノイズ</strong>：間違った情報や外れ値が含まれている</li>
+                    <li><strong>偏った（バイアスのある）データ</strong>：特定の傾向に偏っている</li>
+                    <li><strong>ラベルの間違い</strong>：正解ラベルが間違っている</li>
+                </ul>
+
+                <h1 id="practical-applications">実用的な応用例</h1>
+
+                <h2 id="recommendation-systems">推薦システム</h2>
+
+                <p>Amazonの商品推薦やNetflixの映画推薦は、教師あり学習の代表的な応用例です。ユーザーの過去の購買履歴や評価履歴を訓練データとして、そのユーザーが好みそうな新しい商品を予測します。</p>
+
+                <h2 id="fraud-detection">不正検出</h2>
+
+                <p>クレジットカードの不正利用検出も重要な応用分野です。過去の取引データと不正/正常のラベルから学習し、新しい取引が不正かどうかをリアルタイムで判定します。</p>
+
+                <h2 id="autonomous-vehicles">自動運転</h2>
+
+                <p>自動運転車では、カメラ画像から歩行者、車両、標識などを識別する画像分類技術が不可欠です。大量の道路画像とそれらに写っているオブジェクトのラベルから学習したモデルが活用されています。</p>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>分類と回帰の違い</strong>：出力の種類（離散/連続）で区別</li>
+                        <li><strong>過学習の概念</strong>：訓練データに特化しすぎる問題</li>
+                        <li><strong>評価指標の使い分け</strong>：問題に応じた適切な指標選択</li>
+                        <li><strong>交差検証</strong>：汎化性能を適切に評価する手法</li>
+                        <li><strong>バイアス・バリアンス</strong>：モデルの性能を理解する重要概念</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>回帰を分類と混同</strong>：出力の種類を正確に区別する</li>
+                        <li><strong>正解率だけで評価</strong>：クラス不均衡時は適合率・再現率も重要</li>
+                        <li><strong>訓練データでのみ評価</strong>：必ずテストデータで最終評価</li>
+                        <li><strong>過学習を無視</strong>：複雑なモデルほど過学習しやすい</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>教師あり学習は、正解ラベル付きのデータから規則性を学習し、新しいデータに対して予測を行う機械学習の基本手法です。分類と回帰の2つの主要なタイプがあり、それぞれに適した算法と評価指標があります。</p>
+
+                <p>成功の鍵は<strong>良質な訓練データの準備</strong>と<strong>適切な性能評価</strong>です。過学習などの落とし穴に注意しながら、問題に最適なアルゴリズムを選択することが重要です。</p>
+
+                <p>現代のAIブームの基盤となる技術であり、推薦システム、画像認識、自然言語処理など幅広い分野で活用されている実用性の高い手法です。G検定でも中核的な内容として頻出するため、概念の理解と具体例での応用を確実に押さえましょう。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">教師あり学習（Supervised Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">正解ラベル付きの訓練データから規則性を学習し、新しいデータに対して予測を行う機械学習手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">訓練データ（Training Data）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">機械学習モデルの学習に使用する、入力と正解ラベルのペアからなるデータセット。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">分類（Classification）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データを離散的なカテゴリーに分類する問題。スパムメール検出や画像認識など。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">回帰（Regression）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">連続的な数値を予測する問題。価格予測や売上予測など。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">特徴量（Feature）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">予測の根拠となる入力データの各要素。機械学習モデルが判断に使用する情報。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">ラベル（Label/Target）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">予測したい正解データ。教師あり学習の「教師」となる情報。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">過学習（Overfitting）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">訓練データに過度に適合し、新しいデータに対する汎化性能が低下する問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">汎化（Generalization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習したモデルが、訓練データ以外の新しいデータに対しても良い性能を示す能力。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">交差検証（Cross Validation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データを複数回に分けて訓練・検証を繰り返し、モデルの汎化性能を評価する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">線形回帰（Linear Regression）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データの関係性を直線で表現する回帰アルゴリズム。解釈しやすく計算が高速。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">ロジスティック回帰（Logistic Regression）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">シグモイド関数を用いて確率を予測する二値分類アルゴリズム。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">決定木（Decision Tree）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">一連のYes/No質問により分類や回帰を行う、解釈しやすいアルゴリズム。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">正解率（Accuracy）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">全予測のうち正解した割合。最も基本的な分類性能指標。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">適合率（Precision）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">「ポジティブ」と予測したもののうち実際にポジティブだった割合。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">再現率（Recall）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">実際のポジティブのうち正しく「ポジティブ」と予測できた割合。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study2-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ff00ff;"></i>
+                            Back: 2-4
+                        </a>
+
+                        <a href="study3-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 3-2
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ff00ff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

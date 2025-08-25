@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2-4: ディープラーニング - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-cyan">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 2-4: ディープラーニング</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 2-4</h1>
+                <p class="content-subtitle">ディープラーニング</p>
+            </div>
+
+            <div class="content">
+                <h1 id="learning-objectives">学習目標</h1>
+                <p>この章では以下の内容を学習します：</p>
+                <ul>
+                    <li><strong>ディープラーニングがどのように発展してきたのか、その歴史</strong>を説明できる</li>
+                    <li><strong>古典的な機械学習とディープラーニングの差異</strong>を説明できる</li>
+                    <li><strong>ディープラーニングの代表的な応用例</strong>について理解する</li>
+                </ul>
+
+                <h2 id="keywords">キーワード</h2>
+                <p><strong>ImageNet</strong>, <strong>ILSVRC</strong>, <strong>LeNet</strong>, <strong>アルファ碁 (AlphaGo)</strong>, <strong>人間の神経回路</strong>, <strong>ネオコグニトロン</strong>, <strong>LLM (大規模言語モデル)</strong></p>
+
+                <h1 id="deep-learning-history">ディープラーニングの歴史</h1>
+                <p><strong>ディープラーニング（Deep Learning）</strong>は、多層ニューラルネットワークを用いた機械学習手法です。</p>
+
+                <h2 id="neural-network-origins">ニューラルネットワークの起源</h2>
+
+                <h3 id="human-neural-circuits">人間の神経回路</h3>
+                <p><strong>人間の神経回路</strong>がニューラルネットワークのインスピレーション源です：</p>
+                <ul>
+                    <li><strong>ニューロン</strong>: 神経細胞、情報処理の基本単位</li>
+                    <li><strong>シナプス</strong>: ニューロン間の接続、重みに相当</li>
+                    <li><strong>活動電位</strong>: 神経信号、活性化関数に対応</li>
+                    <li><strong>可塑性</strong>: シナプス強度の変化、学習機構</li>
+                </ul>
+
+                <h3 id="perceptron-history">パーセプトロンの歴史</h3>
+                <ul>
+                    <li><strong>1943年</strong>: マカロー・ピッツモデル（形式ニューロン）</li>
+                    <li><strong>1957年</strong>: ローゼンブラットのパーセプトロン</li>
+                    <li><strong>1969年</strong>: ミンスキー・パパートの批判（XOR問題）</li>
+                    <li><strong>1980年代</strong>: 多層パーセプトロン・誤差逆伝播法</li>
+                </ul>
+
+                <h2 id="first-winter">第1次AIの冬（1970年代〜1980年代）</h2>
+                <ul>
+                    <li><strong>XOR問題</strong>: 単層パーセプトロンの限界露呈</li>
+                    <li><strong>計算能力不足</strong>: 多層ネットワークの学習困難</li>
+                    <li><strong>研究資金削減</strong>: AI研究への期待値低下</li>
+                    <li><strong>他手法の台頭</strong>: エキスパートシステムへの移行</li>
+                </ul>
+
+                <h2 id="neural-network-revival">ニューラルネットワークの復活（1980年代〜1990年代）</h2>
+
+                <h3 id="backpropagation">誤差逆伝播法の発展</h3>
+                <ul>
+                    <li><strong>1986年</strong>: ラメルハート等による誤差逆伝播法</li>
+                    <li><strong>多層学習</strong>: 隠れ層を持つネットワークの学習</li>
+                    <li><strong>連鎖律</strong>: 合成関数の微分による勾配計算</li>
+                    <li><strong>XOR解決</strong>: 非線形分離問題の解決</li>
+                </ul>
+
+                <h3 id="lenet">LeNet</h3>
+                <p><strong>LeNet</strong>は、ヤン・ルカンが開発した初期の畳み込みニューラルネットワークです（1989年）。</p>
+
+                <h4 id="lenet-architecture">LeNet-5アーキテクチャ</h4>
+                <ul>
+                    <li><strong>入力層</strong>: 32×32のグレースケール画像</li>
+                    <li><strong>畳み込み層</strong>: 6個の5×5フィルター</li>
+                    <li><strong>プーリング層</strong>: 2×2の平均プーリング</li>
+                    <li><strong>全結合層</strong>: 84ニューロン</li>
+                    <li><strong>出力層</strong>: 10クラス（数字0-9）</li>
+                </ul>
+
+                <h4 id="lenet-application">実用化</h4>
+                <ul>
+                    <li><strong>郵便番号認識</strong>: アメリカの郵政公社で実用化</li>
+                    <li><strong>ATM</strong>: 銀行の小切手処理システム</li>
+                    <li><strong>手書き数字</strong>: 94%の認識精度を達成</li>
+                </ul>
+
+                <h3 id="neocognitron">ネオコグニトロン</h3>
+                <p><strong>ネオコグニトロン</strong>は、福島邦彦が開発した階層的パターン認識モデル（1980年）。</p>
+
+                <h4 id="neocognitron-features">特徴</h4>
+                <ul>
+                    <li><strong>階層構造</strong>: S細胞（特徴抽出）とC細胞（位置不変性）</li>
+                    <li><strong>位置不変性</strong>: 平行移動に対する頑健性</li>
+                    <li><strong>自己組織化</strong>: 教師なし学習による特徴獲得</li>
+                    <li><strong>生物学的妥当性</strong>: 視覚野の階層構造を模倣</li>
+                </ul>
+
+                <h4 id="neocognitron-influence">影響</h4>
+                <ul>
+                    <li><strong>CNNの原型</strong>: 現代の畳み込みネットワークの基礎</li>
+                    <li><strong>コンピュータビジョン</strong>: 画像認識研究への貢献</li>
+                    <li><strong>日本発の成果</strong>: 国際的に高く評価</li>
+                </ul>
+
+                <h2 id="second-winter">第2次AIの冬（1990年代〜2000年代）</h2>
+                <ul>
+                    <li><strong>勾配消失問題</strong>: 深い層での学習困難</li>
+                    <li><strong>SVM等の台頭</strong>: カーネル法による高性能</li>
+                    <li><strong>計算資源不足</strong>: 大規模ネットワーク学習の困難</li>
+                    <li><strong>過学習問題</strong>: 汎化性能の低下</li>
+                </ul>
+
+                <h2 id="deep-learning-breakthrough">ディープラーニングのブレイクスルー（2006年〜）</h2>
+
+                <h3 id="hinton-breakthrough">ヒントンのブレイクスルー（2006年）</h3>
+                <ul>
+                    <li><strong>事前学習</strong>: 層ごとの教師なし学習</li>
+                    <li><strong>制限ボルツマンマシン</strong>: 確率的生成モデル</li>
+                    <li><strong>深い層の学習</strong>: 勾配消失問題の回避</li>
+                    <li><strong>「Deep Learning」命名</strong>: 用語の普及</li>
+                </ul>
+
+                <h3 id="technical-advances">技術的進歩</h3>
+                <ul>
+                    <li><strong>ReLU活性化関数</strong>: 勾配消失問題の軽減</li>
+                    <li><strong>Dropout</strong>: 過学習の抑制</li>
+                    <li><strong>GPU活用</strong>: 並列計算による高速化</li>
+                    <li><strong>大量データ</strong>: インターネットによるデータ増大</li>
+                </ul>
+
+                <h1 id="imagenet-revolution">ImageNet革命</h1>
+
+                <h2 id="imagenet-dataset">ImageNetデータセット</h2>
+                <p><strong>ImageNet</strong>は、フェイフェイ・リー（李飛飛）が構築した大規模画像データベースです（2009年）。</p>
+
+                <h3 id="imagenet-scale">規模</h3>
+                <ul>
+                    <li><strong>画像数</strong>: 1400万枚以上</li>
+                    <li><strong>カテゴリ数</strong>: 22000個以上</li>
+                    <li><strong>階層構造</strong>: WordNetに基づく概念階層</li>
+                    <li><strong>人手アノテーション</strong>: Amazon Mechanical Turkによるラベル付け</li>
+                </ul>
+
+                <h2 id="ilsvrc">ILSVRC（ImageNet Large Scale Visual Recognition Challenge）</h2>
+                <p><strong>ILSVRC</strong>は、ImageNetを用いた国際的画像認識コンペティション（2010年〜2017年）。</p>
+
+                <h3 id="ilsvrc-tasks">主要タスク</h3>
+                <ul>
+                    <li><strong>画像分類</strong>: 1000クラスの物体分類</li>
+                    <li><strong>物体検出</strong>: 物体の位置特定と分類</li>
+                    <li><strong>物体局在</strong>: 物体の大まかな位置推定</li>
+                </ul>
+
+                <h3 id="ilsvrc-milestones">歴史的成果</h3>
+                <ul>
+                    <li><strong>2010年</strong>: トップ5エラー率28%（従来手法）</li>
+                    <li><strong>2012年</strong>: AlexNet 15.3%（CNNの復活）</li>
+                    <li><strong>2014年</strong>: VGGNet 7.3%、GoogLeNet 6.7%</li>
+                    <li><strong>2015年</strong>: ResNet 3.6%（人間超え）</li>
+                    <li><strong>2017年</strong>: コンペティション終了</li>
+                </ul>
+
+                <h2 id="alexnet-impact">AlexNetのインパクト</h2>
+                <ul>
+                    <li><strong>圧倒的勝利</strong>: 2位を10%上回る性能向上</li>
+                    <li><strong>CNN復活</strong>: 畳み込みニューラルネットワークの再評価</li>
+                    <li><strong>GPU活用</strong>: 並列計算の重要性実証</li>
+                    <li><strong>ディープラーニングブーム</strong>: AI第3次ブームの起点</li>
+                </ul>
+
+                <h1 id="classical-vs-deep">古典的機械学習 vs ディープラーニング</h1>
+
+                <h2 id="feature-engineering">特徴量エンジニアリング</h2>
+
+                <h3 id="classical-ml-features">古典的機械学習</h3>
+                <ul>
+                    <li><strong>手動設計</strong>: 人間が特徴量を設計</li>
+                    <li><strong>ドメイン知識</strong>: 専門知識が必要</li>
+                    <li><strong>前処理重要</strong>: 特徴抽出がボトルネック</li>
+                    <li><strong>例</strong>: SIFT、HOG、LBP等の画像特徴量</li>
+                </ul>
+
+                <h3 id="deep-learning-features">ディープラーニング</h3>
+                <ul>
+                    <li><strong>自動抽出</strong>: データから特徴を自動学習</li>
+                    <li><strong>階層的表現</strong>: 低次元→高次元特徴の組み合わせ</li>
+                    <li><strong>エンドツーエンド</strong>: 特徴抽出〜分類を統合学習</li>
+                    <li><strong>表現学習</strong>: データに適した表現の獲得</li>
+                </ul>
+
+                <h2 id="data-requirements">データ要求量</h2>
+
+                <h3 id="classical-ml-data">古典的機械学習</h3>
+                <ul>
+                    <li><strong>少量データ</strong>: 数百〜数千サンプル</li>
+                    <li><strong>効率的学習</strong>: 少ないデータで良い性能</li>
+                    <li><strong>統計的手法</strong>: 理論的保証あり</li>
+                </ul>
+
+                <h3 id="deep-learning-data">ディープラーニング</h3>
+                <ul>
+                    <li><strong>大量データ</strong>: 数万〜数百万サンプル</li>
+                    <li><strong>データ駆動</strong>: 性能がデータ量に依存</li>
+                    <li><strong>汎化の実現</strong>: 大量データによる過学習回避</li>
+                </ul>
+
+                <h2 id="computational-requirements">計算要求</h2>
+
+                <h3 id="classical-ml-computation">古典的機械学習</h3>
+                <ul>
+                    <li><strong>軽量</strong>: CPU単体で十分</li>
+                    <li><strong>高速学習</strong>: 数分〜数時間</li>
+                    <li><strong>リアルタイム推論</strong>: 低遅延</li>
+                </ul>
+
+                <h3 id="deep-learning-computation">ディープラーニング</h3>
+                <ul>
+                    <li><strong>計算集約</strong>: GPU・TPU等の専用ハードウェア</li>
+                    <li><strong>長時間学習</strong>: 数時間〜数週間</li>
+                    <li><strong>推論コスト</strong>: エッジデバイスで課題</li>
+                </ul>
+
+                <h1 id="deep-learning-applications">ディープラーニングの代表的応用</h1>
+
+                <h2 id="alphago">アルファ碁 (AlphaGo)</h2>
+                <p><strong>アルファ碁</strong>は、DeepMindが開発した囲碁AI（2016年）。</p>
+
+                <h3 id="alphago-achievements">主な成果</h3>
+                <ul>
+                    <li><strong>2016年3月</strong>: イ・セドル九段に4勝1敗</li>
+                    <li><strong>歴史的意義</strong>: 人間が最後に優位を保っていた複雑ゲームで勝利</li>
+                    <li><strong>社会的影響</strong>: AIの可能性を世界に示す</li>
+                </ul>
+
+                <h3 id="alphago-technology">技術構成</h3>
+                <ul>
+                    <li><strong>方策ネットワーク</strong>: 打ち手候補の確率予測</li>
+                    <li><strong>価値ネットワーク</strong>: 局面の勝率予測</li>
+                    <li><strong>モンテカルロ木探索</strong>: 伝統的探索とDLの融合</li>
+                    <li><strong>強化学習</strong>: 自己対戦による性能向上</li>
+                </ul>
+
+                <h3 id="alphago-evolution">発展系</h3>
+                <ul>
+                    <li><strong>AlphaGo Zero</strong>: 人間の棋譜なしで学習</li>
+                    <li><strong>AlphaZero</strong>: 囲碁・将棋・チェスの汎用AI</li>
+                    <li><strong>MuZero</strong>: ルール不明でも学習可能</li>
+                </ul>
+
+                <h2 id="llm">LLM（大規模言語モデル）</h2>
+                <p><strong>LLM（Large Language Model）</strong>は、大量のテキストデータで学習された言語モデルです。</p>
+
+                <h3 id="llm-timeline">発展の歴史</h3>
+                <ul>
+                    <li><strong>2017年</strong>: Transformer（Attention is All You Need）</li>
+                    <li><strong>2018年</strong>: BERT（双方向エンコーダー）</li>
+                    <li><strong>2019年</strong>: GPT-2（17億パラメータ）</li>
+                    <li><strong>2020年</strong>: GPT-3（1750億パラメータ）</li>
+                    <li><strong>2022年</strong>: ChatGPT（対話型AI）</li>
+                    <li><strong>2023年</strong>: GPT-4（マルチモーダル）</li>
+                </ul>
+
+                <h3 id="llm-capabilities">能力</h3>
+                <ul>
+                    <li><strong>文章生成</strong>: 自然で流暢なテキスト生成</li>
+                    <li><strong>質問応答</strong>: 複雑な質問への回答</li>
+                    <li><strong>要約・翻訳</strong>: 高品質な言語処理</li>
+                    <li><strong>プログラミング</strong>: コード生成・デバッグ</li>
+                    <li><strong>推論</strong>: 論理的思考の模倣</li>
+                </ul>
+
+                <h3 id="llm-scaling">スケーリング法則</h3>
+                <p>パラメータ数・データ量・計算量の増加で性能向上：</p>
+                $$\text{性能} \propto (\text{パラメータ数})^\alpha \times (\text{データ量})^\beta$$
+
+                <h2 id="computer-vision">コンピュータビジョン</h2>
+                <ul>
+                    <li><strong>画像分類</strong>: ImageNet等での超人的性能</li>
+                    <li><strong>物体検出</strong>: YOLO、R-CNN系の高精度検出</li>
+                    <li><strong>セマンティックセグメンテーション</strong>: 画素レベル分類</li>
+                    <li><strong>生成AI</strong>: GAN、Diffusion Modelによる画像生成</li>
+                </ul>
+
+                <h2 id="other-applications">その他の応用分野</h2>
+                <ul>
+                    <li><strong>音声認識</strong>: Whisper等の高精度システム</li>
+                    <li><strong>機械翻訳</strong>: Transformer系の高品質翻訳</li>
+                    <li><strong>創薬</strong>: タンパク質構造予測（AlphaFold）</li>
+                    <li><strong>自動運転</strong>: エンドツーエンド学習</li>
+                    <li><strong>ロボティクス</strong>: 感覚運動統合学習</li>
+                </ul>
+
+                <h1 id="key-points">試験対策キーポイント</h1>
+                
+                <h2 id="exam-essentials">必須暗記ポイント</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📈 歴史的発展</h3>
+                    <ul>
+                        <li><strong>LeNet</strong>: 初期CNN、手書き数字認識</li>
+                        <li><strong>ネオコグニトロン</strong>: 福島邦彦、階層的パターン認識</li>
+                        <li><strong>2006年ブレイクスルー</strong>: ヒントンの事前学習</li>
+                        <li><strong>AlexNet（2012年）</strong>: ImageNet優勝、CNNブーム</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🆚 古典的ML vs DL</h3>
+                    <ul>
+                        <li><strong>特徴量</strong>: 手動設計 vs 自動抽出</li>
+                        <li><strong>データ量</strong>: 少量 vs 大量必要</li>
+                        <li><strong>計算量</strong>: 軽量 vs 集約的</li>
+                        <li><strong>汎化性能</strong>: 理論保証 vs 経験的</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🎯 代表的応用</h3>
+                    <ul>
+                        <li><strong>AlphaGo</strong>: 2016年イ・セドル九段に勝利</li>
+                        <li><strong>ImageNet/ILSVRC</strong>: 2015年ResNetが人間超え</li>
+                        <li><strong>LLM</strong>: GPT系、ChatGPTが社会現象</li>
+                        <li><strong>コンピュータビジョン</strong>: 分類・検出・生成で成功</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>ネオコグニトロン</strong>の開発者を間違える（福島邦彦）</li>
+                        <li><strong>AlphaGo勝利年</strong>を2015年と誤記（正：2016年）</li>
+                        <li><strong>ImageNet優勝</strong>をGoogLeNetと誤解（AlexNet）</li>
+                        <li><strong>特徴量設計</strong>の自動化意義を軽視</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+                <ul>
+                    <li><strong>ディープラーニング</strong>は多層ニューラルネットワークによる学習手法</li>
+                    <li><strong>歴史的発展</strong>：ネオコグニトロン→LeNet→冬の時代→2006年復活→AlexNet革命</li>
+                    <li><strong>古典的機械学習との差異</strong>：特徴量自動抽出・大量データ・計算集約</li>
+                    <li><strong>代表的応用</strong>：AlphaGo・LLM・コンピュータビジョンで劇的成功</li>
+                    <li><strong>ImageNet/ILSVRC</strong>がコンピュータビジョン発展の重要な役割</li>
+                </ul>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ImageNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">李飛飛構築の大規模画像データベース（2009年）。1400万枚、22000カテゴリ。ディープラーニング発展の基盤。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ILSVRC</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ImageNetを用いた国際画像認識コンペ（2010-2017年）。AlexNet、ResNet等の歴史的成果を輩出。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">LeNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ヤン・ルカン開発の初期CNN（1989年）。手書き数字認識で実用化。現代CNNの原型。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">アルファ碁 (AlphaGo)</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">DeepMind開発の囲碁AI。2016年イ・セドル九段に4勝1敗。AIの社会的認知度を劇的向上。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">人間の神経回路</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ニューラルネットワークの生物学的インスピレーション。ニューロン・シナプス・活動電位・可塑性が対応。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ネオコグニトロン</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">福島邦彦開発の階層的パターン認識モデル（1980年）。CNNの原型。S細胞・C細胞による階層構造。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">LLM (大規模言語モデル)</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">大量テキストで学習された言語モデル。GPT系が代表。ChatGPTで社会現象化。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">特徴量エンジニアリング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">古典的機械学習では手動設計、ディープラーニングでは自動抽出。DLの重要な利点。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">AlexNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2012年ILSVRC優勝CNN。2位を10%上回る圧勝でディープラーニングブームの起点。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study2-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #00ffff;"></i>
+                            Back: 2-3
+                        </a>
+
+                        <a href="study3-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 3-1
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #00ffff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

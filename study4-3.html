@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4-3: 誤差関数 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 4-3: 誤差関数</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 4-3</h1>
+                <h2 class="content-subtitle">誤差関数</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>誤差関数の基礎的な知識を理解する</li>
+                        <li>代表的な誤差関数を理解する</li>
+                        <li>適用するタスクに応じて、適切な誤差関数を選択できる</li>
+                    </ul>
+                    
+                    <h3 style="color: #ffff00; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Contrastive loss</strong></li>
+                        <li><strong>Triplet Loss</strong></li>
+                        <li><strong>カルバック・ライブラー情報量(KL)</strong></li>
+                        <li><strong>交差エントロピー</strong></li>
+                        <li><strong>平均二乗誤差</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">誤差関数とは何か</h1>
+                
+                <p>誤差関数（Error Function）、または損失関数（Loss Function）は、ニューラルネットワークの学習において最も重要な概念の一つです。これは「正解」と「予測」の間の差を数値化し、学習の方向性を決める羅針盤のような役割を果たします。</p>
+
+                <p>誤差関数の役割を料理のレシピに例えてみましょう。料理人（ニューラルネットワーク）が新しい料理を作るとき、完成品（予測）を理想の味（正解）と比較して、「塩味が足りない」「甘すぎる」といった差を判定します。この「理想との差」を数値化したものが誤差関数です。そして、この差を小さくするように調味料（重み）を調整していくのが学習プロセスなのです。</p>
+
+                <h1 id="fundamental-role">誤差関数の基本的役割</h1>
+
+                <h2 id="learning-objective">学習の目的設定</h2>
+
+                <p>ニューラルネットワークの学習は、誤差関数を<strong>最小化する</strong>プロセスです。誤差が0に近づくほど、予測が正解に近づいていることを意味します。つまり、誤差関数は学習の「成功の定義」を決める重要な要素です。</p>
+
+                <p>同じデータでも、誤差関数を変えれば全く異なる結果が得られます。これは、何を「良い予測」とするかの基準が変わるためです。例えば：</p>
+                <ul>
+                    <li><strong>分類問題</strong>：「正しいクラスを選ぶこと」が成功</li>
+                    <li><strong>回帰問題</strong>：「数値を正確に予測すること」が成功</li>
+                    <li><strong>生成問題</strong>：「現実的なデータを作ること」が成功</li>
+                </ul>
+
+                <h2 id="gradient-source">勾配の情報源</h2>
+
+                <p>誤差逆伝播法では、誤差関数の勾配（微分）を計算して各パラメータを更新します。誤差関数が微分可能でなければ学習は不可能になるため、数学的な性質も重要な考慮事項です。</p>
+
+                <h1 id="regression-loss">回帰問題の誤差関数</h1>
+
+                <h2 id="mse">平均二乗誤差（Mean Squared Error, MSE）</h2>
+
+                <p>平均二乗誤差は、回帰問題における最も基本的で重要な誤差関数です。予測値と実際値の差を二乗して平均したもので、直感的に理解しやすい指標です。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y_i})^2$$
+                </div>
+
+                <p>ここで、$y_i$は実際値、$\hat{y_i}$は予測値、$n$はサンプル数です。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📊 MSEの特徴</h3>
+                    <ul>
+                        <li><strong>外れ値に敏感</strong>：大きな誤差が二乗されるため、外れ値の影響が強い</li>
+                        <li><strong>微分可能</strong>：すべての点で滑らかな勾配を持つ</li>
+                        <li><strong>解釈しやすい</strong>：実際の単位の二乗で表現される</li>
+                        <li><strong>最小値が一意</strong>：凸関数なので大域最適解が保証</li>
+                    </ul>
+                </div>
+
+                <p>MSEは予測の「分散」を測定していると考えることもできます。すべての予測が完全に正確なら分散は0、予測がばらつくほど大きくなります。</p>
+
+                <h2 id="mae">平均絶対誤差（Mean Absolute Error, MAE）</h2>
+
+                <p>平均絶対誤差は、予測値と実際値の差の絶対値を平均したものです。MSEと比べて外れ値の影響を受けにくい特徴があります。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y_i}|$$
+                </div>
+
+                <p>MSEとMAEの使い分けは、問題の性質によって決まります：</p>
+                <ul>
+                    <li><strong>MSE</strong>：外れ値も重要な情報として扱いたい場合</li>
+                    <li><strong>MAE</strong>：外れ値をノイズとして扱いたい場合</li>
+                </ul>
+
+                <h1 id="classification-loss">分類問題の誤差関数</h1>
+
+                <h2 id="cross-entropy">交差エントロピー（Cross Entropy）</h2>
+
+                <p>交差エントロピーは、分類問題における標準的な誤差関数です。情報理論の概念に基づいており、予測の「不確実性」を測定します。</p>
+
+                <h3 id="binary-classification">二値分類の場合</h3>
+
+                <p>二値分類（0か1か）の場合の交差エントロピーは以下のように定義されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L = -\frac{1}{n}\sum_{i=1}^{n}[y_i \log(\hat{y_i}) + (1-y_i)\log(1-\hat{y_i})]$$
+                </div>
+
+                <p>この式の美しさは、正解ラベルに応じて自動的に適切な項が選ばれることです：</p>
+                <ul>
+                    <li><strong>$y_i = 1$の場合</strong>：$-\log(\hat{y_i})$のみが残り、予測確率が高いほど損失が小さい</li>
+                    <li><strong>$y_i = 0$の場合</strong>：$-\log(1-\hat{y_i})$のみが残り、予測確率が低いほど損失が小さい</li>
+                </ul>
+
+                <h3 id="multi-class">多クラス分類の場合</h3>
+
+                <p>多クラス分類では、ソフトマックス関数と組み合わせて使用します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L = -\frac{1}{n}\sum_{i=1}^{n}\sum_{c=1}^{C}y_{i,c} \log(\hat{y_{i,c}})$$
+                </div>
+
+                <p>ここで、$C$はクラス数、$y_{i,c}$は正解ラベル（one-hot形式）、$\hat{y_{i,c}}$は予測確率です。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 交差エントロピーの利点</h3>
+                    <ul>
+                        <li><strong>確率的解釈</strong>：予測を確率として扱える</li>
+                        <li><strong>勾配特性</strong>：間違いが大きいほど勾配が大きく、学習が効率的</li>
+                        <li><strong>理論的基盤</strong>：最尤推定と等価で統計的に正当</li>
+                        <li><strong>数値安定性</strong>：適切な実装で安定した計算が可能</li>
+                    </ul>
+                </div>
+
+                <h1 id="advanced-loss">高度な誤差関数</h1>
+
+                <h2 id="kl-divergence">カルバック・ライブラー情報量（KL Divergence）</h2>
+
+                <p>KLダイバージェンス（Kullback-Leibler Divergence）は、2つの確率分布の「違い」を測定する尺度です。機械学習では、予測分布と真の分布の違いを定量化するのに使われます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$D_{KL}(P||Q) = \sum_{i} P(i) \log\frac{P(i)}{Q(i)}$$
+                </div>
+
+                <p>ここで、$P$は真の分布、$Q$は予測分布です。KLダイバージェンスは以下の重要な性質を持ちます：</p>
+                <ul>
+                    <li><strong>非対称性</strong>：$D_{KL}(P||Q) \neq D_{KL}(Q||P)$</li>
+                    <li><strong>非負性</strong>：常に0以上の値を取る</li>
+                    <li><strong>同一性</strong>：$P = Q$のときのみ0になる</li>
+                </ul>
+
+                <p>実用的には、変分オートエンコーダ（VAE）の学習や、生成モデルの品質評価に使用されます。</p>
+
+                <h2 id="contrastive-loss">対比損失（Contrastive Loss）</h2>
+
+                <p>対比損失は、類似度学習（Similarity Learning）で使用される誤差関数です。2つのデータが同じクラスなら近づけ、異なるクラスなら遠ざけるように学習します。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L = \frac{1}{2}Y D^2 + \frac{1}{2}(1-Y)\max(0, m-D)^2$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$D$</strong>：2つの特徴ベクトル間のユークリッド距離</li>
+                    <li><strong>$Y$</strong>：同じクラスなら1、異なるクラスなら0</li>
+                    <li><strong>$m$</strong>：マージン（異なるクラス間の最小距離）</li>
+                </ul>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🔍 Contrastive Lossの応用</h3>
+                    <ul>
+                        <li><strong>顔認証</strong>：同一人物の顔は近く、他人の顔は遠く</li>
+                        <li><strong>画像検索</strong>：類似画像の特徴を近い位置に配置</li>
+                        <li><strong>自然言語処理</strong>：類似文章の意味表現を近づける</li>
+                        <li><strong>異常検知</strong>：正常データと異常データを分離</li>
+                    </ul>
+                </div>
+
+                <h2 id="triplet-loss">三重損失（Triplet Loss）</h2>
+
+                <p>Triplet Lossは、より洗練された類似度学習の手法です。アンカー（基準）、ポジティブ（同クラス）、ネガティブ（異クラス）の3つのサンプルを使って学習します。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L = \max(0, D(a,p) - D(a,n) + \alpha)$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$a$</strong>：アンカー（基準となるサンプル）</li>
+                    <li><strong>$p$</strong>：ポジティブ（アンカーと同じクラス）</li>
+                    <li><strong>$n$</strong>：ネガティブ（アンカーと異なるクラス）</li>
+                    <li><strong>$\alpha$</strong>：マージン</li>
+                </ul>
+
+                <p>この損失関数は「アンカーとポジティブの距離」が「アンカーとネガティブの距離」より少なくともα以上小さくなるように学習します。</p>
+
+                <p>GoogleのFaceNet（顔認証システム）で有名になった手法で、現在は多くの類似度学習タスクで標準的に使用されています。</p>
+
+                <h1 id="selection-criteria">誤差関数の選択基準</h1>
+
+                <h2 id="problem-type">問題タイプ別選択</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 タスク別推奨誤差関数</h3>
+                    <ul>
+                        <li><strong>回帰問題</strong>：MSE（基本）、MAE（外れ値耐性）、Huber Loss（両者の中間）</li>
+                        <li><strong>二値分類</strong>：交差エントロピー（Binary Cross Entropy）</li>
+                        <li><strong>多クラス分類</strong>：交差エントロピー + ソフトマックス</li>
+                        <li><strong>類似度学習</strong>：Contrastive Loss、Triplet Loss</li>
+                        <li><strong>生成モデル</strong>：KLダイバージェンス、Wasserstein距離</li>
+                    </ul>
+                </div>
+
+                <h2 id="data-characteristics">データの特性による選択</h2>
+
+                <p><strong>クラス不均衡</strong>：少数クラスが重要な場合、Focal LossやWeighted Cross Entropyを使用。</p>
+
+                <p><strong>外れ値の存在</strong>：外れ値が多い場合はMAEやHuber Loss、外れ値も重要ならMSE。</p>
+
+                <p><strong>計算リソース</strong>：リアルタイム処理が必要ならMSE、精度重視ならより複雑な損失関数。</p>
+
+                <h1 id="implementation-considerations">実装上の考慮事項</h1>
+
+                <h2 id="numerical-stability">数値安定性</h2>
+
+                <p>実装時には数値安定性に注意が必要です。例えば、交差エントロピーでは$\log(0)$の計算を避けるため、予測値に小さな値（例：1e-7）を加算することがあります。</p>
+
+                <p>また、ソフトマックス関数と交差エントロピーを組み合わせる場合、数値的に安定な実装（LogSumExp trick）を使用すべきです。</p>
+
+                <h2 id="gradient-properties">勾配の性質</h2>
+
+                <p>学習効率に直結する勾配の性質も重要です：</p>
+                <ul>
+                    <li><strong>交差エントロピー</strong>：間違いが大きいほど勾配が大きく、効率的学習</li>
+                    <li><strong>MSE</strong>：勾配が線形で、予測が飽和すると学習が遅くなる</li>
+                    <li><strong>MAE</strong>：勾配が一定で、細かい調整が困難</li>
+                </ul>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本的な定義</strong>：MSE、交差エントロピーの数式と意味</li>
+                        <li><strong>用途別使い分け</strong>：回帰はMSE、分類は交差エントロピー</li>
+                        <li><strong>KLダイバージェンス</strong>：情報理論的意味と生成モデルでの役割</li>
+                        <li><strong>類似度学習</strong>：Contrastive Loss、Triplet Lossの基本概念</li>
+                        <li><strong>実用的考慮</strong>：外れ値対策、クラス不均衡対策</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>誤差関数と損失関数</strong>：基本的に同じ意味（文脈で使い分け）</li>
+                        <li><strong>MSEの単位</strong>：元データの単位の二乗になる</li>
+                        <li><strong>KLダイバージェンスの非対称性</strong>：P||QとQ||Pは異なる値</li>
+                        <li><strong>Triplet Lossの三つ組</strong>：ランダムではなく意味のある組み合わせが必要</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>誤差関数は、ニューラルネットワーク学習の「成功の定義」を決める重要な要素です。回帰問題では主にMSE、分類問題では交差エントロピーが標準的に使用されます。</p>
+
+                <p>近年は、より洗練された誤差関数も開発されており、<strong>問題の性質に応じた適切な選択</strong>が重要です。KLダイバージェンス、Contrastive Loss、Triplet Lossなどの高度な手法も、特定の応用分野で重要な役割を果たしています。</p>
+
+                <p>G検定では、各誤差関数の定義、使い分けの理由、実用上の考慮点を正確に理解することが求められます。特に、なぜその誤差関数がその問題に適しているのかを論理的に説明できるようになることが重要です。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">誤差関数（Error Function）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">予測値と実際値の差を数値化した関数。損失関数（Loss Function）とも呼ばれ、学習の目的関数となる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">平均二乗誤差（Mean Squared Error, MSE）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">回帰問題の標準的誤差関数。予測値と実際値の差を二乗して平均。外れ値に敏感。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">交差エントロピー（Cross Entropy）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">分類問題の標準的誤差関数。情報理論に基づき、予測の不確実性を測定。確率的解釈が可能。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">カルバック・ライブラー情報量（KL Divergence）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2つの確率分布間の違いを測定する尺度。生成モデルや変分推論で使用。非対称性が特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">対比損失（Contrastive Loss）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">類似度学習で使用。同じクラスは近づけ、異なるクラスは遠ざける学習を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">三重損失（Triplet Loss）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">アンカー、ポジティブ、ネガティブの3つのサンプルを用いる類似度学習手法。FaceNetで有名。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">平均絶対誤差（Mean Absolute Error, MAE）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">予測値と実際値の差の絶対値を平均。MSEより外れ値に頑健だが、勾配が一定。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">数値安定性（Numerical Stability）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">計算機実装での精度問題を避ける技術。log(0)の回避やLogSumExp trickなど。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">類似度学習（Similarity Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データ間の類似性を学習する手法。Contrastive LossやTriplet Lossを使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">マージン（Margin）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">類似度学習で異なるクラス間に要求する最小距離。決定境界の安定性に寄与。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">情報理論（Information Theory）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">情報の量や伝達を数学的に扱う理論。交差エントロピーやKLダイバージェンスの理論的基盤。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study4-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ffff00;"></i>
+                            Back: 4-2
+                        </a>
+
+                        <a href="study4-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 4-4
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ffff00;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

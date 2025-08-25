@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2-2: 知識表現とエキスパートシステム - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-cyan">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 2-2: 知識表現とエキスパートシステム</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 2-2</h1>
+                <p class="content-subtitle">知識表現とエキスパートシステム</p>
+            </div>
+
+            <div class="content">
+                <h1 id="learning-objectives">学習目標</h1>
+                <p>この章では以下の内容を学習します：</p>
+                <ul>
+                    <li><strong>知識表現とは何か</strong>説明できる</li>
+                    <li><strong>エキスパートシステムとは何か</strong>説明できる</li>
+                    <li><strong>知識表現に係る代表的な研究や手法</strong>について理解する</li>
+                    <li><strong>エキスパートシステムに係る代表的な研究や手法</strong>について理解する</li>
+                </ul>
+
+                <h2 id="keywords">キーワード</h2>
+                <p><strong>Cycプロジェクト</strong>, <strong>DENDRAL</strong>, <strong>is-aの関係・has-aの関係・part-ofの関係</strong>, <strong>Question-Answering</strong>, <strong>意味ネットワーク</strong>, <strong>イライザ (ELIZA)</strong>, <strong>インタビューシステム</strong>, <strong>ウェブマイニング</strong>, <strong>オントロジー</strong>, <strong>セマンティックWeb</strong>, <strong>データマイニング</strong>, <strong>東ロボくん</strong>, <strong>マイシン (MYCIN)</strong>, <strong>ワトソン</strong></p>
+
+                <h1 id="knowledge-representation">知識表現とは</h1>
+                <p><strong>知識表現（Knowledge Representation）</strong>は、人間の知識をコンピュータが処理可能な形式で表現する技術です。</p>
+
+                <h2 id="knowledge-types">知識の種類</h2>
+                <ul>
+                    <li><strong>事実的知識</strong>: 「東京は日本の首都である」</li>
+                    <li><strong>手続き的知識</strong>: 「問題の解き方」</li>
+                    <li><strong>宣言的知識</strong>: 「○○とは△△である」</li>
+                    <li><strong>メタ知識</strong>: 「知識についての知識」</li>
+                </ul>
+
+                <h2 id="representation-methods">知識表現の方法</h2>
+
+                <h3 id="semantic-networks">意味ネットワーク</h3>
+                <p><strong>意味ネットワーク（Semantic Network）</strong>は、概念をノード、関係をリンクで表現する手法です。</p>
+
+                <h4 id="semantic-relations">基本的な関係</h4>
+                <ul>
+                    <li><strong>is-a関係</strong>: 上下位関係（「犬は動物である」）</li>
+                    <li><strong>has-a関係</strong>: 所有関係（「車は車輪を持つ」）</li>
+                    <li><strong>part-of関係</strong>: 部分-全体関係（「車輪は車の一部」）</li>
+                    <li><strong>instance-of関係</strong>: インスタンス関係（「ポチは犬のインスタンス」）</li>
+                </ul>
+
+                <h4 id="semantic-network-example">意味ネットワーク例</h4>
+                <pre><code>動物 ─is-a─ 哺乳類 ─is-a─ 犬
+ │              │         │
+has-a          has-a    instance-of
+ │              │         │
+心臓           毛皮      ポチ</code></pre>
+
+                <h3 id="frame-representation">フレーム表現</h3>
+                <ul>
+                    <li><strong>フレーム</strong>: オブジェクトや状況の典型的知識</li>
+                    <li><strong>スロット</strong>: フレーム内の属性</li>
+                    <li><strong>ファセット</strong>: スロットの詳細情報</li>
+                    <li><strong>継承</strong>: 上位フレームからの属性継承</li>
+                </ul>
+
+                <h1 id="ontology">オントロジー</h1>
+                <p><strong>オントロジー（Ontology）</strong>は、特定分野の概念とその関係を体系的に記述したものです。</p>
+
+                <h2 id="ontology-components">オントロジーの構成要素</h2>
+                <ul>
+                    <li><strong>クラス</strong>: 概念の集合</li>
+                    <li><strong>個体</strong>: クラスの具体例</li>
+                    <li><strong>属性</strong>: 個体やクラスの性質</li>
+                    <li><strong>関係</strong>: 概念間の関連</li>
+                    <li><strong>制約</strong>: 概念に課される条件</li>
+                </ul>
+
+                <h2 id="cyc-project">Cycプロジェクト</h2>
+                <p><strong>Cycプロジェクト</strong>は、人間の常識知識を体系化する大規模プロジェクトです。</p>
+
+                <h3 id="cyc-goals">目標</h3>
+                <ul>
+                    <li><strong>常識知識の体系化</strong>: 人間が当たり前に知っていること</li>
+                    <li><strong>推論エンジン</strong>: 知識ベースからの自動推論</li>
+                    <li><strong>自然言語理解</strong>: 常識に基づく言語処理</li>
+                </ul>
+
+                <h3 id="cyc-challenges">課題</h3>
+                <ul>
+                    <li><strong>知識獲得のボトルネック</strong>: 手動での知識入力の限界</li>
+                    <li><strong>一貫性維持</strong>: 大規模知識ベースの矛盾回避</li>
+                    <li><strong>推論の効率性</strong>: 実用的な推論速度の実現</li>
+                </ul>
+
+                <h1 id="semantic-web">セマンティックWeb</h1>
+                <p><strong>セマンティックWeb</strong>は、Webページに意味情報を付与し、機械が理解可能にする技術です。</p>
+
+                <h2 id="semantic-web-stack">技術スタック</h2>
+                <ul>
+                    <li><strong>RDF (Resource Description Framework)</strong>: リソース記述フレームワーク</li>
+                    <li><strong>OWL (Web Ontology Language)</strong>: Web用オントロジー言語</li>
+                    <li><strong>SPARQL</strong>: RDFデータ用クエリ言語</li>
+                    <li><strong>URI/IRI</strong>: リソース識別子</li>
+                </ul>
+
+                <h2 id="rdf-example">RDF例</h2>
+                <pre><code>&lt;http://example.org/person/Alice&gt;
+  &lt;http://example.org/knows&gt;
+  &lt;http://example.org/person/Bob&gt; .</code></pre>
+
+                <h1 id="expert-systems">エキスパートシステム</h1>
+                <p><strong>エキスパートシステム</strong>は、特定分野の専門知識を体系化し、専門家レベルの問題解決を行うシステムです。</p>
+
+                <h2 id="expert-system-architecture">構成要素</h2>
+                <ul>
+                    <li><strong>知識ベース</strong>: 専門知識の集合</li>
+                    <li><strong>推論エンジン</strong>: 知識を用いた推論機構</li>
+                    <li><strong>作業記憶</strong>: 現在の問題状況</li>
+                    <li><strong>説明機構</strong>: 推論過程の説明</li>
+                    <li><strong>知識獲得機構</strong>: 新しい知識の追加</li>
+                </ul>
+
+                <h2 id="mycin">MYCIN（マイシン）</h2>
+                <p><strong>MYCIN</strong>は、感染症診断・治療のためのエキスパートシステムです（1970年代、スタンフォード大学）。</p>
+
+                <h3 id="mycin-features">特徴</h3>
+                <ul>
+                    <li><strong>ルールベース</strong>: IF-THENルールによる知識表現</li>
+                    <li><strong>不確実性推論</strong>: 確信度（Certainty Factor）の使用</li>
+                    <li><strong>後向き推論</strong>: 目標から原因への推論</li>
+                    <li><strong>説明機能</strong>: WHY、HOW質問への対応</li>
+                </ul>
+
+                <h3 id="mycin-rule-example">MYCINルール例</h3>
+                <pre><code>IF: 患者の感染部位が血液 AND
+    患者にグラム染色が実施された AND  
+    染色結果が陽性
+THEN: 感染菌はブドウ球菌の可能性が高い (CF=0.8)</code></pre>
+
+                <h3 id="certainty-factor">確信度（CF）</h3>
+                <p>MYCINの不確実性推論：</p>
+                $$CF(H|E) = \frac{P(H|E) - P(H)}{1 - P(H)}$$
+                <p>where H=仮説、E=証拠、CF ∈ [-1, 1]</p>
+
+                <h2 id="dendral">DENDRAL（デンドラル）</h2>
+                <p><strong>DENDRAL</strong>は、有機化合物の分子構造を決定するエキスパートシステムです（1960年代）。</p>
+
+                <h3 id="dendral-process">処理手順</h3>
+                <ol>
+                    <li><strong>質量分析</strong>: 分子量・断片情報の取得</li>
+                    <li><strong>候補生成</strong>: 可能な分子構造の列挙</li>
+                    <li><strong>予測・検証</strong>: スペクトラム予測と実測値比較</li>
+                    <li><strong>構造決定</strong>: 最も適合する構造の選択</li>
+                </ol>
+
+                <h3 id="dendral-significance">意義</h3>
+                <ul>
+                    <li><strong>初期の成功例</strong>: 実用的エキスパートシステムの先駆け</li>
+                    <li><strong>知識工学</strong>: 専門知識の体系化手法確立</li>
+                    <li><strong>化学への貢献</strong>: 構造決定の自動化</li>
+                </ul>
+
+                <h1 id="modern-systems">現代的システム</h1>
+
+                <h2 id="watson">ワトソン（Watson）</h2>
+                <p><strong>ワトソン</strong>は、IBMが開発したQuestion-Answeringシステムです。</p>
+
+                <h3 id="watson-achievements">主な成果</h3>
+                <ul>
+                    <li><strong>Jeopardy!優勝</strong>: 2011年、人間チャンピオンに勝利</li>
+                    <li><strong>自然言語理解</strong>: 複雑な質問文の解析</li>
+                    <li><strong>大量データ処理</strong>: Wikipedia等から即座に回答生成</li>
+                    <li><strong>医療応用</strong>: がん治療支援システムとして展開</li>
+                </ul>
+
+                <h3 id="watson-architecture">技術構成</h3>
+                <ul>
+                    <li><strong>DeepQA</strong>: 質問応答アーキテクチャ</li>
+                    <li><strong>並列処理</strong>: 数百の推論アルゴリズム同時実行</li>
+                    <li><strong>機械学習</strong>: 回答候補の信頼度学習</li>
+                    <li><strong>知識統合</strong>: 構造化・非構造化データの融合</li>
+                </ul>
+
+                <h2 id="torobo-kun">東ロボくん</h2>
+                <p><strong>東ロボくん</strong>は、国立情報学研究所による大学入試問題解答AIプロジェクトです。</p>
+
+                <h3 id="torobo-goals">目標</h3>
+                <ul>
+                    <li><strong>東京大学合格</strong>: 2021年までの合格を目指す</li>
+                    <li><strong>総合的AI</strong>: 多分野の問題解決能力</li>
+                    <li><strong>日本語処理</strong>: 日本語による複雑な問題理解</li>
+                </ul>
+
+                <h3 id="torobo-challenges">課題と成果</h3>
+                <ul>
+                    <li><strong>数学</strong>: 偏差値76.2を達成（2015年）</li>
+                    <li><strong>英語</strong>: 偏差値66.3を記録</li>
+                    <li><strong>国語の壁</strong>: 読解問題で苦戦</li>
+                    <li><strong>プロジェクト終了</strong>: 2019年に開発終了</li>
+                </ul>
+
+                <h1 id="qa-systems">Question-Answering（QA）システム</h1>
+                <p><strong>Question-Answering</strong>は、自然言語の質問に対して適切な回答を生成する技術です。</p>
+
+                <h2 id="qa-types">QAシステムの分類</h2>
+                <ul>
+                    <li><strong>事実型QA</strong>: 「日本の首都は？」→「東京」</li>
+                    <li><strong>定義型QA</strong>: 「人工知能とは？」→定義説明</li>
+                    <li><strong>手順型QA</strong>: 「パスワードの変更方法は？」→手順説明</li>
+                    <li><strong>推論型QA</strong>: 複数知識の組み合わせが必要</li>
+                </ul>
+
+                <h2 id="qa-pipeline">QA処理パイプライン</h2>
+                <ol>
+                    <li><strong>質問解析</strong>: 質問タイプ・キーワード抽出</li>
+                    <li><strong>文書検索</strong>: 関連文書の候補選択</li>
+                    <li><strong>回答抽出</strong>: 候補文書からの回答候補生成</li>
+                    <li><strong>回答選択</strong>: 最適回答の決定</li>
+                    <li><strong>回答生成</strong>: 自然な回答文の作成</li>
+                </ol>
+
+                <h1 id="data-web-mining">データマイニング・ウェブマイニング</h1>
+
+                <h2 id="data-mining">データマイニング</h2>
+                <p><strong>データマイニング</strong>は、大量データから有用な知識・パターンを発見する技術です。</p>
+
+                <h3 id="data-mining-tasks">主要タスク</h3>
+                <ul>
+                    <li><strong>分類</strong>: データを予め定義されたクラスに分類</li>
+                    <li><strong>クラスタリング</strong>: 類似データのグループ化</li>
+                    <li><strong>関連ルール</strong>: 項目間の関連性発見</li>
+                    <li><strong>異常検知</strong>: 通常と異なるパターンの発見</li>
+                </ul>
+
+                <h3 id="association-rules">関連ルール例</h3>
+                <p>「パン ⇒ 牛乳」（支持度30%, 信頼度80%）</p>
+                $$\text{信頼度} = \frac{P(\text{パン} \cap \text{牛乳})}{P(\text{パン})}$$
+
+                <h2 id="web-mining">ウェブマイニング</h2>
+                <p><strong>ウェブマイニング</strong>は、Web上のデータから知識を発見する技術です。</p>
+
+                <h3 id="web-mining-types">分類</h3>
+                <ul>
+                    <li><strong>Webコンテンツマイニング</strong>: ページ内容の分析</li>
+                    <li><strong>Web構造マイニング</strong>: リンク関係の分析</li>
+                    <li><strong>Web使用法マイニング</strong>: アクセスログの分析</li>
+                </ul>
+
+                <h1 id="eliza-interview">ELIZA・インタビューシステム</h1>
+
+                <h2 id="eliza">ELIZA（イライザ）</h2>
+                <p><strong>ELIZA</strong>は、ジョセフ・ワイゼンバウムが1964-1966年に開発した初期の対話システムです。</p>
+
+                <h3 id="eliza-mechanism">動作原理</h3>
+                <ul>
+                    <li><strong>パターンマッチング</strong>: 入力文のパターン認識</li>
+                    <li><strong>テンプレート応答</strong>: 決められた応答パターン</li>
+                    <li><strong>キーワード変換</strong>: 「私」→「あなた」の置換</li>
+                    <li><strong>心理療法風</strong>: ロジャー派心理療法の模倣</li>
+                </ul>
+
+                <h3 id="eliza-example">対話例</h3>
+                <ul>
+                    <li><strong>Human:</strong> "I am sad."</li>
+                    <li><strong>ELIZA:</strong> "Why do you say you are sad?"</li>
+                    <li><strong>Human:</strong> "Because my father died."</li>
+                    <li><strong>ELIZA:</strong> "Tell me more about your father."</li>
+                </ul>
+
+                <h3 id="eliza-impact">影響</h3>
+                <ul>
+                    <li><strong>ELIZA効果</strong>: 人間がシステムを過大評価する現象</li>
+                    <li><strong>チャットボットの原型</strong>: 現代チャットボットの出発点</li>
+                    <li><strong>倫理問題</strong>: AI理解に関する社会的議論の契機</li>
+                </ul>
+
+                <h2 id="interview-systems">インタビューシステム</h2>
+                <p><strong>インタビューシステム</strong>は、構造化された対話により情報収集を行うシステムです。</p>
+
+                <h3 id="interview-applications">応用分野</h3>
+                <ul>
+                    <li><strong>医療診断</strong>: 症状聞き取りシステム</li>
+                    <li><strong>カスタマーサポート</strong>: 問題特定・解決支援</li>
+                    <li><strong>調査・統計</strong>: アンケート自動実施</li>
+                    <li><strong>教育</strong>: 学習状況診断</li>
+                </ul>
+
+                <h1 id="key-points">試験対策キーポイント</h1>
+                
+                <h2 id="exam-essentials">必須暗記ポイント</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📝 知識表現</h3>
+                    <ul>
+                        <li><strong>意味ネットワーク</strong>: is-a、has-a、part-of関係</li>
+                        <li><strong>オントロジー</strong>: 概念の体系的記述</li>
+                        <li><strong>セマンティックWeb</strong>: 機械可読なWeb</li>
+                        <li><strong>Cyc</strong>: 常識知識の大規模体系化</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🏥 エキスパートシステム</h3>
+                    <ul>
+                        <li><strong>MYCIN</strong>: 感染症診断、確信度使用</li>
+                        <li><strong>DENDRAL</strong>: 分子構造決定、初期成功例</li>
+                        <li><strong>構成</strong>: 知識ベース+推論エンジン+説明機構</li>
+                        <li><strong>課題</strong>: 知識獲得のボトルネック</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">💬 現代システム</h3>
+                    <ul>
+                        <li><strong>Watson</strong>: Jeopardy!優勝、DeepQAアーキテクチャ</li>
+                        <li><strong>東ロボくん</strong>: 大学入試AI、国語が課題</li>
+                        <li><strong>ELIZA</strong>: 初期対話システム、ELIZA効果</li>
+                        <li><strong>QAシステム</strong>: 自然言語質問への回答生成</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>意味ネットワークの関係</strong>を混同（is-a、has-a、part-of）</li>
+                        <li><strong>MYCIN・DENDRAL</strong>の対象分野を逆に覚える</li>
+                        <li><strong>Watson・東ロボくん</strong>の成果を混同</li>
+                        <li><strong>ELIZA効果</strong>の意味を誤解</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+                <ul>
+                    <li><strong>知識表現</strong>は意味ネットワーク・オントロジー等で実現</li>
+                    <li><strong>エキスパートシステム</strong>はMYCIN・DENDRALが代表例</li>
+                    <li><strong>現代システム</strong>はWatson・東ロボくんが注目</li>
+                    <li><strong>QA・対話システム</strong>は自然言語理解の重要分野</li>
+                    <li><strong>知識獲得のボトルネック</strong>が機械学習発展の背景</li>
+                </ul>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">Cycプロジェクト</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">人間の常識知識を体系化する大規模プロジェクト。推論エンジンによる自動推論を目指す。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">DENDRAL</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1960年代の有機化合物分子構造決定システム。実用的エキスパートシステムの先駆け。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">is-a・has-a・part-of関係</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">意味ネットワークの基本関係。is-a（上下位）、has-a（所有）、part-of（部分-全体）。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">Question-Answering</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">自然言語質問に対する自動回答システム。事実型・定義型・推論型に分類。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">意味ネットワーク</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">概念をノード、関係をリンクで表現する知識表現手法。is-a関係等を用いる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ELIZA</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1960年代の初期対話システム。パターンマッチングによる心理療法風対話。ELIZA効果で有名。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">オントロジー</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">特定分野の概念と関係を体系的に記述。クラス・個体・属性・関係で構成。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">セマンティックWeb</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Webページに意味情報を付与し機械可読にする技術。RDF・OWL・SPARQLを使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">データマイニング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">大量データから有用パターンを発見。分類・クラスタリング・関連ルール・異常検知が主要タスク。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">東ロボくん</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">国立情報学研究所の大学入試AI。数学で偏差値76.2達成も国語で苦戦。2019年終了。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">MYCIN</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1970年代の感染症診断エキスパートシステム。確信度による不確実性推論が特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">Watson</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">IBMのQAシステム。2011年Jeopardy!で人間に勝利。DeepQAアーキテクチャ採用。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study2-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #00ffff;"></i>
+                            Back: 2-1
+                        </a>
+
+                        <a href="study2-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 2-3
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #00ffff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

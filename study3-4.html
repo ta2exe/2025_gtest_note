@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3-4: モデルの選択・評価 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-magenta">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 3-4: モデルの選択・評価</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 3-4</h1>
+                <h2 class="content-subtitle">モデルの選択・評価</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">機械学習の概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">📋 学習目標</h3>
+                    <p>機械学習モデルの適切な選択方法と性能評価手法について理解し、過学習や汎化性能などの重要概念を説明できる。</p>
+                    
+                    <h3 style="color: #ff00ff; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>モデル選択</strong></li>
+                        <li><strong>バイアス・バリアンス</strong></li>
+                        <li><strong>過学習</strong></li>
+                        <li><strong>汎化性能</strong></li>
+                        <li><strong>交差検証</strong></li>
+                        <li><strong>ホールドアウト法</strong></li>
+                        <li><strong>正則化</strong></li>
+                        <li><strong>ハイパーパラメータ</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">モデル選択・評価の重要性</h1>
+                
+                <p>機械学習において、モデルの選択と評価は成功の鍵を握る極めて重要なプロセスです。優秀なエンジニアがアルゴリズムを実装しても、適切な評価なしでは本当の性能はわかりません。また、問題に対して不適切なモデルを選択すれば、どれだけデータを増やしても望む結果は得られません。</p>
+
+                <p>この状況を、医師の診断に例えて考えてみましょう。熟練した医師は、患者の症状を聞いてすぐに一つの病気を断定するのではなく、複数の可能性を検討し、検査結果を総合的に評価して最終的な診断を下します。機械学習でも同様に、複数のモデルを候補として検討し、適切な評価基準でその性能を比較して、最終的に最も優秀なモデルを選択する必要があります。</p>
+
+                <p>しかし、この評価プロセスには多くの落とし穴があります。最も危険なのは<strong>「訓練データでの性能が高い = 優秀なモデル」</strong>と誤解することです。これは学校で、カンニングペーパーを使って満点を取った学生を「優秀」と評価するようなものです。本当に重要なのは、未知のデータ（本番のテスト）でどれだけ性能を発揮できるかなのです。</p>
+
+                <h1 id="fundamental-concepts">基本概念：バイアスとバリアンス</h1>
+
+                <p>モデル選択を理解する上で、まず「バイアス」と「バリアンス」という2つの重要概念を理解する必要があります。これらは、モデルの性能を決定する根本的な要因であり、機械学習の理論的基盤となっています。</p>
+
+                <h2 id="bias">バイアス（偏り）</h2>
+
+                <p>バイアスは、モデルの予測値が真の値からどの程度ずれているかを示します。高バイアスのモデルは、どれだけ訓練データを増やしても、真の関係性を捉えきれません。</p>
+
+                <p>射撃の例で説明しましょう。照準がずれた銃を使って的を狙う場合、どれだけ正確に狙っても弾は的の中心から外れた場所に集中します。これが高バイアスの状態です。モデルの「学習能力の限界」とも言えるでしょう。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 高バイアスの特徴</h3>
+                    <ul>
+                        <li><strong>単純すぎるモデル</strong>：線形回帰で曲線関係を学習しようとする</li>
+                        <li><strong>学習不足</strong>：十分に複雑なパターンを表現できない</li>
+                        <li><strong>訓練誤差も高い</strong>：訓練データでも良い性能が出ない</li>
+                        <li><strong>解決策</strong>：より複雑なモデル、特徴量の追加、学習時間の延長</li>
+                    </ul>
+                </div>
+
+                <h2 id="variance">バリアンス（分散）</h2>
+
+                <p>バリアンスは、異なる訓練データセットで学習した場合の予測のばらつきを示します。高バリアンスのモデルは、訓練データの微細な変化に過度に敏感です。</p>
+
+                <p>再び射撃の例を使うと、風向きや気温の僅かな変化で弾道が大きくばらつく状態が高バリアンスです。照準は正確でも、結果が不安定になってしまいます。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">📊 高バリアンスの特徴</h3>
+                    <ul>
+                        <li><strong>複雑すぎるモデル</strong>：不要な詳細まで学習してしまう</li>
+                        <li><strong>過学習気味</strong>：訓練データの特異性を覚えこんでしまう</li>
+                        <li><strong>予測が不安定</strong>：データが少し変わると結果が大きく変わる</li>
+                        <li><strong>解決策</strong>：正則化、データ増加、アンサンブル手法</li>
+                    </ul>
+                </div>
+
+                <h2 id="bias-variance-tradeoff">バイアス・バリアンス・トレードオフ</h2>
+
+                <p>バイアスとバリアンスの関係は、機械学習における最も重要な概念の一つです。一般的に、以下の関係が成り立ちます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{総誤差} = \text{バイアス}^2 + \text{バリアンス} + \text{ノイズ}$$
+                </div>
+
+                <p>この式が示すように、バイアスとバリアンスはトレードオフの関係にあります。一方を減らそうとすると、もう一方が増加する傾向があります。</p>
+
+                <ul>
+                    <li><strong>シンプルなモデル</strong>：バイアス高、バリアンス低</li>
+                    <li><strong>複雑なモデル</strong>：バイアス低、バリアンス高</li>
+                </ul>
+
+                <p>最適なモデルは、この2つのバランスが取れた「スイートスポット」に位置します。料理の味付けに例えると、塩味が足りないのも、しょっぱすぎるのも問題で、ちょうど良い塩梅を見つけることが重要です。</p>
+
+                <h1 id="overfitting-underfitting">過学習と学習不足</h1>
+
+                <h2 id="overfitting-detailed">過学習（Overfitting）</h2>
+
+                <p>過学習は、モデルが訓練データに過度に特化してしまい、新しいデータに対する性能が低下する現象です。高バリアンスの典型的な症状と言えます。</p>
+
+                <p>学校での暗記学習を思い出してください。教科書の例題を完璧に覚えた学生が、テストで少し違う問題が出ると全く解けなくなる状況です。本質的な理解ではなく、表面的な暗記に頼ってしまったためです。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🚨 過学習の兆候</h3>
+                    <ul>
+                        <li><strong>訓練誤差は極めて低い</strong>が<strong>テスト誤差は高い</strong></li>
+                        <li><strong>学習曲線</strong>で訓練誤差と検証誤差が大きく乖離</li>
+                        <li><strong>モデルの複雑度</strong>が問題の複雑さに比して過大</li>
+                        <li><strong>データ数</strong>に対してパラメータ数が多すぎる</li>
+                    </ul>
+                </div>
+
+                <h3 id="overfitting-causes">過学習の原因</h3>
+
+                <p><strong>1. 訓練データ不足</strong>：少ないデータから無理に複雑なパターンを学習しようとする</p>
+                <p><strong>2. モデルの複雑さ</strong>：問題に比してモデルが高機能すぎる</p>
+                <p><strong>3. ノイズの学習</strong>：データの誤差やランダムな変動まで覚えてしまう</p>
+                <p><strong>4. 学習期間の長さ</strong>：必要以上に長時間学習を続ける</p>
+
+                <h2 id="underfitting">学習不足（Underfitting）</h2>
+
+                <p>学習不足は、モデルが十分に複雑なパターンを学習できていない状態です。高バイアスの典型例で、訓練データでさえ良い性能を示せません。</p>
+
+                <p>これは、高校数学の知識だけで大学院レベルの物理問題を解こうとするようなものです。基本的な能力不足により、問題の本質を捉えきれていない状態です。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🔍 学習不足の兆候</h3>
+                    <ul>
+                        <li><strong>訓練誤差もテスト誤差も共に高い</strong></li>
+                        <li><strong>学習曲線</strong>で両誤差が高いまま収束</li>
+                        <li><strong>モデルが単純すぎる</strong>（線形モデルで非線形問題を解くなど）</li>
+                        <li><strong>重要な特徴量</strong>が不足している</li>
+                    </ul>
+                </div>
+
+                <h1 id="evaluation-methods">モデル評価手法</h1>
+
+                <h2 id="holdout-method">ホールドアウト法</h2>
+
+                <p>ホールドアウト法は、最もシンプルなモデル評価手法です。データを「訓練用」と「テスト用」に分割し、訓練用でモデルを学習し、テスト用で性能を評価します。</p>
+
+                <p>通常の分割比率：</p>
+                <ul>
+                    <li><strong>訓練用：70-80%</strong></li>
+                    <li><strong>テスト用：20-30%</strong></li>
+                </ul>
+
+                <p>ハイパーパラメータの調整も行う場合は、3分割にします：</p>
+                <ul>
+                    <li><strong>訓練用：60%</strong> - モデルのパラメータ学習</li>
+                    <li><strong>検証用：20%</strong> - ハイパーパラメータ調整</li>
+                    <li><strong>テスト用：20%</strong> - 最終性能評価</li>
+                </ul>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">✅ ホールドアウト法の利点・欠点</h3>
+                    <p><strong>利点</strong>：</p>
+                    <ul>
+                        <li>理解しやすく実装が簡単</li>
+                        <li>計算コストが低い</li>
+                        <li>大量データがある場合に有効</li>
+                    </ul>
+                    <p><strong>欠点</strong>：</p>
+                    <ul>
+                        <li>データの分割方法に結果が依存する</li>
+                        <li>小規模データでは不安定</li>
+                        <li>データの無駄遣い（一部しか訓練に使えない）</li>
+                    </ul>
+                </div>
+
+                <h2 id="cross-validation">交差検証（Cross Validation）</h2>
+
+                <p>交差検証は、データを複数に分割し、その組み合わせを変えて複数回評価を行う手法です。より信頼性の高い性能推定が可能になります。</p>
+
+                <h3 id="k-fold-cv">k分割交差検証（k-fold Cross Validation）</h3>
+
+                <p>最も一般的な交差検証手法で、データをk個（通常5または10）に分割し、1つをテスト用、残りを訓練用として使用します。これをk回繰り返し、すべての分割でテストを行います。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <pre style="color: #ffffff; margin: 0;">
+5分割交差検証の例：
+
+回数1: [Test][Train][Train][Train][Train]
+回数2: [Train][Test][Train][Train][Train]
+回数3: [Train][Train][Test][Train][Train]
+回数4: [Train][Train][Train][Test][Train]
+回数5: [Train][Train][Train][Train][Test]
+
+最終性能 = 5回の平均
+                    </pre>
+                </div>
+
+                <p>最終的な性能スコアは、k回の評価結果の平均値として算出されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{CV Score} = \frac{1}{k}\sum_{i=1}^{k} \text{Score}_i$$
+                </div>
+
+                <h3 id="loocv">Leave-One-Out Cross Validation (LOOCV)</h3>
+
+                <p>データ数をnとして、n-1個を訓練用、1個をテスト用とする極端な交差検証です。n回の評価を行うため、非常に信頼性の高い推定が得られますが、計算コストが高くなります。</p>
+
+                <h3 id="stratified-cv">層化交差検証（Stratified Cross Validation）</h3>
+
+                <p>分類問題において、各分割でクラス比率を保持する交差検証です。特に不均衡データ（特定のクラスが極端に少ない）での評価で重要になります。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 交差検証の利点</h3>
+                    <ul>
+                        <li><strong>安定した評価</strong>：データ分割による偶然の影響を軽減</li>
+                        <li><strong>データの有効活用</strong>：全データを訓練とテストの両方に使用</li>
+                        <li><strong>統計的信頼性</strong>：平均と標準偏差で性能の信頼区間を推定</li>
+                        <li><strong>小データ対応</strong>：限られたデータでも信頼性の高い評価が可能</li>
+                    </ul>
+                </div>
+
+                <h1 id="regularization">正則化</h1>
+
+                <p>正則化は、過学習を防ぐために意図的にモデルの複雑さを制限する技術です。「制約があることで、より良い解が見つかる」という逆説的なアイデアに基づいています。</p>
+
+                <p>これは、短歌や俳句の創作に例えることができます。「5-7-5音」という厳しい制約があるからこそ、言葉選びに工夫が生まれ、美しい表現が可能になります。制約がなければ、だらだらとした文章になってしまうかもしれません。</p>
+
+                <h2 id="l1-regularization">L1正則化（Lasso回帰）</h2>
+
+                <p>L1正則化は、パラメータの絶対値の和にペナルティを課す手法です。数学的には以下のように表現されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Cost} = \text{元の損失} + \lambda \sum_{i=1}^{n} |w_i|$$
+                </div>
+
+                <p>L1正則化の特徴は<strong>「特徴選択効果」</strong>です。重要でない特徴量の重みを0にする傾向があり、自動的に特徴選択を行います。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🔍 L1正則化の特徴</h3>
+                    <ul>
+                        <li><strong>スパースな解</strong>：多くのパラメータが0になる</li>
+                        <li><strong>自動特徴選択</strong>：重要な特徴量だけを残す</li>
+                        <li><strong>解釈しやすい</strong>：使用される特徴量が限定される</li>
+                        <li><strong>高次元データに有効</strong>：多くの特徴量から少数を選択</li>
+                    </ul>
+                </div>
+
+                <h2 id="l2-regularization">L2正則化（Ridge回帰）</h2>
+
+                <p>L2正則化は、パラメータの二乗和にペナルティを課す手法です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Cost} = \text{元の損失} + \lambda \sum_{i=1}^{n} w_i^2$$
+                </div>
+
+                <p>L2正則化は、パラメータを0に向けて縮小しますが、完全に0にはしません。すべての特徴量を「少しずつ」使用する傾向があります。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">📊 L2正則化の特徴</h3>
+                    <ul>
+                        <li><strong>滑らかな解</strong>：パラメータが急激に変化しない</li>
+                        <li><strong>安定性</strong>：数値的に安定した解が得られる</li>
+                        <li><strong>相関特徴量に対応</strong>：関連する特徴量を均等に使用</li>
+                        <li><strong>過学習抑制</strong>：パラメータの大きさを制限</li>
+                    </ul>
+                </div>
+
+                <h2 id="elastic-net">Elastic Net</h2>
+
+                <p>L1とL2正則化を組み合わせた手法で、両方の利点を活用できます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Cost} = \text{元の損失} + \lambda_1 \sum |w_i| + \lambda_2 \sum w_i^2$$
+                </div>
+
+                <p>実用的には、グループで相関の高い特徴量がある場合に、グループ全体を選択しつつ個別の重要度も考慮できます。</p>
+
+                <h1 id="hyperparameter-tuning">ハイパーパラメータ調整</h1>
+
+                <p>ハイパーパラメータは、学習アルゴリズムの動作を制御する設定値で、データから自動的に学習されるパラメータとは異なり、人間が事前に設定する必要があります。</p>
+
+                <p>これは、料理のレシピに例えることができます。食材の分量（パラメータ）は調理過程で調整されますが、火加減や調理時間（ハイパーパラメータ）は最初に決める必要があります。適切な設定により、同じ食材でも全く異なる味の料理が出来上がります。</p>
+
+                <h2 id="common-hyperparameters">代表的なハイパーパラメータ</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🔧 主要なハイパーパラメータ例</h3>
+                    <ul>
+                        <li><strong>学習率</strong>：勾配降下法での更新幅</li>
+                        <li><strong>正則化係数</strong>：λの値（L1、L2正則化）</li>
+                        <li><strong>決定木の深さ</strong>：最大の分岐回数</li>
+                        <li><strong>k-meansのクラスター数</strong>：k値</li>
+                        <li><strong>ニューラルネットワークの層数・ユニット数</strong></li>
+                        <li><strong>SVMのCパラメータ</strong>：誤分類に対するペナルティ</li>
+                    </ul>
+                </div>
+
+                <h2 id="tuning-methods">調整手法</h2>
+
+                <h3 id="grid-search">グリッドサーチ</h3>
+
+                <p>事前に定義した候補値の組み合わせを総当たりで試す手法です。確実に最適解を見つけられますが、計算コストが高くなります。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <pre style="color: #ffffff; margin: 0;">
+例：SVMのハイパーパラメータ調整
+
+C = [0.1, 1, 10, 100]
+gamma = [0.001, 0.01, 0.1, 1]
+
+合計：4 × 4 = 16通りの組み合わせを評価
+                    </pre>
+                </div>
+
+                <h3 id="random-search">ランダムサーチ</h3>
+
+                <p>パラメータ空間からランダムに候補を選択して評価する手法です。高次元空間では、グリッドサーチよりも効率的な場合があります。</p>
+
+                <h3 id="bayesian-optimization">ベイズ最適化</h3>
+
+                <p>過去の評価結果を活用して、次に試すべきパラメータを賢く選択する手法です。少ない試行回数で良い解を見つけられる可能性が高くなります。</p>
+
+                <h1 id="model-selection-practice">実践的なモデル選択</h1>
+
+                <h2 id="problem-type-matching">問題タイプとモデルの対応</h2>
+
+                <p>適切なモデル選択の第一歩は、解くべき問題の性質を正確に把握することです。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 問題タイプ別推奨モデル</h3>
+                    
+                    <h4 style="color: #ffffff;">線形関係が予想される場合</h4>
+                    <p>線形回帰、ロジスティック回帰、Linear SVM</p>
+                    
+                    <h4 style="color: #ffffff;">非線形関係・複雑なパターン</h4>
+                    <p>決定木、Random Forest、SVM（RBFカーネル）、ニューラルネットワーク</p>
+                    
+                    <h4 style="color: #ffffff;">高次元・スパース特徴</h4>
+                    <p>L1正則化、Linear SVM、Naive Bayes</p>
+                    
+                    <h4 style="color: #ffffff;">小規模データ</h4>
+                    <p>ナイーブベイズ、k-NN、Linear SVM</p>
+                    
+                    <h4 style="color: #ffffff;">大規模データ</h4>
+                    <p>確率的勾配降下法、オンライン学習アルゴリズム</p>
+                </div>
+
+                <h2 id="evaluation-metrics-selection">評価指標の選択</h2>
+
+                <p>問題の性質と業務要件に応じて、適切な評価指標を選択することが重要です。</p>
+
+                <h3 id="classification-metrics-detailed">分類問題の評価指標</h3>
+
+                <p><strong>正解率（Accuracy）</strong>：最も基本的だが、クラス不均衡では誤解を招く</p>
+                <p><strong>適合率（Precision）</strong>：「がん」と診断した患者のうち本当にがんの割合</p>
+                <p><strong>再現率（Recall）</strong>：がん患者のうち正しく「がん」と診断できた割合</p>
+                <p><strong>F1スコア</strong>：適合率と再現率の調和平均</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
+                </div>
+
+                <h3 id="regression-metrics-detailed">回帰問題の評価指標</h3>
+
+                <p><strong>平均二乗誤差（MSE）</strong>：大きな誤差により重いペナルティ</p>
+                <p><strong>平均絶対誤差（MAE）</strong>：外れ値に頑健</p>
+                <p><strong>決定係数（R²）</strong>：説明力の割合を示す</p>
+
+                <h1 id="practical-workflow">実践的なワークフロー</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🔄 推奨ワークフロー</h3>
+                    <ol>
+                        <li><strong>問題の定義</strong>：分類/回帰、評価基準の明確化</li>
+                        <li><strong>データの確認</strong>：サイズ、品質、分布の把握</li>
+                        <li><strong>ベースラインモデル</strong>：シンプルなモデルで基準性能を確立</li>
+                        <li><strong>候補モデルの選定</strong>：問題特性に応じた複数モデル</li>
+                        <li><strong>交差検証による比較</strong>：公平な性能比較</li>
+                        <li><strong>ハイパーパラメータ調整</strong>：最有力候補の性能向上</li>
+                        <li><strong>最終評価</strong>：独立したテストデータで性能確認</li>
+                    </ol>
+                </div>
+
+                <h1 id="common-pitfalls">よくある失敗とその対策</h1>
+
+                <h2 id="data-leakage">データリーケージ</h2>
+
+                <p>未来の情報や目的変数の情報が、意図せず特徴量に混入してしまう問題です。異常に高い性能が出た場合は、まずデータリーケージを疑いましょう。</p>
+
+                <h2 id="inappropriate-evaluation">不適切な評価</h2>
+
+                <p>時系列データで過去のデータでテストしたり、クラス不均衡データで正解率のみで評価したりする問題です。</p>
+
+                <h2 id="overfitting-in-selection">モデル選択での過学習</h2>
+
+                <p>テストデータを何度も使って調整を繰り返すと、テストデータに過学習してしまいます。真の性能評価には、完全に隠されたデータを使う必要があります。</p>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>バイアス・バリアンスの概念</strong>：トレードオフの理解</li>
+                        <li><strong>過学習の識別</strong>：訓練誤差とテスト誤差の関係</li>
+                        <li><strong>交差検証の利点</strong>：ホールドアウト法との違い</li>
+                        <li><strong>正則化の効果</strong>：L1・L2の特徴の違い</li>
+                        <li><strong>評価指標の使い分け</strong>：問題に応じた適切な指標選択</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>訓練精度での評価</strong>：必ず独立したデータで評価</li>
+                        <li><strong>L1・L2正則化の混同</strong>：特徴選択効果の有無</li>
+                        <li><strong>クラス不均衡での正解率偏重</strong>：適合率・再現率も重要</li>
+                        <li><strong>ハイパーパラメータとパラメータの混同</strong>：学習前後の設定の違い</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>モデル選択・評価は、機械学習プロジェクトの成功を決定する重要なプロセスです。バイアス・バリアンスのトレードオフを理解し、過学習を避けながら汎化性能の高いモデルを選択することが目標です。</p>
+
+                <p>そのために<strong>「適切な評価手法」</strong>（交差検証）と<strong>「過学習対策」</strong>（正則化）、そして<strong>「問題に応じた評価指標」</strong>の選択が不可欠です。ハイパーパラメータ調整により、選択したモデルの性能を最大化することも重要な技術です。</p>
+
+                <p>実践では、複数のモデルを公平に比較し、統計的に有意な差を確認して最終決定を行います。また、予期しない高性能にはデータリーケージなどの落とし穴が潜んでいる可能性があるため、慎重な検証が必要です。</p>
+
+                <p>これらの概念を理解することで、信頼性の高い機械学習システムの構築と、その性能の適切な評価が可能になります。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">バイアス（Bias）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">モデルの予測値が真の値からずれる偏り。高バイアスは学習不足を意味する。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">バリアンス（Variance）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">異なる訓練データでの予測のばらつき。高バリアンスは過学習を意味する。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">過学習（Overfitting）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">訓練データに過度に特化し、新しいデータでの性能が低下する現象。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">汎化性能（Generalization Performance）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">未知のデータに対する予測性能。機械学習の最終目標。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">交差検証（Cross Validation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データを複数回分割して評価を繰り返し、信頼性の高い性能推定を行う手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">ホールドアウト法（Holdout Method）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データを訓練用とテスト用に一度だけ分割してモデル評価を行う手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">L1正則化（L1 Regularization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">パラメータの絶対値和にペナルティを課し、特徴選択効果を持つ正則化手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">L2正則化（L2 Regularization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">パラメータの二乗和にペナルティを課し、滑らかな解を得る正則化手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">ハイパーパラメータ（Hyperparameter）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習前に人間が設定する必要がある、アルゴリズムの動作を制御するパラメータ。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">グリッドサーチ（Grid Search）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">事前定義した候補値の組み合わせを総当たりで試すハイパーパラメータ調整手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">F1スコア</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">適合率と再現率の調和平均。分類問題のバランス指標として使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">データリーケージ（Data Leakage）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">未来の情報や目的変数の情報が特徴量に混入し、実際より高い性能を示す問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">学習不足（Underfitting）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">モデルが十分に複雑なパターンを学習できていない状態。高バイアスの症状。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">層化交差検証（Stratified Cross Validation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各分割でクラス比率を保持する交差検証。不均衡データで特に重要。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study3-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ff00ff;"></i>
+                            Back: 3-3
+                        </a>
+
+                        <a href="study4-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 4-1
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ff00ff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

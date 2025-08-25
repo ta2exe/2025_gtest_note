@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7-3: AIに必要な数理・統計知識 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-magenta">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 7-3: AIに必要な数理・統計知識</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 7-3</h1>
+                <h2 class="content-subtitle">AIに必要な数理・統計知識</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">AIの社会実装に向けて</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>最適化に必要な数学基礎知識や微分を理解する</li>
+                        <li>機械学習で必要となる統計学基礎を理解する</li>
+                        <li>基本的な統計情報を計算できる</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>移動平均</strong>、<strong>確率分布</strong>、<strong>確率変数</strong>、<strong>確率密度</strong>、<strong>疑似相関</strong>、<strong>期待値</strong>、<strong>帰無仮説</strong>、<strong>共分散</strong>、<strong>コサイン類似度</strong></li>
+                        <li><strong>最小二乗法</strong>、<strong>最頻値</strong>、<strong>最尤法</strong>、<strong>条件付き確率</strong>、<strong>正規分布</strong>、<strong>相関係数</strong>、<strong>相互情報量</strong>、<strong>対立仮説</strong>、<strong>中央値</strong></li>
+                        <li><strong>度数分布</strong>、<strong>二項分布</strong>、<strong>外れ値</strong>、<strong>標準偏差</strong>、<strong>平均</strong>、<strong>分散</strong>、<strong>偏相関係数</strong></li>
+                        <li><strong>ベルヌーイ分布</strong>、<strong>ポアソン分布</strong>、<strong>マハラノビス距離</strong>、<strong>ユークリッド距離</strong></li>
+                    </ul>
+                </div>
+
+                <!-- 数学基礎 -->
+                <h1 id="mathematical-foundation">数学基礎</h1>
+                
+                <p>AIと機械学習の理解には、確率統計と微分積分の基礎知識が不可欠です。これらの数学的概念は、アルゴリズムの動作原理を理解し、モデルの評価・改善を行う上での基盤となります。</p>
+
+                <h2 id="optimization">最適化数学</h2>
+
+                <h3 id="calculus">微分・積分</h3>
+                <p>機械学習における最適化では、損失関数を最小化するために勾配降下法が用いられます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\frac{\partial}{\partial \theta} J(\theta) = \frac{\partial}{\partial \theta} \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2$$
+                </div>
+
+                <h3 id="gradient-descent">勾配降下法</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 最適化アルゴリズム</h3>
+                    <div style="text-align: center; margin: 20px 0;">
+                        $$\theta_{t+1} = \theta_t - \alpha \nabla_\theta J(\theta_t)$$
+                        $$\text{where } \alpha \text{: learning rate}$$
+                    </div>
+                </div>
+
+                <h3 id="least-squares">最小二乗法</h3>
+                <p>線形回帰の基本原理である最小二乗法は、誤差の二乗和を最小化します。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\min_{\theta} \sum_{i=1}^{n} (y_i - \theta^T x_i)^2$$
+                </div>
+
+                <!-- 確率統計基礎 -->
+                <h1 id="statistics-foundation">統計学基礎</h1>
+
+                <h2 id="probability">確率理論</h2>
+
+                <h3 id="probability-distribution">確率分布</h3>
+                <ul>
+                    <li><strong>確率変数</strong>：実験の結果を数値で表現する変数</li>
+                    <li><strong>確率密度関数</strong>：連続確率変数の分布を記述する関数</li>
+                    <li><strong>確率質量関数</strong>：離散確率変数の分布を記述する関数</li>
+                </ul>
+
+                <h3 id="conditional-probability">条件付き確率</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(A|B) = \frac{P(A \cap B)}{P(B)}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 ベイズの定理</h3>
+                    <div style="text-align: center; margin: 20px 0;">
+                        $$P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)}$$
+                    </div>
+                </div>
+
+                <h2 id="common-distributions">主要確率分布</h2>
+
+                <h3 id="normal-distribution">正規分布</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+                </div>
+
+                <h3 id="bernoulli-distribution">ベルヌーイ分布</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(X = k) = p^k(1-p)^{1-k}, \quad k \in \{0, 1\}$$
+                </div>
+
+                <h3 id="binomial-distribution">二項分布</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+                </div>
+
+                <h3 id="poisson-distribution">ポアソン分布</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(X = k) = \frac{\lambda^k e^{-\lambda}}{k!}$$
+                </div>
+
+                <!-- 記述統計 -->
+                <h1 id="descriptive-statistics">記述統計</h1>
+
+                <h2 id="central-tendency">中心傾向</h2>
+
+                <h3 id="mean">平均（期待値）</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$E[X] = \bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$$
+                </div>
+
+                <h3 id="median">中央値</h3>
+                <p>データを大小順に並べたときの中央の値。外れ値の影響を受けにくい。</p>
+
+                <h3 id="mode">最頻値</h3>
+                <p>データ中で最も頻繁に現れる値。カテゴリデータの代表値として使用。</p>
+
+                <h2 id="variability">ばらつきの指標</h2>
+
+                <h3 id="variance">分散・標準偏差</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Var}(X) = \sigma^2 = E[(X - \mu)^2] = \frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2$$
+                    $$\text{標準偏差} = \sigma = \sqrt{\text{Var}(X)}$$
+                </div>
+
+                <h3 id="covariance">共分散</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Cov}(X,Y) = E[(X - E[X])(Y - E[Y])]$$
+                </div>
+
+                <h3 id="correlation">相関係数</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$r = \frac{\text{Cov}(X,Y)}{\sigma_X \sigma_Y}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚠️ 疑似相関</h3>
+                    <p>実際には因果関係がないにもかかわらず、第三の変数の影響により見かけ上相関があるように見える現象。データ分析時の注意点。</p>
+                </div>
+
+                <h3 id="partial-correlation">偏相関係数</h3>
+                <p>第三の変数の影響を除いた時の2変数間の相関の強さ。疑似相関を排除するために使用。</p>
+
+                <!-- 距離と類似度 -->
+                <h1 id="distance-similarity">距離と類似度</h1>
+
+                <h2 id="distance-measures">距離尺度</h2>
+
+                <h3 id="euclidean-distance">ユークリッド距離</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$d(x, y) = \sqrt{\sum_{i=1}^{n}(x_i - y_i)^2}$$
+                </div>
+
+                <h3 id="mahalanobis-distance">マハラノビス距離</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$d_M(x, y) = \sqrt{(x - y)^T S^{-1} (x - y)}$$
+                    $$\text{where } S \text{: covariance matrix}$$
+                </div>
+
+                <h3 id="cosine-similarity">コサイン類似度</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\cos(\theta) = \frac{A \cdot B}{|A| |B|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}$$
+                </div>
+
+                <!-- 推定・検定 -->
+                <h1 id="estimation-testing">統計的推定と検定</h1>
+
+                <h2 id="parameter-estimation">パラメータ推定</h2>
+
+                <h3 id="maximum-likelihood">最尤法</h3>
+                <p>観測されたデータが最も尤もらしく生成されるパラメータを推定する方法。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\hat{\theta}_{ML} = \arg\max_\theta L(\theta) = \arg\max_\theta \prod_{i=1}^{n} f(x_i | \theta)$$
+                </div>
+
+                <h2 id="hypothesis-testing">仮説検定</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 仮説検定の構造</h3>
+                    <ul>
+                        <li><strong>帰無仮説（H₀）</strong>：効果がないという仮説</li>
+                        <li><strong>対立仮説（H₁）</strong>：効果があるという仮説</li>
+                        <li><strong>p値</strong>：帰無仮説が正しいと仮定した時の観測結果の確率</li>
+                        <li><strong>有意水準（α）</strong>：第一種の誤りを犯す確率の上限</li>
+                    </ul>
+                </div>
+
+                <!-- 情報理論 -->
+                <h1 id="information-theory">情報理論</h1>
+
+                <h2 id="mutual-information">相互情報量</h2>
+                <p>2つの確率変数間の依存関係の強さを表す指標。特徴選択で重要。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$I(X;Y) = \sum_{x,y} p(x,y) \log \frac{p(x,y)}{p(x)p(y)}$$
+                </div>
+
+                <h2 id="entropy">エントロピー</h2>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$H(X) = -\sum_{x} p(x) \log p(x)$$
+                </div>
+
+                <!-- 時系列解析 -->
+                <h1 id="time-series">時系列解析</h1>
+
+                <h2 id="moving-average">移動平均</h2>
+                <p>時系列データの平滑化手法。トレンドの把握やノイズ除去に使用。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$MA_t = \frac{1}{n}\sum_{i=0}^{n-1} x_{t-i}$$
+                </div>
+
+                <h2 id="frequency-distribution">度数分布</h2>
+                <p>データの各値や階級の出現頻度をまとめた表やグラフ。データの分布形状を把握するための基本的手法。</p>
+
+                <!-- 異常値検出 -->
+                <h1 id="outlier-detection">外れ値の検出</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 外れ値検出手法</h3>
+                    <ul>
+                        <li><strong>IQR法</strong>：四分位範囲の1.5倍を超える値</li>
+                        <li><strong>Z-score法</strong>：標準化後の絶対値が3を超える値</li>
+                        <li><strong>統計的検定</strong>：Grubbs検定、Dixon検定等</li>
+                        <li><strong>機械学習手法</strong>：Isolation Forest、Local Outlier Factor等</li>
+                    </ul>
+                </div>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>正規分布の性質</strong>：68-95-99.7ルール、標準化の意味</li>
+                        <li><strong>相関と因果</strong>：相関係数の解釈、疑似相関の概念</li>
+                        <li><strong>確率分布の特徴</strong>：ベルヌーイ、二項、ポアソン分布の適用場面</li>
+                        <li><strong>距離尺度の使い分け</strong>：ユークリッド距離とマハラノビス距離</li>
+                        <li><strong>最小二乗法</strong>：線形回帰との関係、最適化の意味</li>
+                        <li><strong>ベイズの定理</strong>：条件付き確率の計算、ナイーブベイズとの関連</li>
+                        <li><strong>中心極限定理</strong>：サンプル平均の分布、統計的推論の基礎</li>
+                        <li><strong>最尤推定</strong>：パラメータ推定の原理、対数尤度</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>相関と因果の混同</strong>：相関があっても因果関係があるとは限らない</li>
+                        <li><strong>平均と中央値の誤解</strong>：外れ値がある場合の代表値選択</li>
+                        <li><strong>確率の加法定理の誤用</strong>：排反事象でない場合のP(A∪B)計算</li>
+                        <li><strong>条件付き確率の逆転</strong>：P(A|B)とP(B|A)は一般的に異なる</li>
+                        <li><strong>分散の計算間違い</strong>：不偏分散と標本分散の使い分け</li>
+                        <li><strong>検定の多重性</strong>：複数検定による第一種過誤の増加</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>AIに必要な数理・統計知識は、機械学習アルゴリズムの理解と実装において不可欠な基盤です。確率統計の基本概念から最適化数学まで、幅広い数学的素養が求められます。</p>
+                
+                <p>特に重要なのは、確率分布の性質、統計的推定・検定、距離と類似度の概念、最適化手法の原理です。これらの知識は、データの特性理解、モデル選択、性能評価において中心的な役割を果たします。</p>
+                
+                <p>G検定では、各統計量の定義と計算方法、確率分布の特徴、相関と因果の区別といった基本的な統計概念の理解が問われます。実際の機械学習プロジェクトにおいても、これらの知識は問題設定から結果解釈まで一貫して活用されます。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">確率分布</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">確率変数がとりうる値とその確率を対応づけた関数。データ生成過程をモデル化。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">期待値</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">確率分布の平均値。確率変数の中心傾向を表す代表値。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">分散</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">確率変数の散らばりの度合いを表す指標。期待値からの偏差の二乗の期待値。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">相関係数</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2つの変数間の線形関係の強さを-1から1の値で表す指標。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">共分散</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2つの確率変数の共変動を表す指標。相関係数の分子部分。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">最尤法</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">観測データが最も尤もらしく生じるパラメータを推定する統計的手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">最小二乗法</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">誤差の二乗和を最小化することによりパラメータを推定する回帰分析の基本手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">正規分布</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">自然界で最も基本的な連続確率分布。中心極限定理により多くの現象で近似的に成立。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ベルヌーイ分布</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">成功・失敗の2つの結果のみをもつ試行の確率分布。二項分布の基本要素。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ポアソン分布</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">単位時間あたりの発生回数をモデル化する離散確率分布。稀な事象の統計モデル。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">条件付き確率</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ある事象Bが起こったという条件のもとで事象Aが起こる確率。P(A|B)で表記。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">帰無仮説</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">統計的検定において、効果や差がないという基準となる仮説。H₀で表記。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">対立仮説</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">帰無仮説に対立する仮説。研究者が証明したい仮説。H₁で表記。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">疑似相関</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">実際には因果関係がないが、第三の変数の影響で見かけ上の相関が現れる現象。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ユークリッド距離</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">n次元空間での2点間の直線距離。最も基本的な距離尺度。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">マハラノビス距離</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データの分散共分散構造を考慮した距離尺度。外れ値検出で重要。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">コサイン類似度</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2つのベクトルの角度の余弦値で表される類似度。文書分析やレコメンドで使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">相互情報量</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2つの確率変数間の依存関係の強さを表す情報理論の指標。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">移動平均</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">時系列データの一定期間の平均値を逐次計算する平滑化手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">外れ値</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データ分布の大部分から大きく外れた値。異常検知や前処理で重要。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study7-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 7-2
+                        </a>
+                        <a href="study7-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 7-4
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

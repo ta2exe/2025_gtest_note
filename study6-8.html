@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-8: モデルの解釈性 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-8: モデルの解釈性</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-8</h1>
+                <h2 class="content-subtitle">モデルの解釈性</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>モデルの解釈性が必要な背景について理解する</li>
+                        <li>解釈性が必要なユースケースについて理解する</li>
+                        <li>解釈性の向上に寄与する代表的な手法について理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>CAM</strong></li>
+                        <li><strong>Grad-CAM</strong></li>
+                        <li><strong>LIME</strong></li>
+                        <li><strong>Permutation Importance</strong></li>
+                        <li><strong>SHAP</strong></li>
+                        <li><strong>説明可能AI（XAI）</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">説明可能AI（XAI）の重要性</h1>
+                
+                <p>モデルの解釈性（Interpretability）とは、AI・機械学習モデルがどのような根拠で予測を行っているかを人間が理解できるようにする技術です。深層学習の高性能化に伴い「ブラックボックス化」が進む中、信頼性、透明性、説明責任が求められる領域で重要性が急速に高まっています。</p>
+
+                <p>医療診断、金融審査、刑事司法、自動運転など、人命や社会に大きな影響を与える分野では、単なる精度向上だけでなく、判断の根拠を明確にする説明可能AI（Explainable AI, XAI）が必須となっています。</p>
+
+                <h2 id="interpretability-need">解釈性が必要な背景</h2>
+
+                <h3 id="black-box-problem">ブラックボックス問題</h3>
+                <ul>
+                    <li><strong>深層学習の複雑性</strong>：数百万〜数十億パラメータによる非線形変換</li>
+                    <li><strong>意思決定プロセスの不透明性</strong>：入力から出力への変換過程が不明</li>
+                    <li><strong>予測根拠の不明確さ</strong>：なぜその結果になったか説明困難</li>
+                    <li><strong>デバッグの困難性</strong>：エラーや偏見の原因特定が困難</li>
+                </ul>
+
+                <h3 id="social-requirements">社会的要請</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🏛️ 規制・法的要求</h3>
+                    <ul>
+                        <li><strong>GDPR（EU一般データ保護規則）</strong>：自動決定に関する説明権</li>
+                        <li><strong>金融業界規制</strong>：信用スコアリングの説明義務</li>
+                        <li><strong>医療機器承認</strong>：診断根拠の提示要求</li>
+                        <li><strong>AI倫理ガイドライン</strong>：透明性・説明責任の原則</li>
+                        <li><strong>監査・検証要求</strong>：アルゴリズムの公正性検証</li>
+                    </ul>
+                </div>
+
+                <h1 id="interpretability-types">解釈性の分類</h1>
+
+                <h2 id="global-vs-local">グローバル vs ローカル解釈性</h2>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Global}: f: X \rightarrow Y \text{ 全体の動作理解}$$
+                    $$\text{Local}: f(x_i) = y_i \text{ 個別予測の理解}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔍 解釈性の種類</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>グローバル解釈性</strong>:
+・モデル全体の動作パターン理解
+・特徴量の全般的重要度
+・決定境界の可視化
+・代表例: Permutation Importance
+
+<strong>ローカル解釈性</strong>:
+・個別予測の説明
+・特定入力に対する特徴量寄与
+・予測の信頼性評価
+・代表例: LIME, SHAP
+
+<strong>インスタンス別解釈性</strong>:
+・類似事例の提示
+・反実仮想説明（Counterfactual）
+・プロトタイプベース説明
+・代表例: Influence Functions
+                    </pre>
+                </div>
+
+                <h2 id="intrinsic-vs-post-hoc">本質的 vs 事後的解釈性</h2>
+                <ul>
+                    <li><strong>本質的解釈性（Intrinsic）</strong>：線形回帰、決定木等の解釈しやすいモデル</li>
+                    <li><strong>事後的解釈性（Post-hoc）</strong>：学習後にブラックボックスを説明する手法</li>
+                    <li><strong>トレードオフ</strong>：解釈性 vs 予測性能のバランス調整</li>
+                </ul>
+
+                <h1 id="critical-use-cases">解釈性が重要なユースケース</h1>
+
+                <h2 id="healthcare-applications">医療・ヘルスケア</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏥 医療分野での要求</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>医療画像診断</strong>:
+・病変部位の特定と根拠提示
+・誤診リスクの最小化
+・医師の診断支援（Human-in-the-loop）
+・規制当局への説明責任
+
+<strong>薬物発見・治療計画</strong>:
+・薬物相互作用の予測根拠
+・副作用リスクの説明
+・個別化医療の根拠提示
+・臨床試験での透明性確保
+
+<strong>課題</strong>:
+・生死に関わる判断の重大性
+・医師・患者への説明義務
+・規制機関による厳格な審査
+・医療過誤訴訟での説明責任
+                    </pre>
+                </div>
+
+                <h2 id="finance-applications">金融・信用評価</h2>
+                <ul>
+                    <li><strong>融資審査</strong>：信用スコアの算定根拠、拒否理由の説明</li>
+                    <li><strong>保険料設定</strong>：リスク評価の透明性、差別防止</li>
+                    <li><strong>不正検出</strong>：取引異常の検出根拠、誤検知の最小化</li>
+                    <li><strong>投資判断</strong>：運用アルゴリズムの説明責任</li>
+                </ul>
+
+                <h2 id="legal-criminal-justice">刑事司法・法執行</h2>
+                <ul>
+                    <li><strong>再犯リスク評価</strong>：保釈・刑期判断の根拠提示</li>
+                    <li><strong>犯罪予測</strong>：パトロール配置の公正性確保</li>
+                    <li><strong>証拠分析</strong>：DNA鑑定、画像解析の信頼性</li>
+                    <li><strong>法的責任</strong>：アルゴリズムバイアスへの対処</li>
+                </ul>
+
+                <h1 id="visual-explanation-methods">視覚的説明手法</h1>
+
+                <h2 id="cam-methods">CAM（Class Activation Mapping）</h2>
+                <p>CNNの最終畳み込み層の活性化を可視化し、クラス予測に重要な画像領域を特定：</p>
+
+                <h3 id="cam-mechanism">CAMの仕組み</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$M_c(x,y) = \sum_k w_k^c f_k(x,y)$$
+                    $$\text{where } w_k^c \text{ は クラスcに対する重み}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 CAMの特徴と制限</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>利点</strong>:
+・直感的な視覚的説明
+・クラス別の注目領域可視化
+・計算効率が良い
+
+<strong>制限</strong>:
+・Global Average Pooling が必要
+・アーキテクチャの制約
+・既存モデルへの適用困難
+
+<strong>改良版</strong>:
+・Grad-CAM: 勾配利用でアーキテクチャ制約解消
+・Grad-CAM++: より細かい局在化
+・Score-CAM: 勾配なしの確信度ベース
+                    </pre>
+                </div>
+
+                <h2 id="grad-cam">Grad-CAM</h2>
+                <p>勾配情報を利用してCAMの制約を解消した汎用的手法：</p>
+
+                <h3 id="grad-cam-formula">Grad-CAM算出</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\alpha_k^c = \frac{1}{Z} \sum_i \sum_j \frac{\partial y^c}{\partial A_{ij}^k}$$
+                    $$L_{Grad-CAM}^c = \text{ReLU}\left(\sum_k \alpha_k^c A^k\right)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ Grad-CAMの優位性</h3>
+                    <ul>
+                        <li><strong>アーキテクチャ非依存</strong>：CNN、Transformer等に幅広く適用</li>
+                        <li><strong>レイヤー指定可能</strong>：任意の畳み込み層で可視化</li>
+                        <li><strong>既存モデル対応</strong>：再学習不要で適用可能</li>
+                        <li><strong>マルチタスク対応</strong>：複数出力の同時可視化</li>
+                        <li><strong>実装簡易性</strong>：オープンソースツール豊富</li>
+                    </ul>
+                </div>
+
+                <h1 id="model-agnostic-methods">モデル非依存説明手法</h1>
+
+                <h2 id="lime">LIME（Local Interpretable Model-agnostic Explanations）</h2>
+                <p>任意のブラックボックスモデルの局所的予測を解釈可能なモデルで説明：</p>
+
+                <h3 id="lime-algorithm">LIMEアルゴリズム</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\xi(x) = \arg\min_{g \in G} L(f, g, \pi_x) + \Omega(g)$$
+                    $$\text{where } G \text{ は解釈可能モデル集合}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 LIME処理ステップ</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+1. <strong>近傍サンプル生成</strong>:
+   ・入力インスタンス周辺のサンプル作成
+   ・特徴量のランダムマスキング・摂動
+
+2. <strong>ブラックボックス予測</strong>:
+   ・生成サンプルの予測値取得
+   ・距離に基づく重み付け
+
+3. <strong>局所モデル学習</strong>:
+   ・線形回帰等の解釈可能モデル学習
+   ・重要特徴量の特定
+
+4. <strong>説明生成</strong>:
+   ・特徴量寄与度の可視化
+   ・正負の影響度提示
+
+<strong>適用領域</strong>:
+・テキスト分類（単語重要度）
+・画像分類（領域重要度）  
+・表形式データ（特徴量寄与）
+                    </pre>
+                </div>
+
+                <h2 id="shap">SHAP（SHapley Additive exPlanations）</h2>
+                <p>ゲーム理論のShapley値に基づく統一的な特徴量重要度算出手法：</p>
+
+                <h3 id="shapley-value">Shapley値の理論</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\phi_i = \sum_{S \subseteq N \setminus \{i\}} \frac{|S|!(|N|-|S|-1)!}{|N|!}[f(S \cup \{i\}) - f(S)]$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 SHAPの理論的性質</h3>
+                    <ul>
+                        <li><strong>効率性（Efficiency）</strong>：全特徴量寄与の合計 = 予測値 - ベースライン</li>
+                        <li><strong>対称性（Symmetry）</strong>：同じ寄与の特徴量は同じ重要度</li>
+                        <li><strong>ダミー性（Dummy）</strong>：無関係特徴量の重要度は0</li>
+                        <li><strong>加法性（Additivity）</strong>：複合モデルの寄与は個別寄与の和</li>
+                        <li><strong>一意性</strong>：上記4条件を満たす寄与度は唯一</li>
+                    </ul>
+                </div>
+
+                <h3 id="shap-variants">SHAP手法の種類</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚙️ SHAP実装手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>TreeSHAP</strong>:
+・決定木系モデル（XGBoost, Random Forest等）
+・効率的な厳密計算
+・O(TLD²) 時間計算量
+
+<strong>DeepSHAP</strong>:
+・深層学習モデル対応
+・勾配×入力の近似手法
+・DeepLIFTとの理論的関連
+
+<strong>KernelSHAP</strong>:
+・任意モデル対応の汎用手法
+・サンプリングベースの近似
+・LIMEの統一的解釈
+
+<strong>LinearSHAP</strong>:
+・線形モデル用の高速算出
+・係数がそのまま寄与度
+
+<strong>Partition SHAP</strong>:
+・階層構造データ対応
+・スケーラブルな近似手法
+                    </pre>
+                </div>
+
+                <h1 id="feature-importance-methods">特徴量重要度手法</h1>
+
+                <h2 id="permutation-importance">Permutation Importance</h2>
+                <p>特徴量をランダムシャッフルした際の性能劣化で重要度を測定：</p>
+
+                <h3 id="permutation-algorithm">アルゴリズム</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Importance}_j = \text{Score}(\text{original}) - \text{Score}(\text{permuted}_j)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 Permutation Importance手順</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+1. <strong>ベースライン性能測定</strong>:
+   ・元データでのモデル性能算出
+
+2. <strong>特徴量別シャッフル</strong>:
+   ・各特徴量を個別にランダム置換
+   ・他特徴量は元の値を保持
+
+3. <strong>性能劣化測定</strong>:
+   ・シャッフル後の性能算出
+   ・性能差が特徴量重要度
+
+4. <strong>統計的検証</strong>:
+   ・複数回実行で信頼区間算出
+   ・有意性検定による妥当性確認
+
+<strong>利点</strong>:
+・モデル非依存（任意アルゴリズム対応）
+・直感的理解（性能への直接影響）
+・実装簡単（既存モデルそのまま使用）
+
+<strong>注意点</strong>:
+・計算コスト（特徴量数×評価回数）
+・特徴量間相関の影響
+・分布外データでの不安定性
+                    </pre>
+                </div>
+
+                <h1 id="advanced-explanation-methods">高度な説明手法</h1>
+
+                <h2 id="integrated-gradients">Integrated Gradients</h2>
+                <p>勾配の積分による帰属度計算で、公理的性質を満たす説明手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{IG}_i(x) = (x_i - x'_i) \times \int_{\alpha=0}^1 \frac{\partial F(x' + \alpha(x-x'))}{\partial x_i} d\alpha$$
+                </div>
+
+                <ul>
+                    <li><strong>Sensitivity</strong>：重要でない特徴量の帰属度は0</li>
+                    <li><strong>Implementation Invariance</strong>：機能的に同等モデルの帰属度一致</li>
+                    <li><strong>Completeness</strong>：帰属度の和 = 予測差</li>
+                    <li><strong>Linearity</strong>：線形結合モデルでの加法性</li>
+                </ul>
+
+                <h2 id="counterfactual-explanations">反実仮想説明</h2>
+                <p>「もしXが違っていたら予測はどう変わるか」を示す説明手法：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💭 反実仮想の活用例</h3>
+                    <ul>
+                        <li><strong>融資拒否</strong>：「年収があと50万円高ければ承認」</li>
+                        <li><strong>医療診断</strong>：「この値が正常範囲なら健康判定」</li>
+                        <li><strong>採用選考</strong>：「スキルXがあれば通過」</li>
+                        <li><strong>商品推薦</strong>：「この属性変更で他商品推薦」</li>
+                    </ul>
+                </div>
+
+                <h2 id="attention-visualization">Attention可視化</h2>
+                <p>Transformerモデルの注意機構の可視化による解釈性向上：</p>
+
+                <ul>
+                    <li><strong>Multi-Head Attention</strong>：各ヘッドの注目パターン可視化</li>
+                    <li><strong>Layer-wise Analysis</strong>：深さによる注目対象変化</li>
+                    <li><strong>BERTology</strong>：言語モデルの内部表現分析</li>
+                    <li><strong>Probing Tasks</strong>：特定言語現象の捕捉能力測定</li>
+                </ul>
+
+                <h1 id="evaluation-challenges">評価と課題</h1>
+
+                <h2 id="explanation-evaluation">説明品質の評価</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📏 評価指標の分類</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>忠実度（Fidelity）</strong>:
+・説明がモデルの実際動作を反映
+・Insertion/Deletion metrics
+・重要特徴量除去での性能変化
+
+<strong>理解可能性（Comprehensibility）</strong>:
+・人間にとっての分かりやすさ  
+・ユーザースタディによる評価
+・主観的・文脈依存
+
+<strong>安定性（Stability）</strong>:
+・類似入力での説明一貫性
+・ノイズ耐性
+・再現可能性
+
+<strong>公正性（Fairness）</strong>:
+・保護属性による説明差異
+・バイアス検出・軽減
+・グループ間公平性
+                    </pre>
+                </div>
+
+                <h2 id="current-limitations">現在の限界と課題</h2>
+                <ul>
+                    <li><strong>手法間の不一致</strong>：同一データで異なる説明結果</li>
+                    <li><strong>評価基準の不統一</strong>：客観的品質指標の欠如</li>
+                    <li><strong>計算コスト</strong>：大規模モデルでの説明生成負荷</li>
+                    <li><strong>因果関係の混同</strong>：相関と因果の区別困難</li>
+                    <li><strong>敵対的説明</strong>：意図的に誤解を招く説明可能性</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>XAIの必要性</strong>：ブラックボックス問題、規制要求、社会的責任</li>
+                        <li><strong>解釈性分類</strong>：グローバル vs ローカル、本質的 vs 事後的</li>
+                        <li><strong>CAM/Grad-CAM</strong>：CNN可視化手法の代表、アーキテクチャ制約</li>
+                        <li><strong>LIME</strong>：モデル非依存、局所線形近似による説明</li>
+                        <li><strong>SHAP</strong>：Shapley値理論、統一的特徴量寄与度</li>
+                        <li><strong>Permutation Importance</strong>：特徴量シャッフルによる重要度測定</li>
+                        <li><strong>重要ユースケース</strong>：医療、金融、司法での説明責任</li>
+                        <li><strong>評価課題</strong>：忠実度、理解可能性、安定性の評価困難</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>精度 = 信頼性</strong>：高精度でも説明が間違っている可能性</li>
+                        <li><strong>相関 = 因果</strong>：説明は相関関係、因果関係ではない</li>
+                        <li><strong>CAM = 全CNN対応</strong>：元CAMはGAPが必要、Grad-CAMが汎用</li>
+                        <li><strong>LIME = SHAP同等</strong>：理論基盤と適用範囲が異なる</li>
+                        <li><strong>解釈性 = 性能犠牲</strong>：事後説明で性能維持可能</li>
+                        <li><strong>説明 = 客観的真実</strong>：手法により異なる説明、主観性あり</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>モデルの解釈性は、AIの社会実装において信頼性と透明性を確保する重要技術です。医療、金融、司法等の高リスク分野では規制要求もあり、技術的精度だけでなく説明責任が必須となっています。</p>
+                
+                <p>CAM/Grad-CAM、LIME、SHAP、Permutation Importance等の代表的手法により、ブラックボックスモデルの予測根拠を可視化・定量化できますが、手法間の不一致や評価基準の未確立など課題も残されています。</p>
+                
+                <p>G検定では、XAIの社会的必要性、主要手法の特徴と適用範囲、重要ユースケースでの要求事項について体系的な理解が求められます。特に技術的仕組みより、なぜ・どこで・どのような説明が必要かの理解が重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">説明可能AI（XAI）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Explainable AI。AIシステムの判断過程や根拠を人間が理解できるように説明する技術・概念。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CAM</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Class Activation Mapping。CNNの最終畳み込み層の活性化を可視化し、クラス予測に重要な領域を特定する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Grad-CAM</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">勾配情報を利用したCAMの拡張手法。任意のCNNアーキテクチャに適用可能で再学習不要。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">LIME</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Local Interpretable Model-agnostic Explanations。任意のモデルの局所予測を線形モデルで近似説明する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">SHAP</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">SHapley Additive exPlanations。ゲーム理論のShapley値に基づく統一的な特徴量寄与度算出手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Permutation Importance</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">特徴量をランダムシャッフルした際のモデル性能劣化で重要度を測定する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ブラックボックス問題</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深層学習等の複雑モデルで入力から出力への変換過程が不透明な問題。予測根拠の説明が困難。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">グローバル解釈性</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">モデル全体の動作パターンや特徴量の全般的重要度を理解する解釈性。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ローカル解釈性</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">特定の個別予測に対する説明。その入力に対してなぜその結果になったかの理解。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Shapley値</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ゲーム理論の協力ゲームにおける各プレイヤーの貢献度を公平に算出する値。SHAPの理論基盤。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">反実仮想説明</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">「もし条件Xが違っていたら結果はどう変わるか」を示す説明手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Attention可視化</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Transformerの注意機構で各入力要素への注目度を可視化し、モデルの判断根拠を理解する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">忠実度（Fidelity）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">説明がモデルの実際の動作をどの程度正確に反映しているかの指標。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">事後的解釈性</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習済みのブラックボックスモデルに対して後から説明を付加する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">本質的解釈性</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">線形回帰、決定木等、モデル自体が人間にとって理解しやすい構造を持つ解釈性。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-7.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-7
+                        </a>
+                        <a href="study6-9.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-9
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

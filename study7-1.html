@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7-1: AIプロジェクトの進め方 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-magenta">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 7-1: AIプロジェクトの進め方</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 7-1</h1>
+                <h2 class="content-subtitle">AIプロジェクトの進め方</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">AIの社会実装に向けて</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>AIプロジェクトをどのように進めるか、全体像と各フェーズで注意すべき点などを理解する</li>
+                        <li>AIプロジェクトを進めるにあたって、考えるべき論点や基本となる概念、国内外の議論、並びに事例を理解する</li>
+                        <li>サービスやプロダクトとしてAIシステムを世に出す局面で注意すべきことを理解する</li>
+                        <li>AIの運用に必要となるモデルのヘルスモニタリングやライフサイクル管理等を理解する</li>
+                        <li>サービスやプロダクトとしてAIシステムを世に出す局面で注意すべきことを理解する</li>
+                        <li>AIの運用にあたって、どのようなことが必要か理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>AIのビジネス活用</strong></li>
+                        <li><strong>AIプロジェクトの進め方</strong></li>
+                        <li><strong>BPR</strong></li>
+                        <li><strong>CRISP-DM</strong></li>
+                        <li><strong>CRISP-ML</strong></li>
+                        <li><strong>Docker</strong></li>
+                        <li><strong>Jupyter Notebook</strong></li>
+                        <li><strong>MLOps</strong></li>
+                        <li><strong>PoC</strong></li>
+                        <li><strong>Python</strong></li>
+                        <li><strong>Web API</strong></li>
+                        <li><strong>アジャイル</strong></li>
+                        <li><strong>ウォーターフォール</strong></li>
+                        <li><strong>オープン・イノベーション</strong></li>
+                        <li><strong>クラウド</strong></li>
+                        <li><strong>産学連携</strong></li>
+                        <li><strong>ステークホルダーのニーズ</strong></li>
+                        <li><strong>データサイエンティスト</strong></li>
+                        <li><strong>他企業や他業種との連携</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">AIプロジェクト成功の鍵</h1>
+                
+                <p>AIプロジェクトの成功は、技術力だけでなく、ビジネス理解・データ品質・チーム編成・プロジェクト管理・運用体制の総合力によって決まります。従来のITプロジェクトとは異なる特性を理解し、適切な方法論とプロセスを適用することが重要です。</p>
+
+                <p>CRISP-DM等の標準プロセス、PoC（概念実証）による段階的検証、MLOpsによる継続的運用、ステークホルダー間の密な連携が、AI技術の確実な社会実装を実現します。</p>
+
+                <h2 id="ai-project-characteristics">AIプロジェクトの特性</h2>
+
+                <h3 id="traditional-vs-ai">従来ITプロジェクト vs AIプロジェクト</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 プロジェクト特性の比較</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>従来ITプロジェクト</strong>:
+・明確な要件定義
+・決定論的な結果
+・線形的な進行（設計→開発→テスト）
+・予測可能な品質・性能
+
+<strong>AIプロジェクト</strong>:
+・曖昧な要件（「賢く判断して欲しい」）
+・確率的な結果（精度・再現率等）
+・反復的な進行（仮説→実験→検証）
+・データ依存の品質・性能
+
+<strong>AI特有の課題</strong>:
+・データ品質がモデル性能を左右
+・ブラックボックス問題
+・継続的な性能劣化（データドリフト）
+・倫理的・法的課題への対応
+・説明責任の確保
+                    </pre>
+                </div>
+
+                <h1 id="crisp-dm">CRISP-DM方法論</h1>
+
+                <h2 id="crisp-dm-overview">CRISP-DM（Cross Industry Standard Process for Data Mining）</h2>
+                <p>データマイニングプロジェクトの業界標準プロセスモデル：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Business Understanding} \rightarrow \text{Data Understanding} \rightarrow \text{Data Preparation}$$
+                    $$\downarrow \qquad \qquad \qquad \qquad \qquad \qquad \qquad \uparrow$$
+                    $$\text{Deployment} \leftarrow \text{Evaluation} \leftarrow \text{Modeling}$$
+                </div>
+
+                <h3 id="crisp-dm-phases">CRISP-DMの6フェーズ</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 各フェーズの詳細</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>1. Business Understanding（ビジネス理解）</strong>:
+・ビジネス目標の明確化
+・成功指標（KPI）の設定
+・プロジェクトスコープの定義
+・リスクと制約条件の洗い出し
+
+<strong>2. Data Understanding（データ理解）</strong>:
+・利用可能データの収集・調査
+・データ品質の評価
+・初期的なデータ探索・可視化
+・データに関する洞察の獲得
+
+<strong>3. Data Preparation（データ準備）</strong>:
+・データクレンジング
+・特徴量エンジニアリング
+・統合・変換処理
+・学習用データセット構築
+
+<strong>4. Modeling（モデリング）</strong>:
+・アルゴリズム選択
+・パラメータ調整
+・モデル学習・最適化
+・複数手法の比較検討
+
+<strong>5. Evaluation（評価）</strong>:
+・モデル性能評価
+・ビジネス目標達成度確認
+・デプロイメント準備状況確認
+
+<strong>6. Deployment（展開）</strong>:
+・本番環境への実装
+・運用体制の確立
+・継続的監視・改善
+                    </pre>
+                </div>
+
+                <h2 id="crisp-ml">CRISP-ML（Q）</h2>
+                <p>機械学習プロジェクト向けのCRISP-DM拡張版：</p>
+
+                <ul>
+                    <li><strong>品質保証の強化</strong>：モデル品質管理プロセス追加</li>
+                    <li><strong>継続的監視</strong>：運用後のパフォーマンス追跡</li>
+                    <li><strong>フェーズ詳細化</strong>：ML特有のタスク明確化</li>
+                    <li><strong>品質ゲート</strong>：各フェーズでの品質基準設定</li>
+                </ul>
+
+                <h1 id="project-methodologies">開発方法論</h1>
+
+                <h2 id="waterfall-vs-agile">ウォーターフォール vs アジャイル</h2>
+
+                <h3 id="waterfall-approach">ウォーターフォール手法</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ ウォーターフォールの特徴</h3>
+                    <ul>
+                        <li><strong>順次進行</strong>：要件定義→設計→開発→テスト→リリース</li>
+                        <li><strong>事前計画重視</strong>：詳細な計画・文書作成</li>
+                        <li><strong>変更コスト大</strong>：後戻り困難</li>
+                        <li><strong>適用場面</strong>：要件明確、規制対応重要、大規模システム</li>
+                        <li><strong>AI適用課題</strong>：不確実性高、実験的要素大</li>
+                    </ul>
+                </div>
+
+                <h3 id="agile-approach">アジャイル手法</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ アジャイルの特徴</h3>
+                    <ul>
+                        <li><strong>反復開発</strong>：短期スプリントでの段階的改善</li>
+                        <li><strong>変化への対応</strong>：要件変更を積極的に受け入れ</li>
+                        <li><strong>顧客協調</strong>：継続的なフィードバック重視</li>
+                        <li><strong>動作ソフトウェア</strong>：文書より実装を重視</li>
+                        <li><strong>AI適用利点</strong>：実験的アプローチ、早期検証可能</li>
+                    </ul>
+                </div>
+
+                <h2 id="bpr">BPR（Business Process Re-engineering）</h2>
+                <p>AI導入に伴うビジネスプロセス根本的見直し：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Current Process} + \text{AI Technology} \neq \text{Optimal Solution}$$
+                    $$\text{Process Re-design} + \text{AI Technology} = \text{Maximum Value}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔧 BPRのステップ</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>現状分析</strong>:
+・既存プロセスの詳細把握
+・ボトルネック・非効率箇所特定
+・コスト・時間・品質の測定
+
+<strong>理想プロセス設計</strong>:
+・AI活用を前提とした最適設計
+・人間とAIの役割分担明確化
+・新たなKPI・評価指標設定
+
+<strong>ギャップ分析</strong>:
+・現状と理想の差異分析
+・必要な変更項目洗い出し
+・実装優先度付け
+
+<strong>変更管理</strong>:
+・組織・人材の変革管理
+・スキル習得・研修計画
+・段階的移行戦略
+                    </pre>
+                </div>
+
+                <h1 id="poc-approach">PoC（Proof of Concept）アプローチ</h1>
+
+                <h2 id="poc-importance">PoCの重要性</h2>
+                <p>AIプロジェクトの不確実性とリスクを最小化するための概念実証：</p>
+
+                <h3 id="poc-objectives">PoC実施目的</h3>
+                <ul>
+                    <li><strong>技術実現可能性検証</strong>：想定アルゴリズムでの目標精度達成可能性</li>
+                    <li><strong>データ品質・量の十分性確認</strong>：利用可能データでの学習可能性</li>
+                    <li><strong>ビジネス価値検証</strong>：ROI・効果測定</li>
+                    <li><strong>運用課題の洗い出し</strong>：システム統合・保守の実現可能性</li>
+                </ul>
+
+                <h3 id="poc-phases">PoC段階的アプローチ</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 段階的PoC実行</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Phase 1: Technical PoC（技術検証）</strong>:
+・アルゴリズム性能検証
+・少量データでの実現可能性確認
+・期間: 2-4週間
+
+<strong>Phase 2: Business PoC（ビジネス検証）</strong>:
+・実際のビジネスデータでの検証
+・業務フロー組み込み実験
+・ROI概算・効果測定
+
+<strong>Phase 3: Production PoC（運用検証）</strong>:
+・本番環境での小規模実装
+・システム統合・性能検証
+・運用プロセス確立
+
+<strong>Go/No-Go判定基準</strong>:
+・技術的実現可能性
+・ビジネス価値創出見込み
+・投資対効果
+・リスク許容範囲
+                    </pre>
+                </div>
+
+                <h1 id="team-structure">AIプロジェクトチーム</h1>
+
+                <h2 id="key-roles">主要な役割と責任</h2>
+
+                <h3 id="data-scientist">データサイエンティスト</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔬 データサイエンティストの役割</h3>
+                    <ul>
+                        <li><strong>統計・機械学習専門知識</strong>：アルゴリズム選択・調整</li>
+                        <li><strong>データ分析・可視化</strong>：探索的データ分析実施</li>
+                        <li><strong>仮説立案・検証</strong>：ビジネス課題の数理的アプローチ</li>
+                        <li><strong>コミュニケーション</strong>：技術的知見のビジネス価値説明</li>
+                        <li><strong>必要スキル</strong>：Python/R、統計学、機械学習、ドメイン知識</li>
+                    </ul>
+                </div>
+
+                <h3 id="team-collaboration">チーム連携体制</h3>
+                <ul>
+                    <li><strong>ビジネスアナリスト</strong>：要件定義・業務プロセス設計</li>
+                    <li><strong>データエンジニア</strong>：データパイプライン・基盤構築</li>
+                    <li><strong>MLエンジニア</strong>：モデル運用・システム統合</li>
+                    <li><strong>プロダクトマネージャー</strong>：全体統括・ステークホルダー調整</li>
+                    <li><strong>ドメインエキスパート</strong>：業界・業務知識提供</li>
+                </ul>
+
+                <h2 id="stakeholder-management">ステークホルダーのニーズ管理</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🤝 ステークホルダー別アプローチ</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>経営層</strong>:
+・ROI・競合優位性重視
+・リスク・コンプライアンス関心
+・戦略的価値の説明必要
+
+<strong>現場担当者</strong>:
+・業務効率化・負荷軽減期待
+・使いやすさ・精度への関心
+・変化への不安・抵抗も
+
+<strong>IT部門</strong>:
+・システム統合・運用性重視
+・セキュリティ・可用性要求
+・技術的実現可能性関心
+
+<strong>法務・コンプライアンス</strong>:
+・規制遵守・リスク管理
+・説明責任・監査対応
+・個人情報保護要求
+                    </pre>
+                </div>
+
+                <h1 id="mlops">MLOps（Machine Learning Operations）</h1>
+
+                <h2 id="mlops-concept">MLOpsの概念</h2>
+                <p>機械学習モデルの継続的統合・継続的デプロイメント・運用の体系化：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{MLOps} = \text{ML} + \text{DevOps} + \text{DataOps}$$
+                </div>
+
+                <h3 id="mlops-components">MLOps構成要素</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚙️ MLOpsパイプライン</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>データパイプライン</strong>:
+・自動データ収集・前処理
+・データ品質監視・検証
+・特徴量ストア管理
+
+<strong>モデルパイプライン</strong>:
+・自動学習・評価・選択
+・A/Bテスト・段階的デプロイ
+・バージョン管理・ロールバック
+
+<strong>運用監視</strong>:
+・モデル性能劣化検知
+・データドリフト監視
+・リアルタイムアラート
+
+<strong>ガバナンス</strong>:
+・モデル承認プロセス
+・監査ログ・トレーサビリティ
+・コンプライアンス管理
+                    </pre>
+                </div>
+
+                <h2 id="model-lifecycle">モデルライフサイクル管理</h2>
+
+                <h3 id="continuous-learning">継続学習システム</h3>
+                <ul>
+                    <li><strong>自動再学習</strong>：性能劣化検知時の自動リトレーニング</li>
+                    <li><strong>オンライン学習</strong>：リアルタイムデータでの逐次更新</li>
+                    <li><strong>モデル比較</strong>：新旧モデルの性能比較・切り替え</li>
+                    <li><strong>フィードバックループ</strong>：予測結果の実測値による検証</li>
+                </ul>
+
+                <h3 id="health-monitoring">ヘルスモニタリング</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Model Health} = f(\text{Accuracy}, \text{Drift}, \text{Latency}, \text{Throughput})$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 監視指標</h3>
+                    <ul>
+                        <li><strong>精度指標</strong>：正解率・適合率・再現率の時系列変化</li>
+                        <li><strong>データドリフト</strong>：入力データ分布の変化検出</li>
+                        <li><strong>コンセプトドリフト</strong>：ターゲット概念の変化</li>
+                        <li><strong>システム指標</strong>：レスポンス時間・スループット・可用性</li>
+                        <li><strong>ビジネス指標</strong>：ROI・コスト効率・ユーザー満足度</li>
+                    </ul>
+                </div>
+
+                <h1 id="technology-stack">技術スタック</h1>
+
+                <h2 id="development-tools">開発ツール・環境</h2>
+
+                <h3 id="python-ecosystem">Python エコシステム</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🐍 Python AI開発スタック</h3>
+                    <ul>
+                        <li><strong>Jupyter Notebook</strong>：探索的データ分析・プロトタイプ開発</li>
+                        <li><strong>NumPy/Pandas</strong>：数値計算・データ操作基盤</li>
+                        <li><strong>scikit-learn</strong>：機械学習アルゴリズム・前処理</li>
+                        <li><strong>TensorFlow/PyTorch</strong>：深層学習フレームワーク</li>
+                        <li><strong>Matplotlib/Seaborn</strong>：データ可視化</li>
+                    </ul>
+                </div>
+
+                <h3 id="containerization">コンテナ化技術</h3>
+                <p><strong>Docker</strong>：環境一貫性・再現性確保の必須技術</p>
+                <ul>
+                    <li><strong>環境隔離</strong>：開発・テスト・本番環境の一致</li>
+                    <li><strong>依存関係管理</strong>：ライブラリバージョン競合回避</li>
+                    <li><strong>スケーラビリティ</strong>：Kubernetes等でのオーケストレーション</li>
+                    <li><strong>CI/CD統合</strong>：自動ビルド・デプロイパイプライン</li>
+                </ul>
+
+                <h2 id="api-architecture">Web API・マイクロサービス</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🌐 API設計原則</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>RESTful API設計</strong>:
+・HTTP標準メソッド使用（GET/POST/PUT/DELETE）
+・ステートレス通信
+・JSONデータ交換
+・適切なHTTPステータスコード
+
+<strong>API Gateway パターン</strong>:
+・認証・認可の一元管理
+・レート制限・監視
+・ルーティング・ロードバランシング
+・バージョン管理・後方互換性
+
+<strong>マイクロサービス分割</strong>:
+・機能別サービス分離
+・独立デプロイ・スケーリング
+・障害隔離・回復力向上
+・チーム自律性確保
+                    </pre>
+                </div>
+
+                <h1 id="collaboration-models">連携・協働モデル</h1>
+
+                <h2 id="open-innovation">オープン・イノベーション</h2>
+                <p>外部組織との連携による革新創出：</p>
+
+                <h3 id="collaboration-types">連携形態</h3>
+                <ul>
+                    <li><strong>産学連携</strong>：大学・研究機関との共同研究</li>
+                    <li><strong>他企業との連携</strong>：技術補完・市場拡大</li>
+                    <li><strong>他業種との連携</strong>：異分野知見融合</li>
+                    <li><strong>スタートアップ協働</strong>：迅速な技術導入</li>
+                    <li><strong>オープンソース活用</strong>：コミュニティ開発成果利用</li>
+                </ul>
+
+                <h2 id="cloud-platforms">クラウドプラットフォーム活用</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">☁️ クラウドAIサービス</h3>
+                    <ul>
+                        <li><strong>AWS</strong>：SageMaker・Rekognition・Comprehend</li>
+                        <li><strong>Google Cloud</strong>：AI Platform・AutoML・Vision API</li>
+                        <li><strong>Microsoft Azure</strong>：Machine Learning・Cognitive Services</li>
+                        <li><strong>利点</strong>：初期投資削減・スケーラビリティ・最新技術利用</li>
+                        <li><strong>課題</strong>：ベンダーロックイン・セキュリティ・コスト管理</li>
+                    </ul>
+                </div>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>CRISP-DM</strong>：6フェーズの名称・内容・循環構造</li>
+                        <li><strong>PoC重要性</strong>：段階的検証・リスク軽減・Go/No-Go判定</li>
+                        <li><strong>アジャイル vs ウォーターフォール</strong>：AIプロジェクトでの適用特性</li>
+                        <li><strong>データサイエンティスト役割</strong>：必要スキル・責任範囲</li>
+                        <li><strong>MLOps概念</strong>：継続的統合・デプロイ・監視の重要性</li>
+                        <li><strong>ステークホルダー管理</strong>：各層のニーズ・懸念への対応</li>
+                        <li><strong>BPR必要性</strong>：AI導入時のプロセス再設計重要性</li>
+                        <li><strong>技術スタック</strong>：Python・Docker・Web API・クラウド活用</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>技術先行型プロジェクト</strong>：ビジネス価値・ROI軽視</li>
+                        <li><strong>データ品質軽視</strong>：「とりあえずAI導入」の失敗</li>
+                        <li><strong>PoC飛ばし</strong>：いきなり本格実装でのリスク</li>
+                        <li><strong>運用体制未整備</strong>：開発後の継続的改善不備</li>
+                        <li><strong>ステークホルダー軽視</strong>：現場抵抗・経営理解不足</li>
+                        <li><strong>従来手法固執</strong>：AI特性を考慮しない開発手法</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>AIプロジェクトの成功は、技術力だけでなく、適切なプロジェクト管理・チーム編成・ステークホルダー管理の総合力で決まります。CRISP-DM等の標準プロセス、PoC による段階的検証、MLOpsによる継続的運用が重要です。</p>
+                
+                <p>従来ITプロジェクトとは異なるAI特性を理解し、アジャイル手法・BPR・オープンイノベーション等を活用することで、確実な社会実装を実現できます。データサイエンティストを中心とした多職能チームとクラウド・コンテナ技術の活用も成功の鍵です。</p>
+                
+                <p>G検定では、AIプロジェクトの全体像・各フェーズの要点・成功要因・失敗要因について体系的な理解が求められます。技術的詳細より、プロジェクト推進・チーム運営・価値創出の観点での理解が重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CRISP-DM</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Cross Industry Standard Process for Data Mining。データマイニング・機械学習プロジェクトの標準的な6フェーズプロセスモデル。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">PoC</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Proof of Concept（概念実証）。アイデアや技術の実現可能性を小規模実装で検証する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">MLOps</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Machine Learning Operations。機械学習モデルの継続的統合・デプロイ・運用を自動化する実践体系。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">データサイエンティスト</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">統計学・機械学習・プログラミング・ドメイン知識を駆使してデータから価値を創出する専門職。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">BPR</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Business Process Re-engineering。AI導入に合わせてビジネスプロセスを根本的に見直し・再設計すること。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">アジャイル開発</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">短期スプリントでの反復開発により、変化への対応と早期価値提供を重視する開発手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ウォーターフォール開発</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">要件定義→設計→開発→テスト→リリースの順次進行による計画駆動型開発手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Docker</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">アプリケーションとその依存関係をコンテナとしてパッケージング し、環境一貫性を実現する技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Jupyter Notebook</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">コード・実行結果・説明文を統合したインタラクティブな開発環境。データ分析・プロトタイピングに活用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Web API</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">HTTP プロトコルでシステム間連携を行うアプリケーション・プログラミング・インターフェース。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">オープン・イノベーション</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">外部組織との連携・協働により、内部だけでは実現困難な革新を創出するアプローチ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">産学連携</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">企業と大学・研究機関が共同で研究開発や人材育成を行う協力関係。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ステークホルダー</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">プロジェクトに関与・影響を受ける関係者。経営層・現場担当者・IT部門・顧客等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">データドリフト</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">時間経過によりモデル入力データの統計的性質が変化する現象。モデル性能劣化の主要因。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CRISP-ML（Q）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">機械学習プロジェクト向けにCRISP-DMを拡張したプロセスモデル。品質保証を強化。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-9.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-9
+                        </a>
+                        <a href="study7-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 7-2
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

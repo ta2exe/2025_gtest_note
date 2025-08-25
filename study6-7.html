@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-7: マルチモーダル - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-7: マルチモーダル</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-7</h1>
+                <h2 class="content-subtitle">マルチモーダル</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>マルチモーダルタスクの種類とその概要について理解する</li>
+                        <li>代表的なマルチモーダルモデルについて理解する</li>
+                        <li>マルチモーダルモデルが実世界において、どのように活用されているか理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>CLIP</strong></li>
+                        <li><strong>DALL-E</strong></li>
+                        <li><strong>Flamingo</strong></li>
+                        <li><strong>Image Captioning</strong></li>
+                        <li><strong>Text-To-Image</strong></li>
+                        <li><strong>Visual Question Answering</strong></li>
+                        <li><strong>Unified-IO</strong></li>
+                        <li><strong>zero-shot</strong></li>
+                        <li><strong>基盤モデル</strong></li>
+                        <li><strong>マルチタスク学習</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">マルチモーダルAIの革命</h1>
+                
+                <p>マルチモーダルAI（Multimodal AI）は、テキスト、画像、音声、動画など複数のモダリティ（情報様式）を統合的に処理する技術です。人間のような多感覚的な理解と推論を実現し、より汎用的で実用的なAIシステムを可能にします。</p>
+
+                <p>2021年のCLIP登場以来、DALL-E、GPT-4V、Flamingo等の革新的モデルが次々と開発され、画像生成、視覚的質問応答、クロスモーダル検索など幅広い応用で人間レベルの性能を実現しています。</p>
+
+                <h2 id="multimodal-types">マルチモーダルタスクの分類</h2>
+
+                <h3 id="cross-modal-tasks">クロスモーダルタスク</h3>
+                <ul>
+                    <li><strong>Image Captioning</strong>：画像から自然言語記述生成</li>
+                    <li><strong>Text-to-Image</strong>：テキスト記述から画像生成</li>
+                    <li><strong>Visual Question Answering（VQA）</strong>：画像に関する質問への回答</li>
+                    <li><strong>Cross-modal Retrieval</strong>：異なるモダリティ間での検索</li>
+                    <li><strong>Image-Text Matching</strong>：画像とテキストの対応判定</li>
+                </ul>
+
+                <h3 id="fusion-tasks">融合タスク</h3>
+                <ul>
+                    <li><strong>Multimodal Sentiment Analysis</strong>：テキスト+画像での感情分析</li>
+                    <li><strong>Audio-Visual Speech Recognition</strong>：音声+唇読みの統合</li>
+                    <li><strong>Video Understanding</strong>：映像の総合的理解</li>
+                    <li><strong>Embodied AI</strong>：ロボットの多感覚統合</li>
+                </ul>
+
+                <h1 id="clip-revolution">CLIP革命</h1>
+
+                <h2 id="clip-architecture">CLIPの基本構造</h2>
+                <p>OpenAIのCLIP（Contrastive Language-Image Pre-training）は、画像とテキストの大規模対比学習により、ゼロショット画像分類を実現しました。</p>
+
+                <h3 id="contrastive-learning">対比学習の原理</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{similarity}(I, T) = \cos(\text{ImageEncoder}(I), \text{TextEncoder}(T))$$
+                    $$L = -\log \frac{\exp(\text{sim}(I_i, T_i)/\tau)}{\sum_j \exp(\text{sim}(I_i, T_j)/\tau)}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 CLIPの学習プロセス</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>訓練データ</strong>:
+・4億組の画像-テキストペア（インターネット収集）
+・多様な視覚概念と言語表現の網羅
+
+<strong>アーキテクチャ</strong>:
+・Image Encoder: ResNet/Vision Transformer
+・Text Encoder: Transformer
+・共通埋め込み空間での対比学習
+
+<strong>損失関数</strong>:
+・InfoNCE Loss（コントラスティブ損失）
+・正例（対応ペア）の類似度最大化
+・負例（非対応）の類似度最小化
+
+<strong>革新性</strong>:
+・事前定義クラス不要のゼロショット分類
+・自然言語での柔軟な概念指定
+・ImageNet精度に匹敵するゼロショット性能
+                    </pre>
+                </div>
+
+                <h2 id="zero-shot-capabilities">ゼロショット能力</h2>
+                <p>CLIPの最大の革新は、未見クラスでの高精度分類：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(\text{class}_i | \text{image}) = \frac{\exp(\text{sim}(\text{image}, \text{prompt}_i))}{\sum_j \exp(\text{sim}(\text{image}, \text{prompt}_j))}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 ゼロショット応用例</h3>
+                    <ul>
+                        <li><strong>新しい画像分類</strong>：「犬の散歩をしている人」等の複合概念</li>
+                        <li><strong>多言語対応</strong>：英語学習で多言語分類可能</li>
+                        <li><strong>概念の一般化</strong>：アート作品、衛星画像等にも適応</li>
+                        <li><strong>プロンプト工学</strong>：「A photo of a [class]」等の最適化</li>
+                    </ul>
+                </div>
+
+                <h1 id="generative-multimodal">生成型マルチモーダル</h1>
+
+                <h2 id="dalle-series">DALL-Eシリーズ</h2>
+                <p>OpenAIのDALL-Eは、テキスト記述から画像を生成する革新的モデルです：</p>
+
+                <h3 id="dalle-evolution">DALL-Eの進化</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎨 DALL-E系列の発展</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>DALL-E (2021)</strong>:
+・12B parameters GPTベースの自己回帰生成
+・画像をトークン化してテキスト続きとして生成
+・創造的な画像合成（「アボカドの椅子」等）
+
+<strong>DALL-E 2 (2022)</strong>:
+・CLIP + Diffusion Modelの組み合わせ
+・より高解像度・高品質な生成
+・Inpainting、Outpainting機能
+
+<strong>DALL-E 3 (2023)</strong>:
+・ChatGPTとの統合
+・より正確なプロンプト理解
+・安全性とバイアス軽減の改善
+
+<strong>技術革新</strong>:
+・プロンプト忠実度の向上
+・スタイル制御の柔軟性
+・商用利用可能な生成品質
+                    </pre>
+                </div>
+
+                <h3 id="text-to-image-applications">Text-to-Image応用</h3>
+                <ul>
+                    <li><strong>広告・マーケティング</strong>：コンセプトアートの自動生成</li>
+                    <li><strong>教育コンテンツ</strong>：説明用イラストの作成</li>
+                    <li><strong>ゲーム開発</strong>：アセット素材の大量生成</li>
+                    <li><strong>建築・設計</strong>：アイデアスケッチの可視化</li>
+                </ul>
+
+                <h2 id="image-captioning">Image Captioning技術</h2>
+                <p>画像から自然言語記述を生成する基本的なマルチモーダルタスク：</p>
+
+                <h3 id="captioning-architecture">キャプショニングアーキテクチャ</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$h = \text{CNN}(\text{image}), \quad p(w_t | w_{1:t-1}, h) = \text{RNN}(w_{t-1}, h)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📝 キャプショニング手法の進化</h3>
+                    <ul>
+                        <li><strong>CNN + RNN</strong>：初期の基本アーキテクチャ</li>
+                        <li><strong>Attention機構</strong>：画像の関連部分への注目</li>
+                        <li><strong>Transformer採用</strong>：長距離依存の改善</li>
+                        <li><strong>事前学習活用</strong>：CLIP等の視覚言語モデル利用</li>
+                        <li><strong>多様性向上</strong>：Beam Search、多様性損失</li>
+                    </ul>
+                </div>
+
+                <h1 id="vqa-systems">Visual Question Answering</h1>
+
+                <h2 id="vqa-challenge">VQAの挑戦</h2>
+                <p>画像を見て自然言語の質問に答える高度なマルチモーダル推論タスク：</p>
+
+                <h3 id="vqa-types">質問タイプの分類</h3>
+                <ul>
+                    <li><strong>物体認識</strong>：「この画像に猫はいますか？」</li>
+                    <li><strong>属性判定</strong>：「車の色は何ですか？」</li>
+                    <li><strong>空間関係</strong>：「テーブルの上に何がありますか？」</li>
+                    <li><strong>カウント</strong>：「人が何人いますか？」</li>
+                    <li><strong>推論・常識</strong>：「この人の職業は何ですか？」</li>
+                </ul>
+
+                <h3 id="vqa-architecture">VQAアーキテクチャ</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{answer} = f(\text{CNN}(\text{image}), \text{LSTM}(\text{question}))$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🧠 VQAの技術進展</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>初期手法</strong>:
+・単純な特徴量連結
+・浅い推論能力
+
+<strong>Attention導入</strong>:
+・質問関連画像領域への注目
+・Spatial Attention、Object Attention
+
+<strong>Graph Neural Networks</strong>:
+・物体間関係のモデリング
+・Scene Graph を用いた推論
+
+<strong>大規模事前学習</strong>:
+・ViLBERT、LXMERT等
+・Vision-Language事前学習活用
+
+<strong>現在の課題</strong>:
+・バイアス問題（言語的ショートカット）
+・複雑な推論能力不足
+・常識的知識の統合
+                    </pre>
+                </div>
+
+                <h1 id="foundation-models">基盤モデルの時代</h1>
+
+                <h2 id="large-multimodal-models">大規模マルチモーダルモデル</h2>
+                <p>Transformerスケーリングによる汎用マルチモーダルAI：</p>
+
+                <h3 id="flamingo-model">Flamingo</h3>
+                <p>DeepMindのFew-shotマルチモーダル学習モデル：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🦩 Flamingoの特徴</h3>
+                    <ul>
+                        <li><strong>Few-shot学習</strong>：数例で新タスクに適応</li>
+                        <li><strong>In-context学習</strong>：プロンプト内でタスク理解</li>
+                        <li><strong>多様なタスク</strong>：VQA、キャプショニング、分類等</li>
+                        <li><strong>大規模事前学習</strong>：テキスト+画像の同時学習</li>
+                        <li><strong>アーキテクチャ</strong>：Perceiver Resampler + Cross-attention</li>
+                    </ul>
+                </div>
+
+                <h3 id="gpt4v">GPT-4V（Vision）</h3>
+                <ul>
+                    <li><strong>マルチモーダルChatGPT</strong>：画像理解+対話能力</li>
+                    <li><strong>高精度OCR</strong>：文字認識と内容理解</li>
+                    <li><strong>画像分析</strong>：詳細な視覚的説明生成</li>
+                    <li><strong>コード生成</strong>：UI画像からHTML/CSS生成</li>
+                </ul>
+
+                <h2 id="unified-io">Unified-IO：統合学習</h2>
+                <p>University of WashingtonのUnified-IOは、すべてのI/Oをトークン化した統合モデル：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Any Input} \xrightarrow{\text{Tokenization}} \text{Unified Model} \xrightarrow{\text{Detokenization}} \text{Any Output}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 統合アプローチの利点</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>入力モダリティ</strong>:
+・テキスト、画像、音声、3D点群
+・マスク、バウンディングボックス
+
+<strong>出力モダリティ</strong>:
+・テキスト生成、画像生成、セグメンテーション
+・検出、深度推定、3D生成
+
+<strong>統合学習の効果</strong>:
+・クロスモーダル知識共有
+・タスク間のシナジー効果
+・汎用性の向上
+・パラメータ効率性
+
+<strong>課題</strong>:
+・異なるモダリティの学習バランス
+・計算コストの増大
+・評価指標の統一
+                    </pre>
+                </div>
+
+                <h1 id="multitask-learning">マルチタスク学習</h1>
+
+                <h2 id="multitask-paradigm">マルチタスク学習パラダイム</h2>
+                <p>複数のタスクを同時学習し、共有知識による相互向上を実現：</p>
+
+                <h3 id="sharing-strategies">共有戦略</h3>
+                <ul>
+                    <li><strong>Hard Parameter Sharing</strong>：下位層の完全共有</li>
+                    <li><strong>Soft Parameter Sharing</strong>：制約付き類似パラメータ</li>
+                    <li><strong>Task-specific Layers</strong>：タスク専用上位層</li>
+                    <li><strong>Attention-based Sharing</strong>：動的な知識共有</li>
+                </ul>
+
+                <h3 id="multitask-benefits">マルチタスク学習の利点</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Performance}_{\text{multitask}} > \text{Performance}_{\text{single task}}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📈 マルチタスク学習の効果</h3>
+                    <ul>
+                        <li><strong>汎化性能向上</strong>：過学習抑制効果</li>
+                        <li><strong>データ効率化</strong>：少量データタスクでの性能向上</li>
+                        <li><strong>特徴表現改善</strong>：より汎用的な特徴学習</li>
+                        <li><strong>計算効率</strong>：共有により推論コスト削減</li>
+                        <li><strong>知識転移</strong>：関連タスク間での知識活用</li>
+                    </ul>
+                </div>
+
+                <h1 id="real-world-applications">実世界での応用</h1>
+
+                <h2 id="content-creation">コンテンツ制作</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎬 クリエイティブ産業での活用</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>広告・マーケティング</strong>:
+・商品説明からビジュアル生成
+・多言語展開の自動化
+・ターゲット層別コンテンツ最適化
+
+<strong>メディア・エンターテイメント</strong>:
+・ストーリーボード自動生成
+・キャラクターデザイン支援
+・字幕・吹き替えの自動化
+
+<strong>教育・研修</strong>:
+・教材の視覚的説明生成
+・多感覚学習コンテンツ制作
+・個別最適化学習支援
+
+<strong>Webサービス</strong>:
+・商品検索の改善（画像+テキスト）
+・アクセシビリティ向上（画像説明生成）
+・多言語コミュニケーション支援
+                    </pre>
+                </div>
+
+                <h2 id="accessibility-inclusion">アクセシビリティと包摂性</h2>
+                <ul>
+                    <li><strong>視覚障害支援</strong>：画像の詳細音声説明生成</li>
+                    <li><strong>聴覚障害支援</strong>：音声の視覚的表現</li>
+                    <li><strong>言語バリア解消</strong>：リアルタイム翻訳・通訳</li>
+                    <li><strong>高齢者支援</strong>：直感的なマルチモーダルインターフェース</li>
+                </ul>
+
+                <h2 id="autonomous-systems">自律システム</h2>
+                <ul>
+                    <li><strong>自動運転車</strong>：カメラ+LiDAR+地図情報の統合</li>
+                    <li><strong>ロボット</strong>：視覚+触覚+音声の統合認識</li>
+                    <li><strong>ドローン</strong>：映像+指示による自律飛行</li>
+                    <li><strong>AR/VR</strong>：現実とデジタルの融合体験</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>CLIP革命</strong>：対比学習によるゼロショット画像分類</li>
+                        <li><strong>DALL-E系列</strong>：Text-to-Image生成の進化</li>
+                        <li><strong>Image Captioning</strong>：CNN+RNNからTransformerへの発展</li>
+                        <li><strong>Visual Question Answering</strong>：マルチモーダル推論の典型例</li>
+                        <li><strong>基盤モデル</strong>：Flamingo、GPT-4V等の大規模統合モデル</li>
+                        <li><strong>ゼロショット学習</strong>：事前学習による未見タスクへの適応</li>
+                        <li><strong>マルチタスク学習</strong>：複数タスク同時学習の効果</li>
+                        <li><strong>実世界応用</strong>：コンテンツ制作、アクセシビリティ向上</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>マルチモーダル = 画像+テキストのみ</strong>：音声、動画、3D等も含む</li>
+                        <li><strong>CLIP = 画像分類のみ</strong>：検索、生成、推論等幅広い応用</li>
+                        <li><strong>VQA = 簡単な質問のみ</strong>：複雑な推論・常識問題も扱う</li>
+                        <li><strong>マルチタスク = 性能低下</strong>：適切設計で性能向上効果</li>
+                        <li><strong>ゼロショット = 低精度</strong>：大規模事前学習で高精度実現</li>
+                        <li><strong>統合モデル = 複雑すぎ</strong>：実用的な統一アーキテクチャ</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>マルチモーダルAIは、複数の情報様式を統合処理する技術として急速に発展しています。CLIP、DALL-E、Flamingo等の革新的モデルにより、ゼロショット学習、高品質生成、複雑な推論が実現され、人間レベルのマルチモーダル理解に近づいています。</p>
+                
+                <p>基盤モデルの登場により、事前学習+ファインチューニングのパラダイムがマルチモーダル領域でも確立され、少量データでの高性能実現、計算効率化、実世界応用が劇的に進展しています。</p>
+                
+                <p>G検定では、代表的モデルの特徴と革新性、主要タスクの理解、実世界での応用例について体系的な知識が求められます。特にCLIP、DALL-E系列の技術的ブレークスルーと社会的インパクトを押さえることが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CLIP</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Contrastive Language-Image Pre-training。画像とテキストの対比学習により、ゼロショット画像分類を実現するOpenAIのモデル。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">DALL-E</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">OpenAIのテキストから画像を生成するモデル。創造的な画像合成で「Text-to-Image」分野を開拓。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Flamingo</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">DeepMindのFew-shotマルチモーダル学習モデル。数例でVQA、キャプショニング等の新タスクに適応。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Image Captioning</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像から自然言語の説明文を生成するタスク。CNN+RNNからTransformerベースへ発展。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Text-To-Image</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">テキスト記述から画像を生成するタスク。DALL-E、Stable Diffusion等で高品質生成を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Visual Question Answering（VQA）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像に関する自然言語質問に回答するタスク。マルチモーダル推論の代表的問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Unified-IO</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">すべての入出力をトークン化して統一的に処理するマルチモーダル学習フレームワーク。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">zero-shot</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">訓練時に見たことがないタスクやクラスに対して、事前学習知識のみで推論を行う学習パラダイム。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">基盤モデル</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">大規模データで事前学習され、多様なダウンストリームタスクに適用可能な汎用モデル。GPT、BERT等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">マルチタスク学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数のタスクを同時に学習し、共有表現による相互改善効果を狙う学習パラダイム。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">対比学習（Contrastive Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">正例（類似）ペアの表現を近づけ、負例（非類似）ペアを遠ざける表現学習手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">クロスモーダル検索</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">異なるモダリティ間での検索。テキストクエリで画像検索、画像クエリで関連テキスト検索等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">In-Context Learning</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">プロンプト内の例示からタスクを理解し、パラメータ更新なしで新タスクに適応する学習方式。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">モダリティ（Modality）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">情報の様式・形態。視覚、聴覚、テキスト、触覚等の異なる感覚チャンネル。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Vision Transformer（ViT）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像をパッチに分割してTransformerで処理する手法。CNNに代わる画像処理アーキテクチャ。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-6.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-6
+                        </a>
+                        <a href="study6-8.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-8
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

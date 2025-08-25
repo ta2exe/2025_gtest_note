@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-8: オートエンコーダ - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-8: オートエンコーダ</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-8</h1>
+                <h2 class="content-subtitle">オートエンコーダ</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>オートエンコーダの概要を理解する</li>
+                        <li>ディープラーニングにおけるオートエンコーダの役割を説明できる</li>
+                        <li>オートエンコーダの代表的な亜種を理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>VQ-VAE</strong></li>
+                        <li><strong>info VAE・β-VAE</strong></li>
+                        <li><strong>次元削減</strong></li>
+                        <li><strong>事前学習</strong></li>
+                        <li><strong>積層オートエンコーダ</strong></li>
+                        <li><strong>変分オートエンコーダ (VAE)</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">オートエンコーダとは何か</h1>
+                
+                <p>オートエンコーダ（Autoencoder）は、入力データを一度低次元の潜在表現に圧縮し、その後元の次元に復元することを学習する教師なし学習モデルです。「自分自身を復元する」ことから「オート（自動）エンコーダ」と呼ばれます。</p>
+
+                <p>1980年代から存在する概念ですが、深層学習の発展により表現学習、次元削減、生成モデル、異常検知など幅広い用途で活用されるようになりました。近年は変分オートエンコーダ（VAE）やベクトル量子化VAE（VQ-VAE）など、確率的生成モデルとしての発展が著しい分野です。</p>
+
+                <h1 id="basic-structure">基本構造とアーキテクチャ</h1>
+
+                <h2 id="encoder-decoder">エンコーダ・デコーダ構造</h2>
+                
+                <p>オートエンコーダは2つの主要部分から構成されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Encoder}: \quad z = f_\theta(x)$$
+                    $$\text{Decoder}: \quad \hat{x} = g_\phi(z)$$
+                    $$\text{Loss}: \quad L = ||x - \hat{x}||^2$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ オートエンコーダの基本構造</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>エンコーダ（Encoder）</strong>:
+入力 x → 隠れ層1 → 隠れ層2 → 潜在表現 z
+・次元圧縮（例: 784次元 → 64次元）
+・重要特徴の抽出
+・情報のボトルネック形成
+
+<strong>潜在空間（Latent Space）</strong>:
+・低次元の表現ベクトル z
+・データの本質的特徴を保持
+・ボトルネック層（Bottleneck Layer）
+
+<strong>デコーダ（Decoder）</strong>:
+潜在表現 z → 隠れ層1 → 隠れ層2 → 復元 x̂
+・次元復元（例: 64次元 → 784次元）
+・圧縮された情報から原画像を再構築
+・エンコーダの逆変換を近似
+                    </pre>
+                </div>
+
+                <h2 id="loss-functions">損失関数</h2>
+
+                <p>オートエンコーダは入力と出力の差を最小化するよう学習します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{reconstruction} = \frac{1}{n}\sum_{i=1}^{n} ||x_i - \hat{x}_i||^2$$
+                </div>
+
+                <ul>
+                    <li><strong>二乗誤差</strong>：連続値データ（画像、音声等）に適用</li>
+                    <li><strong>交差エントロピー</strong>：バイナリデータやカテゴリカルデータ</li>
+                    <li><strong>KL発散</strong>：確率分布の差を測定（VAE等で使用）</li>
+                </ul>
+
+                <h1 id="applications">オートエンコーダの役割と応用</h1>
+
+                <h2 id="dimensionality-reduction">次元削減</h2>
+
+                <p>高次元データの低次元表現への変換は、オートエンコーダの最も基本的な応用です：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 次元削減の利点</h3>
+                    <ul>
+                        <li><strong>計算効率</strong>：低次元空間での高速処理</li>
+                        <li><strong>視覚化</strong>：2D/3D空間での可視化</li>
+                        <li><strong>ノイズ除去</strong>：重要特徴の保持、雑音の除去</li>
+                        <li><strong>記憶効率</strong>：データの圧縮保存</li>
+                        <li><strong>特徴抽出</strong>：下流タスクでの特徴量として活用</li>
+                    </ul>
+                </div>
+
+                <p><strong>PCAとの比較</strong>：</p>
+                <ul>
+                    <li><strong>線形 vs 非線形</strong>：PCAは線形変換、AEは非線形変換が可能</li>
+                    <li><strong>直交制約</strong>：PCAは直交基底、AEは制約なし</li>
+                    <li><strong>復元品質</strong>：AEはより複雑な構造を捉えられる</li>
+                </ul>
+
+                <h2 id="pretraining">事前学習</h2>
+
+                <p>深層学習初期に重要だった事前学習（Pre-training）手法：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 事前学習の手順</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Step 1: Layer-wise Pre-training</strong>
+各層を順次オートエンコーダで事前学習
+Layer 1: 入力 → 隠れ層1 → 入力を復元
+Layer 2: 隠れ層1 → 隠れ層2 → 隠れ層1を復元
+Layer 3: 隠れ層2 → 隠れ層3 → 隠れ層2を復元
+
+<strong>Step 2: Fine-tuning</strong>  
+事前学習済み重みから教師あり学習で微調整
+
+<strong>歴史的意義</strong>:
+・2006年頃の深層学習ブレイクスルーのきっかけ
+・勾配消失問題の回避
+・現在はBatchNorm等で代替可能
+                    </pre>
+                </div>
+
+                <h2 id="anomaly-detection">異常検知</h2>
+
+                <p>正常データでのみ学習したオートエンコーダによる異常検知：</p>
+
+                <ul>
+                    <li><strong>復元誤差</strong>：正常データは小さな誤差で復元</li>
+                    <li><strong>異常データ</strong>：大きな復元誤差を示す</li>
+                    <li><strong>閾値設定</strong>：復元誤差の閾値で異常判定</li>
+                    <li><strong>応用分野</strong>：製造業の品質管理、ネットワーク侵入検知、医療画像診断</li>
+                </ul>
+
+                <h1 id="stacked-autoencoder">積層オートエンコーダ</h1>
+
+                <h2 id="deep-autoencoder">深い構造の利点</h2>
+
+                <p>積層オートエンコーダ（Stacked Autoencoder）は、複数の隠れ層を持つ深いオートエンコーダです：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$x \rightarrow h^{(1)} \rightarrow h^{(2)} \rightarrow z \rightarrow h^{(2)'} \rightarrow h^{(1)'} \rightarrow \hat{x}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ 積層構造の特徴</h3>
+                    <ul>
+                        <li><strong>階層的特徴学習</strong>：浅い層→エッジ、深い層→概念的特徴</li>
+                        <li><strong>非線形表現力</strong>：複雑なデータ構造の捕捉</li>
+                        <li><strong>対称構造</strong>：エンコーダとデコーダの層対応</li>
+                        <li><strong>Skip Connection</strong>：残差接続による学習安定化</li>
+                    </ul>
+                </div>
+
+                <h2 id="training-strategies">学習戦略</h2>
+
+                <ul>
+                    <li><strong>End-to-End学習</strong>：全層を同時に最適化</li>
+                    <li><strong>Layer-wise学習</strong>：各層を順次事前学習</li>
+                    <li><strong>正則化</strong>：Dropout、重み減衰で過学習を防止</li>
+                    <li><strong>Skip Connection</strong>：U-Net様の接続で勾配問題解決</li>
+                </ul>
+
+                <h1 id="vae">変分オートエンコーダ（VAE）</h1>
+
+                <h2 id="vae-motivation">VAEの動機と設計</h2>
+
+                <p>2013年にKingmaとWellingが提案した変分オートエンコーダ（Variational Autoencoder, VAE）は、確率的生成モデルとしてのオートエンコーダです：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$q_\phi(z|x) = \mathcal{N}(\mu(x), \sigma^2(x))$$
+                    $$p_\theta(x|z) = \mathcal{N}(\mu'(z), \sigma'^2(z))$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎲 VAEの確率的設計</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>従来のAE</strong>: x → z → x̂ (決定論的)
+<strong>VAE</strong>: x → (μ,σ) → sample z ~ N(μ,σ²) → x̂
+
+<strong>エンコーダ</strong>:
+・平均μ(x)と分散σ²(x)を出力
+・潜在変数zを確率分布から サンプリング
+
+<strong>デコーダ</strong>:
+・サンプルされたzから x̂ を生成
+・生成過程も確率的にモデル化
+
+<strong>利点</strong>:
+✓ 滑らかな潜在空間
+✓ 生成能力の獲得
+✓ 補間・外挿が可能
+                    </pre>
+                </div>
+
+                <h2 id="vae-loss">VAEの損失関数</h2>
+
+                <p>VAEの損失はELBO（Evidence Lower BOund）の最大化として定式化されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{VAE} = L_{reconstruction} + \beta \cdot L_{KL}$$
+                    $$L_{KL} = D_{KL}(q_\phi(z|x) \| p(z))$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>復元損失</strong>：入力の再構築品質</li>
+                    <li><strong>KL発散損失</strong>：潜在分布を事前分布（標準正規分布）に近づける</li>
+                    <li><strong>$\beta$パラメータ</strong>：2つの損失のバランス調整</li>
+                </ul>
+
+                <h1 id="vae-variants">VAEの発展と亜種</h1>
+
+                <h2 id="beta-vae">β-VAE</h2>
+
+                <p>2017年にHigginsらが提案したβ-VAEは、KL損失に重み$\beta$を導入：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{\beta\text{-VAE}} = L_{reconstruction} + \beta \cdot L_{KL} \quad (\beta > 1)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚖️ βパラメータの効果</h3>
+                    <ul>
+                        <li><strong>β = 1</strong>：標準VAE</li>
+                        <li><strong>β > 1</strong>：より正則化（disentangled representation）</li>
+                        <li><strong>β < 1</strong>：復元品質重視</li>
+                        <li><strong>Disentanglement</strong>：潜在変数の各次元が独立した意味を持つ</li>
+                    </ul>
+                </div>
+
+                <h2 id="info-vae">InfoVAE</h2>
+
+                <p>2017年にZhaoらが提案したInfoVAEは、相互情報量を活用：</p>
+
+                <ul>
+                    <li><strong>MMD損失</strong>：Maximum Mean Discrepancyによる分布マッチング</li>
+                    <li><strong>情報量保持</strong>：入力と潜在変数間の相互情報量を保持</li>
+                    <li><strong>品質向上</strong>：生成品質とdisentanglementの両立</li>
+                </ul>
+
+                <h2 id="vq-vae">VQ-VAE（Vector Quantized VAE）</h2>
+
+                <p>2017年にvan den Oordらが提案したVQ-VAEは、離散的潜在表現を学習：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔢 VQ-VAEの特徴</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>コードブック</strong>:
+・K個の離散的ベクトル e₁, e₂, ..., eₖ
+・各潜在表現は最近傍のコードベクトルに量子化
+
+<strong>量子化過程</strong>:
+z_e = Encoder(x)  (連続値)
+z_q = argmin_i ||z_e - e_i||₂  (離散値)
+
+<strong>利点</strong>:
+✓ 後験崩壊（posterior collapse）の回避
+✓ 自然言語処理との親和性
+✓ 階層的生成モデルの構築可能
+                    </pre>
+                </div>
+
+                <h1 id="modern-applications">現代的な応用</h1>
+
+                <h2 id="generative-models">生成モデルとしての活用</h2>
+
+                <p>VAE系列は現代の生成AIの基盤技術として広く活用されています：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎨 生成AI応用例</h3>
+                    <ul>
+                        <li><strong>Stable Diffusion</strong>：VAEによる潜在空間での拡散モデル</li>
+                        <li><strong>DALL-E 2</strong>：CLIP+VAEによる画像生成</li>
+                        <li><strong>音楽生成</strong>：MusicVAE等による楽曲自動作曲</li>
+                        <li><strong>文章生成</strong>：Optimus等のテキストVAE</li>
+                        <li><strong>分子設計</strong>：化学構造の生成・最適化</li>
+                    </ul>
+                </div>
+
+                <h2 id="representation-learning">表現学習</h2>
+
+                <p>教師なし表現学習の重要手法として：</p>
+
+                <ul>
+                    <li><strong>自己教師あり学習</strong>：ラベルなしデータからの特徴抽出</li>
+                    <li><strong>転移学習</strong>：事前学習済み表現の下流タスク活用</li>
+                    <li><strong>マルチモーダル学習</strong>：画像・テキスト等の統合表現</li>
+                    <li><strong>連続学習</strong>：破滅的忘却を避ける表現獲得</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本構造</strong>：エンコーダ・デコーダの役割、ボトルネック層</li>
+                        <li><strong>用途</strong>：次元削減、異常検知、事前学習、生成モデル</li>
+                        <li><strong>VAE</strong>：確率的生成モデル、KL発散損失</li>
+                        <li><strong>β-VAE</strong>：disentangled representationの獲得</li>
+                        <li><strong>VQ-VAE</strong>：離散的潜在表現、コードブック</li>
+                        <li><strong>積層AE</strong>：深い構造による階層的特徴学習</li>
+                        <li><strong>損失関数</strong>：復元誤差の最小化</li>
+                        <li><strong>現代応用</strong>：Stable Diffusion等の生成AI</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>教師なし学習</strong>：ラベルを使わない自己復元学習</li>
+                        <li><strong>圧縮と生成</strong>：次元削減だけでなく生成能力も重要</li>
+                        <li><strong>VAEの確率性</strong>：決定論的AEと確率的VAEの違い</li>
+                        <li><strong>KL発散の役割</strong>：分布の正則化、過学習防止</li>
+                        <li><strong>β-VAEのβ値</strong>：β>1で disentanglement 強化</li>
+                        <li><strong>VQ-VAEの離散性</strong>：連続的VAEとの根本的違い</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>オートエンコーダは、自己復元を通じた教師なし学習の代表的手法です。基本的な次元削減から始まり、確率的生成モデルであるVAE、さらにβ-VAE、InfoVAE、VQ-VAE等の発展形まで多様な発展を遂げています。</p>
+                
+                <p>現代では単なる次元削減ツールを超えて、Stable DiffusionやDALL-E等の生成AIの基盤技術として活用されており、表現学習、異常検知、事前学習など幅広い応用を持つ重要技術です。</p>
+                
+                <p>G検定では、エンコーダ・デコーダの基本構造、VAEの確率的設計、各種亜種の特徴、現代的な応用例について理解することが重要です。特に生成AIとの関連性は近年の出題傾向として注目すべき点です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">オートエンコーダ（Autoencoder）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力データを低次元に圧縮してから復元することを学習する教師なし学習モデル。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">エンコーダ（Encoder）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力データを低次元の潜在表現に圧縮する部分。情報の要約・抽象化を行う。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">デコーダ（Decoder）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">潜在表現から元の次元にデータを復元する部分。圧縮された情報の再構築を行う。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">潜在表現（Latent Representation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エンコーダによって生成される低次元の表現ベクトル。データの本質的特徴を保持。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">次元削減（Dimensionality Reduction）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">高次元データを低次元空間に変換する処理。計算効率化と視覚化が主な目的。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">積層オートエンコーダ（Stacked Autoencoder）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数の隠れ層を持つ深いオートエンコーダ。階層的特徴学習が可能。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">事前学習（Pre-training）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">教師あり学習の前に行う教師なし学習。特に深層学習初期に重要だった手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">変分オートエンコーダ（VAE）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">確率的生成モデル。潜在変数を確率分布として扱い、データ生成が可能。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">β-VAE（Beta-VAE）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">KL発散項に重み β を導入したVAE。β>1でdisentangled representation を促進。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">InfoVAE</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">相互情報量を活用するVAE。MMD損失により分布マッチングの品質向上。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">VQ-VAE（Vector Quantized VAE）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">離散的潜在表現を学習するVAE。コードブックによる量子化が特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">コードブック（Codebook）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">VQ-VAEで使用される離散的ベクトル集合。潜在表現の量子化に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">復元損失（Reconstruction Loss）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力と復元された出力間の差を測る損失関数。通常は二乗誤差を使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">KL発散（Kullback-Leibler Divergence）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2つの確率分布の違いを測る指標。VAEで潜在分布の正則化に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Disentangled Representation</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">潜在変数の各次元が独立した意味を持つ表現。解釈可能性が高い。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-7.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-7
+                        </a>
+                        <a href="study5-9.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-9
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

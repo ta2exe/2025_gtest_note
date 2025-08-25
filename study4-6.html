@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4-6: 最適化手法 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 4-6: 最適化手法</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 4-6</h1>
+                <h2 class="content-subtitle">最適化手法</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>勾配降下法の概要を理解する</li>
+                        <li>勾配降下法の問題とそれを解決するための手法を列挙できる</li>
+                        <li>勾配降下法の計算を効率化する方法を説明できる</li>
+                        <li>ハイパーパラメータの概要と代表的な調整方法を列挙・説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>AdaBound</strong></li>
+                        <li><strong>AdaDelta</strong></li>
+                        <li><strong>AdaGrad</strong></li>
+                        <li><strong>Adam</strong></li>
+                        <li><strong>AMSBound</strong></li>
+                        <li><strong>RMSprop</strong></li>
+                        <li><strong>鞍点</strong></li>
+                        <li><strong>イテレーション</strong></li>
+                        <li><strong>エポック</strong></li>
+                        <li><strong>オンライン学習</strong></li>
+                        <li><strong>学習率</strong></li>
+                        <li><strong>確率的勾配降下法(SGD)</strong></li>
+                        <li><strong>グリッドサーチ</strong></li>
+                        <li><strong>勾配降下法</strong></li>
+                        <li><strong>局所最適解</strong></li>
+                        <li><strong>早期終了</strong></li>
+                        <li><strong>大域最適解</strong></li>
+                        <li><strong>二重降下現象</strong></li>
+                        <li><strong>ノーフリーランチの定理</strong></li>
+                        <li><strong>ハイパーパラメータ</strong></li>
+                        <li><strong>バッチ学習</strong></li>
+                        <li><strong>ミニバッチ学習</strong></li>
+                        <li><strong>モーメンタム</strong></li>
+                        <li><strong>ランダムサーチ</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">最適化手法とは何か</h1>
+                
+                <p>最適化手法は、ニューラルネットワークの学習において損失関数を最小化するためのアルゴリズムです。誤差逆伝播法によって勾配が計算された後、実際にパラメータをどのように更新するかを決定するのが最適化手法の役割です。</p>
+
+                <p>ディープラーニングにおける最適化は、高次元の非凸関数における最小値探索という極めて困難な問題です。現実のニューラルネットワークでは、数百万から数十億のパラメータが存在し、これらすべてを同時に最適化する必要があります。</p>
+
+                <h1 id="gradient-descent">勾配降下法の基礎</h1>
+
+                <h2 id="basic-concept">基本概念</h2>
+                
+                <p>勾配降下法は最適化手法の基礎となるアルゴリズムで、損失関数の負の勾配方向にパラメータを更新することで最小値を探索します。数学的には以下のように表されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\theta_{t+1} = \theta_t - \eta \nabla L(\theta_t)$$
+                </div>
+
+                <p>ここで、$\theta$はパラメータ、$\eta$は学習率、$L$は損失関数、$\nabla L$は損失関数の勾配です。</p>
+
+                <h2 id="learning-rate">学習率の重要性</h2>
+
+                <p>学習率（$\eta$）は最適化の成否を決定する最も重要なハイパーパラメータの一つです：</p>
+
+                <ul>
+                    <li><strong>学習率が大きすぎる場合</strong>：最適解を通り越してしまい、発散する可能性</li>
+                    <li><strong>学習率が小さすぎる場合</strong>：収束が極めて遅くなり、局所最適解に捕まりやすい</li>
+                    <li><strong>適切な学習率</strong>：効率的に大域最適解に近づくことが可能</li>
+                </ul>
+
+                <h2 id="gradient-types">勾配計算のバリエーション</h2>
+
+                <p>勾配の計算方法によって、以下の3つの手法に分類されます：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 勾配計算手法の比較</h3>
+                    <ul>
+                        <li><strong>バッチ勾配降下法</strong>：全データセットで勾配を計算（正確だが計算コスト大）</li>
+                        <li><strong>確率的勾配降下法（SGD）</strong>：1サンプルずつで勾配を計算（高速だが不安定）</li>
+                        <li><strong>ミニバッチ勾配降下法</strong>：小さなバッチで勾配を計算（両者の利点を兼ね備える）</li>
+                    </ul>
+                </div>
+
+                <h1 id="problems-with-sgd">従来SGDの問題点</h1>
+
+                <h2 id="local-minima">局所最適解と鞍点問題</h2>
+
+                <p>従来の勾配降下法は、以下の問題に直面します：</p>
+
+                <ul>
+                    <li><strong>局所最適解</strong>：大域最適解ではない局所的な最小値に捕まる</li>
+                    <li><strong>鞍点問題</strong>：勾配がゼロだが最適解ではない点で停滞</li>
+                    <li><strong>プラトー現象</strong>：勾配が非常に小さい平坦な領域での学習停滞</li>
+                </ul>
+
+                <h2 id="oscillation">振動と収束の不安定性</h2>
+
+                <p>特に高次元空間では、パラメータが最適値の周りで振動してしまい、効率的な収束が困難になる問題があります。これは各次元で最適な学習率が異なるにも関わらず、すべての次元で同一の学習率を使用することが原因です。</p>
+
+                <h1 id="advanced-optimizers">先進的な最適化手法</h1>
+
+                <h2 id="momentum">モーメンタム法</h2>
+
+                <p>モーメンタム法は、過去の勾配情報を蓄積して更新方向を決定する手法です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$v_{t+1} = \gamma v_t + \eta \nabla L(\theta_t)$$
+                    $$\theta_{t+1} = \theta_t - v_{t+1}$$
+                </div>
+
+                <p>ここで$v_t$は速度ベクトル、$\gamma$はモーメンタム係数（通常0.9）です。この手法により：</p>
+                <ul>
+                    <li>一貫した方向への加速</li>
+                    <li>振動の減衰</li>
+                    <li>局所最適解からの脱出促進</li>
+                </ul>
+
+                <h2 id="adagrad">AdaGrad</h2>
+
+                <p>AdaGradは各パラメータの過去の勾配を考慮して、適応的に学習率を調整します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$G_{t+1} = G_t + \nabla L(\theta_t)^2$$
+                    $$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_{t+1} + \epsilon}} \nabla L(\theta_t)$$
+                </div>
+
+                <p><strong>特徴</strong>：</p>
+                <ul>
+                    <li>頻繁に更新されるパラメータの学習率を自動的に減少</li>
+                    <li>スパースなデータに対して効果的</li>
+                    <li>問題点：学習率が単調減少し、最終的にゼロに収束</li>
+                </ul>
+
+                <h2 id="rmsprop">RMSprop</h2>
+
+                <p>RMSpropはAdaGradの学習率減衰問題を解決するため、指数移動平均を使用：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$G_{t+1} = \gamma G_t + (1-\gamma) \nabla L(\theta_t)^2$$
+                    $$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_{t+1} + \epsilon}} \nabla L(\theta_t)$$
+                </div>
+
+                <p>$\gamma$は減衰率（通常0.9）で、これにより過去の勾配情報の影響を適度に減衰させます。</p>
+
+                <h2 id="adam">Adam (Adaptive Moment Estimation)</h2>
+
+                <p>Adamは現在最も広く使用される最適化手法の一つで、モーメンタムとRMSpropの利点を組み合わせます：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 Adamアルゴリズム</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>パラメータ</strong>: α=0.001, β₁=0.9, β₂=0.999, ε=10⁻⁸
+
+<strong>各イテレーションで</strong>:
+1. g_t = ∇L(θ_t)                    # 勾配計算
+2. m_t = β₁m_{t-1} + (1-β₁)g_t      # 1次モーメント更新
+3. v_t = β₂v_{t-1} + (1-β₂)g_t²     # 2次モーメント更新
+4. m̂_t = m_t/(1-β₁ᵗ)               # バイアス補正
+5. v̂_t = v_t/(1-β₂ᵗ)               # バイアス補正  
+6. θ_t = θ_{t-1} - α·m̂_t/√(v̂_t+ε) # パラメータ更新
+                    </pre>
+                </div>
+
+                <p><strong>Adamの利点</strong>：</p>
+                <ul>
+                    <li>各パラメータに適応的な学習率</li>
+                    <li>初期の偏った推定値を補正するバイアス補正機能</li>
+                    <li>モーメンタムによる慣性と適応的学習率の両立</li>
+                    <li>多くのタスクでデフォルトパラメータが良好に動作</li>
+                </ul>
+
+                <h1 id="hyperparameter-tuning">ハイパーパラメータチューニング</h1>
+
+                <h2 id="key-hyperparameters">重要なハイパーパラメータ</h2>
+
+                <p>最適化においては以下のハイパーパラメータが性能を大きく左右します：</p>
+
+                <ul>
+                    <li><strong>学習率（Learning Rate）</strong>：0.001〜0.1の範囲で調整</li>
+                    <li><strong>バッチサイズ</strong>：32、64、128、256が一般的</li>
+                    <li><strong>エポック数</strong>：過学習と未学習のバランス</li>
+                    <li><strong>最適化手法固有のパラメータ</strong>：Adamのβ₁、β₂など</li>
+                </ul>
+
+                <h2 id="tuning-strategies">チューニング戦略</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 主要なチューニング手法</h3>
+                    <ul>
+                        <li><strong>グリッドサーチ</strong>：事前定義した値の組み合わせを網羅的に探索</li>
+                        <li><strong>ランダムサーチ</strong>：ランダムに選択した組み合わせを評価</li>
+                        <li><strong>ベイズ最適化</strong>：過去の評価結果を活用した効率的探索</li>
+                        <li><strong>早期終了</strong>：検証損失の改善が止まった時点で学習停止</li>
+                    </ul>
+                </div>
+
+                <h2 id="learning-rate-scheduling">学習率スケジューリング</h2>
+
+                <p>学習の進行に応じて学習率を動的に調整する手法：</p>
+
+                <ul>
+                    <li><strong>Step Decay</strong>：一定エポックごとに学習率を減衰</li>
+                    <li><strong>Exponential Decay</strong>：指数関数的に学習率を減少</li>
+                    <li><strong>Cosine Annealing</strong>：コサイン関数に従って学習率を変化</li>
+                    <li><strong>ReduceLROnPlateau</strong>：検証損失の改善が停滞した際に学習率を減少</li>
+                </ul>
+
+                <h1 id="modern-techniques">現代的な最適化技術</h1>
+
+                <h2 id="advanced-optimizers-2">最新の最適化手法</h2>
+
+                <ul>
+                    <li><strong>AdaBound/AMSBound</strong>：学習初期はAdam、後期はSGDのような挙動</li>
+                    <li><strong>AdaDelta</strong>：学習率を明示的に設定する必要がない手法</li>
+                    <li><strong>Nadam</strong>：AdamとNesterov Accelerated Gradientの組み合わせ</li>
+                </ul>
+
+                <h2 id="double-descent">二重降下現象</h2>
+
+                <p>近年発見された現象で、モデルの複雑さを増加させると、テスト誤差が一度増加した後に再び減少する現象です。これは従来の統計学習理論では説明困難な現象として注目されています。</p>
+
+                <h2 id="no-free-lunch">ノーフリーランチの定理</h2>
+
+                <p>すべての問題に対して最適な最適化手法は存在しないという定理です。そのため、問題に応じて適切な最適化手法を選択する必要があります：</p>
+
+                <ul>
+                    <li><strong>Adam</strong>：一般的なディープラーニングタスクで広く有効</li>
+                    <li><strong>SGD with Momentum</strong>：画像認識などで高い性能</li>
+                    <li><strong>AdaGrad</strong>：スパースデータや自然言語処理で効果的</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本的な最適化手法</strong>：SGD、モーメンタム、Adam の特徴と違い</li>
+                        <li><strong>学習率の影響</strong>：大きすぎる場合と小さすぎる場合の問題</li>
+                        <li><strong>バッチサイズの概念</strong>：バッチ、ミニバッチ、オンライン学習の違い</li>
+                        <li><strong>ハイパーパラメータチューニング</strong>：グリッドサーチ vs ランダムサーチ</li>
+                        <li><strong>局所最適解と大域最適解</strong>：最適化における課題</li>
+                        <li><strong>早期終了</strong>：過学習防止のための手法</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>Adamは万能ではない</strong>：タスクによってはSGDの方が良い場合がある</li>
+                        <li><strong>学習率スケジューリング</strong>：固定学習率より動的調整が一般的に有効</li>
+                        <li><strong>バッチサイズと学習率の関係</strong>：大きなバッチサイズには大きな学習率が必要</li>
+                        <li><strong>エポック vs イテレーション</strong>：エポックは全データを1回、イテレーションは1バッチの処理</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>最適化手法は、ディープラーニングの学習性能を決定する重要な要素です。従来の勾配降下法から始まり、モーメンタム、AdaGrad、RMSprop、Adamへと発展してきました。</p>
+                
+                <p>現在のディープラーニング実践では、Adamがデフォルトの選択肢として広く使用されていますが、ノーフリーランチの定理が示すように、すべての問題に最適な手法は存在しません。適切なハイパーパラメータチューニングと組み合わせて、問題に応じた最適化手法の選択が重要です。</p>
+                
+                <p>G検定では、各最適化手法の基本的な特徴と使い分け、ハイパーパラメータの役割、そして最適化における一般的な課題について理解することが求められます。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">勾配降下法（Gradient Descent）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">損失関数の勾配の負の方向にパラメータを更新することで最小値を探索する基本的な最適化手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">確率的勾配降下法（SGD）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1つのサンプルまたは小さなバッチを用いて勾配を計算し、パラメータを更新する手法。計算効率が良い。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">学習率（Learning Rate）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">パラメータ更新の大きさを制御するハイパーパラメータ。最適化の成否に大きく影響する。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">モーメンタム（Momentum）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">過去の勾配情報を蓄積し、慣性をつけることで振動を減らし局所最適解から脱出しやすくする手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Adam</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">適応的モーメント推定を行う最適化手法。モーメンタムと適応的学習率調整を組み合わせた現在最も広く使用される手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">AdaGrad</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各パラメータの過去の勾配を蓄積し、頻繁に更新されるパラメータの学習率を自動的に減少させる手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">RMSprop</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">AdaGradの学習率減衰問題を解決するため、勾配の2乗の指数移動平均を使用する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ハイパーパラメータ（Hyperparameter）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習アルゴリズムの動作を制御するパラメータ。学習率、バッチサイズ、エポック数など。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">バッチサイズ（Batch Size）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">一度の勾配計算で使用するデータサンプルの数。計算効率と学習の安定性に影響する。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">エポック（Epoch）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">全訓練データを一度学習することを1エポックとする。学習の進行度を表す単位。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">イテレーション（Iteration）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">一度のパラメータ更新を1イテレーションとする。1エポック中のイテレーション数はデータ数をバッチサイズで割った値。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">局所最適解（Local Minimum）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">周囲の点より損失が小さいが、大域的には最適でない解。最適化における主要な課題の一つ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">大域最適解（Global Minimum）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">すべての可能なパラメータの中で損失関数が最小となる解。理想的だが実際には発見困難。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">鞍点（Saddle Point）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">勾配がゼロだが最小値でも最大値でもない点。高次元では局所最適解より鞍点の方が多く存在する。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">早期終了（Early Stopping）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">検証データでの性能改善が停滞した際に学習を停止する手法。過学習を防ぐ正則化手法の一種。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">グリッドサーチ（Grid Search）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">事前に定義したハイパーパラメータの値の組み合わせを網羅的に探索してチューニングする手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ランダムサーチ（Random Search）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ハイパーパラメータをランダムにサンプリングして探索する手法。グリッドサーチより効率的な場合が多い。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ノーフリーランチの定理（No Free Lunch Theorem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">すべての問題に対して最適なアルゴリズムは存在しないという定理。問題に応じた手法選択の重要性を示す。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">二重降下現象（Double Descent）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">モデルの複雑さを増すとテスト誤差が一度増加した後に再び減少する現象。従来の理論では説明困難。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study4-5.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 4-5
+                        </a>
+                        <a href="study5-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-1
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

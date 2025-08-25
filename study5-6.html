@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-6: 回帰結合層 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-6: 回帰結合層</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-6</h1>
+                <h2 class="content-subtitle">回帰結合層</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>回帰結合層の概要を理解する</li>
+                        <li>回帰結合層を含むネットワークであるRNNを理解する</li>
+                        <li>RNNがどのような特性のデータに適したモデルか説明できる</li>
+                        <li>RNNの学習方法について理解する</li>
+                        <li>RNNの学習における課題とその解決手法を説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Back Propbagation Through Time (BPTT)</strong></li>
+                        <li><strong>Gated Recurrent Unit (GRU)</strong></li>
+                        <li><strong>Long Short Term Memory (LSTM)</strong></li>
+                        <li><strong>エルマンネットワーク</strong></li>
+                        <li><strong>勾配消失問題</strong></li>
+                        <li><strong>勾配爆発問題</strong></li>
+                        <li><strong>教師強制</strong></li>
+                        <li><strong>ゲート機構</strong></li>
+                        <li><strong>双方向RNN (Bidirectional RNN)</strong></li>
+                        <li><strong>時系列データ</strong></li>
+                        <li><strong>ジョルダンネットワーク</strong></li>
+                        <li><strong>リカレントニューラルネットワーク (RNN)</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">回帰結合層とは何か</h1>
+                
+                <p>回帰結合層（Recurrent Layer）は、ニューラルネットワークにおいて、前の時刻の隠れ状態を現在の時刻の計算に利用する層です。この構造により、時系列データや系列データの処理が可能になり、記憶機能を持つネットワークを実現します。</p>
+
+                <p>1980年代のHopfield NetworkやElman Networkから始まり、1990年代のLSTM、2010年代のGRUまで発展し、自然言語処理、音声認識、時系列予測など幅広い分野で活用されています。現在では、Transformerに主役を譲りましたが、依然として重要な技術として位置づけられています。</p>
+
+                <h1 id="rnn-basics">RNN（リカレントニューラルネットワーク）の基礎</h1>
+
+                <h2 id="rnn-structure">基本構造</h2>
+                
+                <p>RNNの最も基本的な構造は、隠れ層が自分自身に接続を持つネットワークです：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$h_t = f(W_{hh}h_{t-1} + W_{xh}x_t + b_h)$$
+                    $$y_t = g(W_{hy}h_t + b_y)$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$h_t$</strong>：時刻$t$の隠れ状態</li>
+                    <li><strong>$x_t$</strong>：時刻$t$の入力</li>
+                    <li><strong>$y_t$</strong>：時刻$t$の出力</li>
+                    <li><strong>$W_{hh}, W_{xh}, W_{hy}$</strong>：重み行列</li>
+                    <li><strong>$f, g$</strong>：活性化関数（通常tanh、ReLU、sigmoid等）</li>
+                </ul>
+
+                <h2 id="temporal-unfolding">時間展開（Temporal Unfolding）</h2>
+
+                <p>RNNは時間軸に沿って展開することで理解できます：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🕐 RNNの時間展開</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+時刻t=1:  x₁ → [RNN] → y₁
+              ↓ h₁
+時刻t=2:  x₂ → [RNN] → y₂  
+              ↓ h₂  
+時刻t=3:  x₃ → [RNN] → y₃
+              ↓ h₃
+時刻t=4:  x₄ → [RNN] → y₄
+
+<strong>展開表現</strong>:
+h₁ = f(W_xh·x₁ + b_h)
+h₂ = f(W_xh·x₂ + W_hh·h₁ + b_h)
+h₃ = f(W_xh·x₃ + W_hh·h₂ + b_h)
+h₄ = f(W_xh·x₄ + W_hh·h₃ + b_h)
+                    </pre>
+                </div>
+
+                <h1 id="historical-networks">歴史的なRNNアーキテクチャ</h1>
+
+                <h2 id="elman-network">エルマンネットワーク（Elman Network）</h2>
+
+                <p>1990年にJeffrey Elmanが提案した最初の実用的なRNNの一つです：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$h_t = \text{sigmoid}(W_{xh}x_t + W_{hh}h_{t-1} + b_h)$$
+                </div>
+
+                <p><strong>特徴</strong>：</p>
+                <ul>
+                    <li>隠れ層から隠れ層への回帰結合</li>
+                    <li>文脈情報の学習能力</li>
+                    <li>単純な構造で理解しやすい</li>
+                    <li>勾配消失問題に悩まされる</li>
+                </ul>
+
+                <h2 id="jordan-network">ジョルダンネットワーク（Jordan Network）</h2>
+
+                <p>Michael Jordanが提案した、出力層から隠れ層への回帰結合を持つネットワーク：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$h_t = f(W_{xh}x_t + W_{yh}y_{t-1} + b_h)$$
+                </div>
+
+                <p><strong>エルマンネットワークとの違い</strong>：</p>
+                <ul>
+                    <li>出力の履歴を直接利用</li>
+                    <li>より安定した学習（出力は通常より低次元）</li>
+                    <li>解釈しやすい構造</li>
+                </ul>
+
+                <h1 id="time-series-data">時系列データの特性</h1>
+
+                <h2 id="characteristics">RNNが適したデータの特性</h2>
+
+                <p>RNNが威力を発揮するデータの特性：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 RNN適用データの特性</h3>
+                    <ul>
+                        <li><strong>時系列性</strong>：データが時間的に順序付けられている</li>
+                        <li><strong>系列依存性</strong>：過去の情報が現在に影響する</li>
+                        <li><strong>可変長系列</strong>：入力の長さが固定でない</li>
+                        <li><strong>文脈依存性</strong>：周囲の情報によって意味が変化</li>
+                        <li><strong>長期依存性</strong>：遠い過去の情報が重要</li>
+                    </ul>
+                </div>
+
+                <h2 id="application-domains">主要な応用領域</h2>
+
+                <ul>
+                    <li><strong>自然言語処理</strong>：機械翻訳、言語モデリング、感情分析</li>
+                    <li><strong>音声処理</strong>：音声認識、音声合成、話者認識</li>
+                    <li><strong>時系列予測</strong>：株価予測、気象予測、需要予測</li>
+                    <li><strong>生物学的系列</strong>：DNA解析、タンパク質構造予測</li>
+                    <li><strong>ロボティクス</strong>：動作制御、軌道計画</li>
+                </ul>
+
+                <h1 id="learning-methods">RNNの学習方法</h1>
+
+                <h2 id="bptt">時間を通じた誤差逆伝播（BPTT）</h2>
+
+                <p>Back Propagation Through Time（BPTT）は、RNNの学習に用いられる標準的な手法です：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 BPTTのアルゴリズム</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Forward Pass（前向き計算）</strong>:
+1. t=1からt=Tまで順次計算
+2. 各時刻の隠れ状態と出力を保存
+
+<strong>Backward Pass（後向き計算）</strong>:
+3. t=TからT=1まで逆順に勾配を計算
+4. 各時刻での勾配を累積
+
+<strong>勾配計算例</strong>:
+∂L/∂W_hh = Σ(t=1 to T) ∂L/∂h_t · ∂h_t/∂W_hh
+
+<strong>課題</strong>:
+- メモリ使用量が系列長に比例
+- 勾配消失・爆発問題
+- 長い系列での計算コスト
+                    </pre>
+                </div>
+
+                <h2 id="truncated-bptt">切り詰めBPTT（Truncated BPTT）</h2>
+
+                <p>計算コストとメモリ使用量を削減するための実用的手法：</p>
+
+                <ul>
+                    <li><strong>固定長切り詰め</strong>：一定時刻数までしか勾配を逆伝播しない</li>
+                    <li><strong>状態の持ち越し</strong>：隠れ状態は次のバッチに引き継ぐ</li>
+                    <li><strong>計算効率</strong>：メモリ使用量を制限しながら学習</li>
+                </ul>
+
+                <h2 id="teacher-forcing">教師強制（Teacher Forcing）</h2>
+
+                <p>訓練時に真の出力を入力として使用する学習技術：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$h_t = f(W_{xh}x_t + W_{yh}y_{t-1}^{\text{true}} + W_{hh}h_{t-1} + b_h)$$
+                </div>
+
+                <p><strong>教師強制の効果</strong>：</p>
+                <ul>
+                    <li><strong>学習の安定化</strong>：誤った予測の蓄積を防ぐ</li>
+                    <li><strong>収束の高速化</strong>：正しい出力で学習を促進</li>
+                    <li><strong>訓練・推論の乖離</strong>：exposure biasの原因にもなる</li>
+                </ul>
+
+                <h1 id="rnn-challenges">RNNの学習における課題</h1>
+
+                <h2 id="gradient-problems">勾配消失・爆発問題</h2>
+
+                <p>RNNにおける最も深刻な問題は、時間軸方向での勾配消失・爆発です：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\frac{\partial L}{\partial W_{hh}} = \sum_{t=1}^{T} \frac{\partial L}{\partial y_t} \prod_{k=1}^{t} \frac{\partial h_k}{\partial h_{k-1}}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚠️ 勾配問題の原因と影響</h3>
+                    <ul>
+                        <li><strong>勾配消失</strong>：$|\frac{\partial h_k}{\partial h_{k-1}}| < 1$の場合、勾配が指数的に減少</li>
+                        <li><strong>勾配爆発</strong>：$|\frac{\partial h_k}{\partial h_{k-1}}| > 1$の場合、勾配が指数的に増大</li>
+                        <li><strong>長期依存性の学習困難</strong>：遠い過去の情報を学習できない</li>
+                        <li><strong>学習の不安定性</strong>：パラメータ更新が不安定になる</li>
+                    </ul>
+                </div>
+
+                <h2 id="gradient-solutions">勾配問題への対策</h2>
+
+                <ul>
+                    <li><strong>勾配クリッピング</strong>：勾配のノルムに上限を設定</li>
+                    <li><strong>適切な初期化</strong>：Xavier/He初期化の使用</li>
+                    <li><strong>活性化関数の選択</strong>：ReLUやLeaky ReLUの使用</li>
+                    <li><strong>ゲート機構</strong>：LSTM/GRUによる根本的解決</li>
+                </ul>
+
+                <h1 id="lstm">LSTM（Long Short Term Memory）</h1>
+
+                <h2 id="lstm-motivation">LSTMの動機と設計</h2>
+
+                <p>1997年にHochreiterとSchmidhuberが提案したLSTMは、勾配消失問題を根本的に解決するアーキテクチャです：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🧠 LSTMのゲート機構</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>忘却ゲート（Forget Gate）</strong>:
+f_t = σ(W_f · [h_{t-1}, x_t] + b_f)
+
+<strong>入力ゲート（Input Gate）</strong>:
+i_t = σ(W_i · [h_{t-1}, x_t] + b_i)
+C̃_t = tanh(W_C · [h_{t-1}, x_t] + b_C)
+
+<strong>セル状態更新</strong>:
+C_t = f_t * C_{t-1} + i_t * C̃_t
+
+<strong>出力ゲート（Output Gate）</strong>:
+o_t = σ(W_o · [h_{t-1}, x_t] + b_o)
+h_t = o_t * tanh(C_t)
+                    </pre>
+                </div>
+
+                <h2 id="gate-mechanisms">ゲート機構の役割</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🚪 各ゲートの機能</h3>
+                    <ul>
+                        <li><strong>忘却ゲート</strong>：不要な記憶を削除（0-1の値で制御）</li>
+                        <li><strong>入力ゲート</strong>：新しい情報の重要度を判定</li>
+                        <li><strong>出力ゲート</strong>：セル状態から出力する情報を選択</li>
+                        <li><strong>セル状態</strong>：長期記憶を保持する情報ハイウェイ</li>
+                    </ul>
+                </div>
+
+                <h1 id="gru">GRU（Gated Recurrent Unit）</h1>
+
+                <h2 id="gru-design">GRUの設計思想</h2>
+
+                <p>2014年にChoらが提案したGRUは、LSTMを簡素化したアーキテクチャです：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 GRUの計算式</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>リセットゲート（Reset Gate）</strong>:
+r_t = σ(W_r · [h_{t-1}, x_t])
+
+<strong>更新ゲート（Update Gate）</strong>:
+z_t = σ(W_z · [h_{t-1}, x_t])
+
+<strong>候補状態</strong>:
+h̃_t = tanh(W · [r_t * h_{t-1}, x_t])
+
+<strong>隠れ状態更新</strong>:
+h_t = (1 - z_t) * h_{t-1} + z_t * h̃_t
+                    </pre>
+                </div>
+
+                <h2 id="lstm-vs-gru">LSTM vs GRU</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚖️ LSTM vs GRU比較</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+特性              LSTM           GRU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ゲート数          3個            2個
+パラメータ数      多い            少ない
+計算コスト        高い            低い
+メモリ使用量      大きい          小さい
+表現力           高い            やや低い
+学習速度         遅い            速い
+長期依存性        優秀            良好
+
+<strong>使い分け</strong>:
+LSTM → 複雑なタスク、長期依存性重視
+GRU  → 計算効率重視、中程度の複雑さ
+                    </pre>
+                </div>
+
+                <h1 id="bidirectional-rnn">双方向RNN（Bidirectional RNN）</h1>
+
+                <h2 id="bidirectional-concept">双方向RNNの概念</h2>
+
+                <p>1997年にSchusterとPaliwalが提案した、前向きと後ろ向きの両方向でRNNを実行するアーキテクチャ：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\overrightarrow{h_t} = f(\overrightarrow{W}x_t + \overrightarrow{U}\overrightarrow{h_{t-1}})$$
+                    $$\overleftarrow{h_t} = f(\overleftarrow{W}x_t + \overleftarrow{U}\overleftarrow{h_{t+1}})$$
+                    $$y_t = g(V[\overrightarrow{h_t}; \overleftarrow{h_t}])$$
+                </div>
+
+                <h2 id="bidirectional-advantages">双方向RNNの利点</h2>
+
+                <ul>
+                    <li><strong>完全な文脈情報</strong>：過去と未来の両方の情報を活用</li>
+                    <li><strong>精度向上</strong>：単方向RNNより高い性能</li>
+                    <li><strong>曖昧性解消</strong>：前後の文脈で意味を特定</li>
+                    <li><strong>対称性</strong>：系列の方向に依存しない処理</li>
+                </ul>
+
+                <h1 id="modern-developments">現代的な発展</h1>
+
+                <h2 id="attention-mechanism">AttentionとTransformer</h2>
+
+                <p>2017年のTransformerの登場により、多くのタスクでRNNからAttention機構への移行が進みました：</p>
+
+                <ul>
+                    <li><strong>並列化</strong>：系列処理の並列化により高速化</li>
+                    <li><strong>長距離依存性</strong>：直接的な接続による長期記憶</li>
+                    <li><strong>表現力</strong>：Self-Attentionによる豊富な表現</li>
+                    <li><strong>解釈可能性</strong>：Attention重みの視覚化</li>
+                </ul>
+
+                <h2 id="rnn-renaissance">RNNの新たな役割</h2>
+
+                <p>Transformerの時代においても、RNNが有効な場面：</p>
+
+                <ul>
+                    <li><strong>オンライン処理</strong>：リアルタイムストリーミング</li>
+                    <li><strong>メモリ効率</strong>：長い系列での省メモリ処理</li>
+                    <li><strong>組み込みシステム</strong>：計算資源が限られた環境</li>
+                    <li><strong>生成タスク</strong>：逐次生成が必要なタスク</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>RNNの基本構造</strong>：h_t = f(W_hh·h_{t-1} + W_xh·x_t + b)の理解</li>
+                        <li><strong>時系列データの特性</strong>：系列依存性、可変長、長期依存性</li>
+                        <li><strong>BPTT</strong>：時間を通じた誤差逆伝播の概念</li>
+                        <li><strong>勾配問題</strong>：勾配消失・爆発の原因と対策</li>
+                        <li><strong>LSTM vs GRU</strong>：ゲート機構の違いと特徴</li>
+                        <li><strong>双方向RNN</strong>：前向き・後ろ向き処理の利点</li>
+                        <li><strong>エルマン・ジョルダンネットワーク</strong>：初期のRNN</li>
+                        <li><strong>教師強制</strong>：学習技術の一つ</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>時間展開の理解</strong>：同じ重みが各時刻で共有されることの理解</li>
+                        <li><strong>勾配問題の本質</strong>：なぜ時間軸方向で勾配が変化するか</li>
+                        <li><strong>LSTMのゲート数</strong>：3つのゲート（忘却・入力・出力）</li>
+                        <li><strong>GRUのゲート数</strong>：2つのゲート（リセット・更新）</li>
+                        <li><strong>双方向RNNの制約</strong>：リアルタイム処理では使用不可</li>
+                        <li><strong>現代的位置づけ</strong>：TransformerがRNNの多くの用途を代替</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>回帰結合層は、時系列データや系列データの処理において重要な役割を果たす技術です。基本的なRNNから始まり、勾配問題を解決するLSTM、計算効率を改善したGRU、そして双方向RNNまで発展してきました。</p>
+                
+                <p>BPTT（時間を通じた誤差逆伝播）による学習方法、勾配消失・爆発問題とその解決策、ゲート機構による長期記憶の実現など、現代の深層学習にも通じる重要な概念が含まれています。</p>
+                
+                <p>G検定では、RNNの基本原理、LSTM/GRUの違い、時系列データの特性、学習時の課題とその対策について理解することが重要です。現在はTransformerが主流ですが、RNNの概念は依然として多くの場面で活用されています。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">回帰結合層（Recurrent Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">前の時刻の隠れ状態を現在の時刻の計算に利用する層。時系列データ処理の基本構造。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">RNN（リカレントニューラルネットワーク）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">回帰結合を持つニューラルネットワーク。時系列データや系列データの処理に特化。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">BPTT（Back Propagation Through Time）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">時間を通じた誤差逆伝播。RNNの学習に用いられる標準的な手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">LSTM（Long Short Term Memory）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1997年提案のゲート機構付きRNN。忘却・入力・出力の3つのゲートで長期記憶を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">GRU（Gated Recurrent Unit）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2014年提案のLSTM簡素版。リセット・更新の2つのゲートでLSTM同等の性能。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">エルマンネットワーク（Elman Network）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1990年Jeffrey Elmanが提案した初期のRNN。隠れ層から隠れ層への回帰結合が特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ジョルダンネットワーク（Jordan Network）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">出力層から隠れ層への回帰結合を持つRNN。エルマンネットワークより安定。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">勾配消失問題（Vanishing Gradient Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">時間軸方向で勾配が指数的に減少し、長期依存性を学習できない問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">勾配爆発問題（Exploding Gradient Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">時間軸方向で勾配が指数的に増大し、学習が不安定になる問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">教師強制（Teacher Forcing）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">訓練時に真の出力を次の入力として使用する学習技術。学習の安定化に寄与。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ゲート機構（Gate Mechanism）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">情報の流れを制御する仕組み。0-1の値で情報の通過・遮断を決定。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">双方向RNN（Bidirectional RNN）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">前向きと後ろ向きの両方向でRNNを実行し、完全な文脈情報を活用するアーキテクチャ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">時系列データ（Time Series Data）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">時間的に順序付けられたデータ。株価、気温、音声、テキストなどが該当。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">セル状態（Cell State）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">LSTMにおける長期記憶を保持する内部状態。情報ハイウェイの役割。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">長期依存性（Long-term Dependencies）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">遠い過去の情報が現在の予測に重要な影響を与える性質。RNNの主要課題。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-5.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-5
+                        </a>
+                        <a href="study5-7.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-7
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

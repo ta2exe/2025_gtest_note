@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-6: 転移学習・ファインチューニング - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-6: 転移学習・ファインチューニング</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-6</h1>
+                <h2 class="content-subtitle">転移学習・ファインチューニング</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>転移学習とファインチューニングの基礎的な知識を理解する</li>
+                        <li>どのような場面やタスクにおいて、転移学習・ファインチューニングが効果を発揮するのか理解する</li>
+                        <li>転移学習・ファインチューニングによって、様々なタスクにおいて大幅な精度向上を果たした代表的なモデルについて理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Few-shot</strong></li>
+                        <li><strong>One-shot</strong></li>
+                        <li><strong>自己教師あり学習</strong></li>
+                        <li><strong>事前学習</strong></li>
+                        <li><strong>事前学習済みモデル</strong></li>
+                        <li><strong>破壊的忘却</strong></li>
+                        <li><strong>半教師あり学習</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">転移学習の革命</h1>
+                
+                <p>転移学習（Transfer Learning）は、ある領域で学習したモデルを別の関連領域に適用する技術です。大規模データセットで事前学習したモデルを、限られたデータの新しいタスクに適応させることで、劇的な性能向上と学習効率化を実現します。</p>
+
+                <p>ImageNet事前学習からBERT、GPTまで、現代AIの根幹を支える技術となっており、少数データでの高精度学習、計算コスト削減、実世界への実用的適用を可能にしています。</p>
+
+                <h2 id="basic-concept">転移学習の基本概念</h2>
+
+                <h3 id="motivation">動機と必要性</h3>
+                <ul>
+                    <li><strong>データ不足問題</strong>：新しいタスクで大量ラベル付きデータの取得困難</li>
+                    <li><strong>計算コスト削減</strong>：ゼロからの学習に比べ大幅な効率化</li>
+                    <li><strong>知識再利用</strong>：既存の学習済み特徴表現の有効活用</li>
+                    <li><strong>汎化性能向上</strong>：豊富な事前知識による過学習抑制</li>
+                </ul>
+
+                <h3 id="basic-framework">基本フレームワーク</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Source Task} \xrightarrow{\text{Knowledge Transfer}} \text{Target Task}$$
+                    $$\theta_{pretrained} \rightarrow \theta_{finetuned}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 転移学習の構成要素</h3>
+                    <ul>
+                        <li><strong>ソースドメイン</strong>：事前学習データと知識の源泉領域</li>
+                        <li><strong>ターゲットドメイン</strong>：最終的に解決したい問題領域</li>
+                        <li><strong>事前学習モデル</strong>：ソースドメインで学習済みパラメータ</li>
+                        <li><strong>適応手法</strong>：ターゲットへの知識転移方法</li>
+                        <li><strong>ファインチューニング</strong>：ターゲットデータでの微調整</li>
+                    </ul>
+                </div>
+
+                <h1 id="pretraining-revolution">事前学習モデルの革命</h1>
+
+                <h2 id="imagenet-era">ImageNet時代の始まり</h2>
+                <p>2012年AlexNet以降、ImageNet事前学習は画像認識の標準手法になりました：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 ImageNet事前学習の影響</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>ImageNet Pre-training Pipeline</strong>:
+1. ImageNet-1K (1.2M画像、1000クラス) で事前学習
+2. 最終分類層を除去
+3. ターゲットタスク用分類層追加
+4. 低学習率でファインチューニング
+
+<strong>性能向上</strong>:
+・少数データタスクで10-20%精度向上
+・学習時間1/10-1/100に短縮
+・小規模データセットでの実用化実現
+
+<strong>代表的事前学習モデル</strong>:
+・ResNet, VGG, Inception
+・EfficientNet, Vision Transformer
+・CLIP（言語画像同時学習）
+                    </pre>
+                </div>
+
+                <h2 id="self-supervised-learning">自己教師あり学習</h2>
+                <p>ラベルなしデータから表現を学習する革新技術：</p>
+
+                <h3 id="ssl-principles">自己教師あり学習の原理</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Unlabeled Data} \xrightarrow{\text{Pretext Task}} \text{Learned Representations}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔍 代表的なプリテキストタスク</h3>
+                    <ul>
+                        <li><strong>回転予測</strong>：画像の回転角度を予測</li>
+                        <li><strong>ジグソーパズル</strong>：分割画像の配置順序を学習</li>
+                        <li><strong>colorization</strong>：グレースケールから色彩復元</li>
+                        <li><strong>対比学習（SimCLR等）</strong>：類似画像の表現を近づける</li>
+                        <li><strong>マスク言語モデル</strong>：BERT系の隠された単語予測</li>
+                        <li><strong>次文予測</strong>：文書の文章順序学習</li>
+                    </ul>
+                </div>
+
+                <h1 id="fine-tuning-strategies">ファインチューニング戦略</h1>
+
+                <h2 id="full-fine-tuning">全パラメータファインチューニング</h2>
+                <p>事前学習モデルの全重みを更新する標準的手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\theta_{t+1} = \theta_t - \alpha \nabla_\theta L_{target}(\theta_t)$$
+                    $$\alpha_{pretrained} \ll \alpha_{scratch} \text{（低学習率）}$$
+                </div>
+
+                <h3 id="layer-wise-tuning">層別ファインチューニング</h3>
+                <ul>
+                    <li><strong>frozen features</strong>：下位層は固定、上位層のみ学習</li>
+                    <li><strong>discriminative learning rates</strong>：層ごとに異なる学習率設定</li>
+                    <li><strong>gradual unfreezing</strong>：段階的に学習可能層を拡大</li>
+                </ul>
+
+                <h2 id="parameter-efficient-tuning">パラメータ効率的ファインチューニング</h2>
+                <p>大規模モデルの実用的適応のための軽量化手法：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ 効率的ファインチューニング手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Adapter Layers</strong>:
+・各Transformerブロックに小さなアダプター追加
+・事前学習重みは固定、アダプターのみ学習
+・パラメータ数1-3%で高性能実現
+
+<strong>LoRA（Low-Rank Adaptation）</strong>:
+・重み更新を低ランク行列で近似
+・W = W₀ + ΔW = W₀ + AB (A, Bは低ランク)
+・GPT-3等大規模モデルで効果実証
+
+<strong>Prefix Tuning</strong>:
+・入力に学習可能なプレフィックストークン追加
+・プレフィックスのみ学習、本体重みは固定
+・連続プロンプト学習の一種
+
+<strong>P-Tuning v2</strong>:
+・各層に学習可能プロンプト埋め込み
+・より柔軟な条件付け機構
+・Few-shotで高性能実現
+                    </pre>
+                </div>
+
+                <h1 id="nlp-transformation">自然言語処理の変革</h1>
+
+                <h2 id="bert-revolution">BERT革命</h2>
+                <p>2018年BERTは事前学習+ファインチューニングで自然言語処理を変革：</p>
+
+                <h3 id="bert-pretraining">BERT事前学習</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{MLM} = -\sum_{i \in \text{masked}} \log P(x_i | \text{context})$$
+                    $$L_{NSP} = -\log P(\text{IsNext} | \text{[CLS]})$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 BERT転移学習の成果</h3>
+                    <ul>
+                        <li><strong>GLUE benchmark</strong>：従来手法を大幅に上回る性能</li>
+                        <li><strong>汎用性</strong>：感情分析、質問応答、推論等で高性能</li>
+                        <li><strong>少データ学習</strong>：数百例でも高精度実現</li>
+                        <li><strong>多言語対応</strong>：multilingual BERTで言語横断転移</li>
+                    </ul>
+                </div>
+
+                <h2 id="gpt-series">GPT系列の進化</h2>
+                <p>自己回帰言語モデルの転移学習進化：</p>
+
+                <h3 id="scaling-laws">スケーリング則</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Performance} \propto \text{Model Size}^{\alpha} \times \text{Data Size}^{\beta}$$
+                </div>
+
+                <ul>
+                    <li><strong>GPT-1</strong>：117M parameters、転移学習の有効性実証</li>
+                    <li><strong>GPT-2</strong>：1.5B parameters、ゼロショット学習能力</li>
+                    <li><strong>GPT-3</strong>：175B parameters、Few-shot In-context Learning</li>
+                    <li><strong>ChatGPT/GPT-4</strong>：RLHF + 指示tuning</li>
+                </ul>
+
+                <h1 id="few-shot-learning">Few-shot・Zero-shot学習</h1>
+
+                <h2 id="few-shot-definitions">定義とアプローチ</h2>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎪 Few-shot学習の分類</h3>
+                    <ul>
+                        <li><strong>Zero-shot</strong>：ターゲットタスクの訓練例なし</li>
+                        <li><strong>One-shot</strong>：各クラス1つの訓練例のみ</li>
+                        <li><strong>Few-shot</strong>：各クラス数例（通常5-10例）</li>
+                        <li><strong>Meta-learning</strong>：学習の学習、高速適応能力獲得</li>
+                    </ul>
+                </div>
+
+                <h3 id="in-context-learning">In-Context Learning</h3>
+                <p>GPT系列で注目のプロンプトベース学習：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(\text{answer} | \text{context + examples + question})$$
+                </div>
+
+                <ul>
+                    <li><strong>プロンプトエンジニアリング</strong>：効果的な指示文設計</li>
+                    <li><strong>Chain-of-Thought</strong>：段階的推論プロセス明示</li>
+                    <li><strong>Instruction Tuning</strong>：指示追従能力の向上</li>
+                </ul>
+
+                <h2 id="meta-learning">メタ学習</h2>
+                <p>「学習の学習」による高速適応：</p>
+
+                <h3 id="maml">MAML（Model-Agnostic Meta-Learning）</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\theta' = \theta - \alpha \nabla_\theta L_{task_i}(\theta)$$
+                    $$\theta \leftarrow \theta - \beta \nabla_\theta \sum_i L_{task_i}(\theta')$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 メタ学習の仕組み</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+1. 多数のタスクでメタ訓練
+2. 各タスクで高速適応（内側ループ）
+3. 適応後性能でメタパラメータ更新（外側ループ）
+4. 新タスクで数ステップ適応のみで高性能
+
+<strong>応用例</strong>:
+・画像分類の新クラス適応
+・言語間転移学習
+・ロボティクスの新環境適応
+・創薬での新化合物予測
+                    </pre>
+                </div>
+
+                <h1 id="catastrophic-forgetting">破壊的忘却問題</h1>
+
+                <h2 id="problem-definition">問題の定義</h2>
+                <p>新しいタスクを学習する際、以前のタスクの知識を忘れる現象：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Performance}_{old} \downarrow \text{ while } \text{Performance}_{new} \uparrow$$
+                </div>
+
+                <h3 id="forgetting-mechanisms">発生メカニズム</h3>
+                <ul>
+                    <li><strong>重み干渉</strong>：新タスクが既存重みを上書き</li>
+                    <li><strong>表現競合</strong>：共有特徴層での競合</li>
+                    <li><strong>勾配干渉</strong>：異なるタスクの勾配方向衝突</li>
+                </ul>
+
+                <h2 id="continual-learning">継続学習の解決手法</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🛡️ 破壊的忘却対策</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>正則化手法</strong>:
+・EWC (Elastic Weight Consolidation)
+・重要パラメータの変化を制約
+・L₂正則化の重み付き拡張
+
+<strong>アーキテクチャ手法</strong>:
+・Progressive Neural Networks
+・タスク毎に専用モジュール追加
+・知識共有と干渉回避の両立
+
+<strong>リハーサル手法</strong>:
+・Experience Replay
+・過去タスクのデータ保持・再生
+・生成モデルによる擬似データ生成
+
+<strong>メタ学習手法</strong>:
+・Gradient Episodic Memory (GEM)
+・過去タスクの勾配制約
+・メモリ効率と性能維持
+                    </pre>
+                </div>
+
+                <h1 id="domain-adaptation">ドメイン適応</h1>
+
+                <h2 id="domain-shift">ドメインシフト問題</h2>
+                <p>訓練データと実際の使用環境の分布差：</p>
+
+                <h3 id="adaptation-types">適応タイプ</h3>
+                <ul>
+                    <li><strong>教師ありドメイン適応</strong>：ターゲットドメインにラベル有り</li>
+                    <li><strong>教師なしドメイン適応</strong>：ターゲットドメインにラベル無し</li>
+                    <li><strong>半教師ありドメイン適応</strong>：部分的ラベル有り</li>
+                </ul>
+
+                <h3 id="adaptation-methods">主要な適応手法</h3>
+                <ul>
+                    <li><strong>DANN（Domain Adversarial Neural Networks）</strong>：敵対的ドメイン不変特徴学習</li>
+                    <li><strong>CORAL</strong>：共分散アライメント</li>
+                    <li><strong>MMD</strong>：Maximum Mean Discrepancy最小化</li>
+                    <li><strong>AdaBN</strong>：Batch Normalization統計量の適応</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>事前学習の意義</strong>：データ不足解決、計算コスト削減、性能向上</li>
+                        <li><strong>ImageNet事前学習</strong>：画像認識における標準的転移学習手法</li>
+                        <li><strong>BERT革命</strong>：自然言語処理での事前学習+ファインチューニング</li>
+                        <li><strong>Few-shot vs Zero-shot</strong>：サンプル数による学習方式の違い</li>
+                        <li><strong>自己教師あり学習</strong>：ラベルなしデータからの表現学習</li>
+                        <li><strong>破壊的忘却</strong>：継続学習における重要課題</li>
+                        <li><strong>ファインチューニング戦略</strong>：層別調整、学習率設定</li>
+                        <li><strong>ドメイン適応</strong>：分布シフトへの対応技術</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>転移学習 = 画像のみ</strong>：自然言語、音声、マルチモーダルでも重要</li>
+                        <li><strong>事前学習 = 大規模データ必須</strong>：自己教師あり学習で効率化</li>
+                        <li><strong>ファインチューニング = 全層更新</strong>：部分更新、効率的手法も存在</li>
+                        <li><strong>Zero-shot = 性能低い</strong>：大規模モデルで高性能実現</li>
+                        <li><strong>破壊的忘却 = 解決不可</strong>：多様な対策手法が開発済み</li>
+                        <li><strong>ドメイン適応 = 複雑</strong>：简易な統計量調整でも効果あり</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>転移学習・ファインチューニングは、現代AI技術の根幹を支える重要技術です。ImageNet事前学習からBERT、GPTまで、大規模事前学習モデルの活用により、少データでの高性能実現、計算効率化、実世界応用が劇的に進展しています。</p>
+                
+                <p>自己教師あり学習、Few-shot学習、パラメータ効率的ファインチューニングなど、様々な発展により、より実用的で効率的な学習手法が確立されています。一方で破壊的忘却、ドメインシフトなどの課題に対する継続的な技術革新も重要です。</p>
+                
+                <p>G検定では、転移学習の基本概念、代表的モデル（BERT、GPT等）の特徴、適用場面、効果と課題について体系的な理解が求められます。特に事前学習の意義と実世界での成功事例を押さえることが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">転移学習（Transfer Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ある領域で学習したモデルを関連する別領域に適用する技術。データ不足や計算コスト問題を解決。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">事前学習済みモデル</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">大規模データセットで事前学習され、様々なタスクに転移可能な汎用モデル。ImageNet CNN、BERT等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ファインチューニング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">事前学習モデルをターゲットタスクに適応させるための微調整プロセス。通常低学習率で実行。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">自己教師あり学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ラベルなしデータから人工的タスクを作成し、有用な表現を学習する手法。回転予測、マスク言語モデル等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Few-shot学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各クラス数例の少量データのみで高性能を実現する学習手法。メタ学習や文脈内学習で実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">One-shot学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各クラス1例のみの極少データで学習する手法。Few-shotの極限ケース。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">破壊的忘却</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">新タスク学習時に以前のタスクの知識を失う現象。継続学習の主要課題。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">半教師あり学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">少量のラベル付きデータと大量のラベルなしデータを組み合わせた学習手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ドメイン適応</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">訓練時と実行時のデータ分布差に対処する技術。ドメインシフト問題の解決手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">In-Context Learning</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">GPT系列のプロンプト内での文脈学習。パラメータ更新なしでタスク適応を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">MAML</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Model-Agnostic Meta-Learning。二重勾配により少数ステップでの高速適応能力を獲得。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">LoRA</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Low-Rank Adaptation。大規模モデルの効率的ファインチューニング手法。重み更新を低ランク分解で近似。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">プリテキストタスク</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">自己教師あり学習での人工的な学習タスク。回転予測、ジグソーパズル、マスク予測等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">継続学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数タスクを順次学習しながら過去の知識を保持する学習パラダイム。破壊的忘却への対策。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-5.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-5
+                        </a>
+                        <a href="study6-7.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-7
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-5: スキップ結合 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-5: スキップ結合</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-5</h1>
+                <h2 class="content-subtitle">スキップ結合</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>スキップ結合の概要を理解する</li>
+                        <li>ディープラーニングにおけるスキップ結合の役割を説明できる</li>
+                        <li>スキップ結合を活用したResidual Network (ResNet) の概要を理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Residual Network (ResNet)</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">スキップ結合とは何か</h1>
+                
+                <p>スキップ結合（Skip Connection）は、ディープニューラルネットワークにおいて、層をスキップして入力を直接後続の層に伝える技術です。この革命的なアイデアにより、非常に深いネットワークの学習が可能となり、現代のディープラーニングの発展に大きな影響を与えました。</p>
+
+                <p>2015年にKaiming Heらが提案したResidual Network（ResNet）において初めて体系化され、ImageNet分類コンペティションで劇的な性能向上を達成しました。この技術は、深層学習における「深さの限界」を突破し、152層という超深層ネットワークを実現しました。</p>
+
+                <h1 id="basic-concept">基本概念</h1>
+
+                <h2 id="skip-connection-principle">スキップ結合の原理</h2>
+                
+                <p>スキップ結合の基本的なアイデアは、入力を変換せずに直接出力に加算することです：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mathbf{y} = \mathcal{F}(\mathbf{x}) + \mathbf{x}$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$\mathbf{x}$</strong>：入力</li>
+                    <li><strong>$\mathcal{F}(\mathbf{x})$</strong>：層による変換（残差関数）</li>
+                    <li><strong>$\mathbf{y}$</strong>：出力</li>
+                    <li><strong>恒等写像 $\mathbf{x}$</strong>：スキップ結合による直接パス</li>
+                </ul>
+
+                <h2 id="residual-learning">残差学習（Residual Learning）</h2>
+
+                <p>スキップ結合により、ネットワークは<strong>残差関数</strong>$\mathcal{F}(\mathbf{x}) = \mathbf{y} - \mathbf{x}$を学習するようになります。これは従来の直接的なマッピング$\mathcal{H}(\mathbf{x}) = \mathbf{y}$を学習するよりも容易です。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 残差学習の利点</h3>
+                    <ul>
+                        <li><strong>学習の容易さ</strong>：恒等写像から小さな変化を学習</li>
+                        <li><strong>勾配の流れ</strong>：恒等写像による直接的な勾配伝播</li>
+                        <li><strong>表現の豊かさ</strong>：複雑な変換をより効率的に表現</li>
+                        <li><strong>最適化の安定性</strong>：局所最適解からの脱出促進</li>
+                    </ul>
+                </div>
+
+                <h1 id="problems-solved">解決された問題</h1>
+
+                <h2 id="degradation-problem">劣化問題（Degradation Problem）</h2>
+
+                <p>スキップ結合が解決した最も重要な問題は「劣化問題」です。これは、ネットワークが深くなるにつれて訓練誤差が悪化する現象で、勾配消失とは異なる根本的な問題でした。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📉 劣化問題の実例</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>従来の深いネットワーク（ResNet以前）</strong>
+
+20層ネットワーク: 訓練誤差 8.75%
+56層ネットワーク: 訓練誤差 11.01%  ← より深いのに性能悪化
+
+<strong>期待</strong>: 深いネットワーク ≥ 浅いネットワーク
+<strong>現実</strong>: 深いネットワーク < 浅いネットワーク
+
+<strong>原因</strong>: 最適化の困難（勾配消失以外の要因）
+<strong>解決</strong>: ResNetのスキップ結合
+                    </pre>
+                </div>
+
+                <h2 id="gradient-flow-improvement">勾配フローの改善</h2>
+
+                <p>スキップ結合は、勾配の伝播を劇的に改善します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\frac{\partial \mathcal{L}}{\partial \mathbf{x}} = \frac{\partial \mathcal{L}}{\partial \mathbf{y}} \left(1 + \frac{\partial \mathcal{F}}{\partial \mathbf{x}}\right)$$
+                </div>
+
+                <p>この式から、勾配が最低でも1の値を持つことが保証されます（$\frac{\partial \mathcal{L}}{\partial \mathbf{y}} = 1$の場合）。これにより：</p>
+
+                <ul>
+                    <li><strong>勾配消失の防止</strong>：恒等写像により勾配が保たれる</li>
+                    <li><strong>効率的な学習</strong>：初期層まで学習信号が届く</li>
+                    <li><strong>安定した収束</strong>：最適化過程の安定化</li>
+                </ul>
+
+                <h1 id="resnet-architecture">ResNet（Residual Network）</h1>
+
+                <h2 id="resnet-structure">ResNetの基本構造</h2>
+
+                <p>ResNetは、スキップ結合を体系化した最初の成功例です。基本的な構成要素は<strong>Residual Block</strong>です：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏗️ Residual Blockの構造</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>基本的なResidual Block</strong>:
+
+入力 x
+    ↓
+[Conv 3×3] → [BatchNorm] → [ReLU]
+    ↓
+[Conv 3×3] → [BatchNorm]
+    ↓
+    加算 ← x (スキップ結合)
+    ↓
+[ReLU] 
+    ↓
+出力 y = F(x) + x
+
+<strong>Bottleneck Block（ResNet-50以上）</strong>:
+[Conv 1×1] → [Conv 3×3] → [Conv 1×1]
+         ↓                     ↓
+         +  ←——————————————————— x
+                    </pre>
+                </div>
+
+                <h2 id="resnet-variants">ResNetの主要バリエーション</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 ResNetファミリー</h3>
+                    <ul>
+                        <li><strong>ResNet-18</strong>：18層、基本ブロック使用</li>
+                        <li><strong>ResNet-34</strong>：34層、基本ブロック使用</li>
+                        <li><strong>ResNet-50</strong>：50層、ボトルネックブロック使用</li>
+                        <li><strong>ResNet-101</strong>：101層、超深層ネットワーク</li>
+                        <li><strong>ResNet-152</strong>：152層、最深の標準ResNet</li>
+                        <li><strong>ResNet-1000</strong>：実験的な1000層ネットワーク</li>
+                    </ul>
+                </div>
+
+                <h2 id="resnet-achievements">ResNetの成果</h2>
+
+                <p>ResNetは複数の重要なベンチマークで画期的な成果を達成：</p>
+
+                <ul>
+                    <li><strong>ImageNet分類</strong>：Top-5エラー率3.57%（人間の性能を上回る）</li>
+                    <li><strong>COCO物体検出</strong>：大幅な精度向上</li>
+                    <li><strong>セマンティックセグメンテーション</strong>：PASCAL VOCで最高性能</li>
+                    <li><strong>深さの実現</strong>：152層の安定した学習</li>
+                </ul>
+
+                <h1 id="types-of-skip-connections">スキップ結合の種類</h1>
+
+                <h2 id="identity-shortcut">恒等ショートカット</h2>
+
+                <p>最もシンプルなスキップ結合で、入力をそのまま加算：</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mathbf{y} = \mathcal{F}(\mathbf{x}) + \mathbf{x}$$
+                </div>
+
+                <h2 id="projection-shortcut">射影ショートカット</h2>
+
+                <p>次元が異なる場合に使用される線形変換を含むスキップ結合：</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mathbf{y} = \mathcal{F}(\mathbf{x}) + \mathbf{W_s}\mathbf{x}$$
+                </div>
+
+                <p>$\mathbf{W_s}$は次元調整のための学習可能な線形変換です。</p>
+
+                <h2 id="dense-connections">密結合（DenseNet）</h2>
+
+                <p>DenseNetでは、前のすべての層からの特徴を連結：</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mathbf{x_l} = \mathcal{H_l}([\mathbf{x_0}, \mathbf{x_1}, ..., \mathbf{x_{l-1}}])$$
+                </div>
+
+                <p>$[\mathbf{x_0}, \mathbf{x_1}, ..., \mathbf{x_{l-1}}]$は特徴マップの連結を表します。</p>
+
+                <h1 id="impact-and-applications">影響と応用</h1>
+
+                <h2 id="architectural-influence">アーキテクチャへの影響</h2>
+
+                <p>スキップ結合は、現代のほぼすべての深層アーキテクチャに影響を与えました：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🌟 スキップ結合を活用したアーキテクチャ</h3>
+                    <ul>
+                        <li><strong>DenseNet</strong>：すべての層を密に結合</li>
+                        <li><strong>U-Net</strong>：エンコーダ-デコーダ間のスキップ結合</li>
+                        <li><strong>FPN (Feature Pyramid Network)</strong>：マルチスケール特徴統合</li>
+                        <li><strong>Transformer</strong>：残差結合の標準採用</li>
+                        <li><strong>EfficientNet</strong>：効率的なスキップ結合設計</li>
+                        <li><strong>Vision Transformer</strong>：各ブロックで残差結合使用</li>
+                    </ul>
+                </div>
+
+                <h2 id="beyond-computer-vision">コンピュータビジョン以外への展開</h2>
+
+                <ul>
+                    <li><strong>自然言語処理</strong>：TransformerのAttentionブロック</li>
+                    <li><strong>音声認識</strong>：深いRNNの学習安定化</li>
+                    <li><strong>強化学習</strong>：価値関数近似の改善</li>
+                    <li><strong>生成モデル</strong>：GANの学習安定化</li>
+                </ul>
+
+                <h1 id="theoretical-understanding">理論的理解</h1>
+
+                <h2 id="optimization-perspective">最適化の観点</h2>
+
+                <p>スキップ結合が最適化を改善する理論的根拠：</p>
+
+                <ul>
+                    <li><strong>損失ランドスケープの平滑化</strong>：最適化の困難を軽減</li>
+                    <li><strong>条件数の改善</strong>：ヘッセ行列の条件数を改善</li>
+                    <li><strong>勾配ノルムの保持</strong>：学習信号の減衰防止</li>
+                    <li><strong>アンサンブル効果</strong>：複数のパスによる暗黙的アンサンブル</li>
+                </ul>
+
+                <h2 id="representation-learning">表現学習の観点</h2>
+
+                <p>スキップ結合による表現学習の改善：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 表現学習への効果</h3>
+                    <ul>
+                        <li><strong>多解像度特徴</strong>：異なるレベルの特徴を同時に保持</li>
+                        <li><strong>特徴再利用</strong>：下位層の特徴を上位層で活用</li>
+                        <li><strong>勾配の多様性</strong>：複数の学習パスによる豊富な勾配</li>
+                        <li><strong>特徴の階層性</strong>：階層的特徴表現の学習促進</li>
+                    </ul>
+                </div>
+
+                <h1 id="modern-developments">現代的な発展</h1>
+
+                <h2 id="attention-and-skip">AttentionとSkip Connection</h2>
+
+                <p>Transformerにおけるスキップ結合の発展：</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Output} = \text{LayerNorm}(\mathbf{x} + \text{Attention}(\mathbf{x}))$$
+                </div>
+
+                <h2 id="neural-architecture-search">Neural Architecture Search</h2>
+
+                <p>自動設計によるスキップ結合の最適化：</p>
+                <ul>
+                    <li><strong>NASNet</strong>：強化学習によるセル設計</li>
+                    <li><strong>EfficientNet</strong>：複合スケーリング法則</li>
+                    <li><strong>RegNet</strong>：設計空間の体系的探索</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>スキップ結合の基本式</strong>：y = F(x) + x の理解</li>
+                        <li><strong>残差学習の概念</strong>：なぜ残差関数の学習が容易か</li>
+                        <li><strong>劣化問題の解決</strong>：深いネットワークの訓練誤差悪化問題</li>
+                        <li><strong>ResNetの革新性</strong>：152層の超深層ネットワーク実現</li>
+                        <li><strong>勾配フローの改善</strong>：恒等写像による勾配消失防止</li>
+                        <li><strong>ImageNet性能</strong>：人間の性能を上回る分類精度</li>
+                        <li><strong>現代への影響</strong>：TransformerやU-Netでの採用</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>勾配消失との違い</strong>：劣化問題は勾配消失とは別の問題</li>
+                        <li><strong>次元の整合性</strong>：スキップ結合には同じ次元が必要（または射影）</li>
+                        <li><strong>ResNetの年代</strong>：2015年の提案、Kaiming Heらによる</li>
+                        <li><strong>学習対象の変化</strong>：直接マッピングではなく残差関数を学習</li>
+                        <li><strong>計算量の増加</strong>：スキップ結合自体は計算量をほとんど増やさない</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>スキップ結合は、ディープラーニングにおける最も重要な技術革新の一つです。ResNetでの体系化により、従来不可能だった超深層ネットワークの学習を実現し、劣化問題と勾配消失問題の両方を解決しました。</p>
+                
+                <p>この技術は、コンピュータビジョンから自然言語処理まで、現代のディープラーニングアーキテクチャのほぼすべてに影響を与えています。TransformerのAttentionブロック、U-NetのEncoder-Decoder構造など、様々な形でスキップ結合の概念が活用されています。</p>
+                
+                <p>G検定では、スキップ結合の基本原理、ResNetの革新性、残差学習の概念、そして現代のアーキテクチャへの影響について理解することが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">スキップ結合（Skip Connection）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">層をスキップして入力を直接後続層に伝える技術。残差結合（Residual Connection）とも呼ばれる。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ResNet（Residual Network）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2015年にKaiming Heらが提案した、スキップ結合を体系化したCNNアーキテクチャ。152層の超深層学習を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">残差学習（Residual Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">直接的なマッピングではなく、入力と出力の差分（残差）を学習する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">劣化問題（Degradation Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ネットワークが深くなるにつれて訓練誤差が悪化する問題。勾配消失とは異なる現象。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Residual Block</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ResNetの基本構成要素。畳み込み層とスキップ結合を組み合わせたブロック。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">恒等写像（Identity Mapping）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力をそのまま出力する変換。スキップ結合で実現される直接パス。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">射影ショートカット（Projection Shortcut）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">次元が異なる場合に使用される線形変換を含むスキップ結合。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Bottleneck Block</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ResNet-50以上で使用される効率的なブロック。1×1→3×3→1×1畳み込みの構造。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">勾配消失問題（Vanishing Gradient Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深いネットワークで勾配が初期層に伝わりにくくなる問題。スキップ結合により改善される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">DenseNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各層が前のすべての層と密に結合されたアーキテクチャ。スキップ結合の発展形。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">U-Net</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エンコーダとデコーダ間でスキップ結合を使用するセグメンテーション用アーキテクチャ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Feature Pyramid Network（FPN）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">異なるスケールの特徴を統合するためにスキップ結合を活用するアーキテクチャ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">条件数（Condition Number）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">最適化問題の困難さを表す指標。スキップ結合により改善される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">アンサンブル効果</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">スキップ結合により複数の計算パスが生成され、暗黙的なアンサンブル学習効果を得る現象。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-4
+                        </a>
+                        <a href="study5-6.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-6
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

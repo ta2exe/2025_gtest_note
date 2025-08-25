@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-9: データ拡張 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-9: データ拡張</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-9</h1>
+                <h2 class="content-subtitle">データ拡張</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>データ拡張の基礎的な知識を理解する</li>
+                        <li>代表的なデータ拡張手法について理解する</li>
+                        <li>ディープラーニングにおけるデータ拡張の役割を説明できる</li>
+                        <li>タスクやデータセットに応じて、使用するデータ拡張手法を選択できる</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Contrast</strong></li>
+                        <li><strong>Brightness</strong></li>
+                        <li><strong>Crop</strong></li>
+                        <li><strong>CutMix</strong></li>
+                        <li><strong>Cutout</strong></li>
+                        <li><strong>Mixup</strong></li>
+                        <li><strong>noising</strong></li>
+                        <li><strong>paraphrasing</strong></li>
+                        <li><strong>RandAugment</strong></li>
+                        <li><strong>Random Erasing</strong></li>
+                        <li><strong>Random Flip</strong></li>
+                        <li><strong>Rotate</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">データ拡張とは何か</h1>
+                
+                <p>データ拡張（Data Augmentation）は、既存の訓練データに変形・変換を施すことで、人工的に訓練データを増やす技術です。深層学習モデルの汎化性能向上、過学習の抑制、データ不足問題の解決において重要な役割を果たします。</p>
+
+                <p>1980年代から画像認識で使われていた技術ですが、深層学習の発展とともに多様化し、現在は画像・音声・テキスト・時系列データなど、あらゆるモダリティで活用される基盤技術となっています。</p>
+
+                <h1 id="fundamentals">データ拡張の基礎原理</h1>
+
+                <h2 id="motivation">なぜデータ拡張が必要なのか</h2>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 データ拡張の目的</h3>
+                    <ul>
+                        <li><strong>過学習の防止</strong>：訓練データのバリエーション増加</li>
+                        <li><strong>汎化性能向上</strong>：多様な変換に対する頑健性獲得</li>
+                        <li><strong>データ不足解決</strong>：少ないデータでの効果的学習</li>
+                        <li><strong>不変性の学習</strong>：本質的特徴と無関係な変動への対応</li>
+                        <li><strong>コスト削減</strong>：新データ収集コストの削減</li>
+                    </ul>
+                </div>
+
+                <h2 id="principles">データ拡張の設計原則</h2>
+
+                <p>効果的なデータ拡張には以下の原則があります：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📏 設計原則</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>ラベル不変性（Label Preserving）</strong>:
+変換後もラベルが変わらない変換のみ適用
+例: 猫の画像を回転→依然として猫
+
+<strong>現実的変換（Realistic Transform）</strong>:
+実世界で起こりうる変動のみをシミュレート
+例: 明度変化は○、色相の大幅変更は×
+
+<strong>タスク適応性（Task-Specific）</strong>:
+タスクに応じた適切な変換の選択
+例: OCRでは文字を判読不能にする変換は不適切
+
+<strong>適度な強度（Moderate Intensity）</strong>:
+情報が失われない程度の変換強度
+例: 過度なノイズ追加は逆効果
+                    </pre>
+                </div>
+
+                <h1 id="image-augmentation">画像データ拡張手法</h1>
+
+                <h2 id="geometric-transforms">幾何学的変換</h2>
+
+                <p>画像の位置・形状を変える基本的な変換手法：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 幾何学的変換手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Random Flip（反転）</strong>:
+・水平反転: 左右の鏡像変換
+・垂直反転: 上下反転（用途限定的）
+・用途: 顔認識、一般物体認識
+
+<strong>Rotate（回転）</strong>:
+・角度範囲: 通常±15～30度
+・回転中心: 画像中心または指定点
+・補間方法: バイリニア、バイキューブ
+
+<strong>Crop（切り抜き）</strong>:
+・Random Crop: ランダムな位置・サイズで切り抜き
+・Center Crop: 中央部分の切り抜き
+・Scale: 切り抜き後のリサイズ
+
+<strong>Scale/Zoom（拡大縮小）</strong>:
+・Zoom In: 拡大（一部が切れる）
+・Zoom Out: 縮小（余白が生じる）
+・アスペクト比: 維持 or 変更
+                    </pre>
+                </div>
+
+                <h2 id="photometric-transforms">光学的変換</h2>
+
+                <p>画像の色調・明度を変更する変換手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$I'_{brightness} = I + \Delta b$$
+                    $$I'_{contrast} = \alpha \cdot I + \beta$$
+                    $$I'_{gamma} = I^{\gamma}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🌈 光学的変換手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Brightness（明度変調）</strong>:
+・全ピクセルに定数を加算/減算
+・範囲: ±0.2程度が一般的
+・HSV色空間のV成分変更
+
+<strong>Contrast（コントラスト変調）</strong>:  
+・ピクセル値に係数を乗算
+・α > 1: 高コントラスト, α < 1: 低コントラスト
+・平均値周りでの線形変換
+
+<strong>Saturation（彩度変調）</strong>:
+・HSV色空間のS成分変更
+・モノクロ〜高彩度の範囲で調整
+
+<strong>Hue Shift（色相変化）</strong>:
+・HSV色空間のH成分をシフト
+・虹色の環状移動
+・自然画像では小幅（±10度程度）
+                    </pre>
+                </div>
+
+                <h2 id="noise-transforms">ノイズ系変換</h2>
+
+                <p>ノイズ追加による頑健性向上手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$I'_{gaussian} = I + \mathcal{N}(0, \sigma^2)$$
+                    $$I'_{salt\&pepper} = \begin{cases} 
+                    0 & \text{確率} p/2 \\
+                    255 & \text{確率} p/2 \\
+                    I & \text{確率} 1-p
+                    \end{cases}$$
+                </div>
+
+                <ul>
+                    <li><strong>Gaussian Noise</strong>：正規分布ノイズの追加</li>
+                    <li><strong>Salt & Pepper Noise</strong>：ランダムな白黒点の追加</li>
+                    <li><strong>Speckle Noise</strong>：乗算ノイズによる画像劣化</li>
+                    <li><strong>Motion Blur</strong>：カメラブレのシミュレーション</li>
+                </ul>
+
+                <h1 id="advanced-techniques">高度なデータ拡張手法</h1>
+
+                <h2 id="mixup">Mixup</h2>
+
+                <p>2017年にZhangらが提案した、2つの訓練サンプルを線形結合する手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\tilde{x} = \lambda x_i + (1-\lambda)x_j$$
+                    $$\tilde{y} = \lambda y_i + (1-\lambda)y_j$$
+                </div>
+
+                <p>ここで$\lambda \sim \text{Beta}(\alpha, \alpha)$、通常$\alpha = 0.2$</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔀 Mixupの特徴</h3>
+                    <ul>
+                        <li><strong>線形補間</strong>：画像とラベルの両方を混合</li>
+                        <li><strong>意思決定境界</strong>：クラス間境界の滑らか化</li>
+                        <li><strong>汎化性能</strong>：過学習の抑制と精度向上</li>
+                        <li><strong>敵対的頑健性</strong>：adversarial attacksへの耐性向上</li>
+                    </ul>
+                </div>
+
+                <h2 id="cutmix">CutMix</h2>
+
+                <p>2019年にYunらが提案した、Mixupの改良版：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\tilde{x} = M \odot x_A + (1-M) \odot x_B$$
+                    $$\tilde{y} = \lambda y_A + (1-\lambda) y_B$$
+                </div>
+
+                <p>ここで$M$はバイナリマスク、$\lambda = \frac{\text{cutout area}}{\text{total area}}$</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">✂️ CutMixの動作</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Step 1</strong>: 2つの画像 A, B を選択
+<strong>Step 2</strong>: 矩形領域をランダムに決定
+<strong>Step 3</strong>: A の矩形部分を B で置換
+<strong>Step 4</strong>: ラベルを面積比で混合
+
+<strong>利点</strong>:
+✓ 局所特徴の保持（Mixupより自然）
+✓ 遮蔽（occlusion）に対する頑健性
+✓ CNN の受容野と整合的
+✓ 計算コストが低い
+                    </pre>
+                </div>
+
+                <h2 id="cutout">Cutout</h2>
+
+                <p>2017年にDeVriesとTaylorが提案した、ランダム矩形マスキング手法：</p>
+
+                <ul>
+                    <li><strong>矩形マスク</strong>：ランダムな位置に固定サイズの矩形を配置</li>
+                    <li><strong>Zero Padding</strong>：マスク領域を0（黒）で埋める</li>
+                    <li><strong>遮蔽学習</strong>：部分的な情報欠損への対応力向上</li>
+                    <li><strong>正則化効果</strong>：特定領域への過度な依存を防ぐ</li>
+                </ul>
+
+                <h2 id="random-erasing">Random Erasing</h2>
+
+                <p>2020年にZhongらが提案した、Cutoutの発展版：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 Random Erasingの改良点</h3>
+                    <ul>
+                        <li><strong>可変サイズ</strong>：矩形サイズをランダムに決定</li>
+                        <li><strong>アスペクト比</strong>：縦横比の多様性</li>
+                        <li><strong>埋め込み値</strong>：ランダム値、平均値、0値から選択</li>
+                        <li><strong>確率的実行</strong>：一定確率でのみ適用</li>
+                    </ul>
+                </div>
+
+                <h1 id="automatic-augmentation">自動データ拡張</h1>
+
+                <h2 id="randaugment">RandAugment</h2>
+
+                <p>2019年にCubukらが提案した、自動データ拡張手法：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 RandAugmentのアルゴリズム</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>パラメータ</strong>:
+N: 適用する変換の数（例: N=2）
+M: 変換の強度（例: M=9, 範囲0-30）
+
+<strong>手順</strong>:
+1. 14種類の変換から N個をランダム選択
+2. 各変換を強度 M で適用
+3. 変換の組み合わせは画像ごとにランダム
+
+<strong>14種類の変換</strong>:
+・AutoContrast   ・Equalize    ・Invert
+・Rotate         ・Posterize   ・Solarize  
+・SolarizeAdd    ・Color       ・Contrast
+・Brightness     ・Sharpness   ・ShearX
+・ShearY         ・TranslateX  ・TranslateY
+                    </pre>
+                </div>
+
+                <h2 id="autoaugment">AutoAugment</h2>
+
+                <p>RandAugmentの前身。強化学習による最適な拡張ポリシー探索：</p>
+
+                <ul>
+                    <li><strong>ポリシー探索</strong>：強化学習による最適変換シーケンス発見</li>
+                    <li><strong>データセット特化</strong>：CIFAR-10、ImageNet等に特化ポリシー</li>
+                    <li><strong>計算コスト</strong>：探索に大量の計算資源が必要</li>
+                    <li><strong>転移学習</strong>：学習済みポリシーの他データセットへの適用</li>
+                </ul>
+
+                <h1 id="text-augmentation">テキストデータ拡張</h1>
+
+                <h2 id="paraphrasing">Paraphrasing（言い換え）</h2>
+
+                <p>自然言語処理における基本的なデータ拡張手法：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📝 テキスト拡張手法</h3>
+                    <ul>
+                        <li><strong>同義語置換</strong>：単語を類義語で置き換え</li>
+                        <li><strong>文構造変更</strong>：能動態→受動態、語順変更</li>
+                        <li><strong>逆翻訳</strong>：他言語経由での言い換え生成</li>
+                        <li><strong>テンプレート生成</strong>：定型文からの派生</li>
+                        <li><strong>GPT活用</strong>：大規模言語モデルによる自然な言い換え</li>
+                    </ul>
+                </div>
+
+                <h2 id="text-noise">テキストノイズ追加</h2>
+
+                <ul>
+                    <li><strong>文字レベル</strong>：タイポ、文字挿入・削除・置換</li>
+                    <li><strong>単語レベル</strong>：ランダム単語削除、置換、挿入</li>
+                    <li><strong>文レベル</strong>：文順序のシャッフル</li>
+                    <li><strong>意味保持</strong>：意味を壊さない範囲でのノイズ追加</li>
+                </ul>
+
+                <h1 id="domain-specific">ドメイン固有の拡張</h1>
+
+                <h2 id="audio-augmentation">音声データ拡張</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎵 音声拡張手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>時間軸変換</strong>:
+・Time Stretching: 再生速度変更
+・Time Shifting: 開始時刻のずらし
+・Silence Insertion: 無音区間の挿入
+
+<strong>周波数変換</strong>:
+・Pitch Shifting: 音程変更
+・Formant Shifting: 声質変更
+・Spectral Rolling: 周波数スペクトラムの回転
+
+<strong>ノイズ系</strong>:
+・Background Noise: 背景雑音追加
+・Room Reverb: 残響効果
+・Band-pass Filter: 周波数帯域制限
+                    </pre>
+                </div>
+
+                <h2 id="time-series-augmentation">時系列データ拡張</h2>
+
+                <ul>
+                    <li><strong>Window Slicing</strong>：時間窓のスライディング</li>
+                    <li><strong>Jittering</strong>：微小ノイズ追加</li>
+                    <li><strong>Scaling</strong>：振幅の拡大縮小</li>
+                    <li><strong>Time Warping</strong>：時間軸の非線形変換</li>
+                    <li><strong>Permutation</strong>：時系列セグメントの順序変更</li>
+                </ul>
+
+                <h1 id="implementation-strategies">実装と適用戦略</h1>
+
+                <h2 id="pipeline-integration">パイプライン統合</h2>
+
+                <p>データ拡張の効果的な組み込み方：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔧 実装パターン</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>オンライン拡張（On-the-fly）</strong>:
+・訓練時にリアルタイムで変換
+・メモリ効率が良い
+・無限の拡張バリエーション
+
+<strong>オフライン拡張（Pre-computed）</strong>:
+・事前に拡張データを生成・保存
+・訓練時の計算負荷が少ない
+・ディスク容量が必要
+
+<strong>混合戦略</strong>:
+・軽い変換→オンライン
+・重い変換→オフライン
+・計算とストレージのトレードオフ
+                    </pre>
+                </div>
+
+                <h2 id="hyperparameter-tuning">ハイパーパラメータ調整</h2>
+
+                <ul>
+                    <li><strong>変換強度</strong>：タスクに応じた適切な強度設定</li>
+                    <li><strong>適用確率</strong>：各変換の適用頻度制御</li>
+                    <li><strong>組み合わせ</strong>：複数変換の同時適用</li>
+                    <li><strong>段階的適用</strong>：学習進行に応じた強度調整</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本概念</strong>：データ拡張の目的（過学習防止、汎化性能向上）</li>
+                        <li><strong>幾何学的変換</strong>：Flip、Rotate、Crop、スケーリング</li>
+                        <li><strong>光学的変換</strong>：Brightness、Contrast、彩度・色相変更</li>
+                        <li><strong>Mixup</strong>：2つのサンプルの線形結合、ラベル混合</li>
+                        <li><strong>CutMix</strong>：矩形領域の置換、面積比ラベル混合</li>
+                        <li><strong>Cutout</strong>：ランダム矩形マスキング</li>
+                        <li><strong>RandAugment</strong>：自動データ拡張、N・Mパラメータ</li>
+                        <li><strong>ドメイン固有拡張</strong>：テキスト（paraphrasing）、音声変換</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>ラベル保持原則</strong>：変換後もラベルが変わらない変換のみ適用</li>
+                        <li><strong>過度な変換</strong>：強すぎる変換は逆に性能を低下させる</li>
+                        <li><strong>タスク適応性</strong>：OCRに回転、医療画像に色調変換は不適切</li>
+                        <li><strong>Mixupのラベル混合</strong>：画像だけでなくラベルも線形結合</li>
+                        <li><strong>CutMixの面積比</strong>：ラベル混合比は切り抜き領域の面積比</li>
+                        <li><strong>自動拡張の設定</strong>：RandAugmentのN（変換数）・M（強度）調整</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>データ拡張は、深層学習において汎化性能向上と過学習防止のための必須技術です。基本的な幾何学的・光学的変換から、Mixup・CutMix等の高度な手法、RandAugment等の自動化手法まで多様な発展を遂げています。</p>
+                
+                <p>各データモダリティ（画像・音声・テキスト・時系列）に適した拡張手法があり、タスクの性質を理解して適切な手法を選択することが重要です。現代のディープラーニングでは、データ拡張なしでは競争力のある性能は期待できません。</p>
+                
+                <p>G検定では、基本的な変換手法の理解、Mixup系手法の仕組み、自動データ拡張の概念、ドメイン固有の拡張手法について出題される可能性が高く、実際の適用場面での選択指針も理解しておくことが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">データ拡張（Data Augmentation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">既存データに変形・変換を施して人工的に訓練データを増やす技術。過学習防止と汎化性能向上が目的。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Random Flip（ランダム反転）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像を水平・垂直方向に反転させる基本的な幾何学変換。左右対称性の学習に有効。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Rotate（回転）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像を指定角度回転させる変換。通常は±15～30度の範囲で適用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Crop（切り抜き）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像の一部をランダムまたは中央から切り抜く変換。位置不変性の学習に寄与。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Brightness（明度調整）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像の明るさを変更する光学的変換。全ピクセルに定数を加算・減算。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Contrast（コントラスト調整）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像のコントラストを変更する変換。ピクセル値に係数を乗算して実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Mixup</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2つの訓練サンプルを線形結合する手法。画像とラベルの両方を混合して新しいサンプルを生成。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">CutMix</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">一方の画像の矩形領域を他方で置換する手法。ラベルは面積比で混合。Mixupの改良版。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Cutout</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">画像のランダムな矩形領域を0（黒）でマスクする手法。遮蔽に対する頑健性向上。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Random Erasing</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Cutoutの発展版。可変サイズの矩形マスクをランダム値・平均値・0値で埋める。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">RandAugment</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">自動データ拡張手法。14種類の変換からN個を選択し、強度Mで適用するシンプルな戦略。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">AutoAugment</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">強化学習により最適な拡張ポリシーを探索する手法。データセット特化のポリシー学習。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Paraphrasing（言い換え）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">テキストデータ拡張の基本手法。同義語置換、文構造変更、逆翻訳等で実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Noising（ノイズ追加）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データにランダムノイズを追加する手法。Gaussianノイズ、Salt&Pepperノイズ等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">ラベル不変性（Label Preserving）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データ拡張の基本原則。変換後もラベル（正解）が変わらない変換のみ適用すべき。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-8.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-8
+                        </a>
+                        <a href="study6-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-1
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

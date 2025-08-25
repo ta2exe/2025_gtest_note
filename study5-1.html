@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-1: 全結合層 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-1: 全結合層</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-1</h1>
+                <h2 class="content-subtitle">全結合層</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>全結合層の概要を理解する</li>
+                        <li>全結合層のパラメータ数について理解する</li>
+                        <li>ディープラーニングにおける全結合層の役割を説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>重み</strong></li>
+                        <li><strong>線形関数</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">全結合層とは何か</h1>
+                
+                <p>全結合層（Fully Connected Layer、Dense Layer）は、ニューラルネットワークにおける最も基本的かつ重要な構成要素です。前の層のすべてのニューロンが次の層のすべてのニューロンと接続されているため「全結合」と呼ばれます。</p>
+
+                <p>この層は線形変換を行う基本的な計算ユニットであり、ディープラーニングにおける情報処理の中核を担います。現代の複雑なアーキテクチャにおいても、最終的な分類や回帰タスクの出力層として不可欠な役割を果たしています。</p>
+
+                <h1 id="basic-concept">基本概念</h1>
+
+                <h2 id="structure">構造と仕組み</h2>
+                
+                <p>全結合層は、入力ベクトルに対して線形変換を適用し、バイアス項を加算する単純な構造を持ちます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mathbf{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$\mathbf{x}$</strong>：入力ベクトル（次元数: $n$）</li>
+                    <li><strong>$\mathbf{W}$</strong>：重み行列（サイズ: $m \times n$）</li>
+                    <li><strong>$\mathbf{b}$</strong>：バイアスベクトル（次元数: $m$）</li>
+                    <li><strong>$\mathbf{y}$</strong>：出力ベクトル（次元数: $m$）</li>
+                </ul>
+
+                <h2 id="linear-function">線形関数としての特性</h2>
+
+                <p>全結合層は本質的に<strong>線形関数</strong>です。この線形性により以下の特性を持ちます：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 線形関数の重要な性質</h3>
+                    <ul>
+                        <li><strong>加法性</strong>：$f(\mathbf{x_1} + \mathbf{x_2}) = f(\mathbf{x_1}) + f(\mathbf{x_2})$</li>
+                        <li><strong>斉次性</strong>：$f(c\mathbf{x}) = cf(\mathbf{x})$</li>
+                        <li><strong>重ね合わせ原理</strong>：$f(a\mathbf{x_1} + b\mathbf{x_2}) = af(\mathbf{x_1}) + bf(\mathbf{x_2})$</li>
+                        <li><strong>微分可能性</strong>：すべての点で微分可能</li>
+                    </ul>
+                </div>
+
+                <p>ただし、線形関数だけでは非線形な問題を解くことができないため、通常は活性化関数と組み合わせて使用されます。</p>
+
+                <h1 id="parameter-calculation">パラメータ数の計算</h1>
+
+                <h2 id="weight-parameters">重みパラメータ</h2>
+
+                <p>全結合層のパラメータ数の計算は、ディープラーニングにおけるメモリ使用量や計算量の見積もりに重要です：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔢 パラメータ数計算式</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>全結合層のパラメータ数</strong>
+
+入力次元数: n
+出力次元数: m
+
+重みパラメータ数    = n × m
+バイアスパラメータ数 = m
+<strong>総パラメータ数     = n × m + m = m(n + 1)</strong>
+
+<strong>具体例：</strong>
+入力: 784次元（28×28画像）
+出力: 128次元
+パラメータ数 = 128 × (784 + 1) = 128 × 785 = 100,480個
+                    </pre>
+                </div>
+
+                <h2 id="memory-consideration">メモリ使用量の考慮</h2>
+
+                <p>現代のディープラーニングでは、パラメータ数の爆発的増加が問題となります：</p>
+
+                <ul>
+                    <li><strong>GPT-3</strong>：1,750億パラメータ</li>
+                    <li><strong>PaLM</strong>：5,400億パラメータ</li>
+                    <li><strong>メモリ使用量</strong>：float32で1パラメータ4バイト</li>
+                    <li><strong>計算コスト</strong>：パラメータ数に比例した演算が必要</li>
+                </ul>
+
+                <h1 id="role-in-deep-learning">ディープラーニングにおける役割</h1>
+
+                <h2 id="information-integration">情報統合の機能</h2>
+
+                <p>全結合層は、ディープラーニングにおいて以下の重要な役割を果たします：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🔗 全結合層の主要な役割</h3>
+                    <ul>
+                        <li><strong>特徴統合</strong>：前の層からの特徴を線形結合して新しい表現を生成</li>
+                        <li><strong>次元変換</strong>：任意の入力次元を任意の出力次元に変換</li>
+                        <li><strong>分類ヘッド</strong>：最終層で特徴をクラス確率に変換</li>
+                        <li><strong>表現学習</strong>：重みパラメータが学習する特徴表現</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-usage-patterns">典型的な使用パターン</h2>
+
+                <p>ディープラーニングアーキテクチャにおける全結合層の配置：</p>
+
+                <h3 id="classifier-head">分類器ヘッド</h3>
+                <p>最も一般的な使用法で、特徴抽出層の後に配置されます：</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{特徴抽出} \rightarrow \text{Global Average Pooling} \rightarrow \text{全結合層} \rightarrow \text{Softmax}$$
+                </div>
+
+                <h3 id="feature-transformation">特徴変換層</h3>
+                <p>中間層として特徴の次元を調整：</p>
+                <ul>
+                    <li><strong>次元削減</strong>：高次元特徴を低次元に圧縮</li>
+                    <li><strong>次元拡張</strong>：情報量を増やすための拡張</li>
+                    <li><strong>ボトルネック</strong>：計算効率化のための次元調整</li>
+                </ul>
+
+                <h3 id="attention-mechanism">アテンション機構</h3>
+                <p>Transformerにおける全結合層の役割：</p>
+                <ul>
+                    <li><strong>Query/Key/Value変換</strong>：入力を注意機構の各要素に変換</li>
+                    <li><strong>Position-wise FFN</strong>：各位置に独立に適用される変換</li>
+                    <li><strong>残差接続</strong>：スキップ結合と組み合わせた使用</li>
+                </ul>
+
+                <h1 id="advantages-and-limitations">利点と制限</h1>
+
+                <h2 id="advantages">利点</h2>
+
+                <ul>
+                    <li><strong>表現力の高さ</strong>：理論上、任意の連続関数を近似可能（万能近似定理）</li>
+                    <li><strong>実装の簡単さ</strong>：行列演算として効率的に実装可能</li>
+                    <li><strong>学習の安定性</strong>：勾配計算が単純で安定</li>
+                    <li><strong>汎用性</strong>：あらゆるタスクに適用可能</li>
+                </ul>
+
+                <h2 id="limitations">制限と問題点</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚠️ 全結合層の主な制限</h3>
+                    <ul>
+                        <li><strong>パラメータ爆発</strong>：入出力次元の積に比例したパラメータ数</li>
+                        <li><strong>空間的構造の無視</strong>：入力の位置関係を考慮しない</li>
+                        <li><strong>過学習のリスク</strong>：大量のパラメータによる過学習</li>
+                        <li><strong>計算コストの高さ</strong>：大規模な行列演算が必要</li>
+                    </ul>
+                </div>
+
+                <h1 id="modern-alternatives">現代的な代替手法</h1>
+
+                <h2 id="efficiency-improvements">効率化手法</h2>
+
+                <p>全結合層の制限を克服するための技術：</p>
+
+                <ul>
+                    <li><strong>Dropout</strong>：過学習防止のためのランダムな重み無効化</li>
+                    <li><strong>Weight Decay</strong>：L2正則化による重みの制御</li>
+                    <li><strong>Batch Normalization</strong>：学習の安定化</li>
+                    <li><strong>Low-rank Approximation</strong>：重み行列の低ランク近似</li>
+                </ul>
+
+                <h2 id="architectural-innovations">アーキテクチャ革新</h2>
+
+                <p>全結合層を部分的に置き換える現代技術：</p>
+
+                <ul>
+                    <li><strong>畳み込み層</strong>：空間的構造を考慮した局所結合</li>
+                    <li><strong>アテンション機構</strong>：動的な重み付けによる選択的結合</li>
+                    <li><strong>Global Average Pooling</strong>：全結合層の代替としての平均プーリング</li>
+                    <li><strong>Group Normalization</strong>：チャンネルグループ単位の正規化</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本的な計算式</strong>：y = Wx + b の意味と構成要素</li>
+                        <li><strong>パラメータ数の計算</strong>：入力×出力+バイアス項の計算方法</li>
+                        <li><strong>線形関数の特性</strong>：活性化関数との組み合わせの必要性</li>
+                        <li><strong>典型的な用途</strong>：分類器ヘッド、特徴変換、次元調整</li>
+                        <li><strong>制限事項</strong>：パラメータ爆発、空間構造の無視</li>
+                        <li><strong>現代的代替技術</strong>：畳み込み層、アテンション、GAP</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>線形関数だけでは不十分</strong>：活性化関数との組み合わせが必須</li>
+                        <li><strong>パラメータ数の過小評価</strong>：バイアス項を忘れがち</li>
+                        <li><strong>畳み込み層との混同</strong>：全結合は位置不変性なし</li>
+                        <li><strong>計算コストの軽視</strong>：大規模モデルでは主要なボトルネック</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>全結合層は、ニューラルネットワークの基本構成要素として、線形変換 $\mathbf{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$ を実行する層です。その単純さゆえに理解しやすく、実装も容易ですが、現代のディープラーニングにおいても重要な役割を担っています。</p>
+                
+                <p>パラメータ数は $m(n+1)$ で計算でき、これが計算コストとメモリ使用量を決定します。大規模モデルではパラメータ爆発の問題があるものの、適切な正則化や効率化手法との組み合わせにより、依然として多くのアーキテクチャで活用されています。</p>
+                
+                <p>G検定では、全結合層の基本的な動作原理、パラメータ数の計算方法、そして現代的なアーキテクチャにおける位置づけについて理解することが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">全結合層（Fully Connected Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">前の層のすべてのニューロンが次の層のすべてのニューロンと接続された層。Dense Layerとも呼ばれる。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">重み（Weight）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ニューロン間の接続強度を表すパラメータ。学習により最適化される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">線形関数（Linear Function）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">加法性と斉次性を満たす関数。y = Wx + b の形で表される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">バイアス（Bias）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">線形変換に加算される定数項。決定境界の位置を調整する役割。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">パラメータ数（Number of Parameters）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">層が持つ学習可能なパラメータの総数。計算量とメモリ使用量に直結。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">万能近似定理（Universal Approximation Theorem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">適切な活性化関数を持つニューラルネットワークが任意の連続関数を近似できることを示す定理。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">分類器ヘッド（Classifier Head）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">特徴抽出層の後に配置され、最終的な分類を行う全結合層。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">パラメータ爆発（Parameter Explosion）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">層のサイズ増大に伴いパラメータ数が指数的に増加する問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">次元変換（Dimension Transformation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">入力の次元数を出力の次元数に変換する処理。特徴の圧縮や拡張に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Global Average Pooling（GAP）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">特徴マップ全体の平均を取る操作。全結合層の代替として使用されパラメータ数を削減。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">低ランク近似（Low-rank Approximation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">重み行列を低ランクの行列の積で近似し、パラメータ数を削減する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Position-wise FFN</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Transformerにおける各位置に独立に適用される全結合層からなるフィードフォワードネットワーク。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study4-6.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 4-6
+                        </a>
+                        <a href="study5-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-2
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

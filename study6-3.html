@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6-3: 音声処理 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 6-3: 音声処理</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 6-3</h1>
+                <h2 class="content-subtitle">音声処理</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの応用例</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>音声処理タスクの種類とその概要について理解する</li>
+                        <li>音声処理タスクにおける特徴表現とその手法について理解する</li>
+                        <li>代表的な音声処理モデルについて理解する</li>
+                        <li>音声処理が実世界において、どのように活用されているか理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>A-D変換</strong></li>
+                        <li><strong>WaveNet</strong></li>
+                        <li><strong>音韻</strong></li>
+                        <li><strong>音声合成</strong></li>
+                        <li><strong>音声認識</strong></li>
+                        <li><strong>音素</strong></li>
+                        <li><strong>隠れマルコフモデル</strong></li>
+                        <li><strong>感情分析</strong></li>
+                        <li><strong>高速フーリエ変換（FFT）</strong></li>
+                        <li><strong>スペクトル包絡</strong></li>
+                        <li><strong>パルス符号変調器（PCM）</strong></li>
+                        <li><strong>フォルマント</strong></li>
+                        <li><strong>フォルマント周波数</strong></li>
+                        <li><strong>メル周波数ケプストラム係数（MFCC）</strong></li>
+                        <li><strong>メル尺度</strong></li>
+                        <li><strong>話者識別</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">音声処理とは何か</h1>
+                
+                <p>音声処理（Speech Processing）は、人間の音声信号を解析・理解・生成する技術分野です。音響信号をデジタル処理し、言語情報や話者情報、感情情報などを抽出・活用します。自然なコミュニケーションインターフェースとして、AI技術の中でも特に重要な位置を占めています。</p>
+
+                <p>音声認識（ASR: Automatic Speech Recognition）、音声合成（TTS: Text-To-Speech）、話者認識、感情認識等の技術により、スマートスピーカー、音声アシスタント、自動翻訳システムなど、現代社会に欠かせない応用が実現されています。</p>
+
+                <h1 id="audio-fundamentals">音声の基本原理</h1>
+
+                <h2 id="speech-production">音声生成メカニズム</h2>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🗣️ 人間の音声生成</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>音声生成過程</strong>:
+1. 呼気: 肺からの空気流
+2. 音源: 声帯振動（有声音）or 気流雑音（無声音）
+3. 共鳴: 声道（口腔・咽頭・鼻腔）での音響フィルタリング
+4. 放射: 唇・鼻孔からの音波放出
+
+<strong>音韻学的分類</strong>:
+・音素（Phoneme）: 意味を区別する最小音響単位
+・音韻（Phone）: 音素の具体的な音響実現
+・異音（Allophone）: 同一音素の異なる発音
+
+<strong>調音特徴</strong>:
+・調音点: 舌、唇、歯等の接触・近接位置
+・調音方法: 閉鎖、摩擦、鼻音等の発音方法
+・有声性: 声帯振動の有無
+                    </pre>
+                </div>
+
+                <h2 id="digital-audio">デジタル音声の基礎</h2>
+
+                <p>アナログ音声信号をデジタルで表現するための変換：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$x[n] = x(nT_s), \quad T_s = \frac{1}{f_s}$$
+                    $$\text{Quantization: } \hat{x}[n] = Q(x[n])$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔢 A-D変換プロセス</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>サンプリング（標本化）</strong>:
+・連続時間信号を離散時間信号に変換
+・サンプリング周波数: fs = 1/Ts
+・ナイキスト定理: fs > 2 × 最高周波数
+
+<strong>量子化（Quantization）</strong>:
+・連続振幅値を有限ビット数で表現
+・16bit: 65536段階、24bit: 1677万段階
+・量子化雑音の発生
+
+<strong>PCM（Pulse Code Modulation）</strong>:
+・パルス符号変調による符号化
+・非圧縮デジタル音声の標準形式
+・WAVファイル等で使用
+
+<strong>標準設定</strong>:
+・電話音質: 8kHz, 8bit
+・CD音質: 44.1kHz, 16bit
+・高音質: 48kHz, 24bit
+                    </pre>
+                </div>
+
+                <h1 id="feature-extraction">音声特徴量抽出</h1>
+
+                <h2 id="fft-analysis">周波数解析</h2>
+
+                <p>音声信号の周波数成分分析：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$X[k] = \sum_{n=0}^{N-1} x[n] e^{-j2\pi kn/N}$$
+                    $$\text{Power Spectrum: } |X[k]|^2$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 FFT（高速フーリエ変換）</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>短時間フーリエ変換（STFT）</strong>:
+・音声を短時間フレーム（20-40ms）に分割
+・各フレームでFFTを実行
+・時間-周波数スペクトログラムを生成
+
+<strong>窓関数の適用</strong>:
+・ハミング窓、ハン窓等でフレーム境界を滑らかに
+・スペクトル漏れの抑制
+・周波数分解能 vs 時間分解能のトレードオフ
+
+<strong>スペクトログラム解析</strong>:
+・横軸: 時間、縦軸: 周波数、色: パワー
+・ピッチ（基本周波数）の可視化
+・フォルマント構造の観察
+                    </pre>
+                </div>
+
+                <h2 id="formant-analysis">フォルマント解析</h2>
+
+                <p>音声の音韻的特徴を表すフォルマント：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎵 フォルマントの役割</h3>
+                    <ul>
+                        <li><strong>フォルマント（Formant）</strong>：声道の共鳴による周波数ピーク</li>
+                        <li><strong>F1（第1フォルマント）</strong>：舌の高低に対応、母音の開口度</li>
+                        <li><strong>F2（第2フォルマント）</strong>：舌の前後位置、母音の舌位</li>
+                        <li><strong>F3以降</strong>：話者個性、子音の区別に寄与</li>
+                        <li><strong>フォルマント周波数</strong>：各フォルマントのピーク周波数値</li>
+                    </ul>
+                </div>
+
+                <p><strong>母音のフォルマント例</strong>：</p>
+                <ul>
+                    <li><strong>/a/（あ）</strong>：F1=750Hz, F2=1200Hz（開口大、舌中央）</li>
+                    <li><strong>/i/（い）</strong>：F1=300Hz, F2=2300Hz（開口小、舌前方）</li>
+                    <li><strong>/u/（う）</strong>：F1=350Hz, F2=800Hz（開口小、舌後方）</li>
+                </ul>
+
+                <h2 id="mfcc">MFCC（メル周波数ケプストラム係数）</h2>
+
+                <p>音声認識で最も重要な特徴量：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Mel}(f) = 2595 \log_{10}(1 + f/700)$$
+                    $$\text{MFCC} = \text{DCT}(\log(\text{Mel Filter Bank Output}))$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔍 MFCC抽出プロセス</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>1. 前処理</strong>:
+・窓関数適用、FFT実行
+・パワースペクトル計算
+
+<strong>2. メルフィルタバンク</strong>:
+・人間の聴覚特性に基づく周波数尺度
+・低周波数で高分解能、高周波数で低分解能
+・通常26個の三角フィルタ
+
+<strong>3. 対数変換</strong>:
+・人間の聴覚の対数応答特性を模擬
+・log(mel filter bank output)
+
+<strong>4. 離散コサイン変換（DCT）</strong>:
+・相関を除去し、次元圧縮
+・通常12-13次元のMFCC係数を抽出
+
+<strong>5. 動的特徴</strong>:
+・Δ-MFCC: 1次時間微分
+・ΔΔ-MFCC: 2次時間微分
+・時間変化情報の付加
+                    </pre>
+                </div>
+
+                <h1 id="speech-recognition">音声認識</h1>
+
+                <h2 id="hmm-based-asr">隠れマルコフモデルによる音声認識</h2>
+
+                <p>従来音声認識の主流手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$P(O|\lambda) = \sum_{S} P(O,S|\lambda) = \sum_{S} \prod_{t=1}^{T} a_{s_{t-1}s_t} b_{s_t}(o_t)$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔗 HMM音声認識システム</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>3つのモデル</strong>:
+・音響モデル: HMM（観測確率分布はGMM）
+・言語モデル: N-gram統計モデル
+・辞書モデル: 単語-音素変換テーブル
+
+<strong>認識プロセス</strong>:
+1. 特徴量抽出（MFCC等）
+2. HMM状態系列推定（Viterbiアルゴリズム）
+3. 音素→単語→文の変換
+4. 言語モデルによるスコア調整
+
+<strong>課題</strong>:
+・音響・言語モデルの独立最適化
+・ガウス混合分布の表現力限界
+・文脈依存性の不十分な表現
+・大量の音響データが必要
+                    </pre>
+                </div>
+
+                <h2 id="deep-learning-asr">深層学習による音声認識</h2>
+
+                <p>2010年代以降の革命的発展：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px 0margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🧠 Deep Learning ASRの進化</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>DNN-HMMハイブリッド</strong>:
+・HMMの出力確率をDNNで計算
+・従来GMM-HMMより大幅性能向上
+・音響モデルの表現力向上
+
+<strong>End-to-End音声認識</strong>:
+・音響→言語モデルの統合学習
+・CTC、Attention、Transducerベース
+・中間表現（音素）の不要化
+
+<strong>Transformer音声認識</strong>:
+・Self-Attentionによる長距離依存捕捉
+・並列処理による高速学習
+・マルチヘッド注意による多様な関係学習
+
+<strong>事前学習モデル</strong>:
+・wav2vec 2.0: 自己教師あり音声表現学習
+・Whisper: 大規模多言語音声認識
+・少量データでの高精度実現
+                    </pre>
+                </div>
+
+                <h2 id="ctc-attention">CTC・Attention機構</h2>
+
+                <p>系列変換問題の解決手法：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$L_{CTC} = -\ln \sum_{\pi \in \Phi(y)} \prod_{t=1}^{T} p(\pi_t | x_{1:T})$$
+                    $$\text{Attention}(Q,K,V) = \text{softmax}(QK^T/\sqrt{d_k})V$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">⚡ CTC・Attentionの特徴</h3>
+                    <ul>
+                        <li><strong>CTC利点</strong>：単調アライメント、高速推論、音響モデリング</li>
+                        <li><strong>CTC課題</strong>：条件独立仮定、言語モデルとの統合困難</li>
+                        <li><strong>Attention利点</strong>：柔軟なアライメント、End-to-End学習</li>
+                        <li><strong>Attention課題</strong>：計算量大、アライメント誤差</li>
+                        <li><strong>ハイブリッド</strong>：CTC + AttentionでもCoの利点を融合</li>
+                    </ul>
+                </div>
+
+                <h1 id="speech-synthesis">音声合成</h1>
+
+                <h2 id="traditional-tts">従来の音声合成</h2>
+
+                <p>統計的パラメトリック音声合成：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔊 従来TTS システム</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>テキスト解析</strong>:
+・形態素解析、品詞タグ付け
+・音素変換、アクセント付与
+・韻律情報（ピッチ、継続時間）予測
+
+<strong>音響パラメータ生成</strong>:
+・HMM/DNN による音響特徴予測
+・基本周波数（F0）、スペクトル包絡
+・非周期性指標、継続時間
+
+<strong>音声波形合成</strong>:
+・ボコーダ（STRAIGHT, WORLD等）
+・音響パラメータ→波形変換
+・位相情報の再構成
+
+<strong>課題</strong>:
+・ブザー音のような不自然さ
+・韻律の単調さ
+・話者性の不十分な表現
+                    </pre>
+                </div>
+
+                <h2 id="neural-tts">神経音声合成</h2>
+
+                <p>深層学習による自然な音声生成：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🚀 Neural TTS の革新</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Tacotron系列</strong>:
+・Encoder-Decoder + Attention構造
+・テキスト→メルスペクトログラム
+・自然な韻律の学習
+・End-to-End学習による品質向上
+
+<strong>WaveNet</strong>:
+・拡張畳み込みによる長期依存捕捉
+・条件付き生成による話者制御
+・人間に匹敵する音質実現
+・リアルタイム合成の課題
+
+<strong>並列波形生成</strong>:
+・WaveGlow: Flow-based生成モデル
+・Parallel WaveGAN: 敵対的学習
+・高速な推論時間を実現
+
+<strong>事前学習アプローチ</strong>:
+・大規模データでの表現学習
+・少量データでの話者適応
+・多言語・多話者対応
+                    </pre>
+                </div>
+
+                <h2 id="wavenet">WaveNet</h2>
+
+                <p>DeepMindによる革命的音声生成モデル：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$p(x_t | x_1, ..., x_{t-1}, h) = \text{softmax}(W_{f,k} \ast (x \ast g)(t))$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🌊 WaveNet アーキテクチャ</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>拡張畳み込み（Dilated Convolution）</strong>:
+・受容野を指数的に拡大
+・dilation = 1, 2, 4, 8, 16, ...
+・長期依存関係の効率的捕捉
+
+<strong>残差・スキップ接続</strong>:
+・勾配消失問題の解決
+・深い構造での学習安定化
+・階層的特徴の利用
+
+<strong>ゲート機構</strong>:
+・tanh と sigmoid の組み合わせ
+・情報の選択的通過
+・LSTM様の記憶機能
+
+<strong>条件付き生成</strong>:
+・話者ID、言語特徴等の条件
+・同一モデルで多様な音声生成
+・ファインチューニングによる適応
+                    </pre>
+                </div>
+
+                <h1 id="speaker-recognition">話者認識・感情分析</h1>
+
+                <h2 id="speaker-identification">話者識別・認証</h2>
+
+                <p>音声から話者を特定・認証する技術：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">👤 話者認識技術</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>話者識別（Speaker Identification）</strong>:
+・複数候補から話者を特定
+・クローズドセット問題
+・音声データベースとの照合
+
+<strong>話者認証（Speaker Verification）</strong>:
+・主張する話者本人かを判定
+・オープンセット問題
+・バイオメトリクス認証応用
+
+<strong>特徴量</strong>:
+・基本周波数（ピッチ）パターン
+・フォルマント特性
+・話速、ポーズパターン
+・i-vector、x-vector等の話者埋め込み
+
+<strong>Deep Speaker Embedding</strong>:
+・CNNベースの話者特徴抽出
+・大規模話者データでの学習
+・ロバストな話者表現獲得
+                    </pre>
+                </div>
+
+                <h2 id="emotion-recognition">音声感情分析</h2>
+
+                <p>音声に含まれる感情状態の自動認識：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">😊 感情音声解析</h3>
+                    <ul>
+                        <li><strong>韻律特徴</strong>：基本周波数の変動、発話速度、音量変化</li>
+                        <li><strong>音質特徴</strong>：フォルマント、jitter、shimmer</li>
+                        <li><strong>スペクトル特徴</strong>：MFCC、スペクトル重心、ロールオフ</li>
+                        <li><strong>感情カテゴリ</strong>：喜び、怒り、悲しみ、驚き、恐怖、嫌悪</li>
+                        <li><strong>次元モデル</strong>：覚醒度（arousal）、感情価（valence）</li>
+                    </ul>
+                </div>
+
+                <h1 id="real-world-applications">実世界での活用</h1>
+
+                <h2 id="voice-assistants">音声アシスタント</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎤 スマートスピーカー技術</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Amazon Alexa</strong>:
+・遠距離音声認識（far-field ASR）
+・ウェイクワード検出（"Alexa"）
+・マルチターン対話システム
+・Skills プラットフォーム
+
+<strong>Google Assistant</strong>:
+・多言語・方言対応
+・文脈理解能力
+・Duplex: 人間らしい対話AI
+・Actions on Google
+
+<strong>Apple Siri</strong>:
+・オンデバイス処理（プライバシー）
+・個人化された音声認識
+・ショートカットとの連携
+・デバイス間での一貫性
+
+<strong>共通技術課題</strong>:
+・雑音環境での認識精度
+・複数話者の分離
+・プライバシー保護
+・リアルタイム応答
+                    </pre>
+                </div>
+
+                <h2 id="commercial-applications">産業・商業応用</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏢 音声技術の実用化</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>コールセンター自動化</strong>:
+・IVR（自動音声応答）システム
+・音声→テキスト→自動応答
+・感情認識によるエスカレーション
+・オペレータ支援システム
+
+<strong>議事録自動作成</strong>:
+・会議音声のリアルタイム書き起こし
+・話者分離・識別
+・要約・整理機能
+・多言語対応
+
+<strong>車載音声インターフェース</strong>:
+・ハンズフリー操作
+・ナビゲーション音声入力
+・安全運転支援
+・個人設定の音声調整
+
+<strong>医療・介護支援</strong>:
+・診療記録の音声入力
+・高齢者見守りシステム
+・聴覚障がい者支援
+・リハビリテーション評価
+                    </pre>
+                </div>
+
+                <h2 id="accessibility">アクセシビリティ向上</h2>
+
+                <ul>
+                    <li><strong>視覚障がい者支援</strong>：音声読み上げ、音声操作インターフェース</li>
+                    <li><strong>聴覚障がい者支援</strong>：リアルタイム音声認識・字幕生成</li>
+                    <li><strong>言語学習支援</strong>：発音評価・訂正、会話練習</li>
+                    <li><strong>高齢者支援</strong>：簡単音声操作、健康状態モニタリング</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>音声基礎</strong>：A-D変換、PCM、サンプリング定理、FFT</li>
+                        <li><strong>特徴量</strong>：MFCC、フォルマント、メル尺度の意義</li>
+                        <li><strong>音声認識</strong>：隠れマルコフモデル、CTC、Attention機構</li>
+                        <li><strong>音声合成</strong>：WaveNet、拡張畳み込み、神経合成</li>
+                        <li><strong>話者認識</strong>：話者識別 vs 認証、話者埋め込み</li>
+                        <li><strong>音響分析</strong>：スペクトル包絡、音韻・音素の違い</li>
+                        <li><strong>感情分析</strong>：韻律特徴による感情認識</li>
+                        <li><strong>実用化</strong>：音声アシスタント、アクセシビリティ応用</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>音韻 vs 音素</strong>：音素は言語学単位、音韻は音響実現</li>
+                        <li><strong>フォルマント理解</strong>：声道の共鳴周波数、F1/F2の意味</li>
+                        <li><strong>MFCC特徴</strong>：人間聴覚特性、メル尺度の対数性</li>
+                        <li><strong>A-D変換</strong>：サンプリング周波数とナイキスト定理</li>
+                        <li><strong>WaveNetの核心</strong>：拡張畳み込みによる長期依存</li>
+                        <li><strong>話者認識区分</strong>：識別（誰？）vs 認証（本人？）</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>音声処理は、音響信号の理解と生成を通じて自然なコミュニケーションを実現する重要技術です。従来の統計的手法（HMM、GMM）から深層学習手法（WaveNet、Transformer）への移行により、飛躍的な性能向上を達成しました。</p>
+                
+                <p>MFCC等の特徴量抽出、CTC・Attentionによる系列変換、WaveNetによる自然な音声生成など、各技術が現実のアプリケーション（音声アシスタント、自動翻訳、アクセシビリティ支援）で活用されています。</p>
+                
+                <p>G検定では、音声の物理的性質（A-D変換、FFT、フォルマント）、機械学習手法（HMM、深層学習）、実用化動向について出題される可能性があり、音響処理の基礎から最新技術まで体系的な理解が重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">A-D変換（Analog-to-Digital Conversion）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">アナログ音声信号をデジタル信号に変換する処理。サンプリングと量子化を含む。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">PCM（Pulse Code Modulation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">パルス符号変調。音声のデジタル符号化の標準方式。WAVファイル等で使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">FFT（高速フーリエ変換）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音声信号の周波数成分を効率的に分析する算法。スペクトログラム生成に使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">音素（Phoneme）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">言語において意味を区別する最小の音響単位。/a/、/i/、/ka/等。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">音韻（Phone）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音素の具体的な音響実現。同一音素でも文脈により異なる音韻となる。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">フォルマント（Formant）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">声道の共鳴による周波数ピーク。F1、F2等が母音の特徴を決定。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">フォルマント周波数</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各フォルマントのピーク周波数値。話者・母音により異なる。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">メル尺度（Mel Scale）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">人間の聴覚特性に基づく周波数尺度。低周波数で高分解能を持つ。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">MFCC（Mel-Frequency Cepstral Coefficients）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音声認識で最も重要な特徴量。メル尺度フィルタバンク出力のケプストラム係数。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">スペクトル包絡</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音声スペクトラムの滑らかな外形。音韻特性を表現する重要な特徴。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">隠れマルコフモデル（HMM）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">従来音声認識の主流手法。状態遷移と観測確率で音声をモデル化。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">音声認識（ASR: Automatic Speech Recognition）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音声信号を自動的にテキストに変換する技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">音声合成（TTS: Text-To-Speech）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">テキストから自然な音声を生成する技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">WaveNet</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">DeepMind開発の音声生成モデル。拡張畳み込みにより人間レベルの音質を実現。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">話者識別（Speaker Identification）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音声から話者を特定する技術。複数候補から1人を選択。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">話者認証（Speaker Verification）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音声による本人認証技術。主張する話者が本人かを判定。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">感情分析（Emotion Recognition）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">音声から話者の感情状態を自動認識する技術。韻律特徴等を利用。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study6-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 6-2
+                        </a>
+                        <a href="study6-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 6-4
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

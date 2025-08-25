@@ -1,0 +1,661 @@
+/* CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 3px solid #000000;
+    position: sticky;
+    top: 0;
+    background-color: #2a2a2a;
+    z-index: 100;
+}
+
+.logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-decoration: none;
+}
+
+.logo:hover {
+    color: #00ffff;
+}
+
+.hamburger {
+    background: none;
+    border: 3px solid #000000;
+    color: #ffffff;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.hamburger:hover {
+    background-color: #00ffff;
+    color: #000000;
+}
+
+/* Main Content for Index Page */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 100px);
+    padding: 40px 20px;
+}
+
+.title-section {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.main-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    border: 5px solid #000000;
+    padding: 30px;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.main-title:hover {
+    transform: rotate(-8deg) scale(1.02);
+    color: #ffff00;
+}
+
+.subtitle {
+    font-size: 18px;
+    color: #cccccc;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.start-button {
+    background-color: #00ffff;
+    color: #000000;
+    border: 5px solid #000000;
+    padding: 25px 60px;
+    font-size: 24px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'JetBrains Mono', monospace;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.start-button:hover {
+    background-color: #ff00ff;
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 #000000;
+}
+
+/* Study Page Layout */
+.container {
+    display: flex;
+    min-height: calc(100vh - 86px);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 320px;
+    background-color: #1a1a1a;
+    border-right: 3px solid #000000;
+    padding: 30px 0;
+    position: sticky;
+    top: 86px;
+    height: calc(100vh - 86px);
+    overflow-y: auto;
+}
+
+/* Custom Scrollbar for Sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 12px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background-color: #1a1a1a;
+    border-left: 2px solid #000000;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #00ffff;
+    border: 2px solid #000000;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: #ffffff;
+}
+
+.chapter-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #00ffff;
+    padding: 0 30px 20px;
+    border-bottom: 2px solid #000000;
+    margin-bottom: 20px;
+}
+
+/* Chapter Color Themes */
+.chapter-cyan .chapter-title { color: #00ffff; }
+.chapter-magenta .chapter-title { color: #ff00ff; }
+.chapter-yellow .chapter-title { color: #ffff00; }
+
+.chapter-cyan .sidebar::-webkit-scrollbar-thumb { background-color: #00ffff; }
+.chapter-magenta .sidebar::-webkit-scrollbar-thumb { background-color: #ff00ff; }
+.chapter-yellow .sidebar::-webkit-scrollbar-thumb { background-color: #ffff00; }
+
+.toc {
+    list-style: none;
+}
+
+.toc-item {
+    margin-bottom: 5px;
+}
+
+.toc-link {
+    display: block;
+    color: #cccccc;
+    text-decoration: none;
+    padding: 12px 30px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.toc-link:hover {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+.chapter-cyan .toc-link:hover { border-left-color: #00ffff; }
+.chapter-magenta .toc-link:hover { border-left-color: #ff00ff; }
+.chapter-yellow .toc-link:hover { border-left-color: #ffff00; }
+
+.toc-link.active {
+    color: #000000;
+    font-weight: 600;
+}
+
+.chapter-cyan .toc-link.active { 
+    background-color: #00ffff; 
+    border-left-color: #00ffff; 
+}
+.chapter-magenta .toc-link.active { 
+    background-color: #ff00ff; 
+    border-left-color: #ff00ff; 
+}
+.chapter-yellow .toc-link.active { 
+    background-color: #ffff00; 
+    border-left-color: #ffff00; 
+}
+
+.toc-link.level-2 {
+    padding-left: 50px;
+    font-size: 13px;
+}
+
+.toc-link.level-3 {
+    padding-left: 70px;
+    font-size: 12px;
+}
+
+/* Study Page Main Content */
+.main-content.study {
+    flex: 1;
+    padding: 40px;
+    max-width: calc(100% - 320px);
+}
+
+.content-header {
+    margin-bottom: 40px;
+    border-bottom: 3px solid #000000;
+    padding-bottom: 20px;
+}
+
+.content-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.chapter-cyan .content-title { color: #00ffff; }
+.chapter-magenta .content-title { color: #ff00ff; }
+.chapter-yellow .content-title { color: #ffff00; }
+
+.content-subtitle {
+    font-size: 18px;
+    color: #cccccc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Content Styles */
+.content h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 40px 0 20px;
+    padding: 15px;
+    border: 3px solid #000000;
+    background-color: #1a1a1a;
+}
+
+.chapter-cyan .content h1 { color: #00ffff; }
+.chapter-magenta .content h1 { color: #ff00ff; }
+.chapter-yellow .content h1 { color: #ffff00; }
+
+.content h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 30px 0 15px;
+    padding: 10px 0;
+}
+
+.chapter-cyan .content h2 { border-bottom: 2px solid #00ffff; }
+.chapter-magenta .content h2 { border-bottom: 2px solid #ff00ff; }
+.chapter-yellow .content h2 { border-bottom: 2px solid #ffff00; }
+
+.content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 25px 0 10px;
+}
+
+.content p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.content ul {
+    margin: 20px 0;
+    padding-left: 20px;
+}
+
+.content li {
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.content strong {
+    font-weight: 600;
+}
+
+.chapter-cyan .content strong { color: #00ffff; }
+.chapter-magenta .content strong { color: #ff00ff; }
+.chapter-yellow .content strong { color: #ffff00; }
+
+.content code {
+    background-color: #1a1a1a;
+    padding: 2px 6px;
+    border: 1px solid #000000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+}
+
+.chapter-cyan .content code { color: #00ffff; }
+.chapter-magenta .content code { color: #ff00ff; }
+.chapter-yellow .content code { color: #ffff00; }
+
+.content pre {
+    background-color: #1a1a1a;
+    border: 3px solid #000000;
+    padding: 20px;
+    margin: 20px 0;
+    overflow-x: auto;
+}
+
+.content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+/* Image and Graph Styles */
+.content img {
+    max-width: 100%;
+    height: auto;
+    border: 3px solid #000000;
+    margin: 20px 0;
+    display: block;
+}
+
+.content figure {
+    margin: 30px 0;
+    text-align: center;
+}
+
+.content figcaption {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 2px solid #000000;
+    background-color: #1a1a1a;
+}
+
+.chapter-cyan .content figcaption { color: #00ffff; }
+.chapter-magenta .content figcaption { color: #ff00ff; }
+.chapter-yellow .content figcaption { color: #ffff00; }
+
+/* Placeholder for missing images */
+.image-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: #1a1a1a;
+    border: 3px solid #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Hamburger Menu */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1a1a1a;
+    z-index: 1000;
+    display: none;
+    padding: 20px;
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    border-bottom: 3px solid #000000;
+    padding-bottom: 20px;
+}
+
+.menu-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.close-btn {
+    background: none;
+    border: 3px solid #000000;
+    color: #ffffff;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.close-btn:hover {
+    background-color: #ffff00;
+    color: #000000;
+}
+
+.menu-items {
+    list-style: none;
+}
+
+.menu-item {
+    margin-bottom: 15px;
+}
+
+.menu-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 15px 20px;
+    border: 3px solid #000000;
+    display: block;
+    transition: all 0.2s ease;
+}
+
+.menu-link:hover {
+    background-color: #00ffff;
+    color: #000000;
+}
+
+.menu-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 3px solid #000000;
+}
+
+.menu-section-title {
+    font-size: 16px;
+    color: #cccccc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .header {
+        padding: 15px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .main-title {
+        padding: 20px;
+        margin-bottom: 40px;
+    }
+
+    .start-button {
+        padding: 20px 40px;
+        font-size: 20px;
+    }
+
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        display: none;
+    }
+
+    .sidebar.mobile-open {
+        display: block;
+    }
+
+    .main-content.study {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    .hamburger {
+        display: block;
+    }
+}
+
+/* Table Styles */
+.content table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000;
+    margin: 20px 0;
+}
+
+.content th {
+    border: 2px solid #000;
+    padding: 10px;
+    background-color: #1a1a1a;
+}
+
+.content td {
+    border: 2px solid #000;
+    padding: 10px;
+}
+
+.chapter-cyan .content th { color: #00ffff; }
+.chapter-magenta .content th { color: #ff00ff; }
+.chapter-yellow .content th { color: #ffff00; }
+
+/* MathJax Styles */
+.MathJax {
+    outline: none;
+}
+
+.MathJax_Display {
+    background-color: #1a1a1a !important;
+    border: 3px solid #000000 !important;
+    padding: 15px !important;
+    margin: 20px 0 !important;
+    text-align: center !important;
+}
+
+.chapter-cyan .MathJax { color: #00ffff !important; }
+.chapter-magenta .MathJax { color: #ff00ff !important; }
+.chapter-yellow .MathJax { color: #ffff00 !important; }
+
+/* Inline math */
+.MathJax_SVG {
+    vertical-align: middle;
+}
+
+/* Math equation numbering */
+.MathJax_Display .mjx-equation {
+    position: relative;
+}
+
+.MathJax_Display .mjx-equation .mjx-number {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Page Navigation */
+.page-nav a:hover {
+    background-color: #333333;
+    transform: translate(-2px, -2px);
+    box-shadow: 2px 2px 0 #000000;
+}
+
+.page-nav .home-btn:hover {
+    color: #000000;
+}
+
+.chapter-cyan .page-nav .home-btn:hover { background-color: #00ffff; }
+.chapter-magenta .page-nav .home-btn:hover { background-color: #ff00ff; }
+.chapter-yellow .page-nav .home-btn:hover { background-color: #ffff00; }
+
+/* Sitemap Styles - Brutalism focused */
+.sitemap-chapter {
+    margin-bottom: 60px;
+}
+
+.sitemap-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    padding: 15px 0;
+    border-bottom: 3px solid #000000;
+}
+
+.sitemap-title.cyan { color: #00ffff; }
+.sitemap-title.magenta { color: #ff00ff; }
+.sitemap-title.yellow { color: #ffff00; }
+
+.sitemap-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sitemap-item {
+    background: none;
+    border: none;
+}
+
+.sitemap-link {
+    display: block;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 12px 15px;
+    border: 2px solid #000000;
+    background-color: #1a1a1a;
+    font-weight: 500;
+    transition: all 0.1s ease;
+}
+
+.sitemap-link:hover {
+    background-color: #2a2a2a;
+    transform: translate(-1px, -1px);
+    box-shadow: 1px 1px 0 #000000;
+}
+
+.sitemap-link.cyan:hover { background-color: #00ffff; color: #000000; }
+.sitemap-link.magenta:hover { background-color: #ff00ff; color: #000000; }
+.sitemap-link.yellow:hover { background-color: #ffff00; color: #000000; }

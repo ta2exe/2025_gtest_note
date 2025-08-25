@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1-1: 人工知能の定義 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-cyan">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 1-1: 人工知能の定義</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 1-1</h1>
+                <p class="content-subtitle">人工知能の定義</p>
+            </div>
+
+            <div class="content">
+                <h1 id="learning-objectives">学習目標</h1>
+                <p>この章では以下の内容を学習します：</p>
+                <ul>
+                    <li><strong>人工知能とは何か</strong>、具体例を用いて説明できる</li>
+                    <li><strong>人工知能のレベル</strong>を「単純な制御プログラム」「古典的な人工知能」「機械学習」「深層学習」の4つに分類し、それぞれの特徴を説明できる</li>
+                    <li><strong>AI効果</strong>について説明できる</li>
+                    <li><strong>人工知能とロボットの違い</strong>を説明できる</li>
+                </ul>
+
+                <h2 id="keywords">キーワード</h2>
+                <p><strong>AI効果</strong>, <strong>エージェント</strong>, <strong>人工知能</strong>, <strong>機械学習</strong>, <strong>ディープラーニング</strong></p>
+
+                <h1 id="what-is-ai">人工知能とは</h1>
+                <p><strong>人工知能（AI: Artificial Intelligence）</strong>とは、人間の知的活動（思考、学習、判断、認識など）を機械やコンピュータが行うことを指します。</p>
+
+                <h2 id="ai-definition-history">人工知能の定義の変遷</h2>
+                <p>人工知能の定義は時代とともに変化してきました：</p>
+                <ul>
+                    <li><strong>1950年代</strong>: アラン・チューリングによる「機械が思考できるか」という問い</li>
+                    <li><strong>1956年</strong>: ダートマス会議で「人工知能」という用語が初めて使用</li>
+                    <li><strong>現在</strong>: 「人間の知能の一部を機械で実現する技術」として広く理解される</li>
+                </ul>
+
+                <h1 id="ai-levels">人工知能の4つのレベル</h1>
+                <p>人工知能は技術的な発展段階に応じて、以下の<strong>4つのレベル</strong>に分類されます：</p>
+
+                <h2 id="level1">レベル1: 単純な制御プログラム</h2>
+                <ul>
+                    <li><strong>特徴</strong>: 事前に決められたルールに従って動作</li>
+                    <li><strong>技術</strong>: if-then文のような条件分岐</li>
+                    <li><strong>例</strong>: エアコンの温度制御、信号機の制御</li>
+                    <li><strong>学習能力</strong>: なし</li>
+                </ul>
+                <pre><code># 単純制御プログラムの例
+if temperature > 25:
+    turn_on_air_conditioner()
+else:
+    turn_off_air_conditioner()</code></pre>
+
+                <h2 id="level2">レベル2: 古典的な人工知能</h2>
+                <ul>
+                    <li><strong>特徴</strong>: ルールベース、専門家の知識を体系化</li>
+                    <li><strong>技術</strong>: エキスパートシステム、推論エンジン</li>
+                    <li><strong>例</strong>: 医療診断システム、チェスプログラム</li>
+                    <li><strong>学習能力</strong>: 限定的</li>
+                </ul>
+                <p><strong>代表例: エキスパートシステム</strong></p>
+                <ul>
+                    <li>MYCIN（医療診断）</li>
+                    <li>DENDRAL（化学構造解析）</li>
+                </ul>
+
+                <h2 id="level3">レベル3: 機械学習</h2>
+                <ul>
+                    <li><strong>特徴</strong>: データからパターンを学習</li>
+                    <li><strong>技術</strong>: 統計的手法、決定木、サポートベクターマシン</li>
+                    <li><strong>例</strong>: スパムフィルター、レコメンデーションシステム</li>
+                    <li><strong>学習能力</strong>: データから自動学習</li>
+                </ul>
+                <p><strong>機械学習の手法例</strong>:</p>
+                <ul>
+                    <li><strong>教師あり学習</strong>: 分類、回帰</li>
+                    <li><strong>教師なし学習</strong>: クラスタリング、次元削減</li>
+                    <li><strong>強化学習</strong>: 試行錯誤による学習</li>
+                </ul>
+
+                <h2 id="level4">レベル4: 深層学習（ディープラーニング）</h2>
+                <ul>
+                    <li><strong>特徴</strong>: 多層ニューラルネットワーク</li>
+                    <li><strong>技術</strong>: CNN、RNN、Transformer</li>
+                    <li><strong>例</strong>: 画像認識、音声認識、自然言語処理</li>
+                    <li><strong>学習能力</strong>: 複雑なパターンの自動抽出</li>
+                </ul>
+                <p><strong>深層学習の特徴</strong>:</p>
+                <ul>
+                    <li><strong>特徴抽出の自動化</strong>: 人間が特徴を設計する必要がない</li>
+                    <li><strong>大量データの活用</strong>: ビッグデータから複雑なパターンを学習</li>
+                    <li><strong>高い性能</strong>: 多くのタスクで人間を上回る性能を実現</li>
+                </ul>
+
+                <h1 id="ai-effect">AI効果</h1>
+                <p><strong>AI効果</strong>とは、「AIが実用化されると、それはもはやAIではないと考えられる」現象を指します。</p>
+
+                <h2 id="ai-effect-examples">AI効果の例</h2>
+                <ul>
+                    <li><strong>計算機</strong>: かつては「人工知能」と考えられていた</li>
+                    <li><strong>文字認識</strong>: OCR技術が普及すると「単なるソフトウェア」と認識される</li>
+                    <li><strong>チェス</strong>: コンピュータが人間に勝つと「ルールベースの計算」と見なされる</li>
+                </ul>
+
+                <h2 id="ai-effect-reasons">AI効果が起こる理由</h2>
+                <ul>
+                    <li><strong>技術の日常化</strong>: 実用化されると「当たり前」の技術として認識される</li>
+                    <li><strong>期待値の上昇</strong>: AIへの期待が常に未実現の技術に向けられる</li>
+                    <li><strong>定義の曖昧さ</strong>: AIの定義が時代とともに変化する</li>
+                </ul>
+
+                <h1 id="ai-vs-robot">人工知能とロボットの違い</h1>
+
+                <h2 id="ai-definition">人工知能（AI）</h2>
+                <ul>
+                    <li><strong>定義</strong>: 知的活動を行うソフトウェアやアルゴリズム</li>
+                    <li><strong>実体</strong>: プログラム、データ、計算処理</li>
+                    <li><strong>例</strong>: 検索エンジン、翻訳ソフト、画像認識システム</li>
+                </ul>
+
+                <h2 id="robot-definition">ロボット</h2>
+                <ul>
+                    <li><strong>定義</strong>: 物理的な作業を自動で行う機械</li>
+                    <li><strong>実体</strong>: センサー、アクチュエータ、制御システム</li>
+                    <li><strong>例</strong>: 産業用ロボット、掃除ロボット、ドローン</li>
+                </ul>
+
+                <h2 id="ai-robot-relationship">AIとロボットの関係</h2>
+                <ul>
+                    <li><strong>AIロボット</strong>: AIを搭載したロボット（自律的な判断が可能）</li>
+                    <li><strong>従来のロボット</strong>: プログラムされた動作のみを実行</li>
+                    <li><strong>組み合わせ</strong>: AIの「頭脳」とロボットの「身体」が連携</li>
+                </ul>
+
+                <h1 id="ai-examples">具体例で理解するAI</h1>
+
+                <h2 id="familiar-ai">身近なAIの例</h2>
+                <ol>
+                    <li><strong>スマートフォン</strong>
+                        <ul>
+                            <li>音声アシスタント（Siri、Google Assistant）</li>
+                            <li>カメラの自動フォーカス</li>
+                            <li>予測変換</li>
+                        </ul>
+                    </li>
+                    <li><strong>Webサービス</strong>
+                        <ul>
+                            <li>検索エンジンの結果表示</li>
+                            <li>SNSのタイムライン</li>
+                            <li>動画配信の推薦システム</li>
+                        </ul>
+                    </li>
+                    <li><strong>交通・物流</strong>
+                        <ul>
+                            <li>自動運転技術</li>
+                            <li>交通渋滞の予測</li>
+                            <li>配送ルートの最適化</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h2 id="ai-strengths-weaknesses">AIが得意なこと・苦手なこと</h2>
+                <p><strong>得意なこと</strong>:</p>
+                <ul>
+                    <li>大量データの処理</li>
+                    <li>パターン認識</li>
+                    <li>計算集約的なタスク</li>
+                    <li>反復作業</li>
+                </ul>
+                <p><strong>苦手なこと</strong>:</p>
+                <ul>
+                    <li>常識的な推論</li>
+                    <li>創造性が必要なタスク</li>
+                    <li>倫理的な判断</li>
+                    <li>少ないデータでの学習</li>
+                </ul>
+
+                <h1 id="ai-mathematical-concepts">AIにおける数学的概念</h1>
+                <p>人工知能の理解には基本的な数学的概念も重要です：</p>
+
+                <h2 id="probability-basics">確率の基礎</h2>
+                <p>AIの多くの手法は確率論に基づいています：</p>
+                <ul>
+                    <li><strong>条件付き確率</strong>: $P(A|B) = \frac{P(A \cap B)}{P(B)}$</li>
+                    <li><strong>ベイズの定理</strong>: $P(A|B) = \frac{P(B|A)P(A)}{P(B)}$</li>
+                </ul>
+
+                <h2 id="basic-functions">基本的な関数</h2>
+                <p>機械学習でよく使用される数学関数：</p>
+                <ul>
+                    <li><strong>指数関数</strong>: $f(x) = e^x$ (自然指数関数)</li>
+                    <li><strong>対数関数</strong>: $f(x) = \log(x)$ (自然対数)</li>
+                    <li><strong>シグモイド関数</strong>: $\sigma(x) = \frac{1}{1 + e^{-x}}$</li>
+                </ul>
+
+                <p>これらの関数は、後章で学習する機械学習・深層学習で頻繁に使用されます。</p>
+
+                <h1 id="key-points">試験対策キーポイント</h1>
+                
+                <h2 id="exam-essentials">必須暗記ポイント</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📝 AI定義の基本</h3>
+                    <ul>
+                        <li><strong>人工知能の4つのレベル</strong>: 単純制御→古典的AI→機械学習→深層学習</li>
+                        <li><strong>AI効果</strong>: 実用化されるとAIではないと見なされる現象</li>
+                        <li><strong>AIとロボットの違い</strong>: AIはソフトウェア、ロボットはハードウェア</li>
+                        <li><strong>エージェント</strong>: 環境を認識し、行動を決定するシステム</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📊 レベル別特徴</h3>
+                    <ul>
+                        <li><strong>レベル1</strong>: if-then文、学習なし</li>
+                        <li><strong>レベル2</strong>: エキスパートシステム、ルールベース</li>
+                        <li><strong>レベル3</strong>: データから学習、統計的手法</li>
+                        <li><strong>レベル4</strong>: 多層NN、特徴抽出自動化</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🎯 よく出る問題パターン</h3>
+                    <ul>
+                        <li><strong>定義問題</strong>: 「AIとは何か」を具体例で説明</li>
+                        <li><strong>レベル分類</strong>: 「○○はAIの第何レベル？」</li>
+                        <li><strong>AI効果</strong>: 「なぜ○○はAIと呼ばれなくなったか？」</li>
+                        <li><strong>区別問題</strong>: 「AIとロボットの違いは？」</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li>AIの<strong>レベル分類</strong>を混同（特にレベル2と3の境界）</li>
+                        <li><strong>AI効果</strong>の概念を理解せず、単なる技術進歩と混同</li>
+                        <li>AIと<strong>ロボットを同一視</strong>する（AIはソフト、ロボットはハード）</li>
+                        <li><strong>機械学習と深層学習</strong>の包含関係を逆に理解</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+                <ul>
+                    <li>人工知能は<strong>4つのレベル</strong>で発展してきた</li>
+                    <li><strong>AI効果</strong>により、実用化された技術は「AI」と認識されなくなる傾向がある</li>
+                    <li>AIは<strong>ソフトウェア</strong>、ロボットは<strong>ハードウェア</strong>が中心</li>
+                    <li>現代社会にAIは広く浸透しており、今後も発展が期待される</li>
+                    <li>G検定では<strong>定義・レベル分類・AI効果</strong>の理解が重要</li>
+                </ul>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">人工知能（AI: Artificial Intelligence）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">人間の知的活動（思考、学習、判断、認識など）を機械やコンピュータで実現する技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">AI効果</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">AIが実用化されると、それはもはやAIではないと考えられる現象。技術の日常化により起こる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">エージェント</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">環境を認識し、目標達成のために行動を決定・実行するシステム。AIの基本概念。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">エキスパートシステム</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">専門家の知識をルール化し、推論により問題解決を行う古典的AI。MYCIN、DENDRALが代表例。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">機械学習（Machine Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データからパターンを学習し、新しいデータに対して予測や判断を行うAI技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">深層学習（Deep Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">多層ニューラルネットワークを用いた機械学習手法。特徴抽出を自動化できる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">チューリングテスト</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">アラン・チューリングが提案した、機械が知能を持つかを判定するテスト。人間と区別がつかない対話ができれば合格。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="index.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;" class="home-btn">
+                            <i class="fas fa-home" style="margin-right: 8px; color: #00ffff;"></i>
+                            Home
+                        </a>
+
+                        <a href="study1-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 1-2
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #00ffff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

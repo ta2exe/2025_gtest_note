@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1-2: AI分野で議論される問題 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-cyan">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 1-2: AI分野で議論される問題</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 1-2</h1>
+                <p class="content-subtitle">AI分野で議論される問題</p>
+            </div>
+
+            <div class="content">
+                <h1 id="learning-objectives">学習目標</h1>
+                <p>この章では以下の内容を学習します：</p>
+                <ul>
+                    <li><strong>人工知能の知的レベルや汎用性</strong>に関する議論を説明できる</li>
+                    <li><strong>シンボルグラウンディング問題</strong>、<strong>フレーム問題</strong>について説明できる</li>
+                    <li><strong>AIにまつわる社会的・倫理的問題</strong>について説明できる</li>
+                    <li><strong>汎用人工知能（AGI）と特化型AI</strong>の違いを説明できる</li>
+                </ul>
+
+                <h2 id="keywords">キーワード</h2>
+                <p><strong>シンギュラリティ</strong>, <strong>シンボルグラウンディング問題</strong>, <strong>身体性</strong>, <strong>ダートマス会議</strong>, <strong>トイ・プロブレム</strong>, <strong>知識獲得のボトルネック</strong>, <strong>チューリングテスト</strong>, <strong>中国語の部屋</strong>, <strong>強いAIと弱いAI</strong>, <strong>統計的機械翻訳</strong>, <strong>フレーム問題</strong>, <strong>ルールベース機械翻訳</strong>, <strong>ローブナーコンテスト</strong></p>
+
+                <h1 id="intelligence-levels">知的レベルに関する議論</h1>
+                <p>AIの知的能力について、人間との比較で議論される主要な観点：</p>
+
+                <h2 id="narrow-vs-general">特化型AI vs 汎用AI</h2>
+
+                <h3 id="narrow-ai">特化型AI（ANI: Artificial Narrow Intelligence）</h3>
+                <ul>
+                    <li><strong>定義</strong>: 特定の狭い領域で人間を上回る性能を発揮</li>
+                    <li><strong>特徴</strong>: 単一タスク特化、他領域への転用困難</li>
+                    <li><strong>現状</strong>: 現在のAIのほとんどがこのカテゴリ</li>
+                    <li><strong>例</strong>:
+                        <ul>
+                            <li>チェス・囲碁: AlphaGo、Deep Blue</li>
+                            <li>画像認識: ImageNet分類システム</li>
+                            <li>音声認識: Siri、Alexa</li>
+                            <li>機械翻訳: Google Translate</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3 id="general-ai">汎用人工知能（AGI: Artificial General Intelligence）</h3>
+                <ul>
+                    <li><strong>定義</strong>: 人間と同等以上の知的能力を幅広い領域で発揮</li>
+                    <li><strong>特徴</strong>: 学習転移、抽象的思考、創造性</li>
+                    <li><strong>現状</strong>: まだ実現されていない未来技術</li>
+                    <li><strong>課題</strong>:
+                        <ul>
+                            <li>常識的推論</li>
+                            <li>文脈理解</li>
+                            <li>感情・直感の理解</li>
+                            <li>創造的問題解決</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3 id="super-ai">超人工知能（ASI: Artificial Super Intelligence）</h3>
+                <ul>
+                    <li><strong>定義</strong>: 人間の知能を大幅に上回る仮想的AI</li>
+                    <li><strong>議論</strong>: 技術的特異点との関連で論じられる</li>
+                    <li><strong>時期予測</strong>: 専門家の間でも大きく意見が分かれる</li>
+                </ul>
+
+                <h1 id="ai-history">人工知能研究の歴史的背景</h1>
+
+                <h2 id="dartmouth-conference">ダートマス会議（1956年）</h2>
+                <p><strong>ダートマス会議</strong>は、人工知能という用語が初めて使用された歴史的な会議です。</p>
+
+                <h3 id="dartmouth-participants">主要参加者</h3>
+                <ul>
+                    <li><strong>ジョン・マッカーシー</strong>: 「人工知能」という用語を提唱</li>
+                    <li><strong>マービン・ミンスキー</strong>: 認知科学・AI研究の先駆者</li>
+                    <li><strong>クロード・シャノン</strong>: 情報理論の父</li>
+                    <li><strong>アレン・ニューウェル</strong>: 記号処理システム研究</li>
+                </ul>
+
+                <h3 id="dartmouth-impact">会議の意義</h3>
+                <ul>
+                    <li><strong>学問分野の確立</strong>: AIが独立した研究分野として認識</li>
+                    <li><strong>楽観的予測</strong>: 10年以内にAGI実現可能と予測</li>
+                    <li><strong>研究方向性</strong>: 記号処理アプローチの基礎を築く</li>
+                </ul>
+
+                <h2 id="strong-weak-ai">強いAIと弱いAI</h2>
+                <p>哲学者<strong>ジョン・サール</strong>が提唱したAIの分類概念：</p>
+
+                <h3 id="strong-ai">強いAI（Strong AI）</h3>
+                <ul>
+                    <li><strong>定義</strong>: コンピュータが実際に意識や理解を持つ</li>
+                    <li><strong>特徴</strong>: 単なるシミュレーションではなく、真の知能</li>
+                    <li><strong>現状</strong>: まだ実現されていない理論的概念</li>
+                    <li><strong>関連概念</strong>: AGI、シンギュラリティと関連</li>
+                </ul>
+
+                <h3 id="weak-ai">弱いAI（Weak AI）</h3>
+                <ul>
+                    <li><strong>定義</strong>: 知的行動をシミュレートするだけ</li>
+                    <li><strong>特徴</strong>: 理解や意識は持たない、機能的模倣</li>
+                    <li><strong>現状</strong>: 現在のAI技術がこのカテゴリ</li>
+                    <li><strong>例</strong>: チェスAI、音声認識、画像認識</li>
+                </ul>
+
+                <h2 id="turing-test">チューリングテスト</h2>
+                <p><strong>アラン・チューリング</strong>が1950年に提唱した、機械の知能を判定するテスト：</p>
+
+                <h3 id="turing-test-procedure">テストの手順</h3>
+                <ol>
+                    <li><strong>参加者</strong>: 人間の質問者、人間の回答者、機械の回答者</li>
+                    <li><strong>条件</strong>: 質問者は回答者の正体を知らない</li>
+                    <li><strong>判定</strong>: 質問者が機械を人間と誤認すれば合格</li>
+                </ol>
+
+                <h3 id="loebner-prize">ローブナーコンテスト</h3>
+                <ul>
+                    <li><strong>概要</strong>: チューリングテストの実践的コンテスト</li>
+                    <li><strong>開始年</strong>: 1991年から毎年開催</li>
+                    <li><strong>賞金</strong>: 完全合格者に10万ドル（未だ受賞者なし）</li>
+                    <li><strong>現状</strong>: 部分的合格者のみ存在</li>
+                </ul>
+
+                <h2 id="toy-problems">トイ・プロブレム</h2>
+                <p><strong>トイ・プロブレム</strong>とは、AI研究初期に使用された単純化された問題設定：</p>
+
+                <h3 id="toy-problem-examples">代表的なトイ・プロブレム</h3>
+                <ul>
+                    <li><strong>ハノイの塔</strong>: 円盤移動パズル、探索アルゴリズムの研究</li>
+                    <li><strong>8パズル</strong>: タイル並び替えゲーム、状態空間探索</li>
+                    <li><strong>宣教師と食人族問題</strong>: 制約充足問題の典型例</li>
+                    <li><strong>チェス・囲碁</strong>: ゲーム理論、探索戦略の研究</li>
+                </ul>
+
+                <h3 id="toy-problem-limitations">限界と批判</h3>
+                <ul>
+                    <li><strong>現実との乖離</strong>: 実世界の複雑さを捉えきれない</li>
+                    <li><strong>汎化困難</strong>: 特定問題の解法が他に応用できない</li>
+                    <li><strong>知識獲得の軽視</strong>: 問題解決手法のみに注目</li>
+                </ul>
+
+                <h2 id="knowledge-bottleneck">知識獲得のボトルネック</h2>
+                <p><strong>知識獲得のボトルネック</strong>は、エキスパートシステム時代の重要な課題：</p>
+
+                <h3 id="bottleneck-problems">問題の構造</h3>
+                <ul>
+                    <li><strong>専門家の暗黙知</strong>: 言語化困難な経験的知識</li>
+                    <li><strong>知識工学者の限界</strong>: 全分野の専門性理解は不可能</li>
+                    <li><strong>コストと時間</strong>: 知識抽出・体系化の膨大な工数</li>
+                    <li><strong>知識の更新</strong>: 新しい知見の継続的統合が困難</li>
+                </ul>
+
+                <h3 id="bottleneck-solutions">解決アプローチ</h3>
+                <ul>
+                    <li><strong>機械学習</strong>: データから自動的に知識を獲得</li>
+                    <li><strong>オントロジー</strong>: 知識の構造化・標準化</li>
+                    <li><strong>セマンティックWeb</strong>: Web上での知識共有</li>
+                </ul>
+
+                <h2 id="machine-translation">機械翻訳の発展</h2>
+
+                <h3 id="rule-based-mt">ルールベース機械翻訳</h3>
+                <ul>
+                    <li><strong>手法</strong>: 文法規則と辞書による翻訳</li>
+                    <li><strong>特徴</strong>: 言語学的知識を明示的に活用</li>
+                    <li><strong>利点</strong>: 文法的に正確、説明可能</li>
+                    <li><strong>欠点</strong>: 規則作成に膨大な工数、柔軟性の欠如</li>
+                </ul>
+
+                <h3 id="statistical-mt">統計的機械翻訳</h3>
+                <ul>
+                    <li><strong>手法</strong>: 対訳コーパスからの確率的学習</li>
+                    <li><strong>特徴</strong>: データ駆動アプローチ</li>
+                    <li><strong>利点</strong>: 自動学習、多言語対応</li>
+                    <li><strong>発展</strong>: Google翻訳の初期技術</li>
+                </ul>
+
+                <h2 id="embodiment">身体性</h2>
+                <p><strong>身体性（Embodiment）</strong>とは、知能が身体との相互作用から生まれるという考え：</p>
+
+                <h3 id="embodiment-principles">身体性の原理</h3>
+                <ul>
+                    <li><strong>環境との相互作用</strong>: 知能は環境との動的相互作用から創発</li>
+                    <li><strong>感覚運動結合</strong>: 感覚と運動の統合が認知の基盤</li>
+                    <li><strong>物理制約</strong>: 身体的制約が思考を形成</li>
+                    <li><strong>学習の基盤</strong>: 身体経験が抽象概念の理解に必要</li>
+                </ul>
+
+                <h3 id="embodiment-implications">AI研究への示唆</h3>
+                <ul>
+                    <li><strong>ロボティクス</strong>: 物理的身体を持つAIの重要性</li>
+                    <li><strong>シミュレーション限界</strong>: 仮想環境だけでは不十分</li>
+                    <li><strong>発達的アプローチ</strong>: 成長過程での学習の重要性</li>
+                </ul>
+
+                <h1 id="fundamental-problems">AI研究の根本的問題</h1>
+
+                <h2 id="symbol-grounding">シンボルグラウンディング問題</h2>
+                <p><strong>シンボルグラウンディング問題</strong>とは、コンピュータが扱う記号（シンボル）と現実世界の意味をどう結び付けるかという問題です。</p>
+
+                <h3 id="symbol-grounding-detail">問題の詳細</h3>
+                <ul>
+                    <li><strong>記号操作</strong>: コンピュータは記号を操作するが、その意味を理解しているわけではない</li>
+                    <li><strong>意味の欠如</strong>: 「赤」という文字列を処理できても、「赤色」という概念は理解していない</li>
+                    <li><strong>現実との乖離</strong>: 記号と物理世界の対象物の対応関係が不明確</li>
+                </ul>
+
+                <h3 id="symbol-grounding-examples">具体例</h3>
+                <ul>
+                    <li><strong>言語理解</strong>: 「猫」という単語を知っていても、実際の猫を認識できない</li>
+                    <li><strong>常識推論</strong>: 「コップは水を入れる容器」という知識はあっても、壊れやすさを理解しない</li>
+                    <li><strong>文脈依存</strong>: 「冷たい人」の意味が温度なのか性格なのか判断できない</li>
+                </ul>
+
+                <h3 id="approaches-to-grounding">解決へのアプローチ</h3>
+                <ul>
+                    <li><strong>身体性</strong>: ロボットによる物理世界との相互作用</li>
+                    <li><strong>多模態学習</strong>: 視覚・聴覚・触覚などの統合</li>
+                    <li><strong>大規模言語モデル</strong>: 大量テキストからの暗黙的意味獲得</li>
+                </ul>
+
+                <h2 id="frame-problem">フレーム問題</h2>
+                <p><strong>フレーム問題</strong>とは、行動の結果として何が変化し、何が変化しないかを適切に判断する問題です。</p>
+
+                <h3 id="frame-problem-detail">問題の核心</h3>
+                <ul>
+                    <li><strong>変化の予測</strong>: ある行動により、世界のどの部分が影響を受けるか</li>
+                    <li><strong>不変の仮定</strong>: 影響を受けない部分は変化しないと仮定</li>
+                    <li><strong>計算爆発</strong>: すべての可能性を考慮すると計算量が爆発的に増加</li>
+                </ul>
+
+                <h3 id="frame-problem-examples">具体例</h3>
+                <p><strong>ロボットがドアを開ける場面</strong>:</p>
+                <ul>
+                    <li><strong>変化するもの</strong>: ドアの位置、ロボットの位置</li>
+                    <li><strong>変化しないもの</strong>: 部屋の色、机の位置、時刻</li>
+                    <li><strong>問題</strong>: 「変化しないもの」を全てリストアップするのは不可能</li>
+                </ul>
+
+                <h3 id="frame-problem-approaches">解決アプローチ</h3>
+                <ul>
+                    <li><strong>閉世界仮定</strong>: 明示的に変化するもの以外は不変と仮定</li>
+                    <li><strong>因果関係モデル</strong>: 行動と結果の因果関係を明確化</li>
+                    <li><strong>機械学習</strong>: データから変化パターンを学習</li>
+                </ul>
+
+                <h1 id="social-ethical-issues">社会的・倫理的問題</h1>
+
+                <h2 id="employment-impact">労働への影響</h2>
+                <ul>
+                    <li><strong>職業の自動化</strong>: AIによる人間の仕事の代替</li>
+                    <li><strong>新規雇用創出</strong>: AI関連の新しい職種の誕生</li>
+                    <li><strong>スキル転換</strong>: 労働者の再教育・スキルアップの必要性</li>
+                    <li><strong>格差拡大</strong>: AI活用格差による所得格差の拡大懸念</li>
+                </ul>
+
+                <h2 id="bias-fairness">バイアスと公平性</h2>
+                <ul>
+                    <li><strong>学習データのバイアス</strong>: 過去のデータに含まれる偏見の再現</li>
+                    <li><strong>アルゴリズムバイアス</strong>: 設計段階で混入する偏見</li>
+                    <li><strong>差別的判断</strong>: 性別・人種・年齢による不公平な扱い</li>
+                    <li><strong>透明性の欠如</strong>: AIの判断根拠が不明（ブラックボックス問題）</li>
+                </ul>
+
+                <h2 id="privacy-surveillance">プライバシーと監視</h2>
+                <ul>
+                    <li><strong>個人情報収集</strong>: 大量の個人データの蓄積・活用</li>
+                    <li><strong>監視社会</strong>: 顔認識技術による行動追跡</li>
+                    <li><strong>データ所有権</strong>: 個人データの帰属と利用権限</li>
+                    <li><strong>忘れられる権利</strong>: データ削除の権利と技術的課題</li>
+                </ul>
+
+                <h2 id="responsibility-accountability">責任と説明責任</h2>
+                <ul>
+                    <li><strong>AI事故の責任</strong>: 自動運転事故等での責任の所在</li>
+                    <li><strong>判断の説明</strong>: AI判断の根拠説明義務</li>
+                    <li><strong>人間の監督</strong>: Human-in-the-loop の重要性</li>
+                    <li><strong>法制度整備</strong>: AI関連法規制の必要性</li>
+                </ul>
+
+                <h1 id="singularity-threat">技術的特異点とAI脅威論</h1>
+
+                <h2 id="technological-singularity">技術的特異点（シンギュラリティ）</h2>
+                <p>レイ・カーツワイルが提唱した概念で、AIが人間の知能を超越する転換点を指します。</p>
+
+                <h3 id="singularity-timeline">予測時期</h3>
+                <ul>
+                    <li><strong>カーツワイル予測</strong>: 2045年頃</li>
+                    <li><strong>専門家の見解</strong>: 2030年～2100年以降まで幅広い予測</li>
+                    <li><strong>懐疑論</strong>: 実現不可能とする意見も存在</li>
+                </ul>
+
+                <h3 id="singularity-implications">想定される影響</h3>
+                <ul>
+                    <li><strong>指数的進歩</strong>: AIが自己改良により急速に発展</li>
+                    <li><strong>予測不可能性</strong>: 人間には理解できない変化</li>
+                    <li><strong>社会構造変化</strong>: 経済・政治システムの根本的変革</li>
+                </ul>
+
+                <h2 id="ai-threats">AI脅威論</h2>
+
+                <h3 id="existential-risk">存在論的リスク</h3>
+                <ul>
+                    <li><strong>制御問題</strong>: 超知能AIの制御不能化</li>
+                    <li><strong>目標不整合</strong>: AIの目標と人間の価値観の乖離</li>
+                    <li><strong>人類の衰退</strong>: AIによる人間の不要化</li>
+                </ul>
+
+                <h3 id="immediate-risks">現実的リスク</h3>
+                <ul>
+                    <li><strong>自律兵器</strong>: 殺傷自律ロボット兵器の開発</li>
+                    <li><strong>サイバー攻撃</strong>: AI活用による高度な攻撃</li>
+                    <li><strong>偽情報拡散</strong>: ディープフェイク等による情報操作</li>
+                    <li><strong>経済的混乱</strong>: 急激な自動化による社会不安</li>
+                </ul>
+
+                <h3 id="safety-measures">安全対策</h3>
+                <ul>
+                    <li><strong>AI安全研究</strong>: 制御可能なAI開発手法の研究</li>
+                    <li><strong>国際協調</strong>: AI開発の国際的ガイドライン策定</li>
+                    <li><strong>段階的開発</strong>: 急進的でない慎重な技術発展</li>
+                    <li><strong>人間中心設計</strong>: 人間の価値観を組み込んだAI設計</li>
+                </ul>
+
+                <h1 id="key-points">試験対策キーポイント</h1>
+                
+                <h2 id="exam-essentials">必須暗記ポイント</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📝 根本的問題</h3>
+                    <ul>
+                        <li><strong>シンボルグラウンディング問題</strong>: 記号と現実世界の意味の結び付け</li>
+                        <li><strong>フレーム問題</strong>: 行動の結果、何が変化し何が不変かの判断</li>
+                        <li><strong>中国語の部屋</strong>: 理解と操作の違いを示す思考実験</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🎯 AI分類</h3>
+                    <ul>
+                        <li><strong>ANI</strong>: 特化型AI、現在主流、単一タスク特化</li>
+                        <li><strong>AGI</strong>: 汎用AI、人間レベル、未実現</li>
+                        <li><strong>ASI</strong>: 超人工知能、人間超越、仮想的概念</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">⚠️ 社会的課題</h3>
+                    <ul>
+                        <li><strong>雇用問題</strong>: 自動化による職業代替</li>
+                        <li><strong>バイアス問題</strong>: 学習データの偏見再現</li>
+                        <li><strong>プライバシー</strong>: 個人情報収集・監視</li>
+                        <li><strong>責任問題</strong>: AI判断の説明責任</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🔮 未来予測</h3>
+                    <ul>
+                        <li><strong>シンギュラリティ</strong>: 2045年予測（カーツワイル）</li>
+                        <li><strong>AI脅威論</strong>: 制御問題、存在論的リスク</li>
+                        <li><strong>AI安全研究</strong>: 制御可能なAI開発の重要性</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>シンボルグラウンディング問題</strong>を単なる翻訳問題と誤解</li>
+                        <li><strong>フレーム問題</strong>を計算速度の問題と混同</li>
+                        <li><strong>AGI</strong>の実現時期を現在と誤認</li>
+                        <li><strong>シンギュラリティ</strong>を単なる技術進歩と混同</li>
+                        <li>AI脅威論を<strong>SF映画</strong>レベルの話と軽視</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+                <ul>
+                    <li>AI研究には<strong>シンボルグラウンディング問題</strong>や<strong>フレーム問題</strong>という根本的課題がある</li>
+                    <li>現在のAIは<strong>特化型（ANI）</strong>が主流で、<strong>汎用AI（AGI）</strong>は未実現</li>
+                    <li>AIの社会実装には<strong>雇用・バイアス・プライバシー</strong>等の課題が伴う</li>
+                    <li><strong>技術的特異点</strong>とAI脅威論は重要な議論テーマ</li>
+                    <li>AI安全研究と<strong>人間中心設計</strong>の重要性が高まっている</li>
+                </ul>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">シンギュラリティ（技術的特異点）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">AIが人間の知能を超越する転換点。カーツワイルは2045年頃と予測。AIの自己改良により指数的発展が起こる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">シンボルグラウンディング問題</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">コンピュータが扱う記号と現実世界の意味を結び付ける問題。記号操作と意味理解の乖離を指す。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">身体性（Embodiment）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">知能が身体との相互作用から生まれるという考え。環境との動的相互作用が認知の基盤となる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ダートマス会議</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">1956年の歴史的会議。ジョン・マッカーシーが「人工知能」という用語を初めて使用。AI研究分野の出発点。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">トイ・プロブレム</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">AI研究初期の単純化された問題設定。ハノイの塔、8パズルなど。現実との乖離が課題とされた。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">知識獲得のボトルネック</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エキスパートシステムで専門家の知識を抽出・体系化することの困難さ。機械学習発展の背景要因。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">チューリングテスト</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">アラン・チューリング提唱の機械知能判定テスト。人間が機械を人間と誤認すれば合格。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">中国語の部屋</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ジョン・サールの思考実験。記号操作と理解の違いを示し、強いAIの可能性に疑問を呈する。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">強いAI・弱いAI</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">サールの分類。強いAI：真の理解を持つ、弱いAI：知的行動のシミュレートのみ。現在のAIは弱いAI。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">統計的機械翻訳</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">対訳コーパスから確率的に学習する翻訳手法。データ駆動アプローチ。Google翻訳の初期技術。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">フレーム問題</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">行動の結果として何が変化し、何が変化しないかを判断する問題。計算量爆発の原因となる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ルールベース機械翻訳</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">文法規則と辞書による翻訳手法。言語学的知識を明示的に活用。説明可能だが柔軟性に欠ける。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ローブナーコンテスト</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">チューリングテストの実践コンテスト。1991年開始。完全合格者に10万ドルの賞金（未達成）。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study1-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #00ffff;"></i>
+                            Back: 1-1
+                        </a>
+
+                        <a href="study2-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 2-1
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #00ffff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

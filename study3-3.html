@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3-3: 強化学習 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-magenta">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 3-3: 強化学習</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 3-3</h1>
+                <h2 class="content-subtitle">強化学習</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">機械学習の概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">📋 学習目標</h3>
+                    <p>強化学習の基本概念を理解し、エージェントが環境との相互作用を通じて学習する仕組みについて説明できる。</p>
+                    
+                    <h3 style="color: #ff00ff; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>強化学習</strong></li>
+                        <li><strong>エージェント</strong></li>
+                        <li><strong>環境</strong></li>
+                        <li><strong>状態</strong></li>
+                        <li><strong>行動</strong></li>
+                        <li><strong>報酬</strong></li>
+                        <li><strong>方策</strong></li>
+                        <li><strong>Q学習</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">強化学習とは何か</h1>
+                
+                <p>強化学習（Reinforcement Learning）は、エージェント（学習主体）が環境との試行錯誤的な相互作用を通じて、最適な行動方針を学習する機械学習手法です。教師あり学習や教師なし学習とは根本的に異なる学習パラダイムを持っています。</p>
+
+                <p>強化学習の本質を理解するために、子どもが自転車に乗ることを覚える過程を想像してみてください。親から「ペダルを踏んで、バランスを取って...」と詳細な説明を受けても（教師あり学習）、実際に自転車に乗れるようになるわけではありません。子どもは実際に自転車にまたがり、転んでは起き上がり、少しずつバランスを覚えて（試行錯誤）、最終的に乗れるようになります。この過程こそが強化学習の考え方なのです。</p>
+
+                <p>強化学習が他の手法と大きく異なるのは、<strong>「環境からのフィードバック（報酬）を最大化する」</strong>ことを目標とする点です。正解データがあらかじめ用意されているわけではなく、行動の結果として得られる報酬を手がかりに、試行錯誤を通じて学習を進めます。</p>
+
+                <h1 id="comparison">他の機械学習手法との比較</h1>
+
+                <p>3つの主要な機械学習パラダイムを比較してみましょう：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🔄 学習パラダイムの比較</h3>
+                    
+                    <h4 style="color: #ffffff;">教師あり学習</h4>
+                    <p><strong>例</strong>：写真を見て「これは犬です」と教えられて学習</p>
+                    <p><strong>特徴</strong>：正解ラベル付きデータから学習、予測精度重視</p>
+                    
+                    <h4 style="color: #ffffff; margin-top: 15px;">教師なし学習</h4>
+                    <p><strong>例</strong>：写真の集合を見て、似たような特徴の写真をグループ分け</p>
+                    <p><strong>特徴</strong>：正解なしでパターン発見、構造理解重視</p>
+                    
+                    <h4 style="color: #ffffff; margin-top: 15px;">強化学習</h4>
+                    <p><strong>例</strong>：ゲームをプレイして、勝ったら報酬、負けたらペナルティを受けながら学習</p>
+                    <p><strong>特徴</strong>：行動の結果から学習、長期的な報酬最大化重視</p>
+                </div>
+
+                <p>強化学習の独自性は、<strong>「時系列的な意思決定」</strong>と<strong>「遅延報酬」</strong>の概念にあります。チェスの一手は即座に勝敗が決まるわけではありませんが、最終的な勝利に向けた重要な一歩かもしれません。このような長期的な視点での学習が強化学習の本質です。</p>
+
+                <h1 id="basic-framework">強化学習の基本フレームワーク</h1>
+
+                <p>強化学習は以下の要素から構成される数学的フレームワークで記述されます：</p>
+
+                <h2 id="agent">エージェント（Agent）</h2>
+                
+                <p>エージェントは学習と意思決定の主体です。環境を観察し、行動を選択し、その結果から学習します。人間でいえば「学習者」、ゲームでいえば「プレイヤー」に相当します。</p>
+
+                <p>エージェントの能力は、現在の状況（状態）を認識し、取るべき行動を選択し、その結果を評価して将来の行動選択を改善することです。これは人間の学習プロセスと本質的に同じです。</p>
+
+                <h2 id="environment">環境（Environment）</h2>
+                
+                <p>環境は、エージェントが行動する世界そのものです。エージェントの行動を受け取り、新しい状態と報酬を返します。環境は通常、エージェントの制御外にある要素として設計されます。</p>
+
+                <p>例えば、チェスAIにとっての環境は「チェス盤と対戦相手」、自動運転車にとっての環境は「道路と他の交通参加者」、推薦システムにとっての環境は「ユーザーとコンテンツ」になります。</p>
+
+                <h2 id="state">状態（State）</h2>
+                
+                <p>状態は、現在の環境の状況を表現する情報です。エージェントが意思決定を行うために必要なすべての情報を含む必要があります。</p>
+
+                <p>状態の例：</p>
+                <ul>
+                    <li><strong>チェス</strong>：盤面の駒の配置</li>
+                    <li><strong>自動運転</strong>：車両の位置、速度、周囲の交通状況</li>
+                    <li><strong>株式取引</strong>：現在の価格、過去の値動き、市場指標</li>
+                </ul>
+
+                <h2 id="action">行動（Action）</h2>
+                
+                <p>行動は、エージェントが環境に対して実行できる操作です。行動は離散的（「上下左右に移動」など）でも連続的（「アクセルを0.3踏む」など）でも構いません。</p>
+
+                <p>適切な行動空間の設計は強化学習の成功に大きく影響します。行動の選択肢が多すぎると学習が困難になり、少なすぎると表現力が制限されます。</p>
+
+                <h2 id="reward">報酬（Reward）</h2>
+                
+                <p>報酬は、エージェントの行動の良し悪しを示すスカラー値です。強化学習における「教師」の役割を果たし、エージェントの学習方向を決定します。</p>
+
+                <p>報酬設計は強化学習の最も重要で困難な課題の一つです。不適切な報酬関数は予期しない行動を引き起こす可能性があります。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 報酬設計の例</h3>
+                    <ul>
+                        <li><strong>ゲーム</strong>：勝利で+1、敗北で-1、引き分けで0</li>
+                        <li><strong>ロボット制御</strong>：目標到達で+100、障害物衝突で-10、時間経過で-1</li>
+                        <li><strong>推薦システム</strong>：クリックで+1、購入で+10、離脱で-1</li>
+                    </ul>
+                </div>
+
+                <h2 id="policy">方策（Policy）</h2>
+                
+                <p>方策は、状態から行動への写像を定義します。「この状況では、この行動を取る」という意思決定ルールです。強化学習の目標は、報酬を最大化する最適方策を見つけることです。</p>
+
+                <p>方策は以下のように表現されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\pi(a|s) = P(\text{Action} = a | \text{State} = s)$$
+                </div>
+
+                <p>これは「状態sにおいて行動aを選択する確率」を意味します。</p>
+
+                <h1 id="learning-process">学習プロセス</h1>
+
+                <p>強化学習の基本的な学習サイクルは以下の通りです：</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <pre style="color: #ffffff; margin: 0;">
+1. エージェントが現在状態を観察
+2. 方策に基づいて行動を選択
+3. 環境が行動を受け取り、新状態と報酬を返す
+4. エージェントが経験（状態、行動、報酬、新状態）を記録
+5. 蓄積された経験から方策を更新
+6. 1に戻って繰り返し
+                    </pre>
+                </div>
+
+                <p>この過程で重要なのが<strong>「探索と活用のトレードオフ」</strong>です。エージェントは、既に知っている良い行動を活用（Exploitation）する一方で、未知の可能性のある行動を探索（Exploration）する必要があります。</p>
+
+                <h2 id="exploration-exploitation">探索と活用</h2>
+
+                <p>レストラン選びを例に考えてみましょう。いつものお気に入りの店（活用）に行くか、新しい店（探索）を試すかのジレンマです。新しい店を試さなければ、もっと良い店を見つける機会を失いますが、試しすぎると不味い料理に当たるリスクもあります。</p>
+
+                <p>強化学習では、この問題に対する様々な手法が提案されています：</p>
+
+                <ul>
+                    <li><strong>ε-greedy法</strong>：確率εで探索、1-εで活用</li>
+                    <li><strong>UCB (Upper Confidence Bound)</strong>：不確実性を考慮した行動選択</li>
+                    <li><strong>Thompson Sampling</strong>：ベイズ的手法による探索</li>
+                </ul>
+
+                <h1 id="q-learning">Q学習</h1>
+
+                <p>Q学習（Q-Learning）は強化学習の代表的なアルゴリズムです。各状態-行動ペアの価値（Q値）を学習し、最も価値の高い行動を選択します。</p>
+
+                <h2 id="q-function">Q関数</h2>
+
+                <p>Q関数は、状態sで行動aを取ったときの長期的な価値を表します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$Q(s,a) = \text{状態sで行動aを取った時の期待総報酬}$$
+                </div>
+
+                <p>Q関数が正確にわかれば、各状態で最も価値の高い行動を選択するだけで最適方策が得られます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\pi^*(s) = \arg\max_a Q(s,a)$$
+                </div>
+
+                <h2 id="q-update">Q値の更新</h2>
+
+                <p>Q学習では、経験した状態遷移から以下の更新式でQ値を改善します：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$Q(s,a) \leftarrow Q(s,a) + \alpha [r + \gamma \max_{a'} Q(s',a') - Q(s,a)]$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>α</strong>：学習率（0 < α ≤ 1）</li>
+                    <li><strong>γ</strong>：割引率（0 ≤ γ ≤ 1）</li>
+                    <li><strong>r</strong>：即時報酬</li>
+                    <li><strong>s'</strong>：次状態</li>
+                </ul>
+
+                <p>この更新式の意味は「現在のQ値を、実際に得た報酬＋将来の期待価値の方向に少しずつ修正する」ことです。</p>
+
+                <h2 id="discount-factor">割引率の意味</h2>
+
+                <p>割引率γは、将来の報酬をどの程度重視するかを調整するパラメータです：</p>
+
+                <ul>
+                    <li><strong>γ = 0</strong>：即時報酬のみを重視（近視眼的）</li>
+                    <li><strong>γ = 1</strong>：未来の報酬も現在と同じ価値</li>
+                    <li><strong>0 < γ < 1</strong>：将来の報酬は現在より価値が低い</li>
+                </ul>
+
+                <p>多くの実問題では、γ = 0.9 ~ 0.99 程度の値が使われます。</p>
+
+                <h1 id="applications">強化学習の応用分野</h1>
+
+                <h2 id="games">ゲーム・エンターテインメント</h2>
+
+                <p>強化学習が最も劇的な成功を収めたのがゲーム分野です。</p>
+
+                <p><strong>AlphaGo</strong>（2016年）は、モンテカルロ木探索と深層学習を組み合わせた強化学習により、世界トップ級の囲碁棋士に勝利しました。囲碁の可能な局面数は宇宙の原子数よりも多いとされ、従来の総当たり探索では不可能とされていた問題の解決でした。</p>
+
+                <p><strong>OpenAI Five</strong>は、チームワークが必要な複雑なゲーム（Dota 2）で人間のプロチームを破り、マルチエージェント強化学習の可能性を示しました。</p>
+
+                <h2 id="robotics">ロボティクス</h2>
+
+                <p>ロボット制御は強化学習の自然な応用分野です。従来の制御理論では困難だった不確実性の多い環境での学習が可能になります。</p>
+
+                <p>例えば、二足歩行ロボットの歩行学習では、転倒するたびにペナルティを与え、安定歩行に報酬を与えることで、試行錯誤を通じて歩行パターンを獲得できます。</p>
+
+                <h2 id="autonomous-driving">自動運転</h2>
+
+                <p>自動運転車は、道路状況の認識から運転操作まで、複雑な意思決定プロセスを必要とします。強化学習は、安全運転を報酬として、危険行動をペナルティとして学習することで、運転技能を向上させます。</p>
+
+                <h2 id="finance">金融・トレーディング</h2>
+
+                <p>アルゴリズム取引では、市場状況に応じて売買判断を行う必要があります。強化学習は、利益を報酬、損失をペナルティとして、最適な取引戦略を学習できます。</p>
+
+                <h2 id="recommendation">推薦システム</h2>
+
+                <p>ユーザーの長期的な満足度を最大化する推薦システムに強化学習が応用されています。短期的なクリック率だけでなく、ユーザーの継続利用や多様性も考慮した推薦が可能になります。</p>
+
+                <h1 id="challenges">強化学習の課題と限界</h1>
+
+                <h2 id="sample-efficiency">サンプル効率性</h2>
+
+                <p>強化学習は大量の試行錯誤を必要とします。実世界の問題では、一回の試行にコストがかかる場合が多く、効率的な学習方法が求められます。</p>
+
+                <p>例えば、実際のロボットで歩行を学習する場合、転倒による故障リスクや時間コストを考えると、シミュレーションでの事前学習が不可欠です。</p>
+
+                <h2 id="reward-shaping">報酬設計の困難さ</h2>
+
+                <p>適切な報酬関数の設計は極めて困難です。不適切な報酬設計は、予期しない行動や目標の誤解を引き起こします。</p>
+
+                <p>有名な例として「海岸掃除ロボット」の話があります。「ゴミを集める」ことに報酬を与えたところ、ロボットはゴミを集めては散らかし、また集めることを繰り返すようになりました。真の目標は「海岸をきれいに保つ」ことでしたが、報酬設計がその意図を正確に反映できていませんでした。</p>
+
+                <h2 id="safety">安全性</h2>
+
+                <p>学習過程での試行錯誤は、時として危険な行動を含む可能性があります。自動運転や医療分野など、失敗が重大な結果をもたらす領域では、安全な学習方法の開発が重要課題です。</p>
+
+                <h2 id="interpretability">解釈可能性</h2>
+
+                <p>学習された方策が「なぜその行動を選択するのか」を理解することは困難です。特に深層学習と組み合わせた場合、ブラックボックス化の問題が深刻になります。</p>
+
+                <h1 id="recent-developments">最近の発展</h1>
+
+                <h2 id="deep-reinforcement-learning">深層強化学習</h2>
+
+                <p>深層学習と強化学習を組み合わせた深層強化学習（Deep Reinforcement Learning）により、高次元状態空間での学習が可能になりました。画像から直接学習するDQN（Deep Q-Network）がその代表例です。</p>
+
+                <h2 id="multi-agent">マルチエージェント強化学習</h2>
+
+                <p>複数のエージェントが同時に学習・行動する環境での強化学習です。競争と協調の両面を考慮した学習により、より複雑な問題の解決が可能になります。</p>
+
+                <h2 id="meta-learning">メタ学習</h2>
+
+                <p>「学習の仕方を学習する」メタ学習と強化学習の組み合わせにより、新しいタスクに素早く適応できるエージェントの開発が進んでいます。</p>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ff00ff; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>基本構成要素</strong>：エージェント、環境、状態、行動、報酬、方策の関係</li>
+                        <li><strong>他手法との違い</strong>：教師あり・教師なし学習との比較</li>
+                        <li><strong>探索と活用</strong>：トレードオフの概念</li>
+                        <li><strong>Q学習の概念</strong>：価値関数の基本的考え方</li>
+                        <li><strong>応用事例</strong>：AlphaGo、ゲームAI、ロボット制御など</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>報酬と方策の混同</strong>：報酬は環境からの評価、方策は行動選択ルール</li>
+                        <li><strong>即時報酬への偏重</strong>：長期的な価値最大化が目標</li>
+                        <li><strong>決定論的思考</strong>：確率的な行動選択の重要性</li>
+                        <li><strong>完璧な情報の仮定</strong>：不確実な環境での学習が前提</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>強化学習は、エージェントが環境との相互作用を通じて試行錯誤により最適な行動方針を学習する手法です。教師あり・教師なし学習とは異なる第三のパラダイムとして、時系列的な意思決定問題に特化しています。</p>
+
+                <p>その特徴は<strong>「環境からの報酬最大化」</strong>と<strong>「探索と活用のバランス」</strong>にあります。Q学習をはじめとする具体的なアルゴリズムにより、ゲーム、ロボティクス、自動運転、金融など幅広い分野で実用化が進んでいます。</p>
+
+                <p>一方で、サンプル効率性、報酬設計、安全性など解決すべき課題も多く残されています。しかし、AlphaGoの成功に象徴されるように、人間の能力を超える可能性を秘めた技術として、今後さらなる発展が期待されています。</p>
+
+                <p>G検定では、基本概念の理解と代表的な応用事例の把握が重要です。特に他の機械学習手法との違いを明確に説明できるよう整理しておきましょう。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">強化学習（Reinforcement Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エージェントが環境との試行錯誤的相互作用を通じて最適な行動方針を学習する機械学習手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">エージェント（Agent）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習と意思決定の主体。環境を観察し、行動を選択し、その結果から学習する。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">環境（Environment）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エージェントが行動する世界。エージェントの行動を受け取り、新しい状態と報酬を返す。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">状態（State）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">現在の環境の状況を表現する情報。エージェントの意思決定の基準となる。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">行動（Action）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エージェントが環境に対して実行できる操作。離散的または連続的な値を取る。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">報酬（Reward）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">エージェントの行動の良し悪しを示すスカラー値。学習の方向性を決定する。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">方策（Policy）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">状態から行動への写像を定義する意思決定ルール。強化学習の最終的な学習対象。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">Q学習（Q-Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各状態-行動ペアの価値（Q値）を学習する強化学習の代表的アルゴリズム。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">Q関数（Q-Function）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">状態sで行動aを取った時の長期的な期待総報酬を表す価値関数。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">探索と活用（Exploration vs Exploitation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">既知の良い行動を活用するか、未知の行動を探索するかのトレードオフ。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">割引率（Discount Factor）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">将来の報酬をどの程度重視するかを調整するパラメータ（通常γで表記）。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">学習率（Learning Rate）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Q値更新の際の変更幅を制御するパラメータ（通常αで表記）。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">深層強化学習（Deep Reinforcement Learning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深層学習と強化学習を組み合わせ、高次元状態空間での学習を可能にする手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ff00ff; margin-top: 15px;">AlphaGo</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Google DeepMindが開発した囲碁AI。強化学習により人間のトップ棋士を破った歴史的システム。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study3-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ff00ff;"></i>
+                            Back: 3-2
+                        </a>
+
+                        <a href="study3-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 3-4
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ff00ff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

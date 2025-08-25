@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5-3: 正規化層 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 5-3: 正規化層</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 5-3</h1>
+                <h2 class="content-subtitle">正規化層</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの要素技術</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>正規化層の基礎的な知識を理解する</li>
+                        <li>代表的な正規化手法について理解する</li>
+                        <li>正規化層がディープラーニングモデルの学習において、どのような役割を果たすのか説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>グループ正規化</strong></li>
+                        <li><strong>バッチ正規化</strong></li>
+                        <li><strong>レイヤー正規化</strong></li>
+                        <li><strong>インスタンス正規化</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">正規化層とは何か</h1>
+                
+                <p>正規化層（Normalization Layer）は、ディープニューラルネットワークの学習を安定化・高速化するために、各層の入力を統計的に正規化する技術です。2015年のBatch Normalizationの登場以来、深いネットワークの学習を可能にする重要な技術として発展してきました。</p>
+
+                <p>正規化は、ネットワーク内部の活性化分布を適切な範囲に維持することで、勾配消失・勾配爆発問題を緩和し、より高い学習率での安定した学習を実現します。現代のディープラーニングアーキテクチャにおいて、ほぼ必須の技術となっています。</p>
+
+                <h1 id="basic-concept">基本概念</h1>
+
+                <h2 id="normalization-principle">正規化の原理</h2>
+                
+                <p>正規化の基本的なアイデアは、データを平均0、分散1に変換することです：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\hat{x} = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}}$$
+                </div>
+
+                <p>ここで：</p>
+                <ul>
+                    <li><strong>$x$</strong>：入力値</li>
+                    <li><strong>$\mu$</strong>：平均値</li>
+                    <li><strong>$\sigma^2$</strong>：分散</li>
+                    <li><strong>$\epsilon$</strong>：数値安定性のための小さな定数（通常$10^{-5}$）</li>
+                    <li><strong>$\hat{x}$</strong>：正規化された値</li>
+                </ul>
+
+                <h2 id="scale-and-shift">スケールとシフト</h2>
+
+                <p>多くの正規化手法では、学習可能なパラメータによるスケール調整とシフトが追加されます：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$y = \gamma \hat{x} + \beta$$
+                </div>
+
+                <p>$\gamma$（スケール）と$\beta$（シフト）は学習可能なパラメータで、正規化により失われる可能性のある表現力を回復します。</p>
+
+                <h1 id="batch-normalization">バッチ正規化（Batch Normalization）</h1>
+
+                <h2 id="bn-mechanism">基本メカニズム</h2>
+
+                <p>Sergey IoffeとChristian Szegedyにより2015年に提案されたBatch Normalizationは、ミニバッチ内の統計量を用いて正規化を行います。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 バッチ正規化のアルゴリズム</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>訓練時</strong>：
+1. μ_B = (1/m) Σ x_i           # バッチ平均を計算
+2. σ²_B = (1/m) Σ (x_i - μ_B)²  # バッチ分散を計算
+3. x̂_i = (x_i - μ_B) / √(σ²_B + ε)  # 正規化
+4. y_i = γ x̂_i + β            # スケール・シフト
+
+<strong>推論時</strong>：
+- 訓練中に蓄積した移動平均・分散を使用
+- μ = E[μ_B], σ² = E[σ²_B]
+
+m: バッチサイズ
+γ, β: 学習可能なパラメータ
+                    </pre>
+                </div>
+
+                <h2 id="bn-benefits">バッチ正規化の効果</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">✅ バッチ正規化のメリット</h3>
+                    <ul>
+                        <li><strong>学習の高速化</strong>：より高い学習率での安定した学習</li>
+                        <li><strong>勾配フローの改善</strong>：勾配消失・爆発問題の緩和</li>
+                        <li><strong>初期化依存性の軽減</strong>：重み初期化の影響を軽減</li>
+                        <li><strong>正則化効果</strong>：軽度なドロップアウト効果</li>
+                        <li><strong>Internal Covariate Shift解決</strong>：層間の分布変化を安定化</li>
+                    </ul>
+                </div>
+
+                <h2 id="bn-limitations">制限事項</h2>
+
+                <ul>
+                    <li><strong>バッチサイズ依存</strong>：小さなバッチで性能が不安定</li>
+                    <li><strong>推論時の複雑さ</strong>：移動平均・分散の管理が必要</li>
+                    <li><strong>RNNでの問題</strong>：時系列の長さに依存した統計量</li>
+                    <li><strong>分散学習の困難</strong>：バッチ統計量の同期が必要</li>
+                </ul>
+
+                <h1 id="layer-normalization">レイヤー正規化（Layer Normalization）</h1>
+
+                <h2 id="ln-principle">原理と特徴</h2>
+
+                <p>Jimmy Lei Ba、Jamie Ryan Kiros、Geoffrey Hintonにより2016年に提案されたLayer Normalizationは、各サンプル内で正規化を行います。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mu^l = \frac{1}{H} \sum_{i=1}^{H} a_i^l$$
+                    $$\sigma^{l^2} = \frac{1}{H} \sum_{i=1}^{H} (a_i^l - \mu^l)^2$$
+                </div>
+
+                <p>$H$は隠れ層のユニット数、$a_i^l$は$l$層の$i$番目のユニットの活性化値です。</p>
+
+                <h2 id="ln-advantages">レイヤー正規化の利点</h2>
+
+                <ul>
+                    <li><strong>バッチサイズ不依存</strong>：バッチサイズに関係なく安定</li>
+                    <li><strong>RNNに最適</strong>：時系列データで効果的</li>
+                    <li><strong>推論時の一貫性</strong>：訓練時と推論時で同じ計算</li>
+                    <li><strong>並列化しやすい</strong>：サンプル間で独立した計算</li>
+                </ul>
+
+                <h2 id="ln-applications">主要な応用</h2>
+
+                <ul>
+                    <li><strong>Transformer</strong>：BERT、GPTなどで標準採用</li>
+                    <li><strong>RNN/LSTM</strong>：時系列モデルで効果的</li>
+                    <li><strong>強化学習</strong>：バッチサイズの制約がない環境</li>
+                    <li><strong>生成モデル</strong>：GANの安定化に貢献</li>
+                </ul>
+
+                <h1 id="instance-normalization">インスタンス正規化（Instance Normalization）</h1>
+
+                <h2 id="in-concept">概念と計算</h2>
+
+                <p>Dmitry Ulyanovらにより2016年に提案されたInstance Normalizationは、各サンプルの各チャンネルで独立に正規化を行います。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mu_{nc} = \frac{1}{HW} \sum_{h=1}^{H} \sum_{w=1}^{W} x_{nchw}$$
+                    $$\sigma_{nc}^2 = \frac{1}{HW} \sum_{h=1}^{H} \sum_{w=1}^{W} (x_{nchw} - \mu_{nc})^2$$
+                </div>
+
+                <p>ここで、$n$はサンプル、$c$はチャンネル、$h,w$は空間的位置を表します。</p>
+
+                <h2 id="in-applications">特徴的な用途</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎨 インスタンス正規化の主要応用</h3>
+                    <ul>
+                        <li><strong>スタイル転送</strong>：画像のスタイル特徴を除去</li>
+                        <li><strong>画像生成</strong>：GANでのアーティファクト軽減</li>
+                        <li><strong>超解像</strong>：高解像度画像の品質向上</li>
+                        <li><strong>画像復元</strong>：ノイズ除去やぼけ除去</li>
+                    </ul>
+                </div>
+
+                <h1 id="group-normalization">グループ正規化（Group Normalization）</h1>
+
+                <h2 id="gn-motivation">動機と設計</h2>
+
+                <p>Yuxin WuとKaiming Heにより2018年に提案されたGroup Normalizationは、チャンネルを小さなグループに分けて正規化する手法です。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\mu_{ng} = \frac{1}{C_g HW} \sum_{c \in \mathcal{S}_g} \sum_{h=1}^{H} \sum_{w=1}^{W} x_{nchw}$$
+                </div>
+
+                <p>$\mathcal{S}_g$はグループ$g$に属するチャンネルの集合、$C_g$はグループ内のチャンネル数です。</p>
+
+                <h2 id="gn-benefits">グループ正規化の特長</h2>
+
+                <ul>
+                    <li><strong>バッチサイズ不依存</strong>：小さなバッチでも安定</li>
+                    <li><strong>計算効率</strong>：チャンネル間の相関を活用</li>
+                    <li><strong>物体検出で有効</strong>：異なるサイズの物体に対応</li>
+                    <li><strong>セグメンテーション向け</strong>：Mask R-CNNなどで採用</li>
+                </ul>
+
+                <h1 id="comparison">正規化手法の比較</h1>
+
+                <h2 id="normalization-dimensions">正規化の次元と特性</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 正規化手法の比較表</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+手法            | 正規化の軸        | 特徴                | 主な用途
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Batch Norm      | バッチ内         | バッチサイズ依存     | CNN（畳み込み）
+Layer Norm      | レイヤー内       | バッチ不依存        | Transformer, RNN
+Instance Norm   | 各インスタンス    | チャンネル独立      | スタイル転送, GAN
+Group Norm      | チャンネルグループ | バッチ不依存        | 物体検出, セグメンテーション
+
+<strong>テンソル形状：(N, C, H, W) - N:バッチ, C:チャンネル, H×W:空間</strong>
+
+Batch Norm:    N, H, W 軸で統計量計算
+Layer Norm:    C, H, W 軸で統計量計算  
+Instance Norm: H, W 軸で統計量計算（各チャンネル独立）
+Group Norm:    グループ内 C, H, W 軸で統計量計算
+                    </pre>
+                </div>
+
+                <h2 id="selection-criteria">手法選択の指針</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 用途別正規化手法の選択</h3>
+                    <ul>
+                        <li><strong>大きなバッチでのCNN</strong> → Batch Normalization</li>
+                        <li><strong>小さなバッチ・推論重視</strong> → Group/Layer Normalization</li>
+                        <li><strong>Transformer・言語モデル</strong> → Layer Normalization</li>
+                        <li><strong>生成・スタイル転送</strong> → Instance Normalization</li>
+                        <li><strong>物体検出・セグメンテーション</strong> → Group Normalization</li>
+                        <li><strong>RNN・時系列</strong> → Layer Normalization</li>
+                    </ul>
+                </div>
+
+                <h1 id="role-in-training">学習における役割</h1>
+
+                <h2 id="gradient-flow">勾配フローの改善</h2>
+
+                <p>正規化層がディープラーニングの学習に与える主要な効果：</p>
+
+                <ul>
+                    <li><strong>勾配の安定化</strong>：各層の入力分布を安定化し、勾配消失・爆発を防止</li>
+                    <li><strong>学習率の向上</strong>：より高い学習率での安定した学習が可能</li>
+                    <li><strong>収束速度の向上</strong>：エポック数を大幅に削減</li>
+                    <li><strong>重み初期化の緩和</strong>：Xavier/He初期化への依存度軽減</li>
+                </ul>
+
+                <h2 id="regularization-effect">正則化効果</h2>
+
+                <p>正規化は意図的な正則化技術ではありませんが、以下の正則化効果をもたらします：</p>
+
+                <ul>
+                    <li><strong>ノイズ導入</strong>：バッチ統計量のランダム性</li>
+                    <li><strong>過学習抑制</strong>：モデルの汎化性能向上</li>
+                    <li><strong>ドロップアウト的効果</strong>：軽度な正則化作用</li>
+                </ul>
+
+                <h2 id="activation-distribution">活性化分布の制御</h2>
+
+                <p>正規化により活性化値の分布が適切に制御され、以下の問題を解決：</p>
+
+                <ul>
+                    <li><strong>飽和の回避</strong>：活性化関数の飽和領域を回避</li>
+                    <li><strong>Internal Covariate Shift</strong>：層間での分布変化を抑制</li>
+                    <li><strong>条件数の改善</strong>：最適化問題の条件数を改善</li>
+                </ul>
+
+                <h1 id="modern-developments">現代的な発展</h1>
+
+                <h2 id="advanced-normalizations">高度な正規化技術</h2>
+
+                <ul>
+                    <li><strong>Spectral Normalization</strong>：GANの学習安定化</li>
+                    <li><strong>Weight Normalization</strong>：重み自体を正規化</li>
+                    <li><strong>Cosine Normalization</strong>：コサイン類似度を用いた正規化</li>
+                    <li><strong>Adaptive Instance Normalization</strong>：AdaINによる適応的正規化</li>
+                </ul>
+
+                <h2 id="normalization-free">正規化フリーアーキテクチャ</h2>
+
+                <p>最近の研究では、正規化に依存しないアーキテクチャも提案されています：</p>
+
+                <ul>
+                    <li><strong>NFNet</strong>：Batch Normalizationを使わない高性能CNN</li>
+                    <li><strong>ResMLP</strong>：正規化なしでTransformerに匹敵する性能</li>
+                    <li><strong>ConvNeXt</strong>：LayerNormをCNNに適用した現代的設計</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>バッチ正規化の基本原理</strong>：平均0、分散1への正規化とスケール・シフト</li>
+                        <li><strong>各正規化手法の違い</strong>：統計量計算の軸と特徴の理解</li>
+                        <li><strong>バッチ正規化の効果</strong>：学習高速化、勾配フロー改善</li>
+                        <li><strong>レイヤー正規化の特徴</strong>：バッチサイズ不依存、Transformerでの採用</li>
+                        <li><strong>用途別の使い分け</strong>：CNN、RNN、生成モデルでの選択指針</li>
+                        <li><strong>Internal Covariate Shift</strong>：層間分布変化の問題</li>
+                        <li><strong>正則化効果</strong>：意図しない正則化作用の理解</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>推論時の処理</strong>：バッチ正規化は移動平均を使用、学習時とは計算が異なる</li>
+                        <li><strong>バッチサイズの影響</strong>：小さなバッチでバッチ正規化の性能が不安定</li>
+                        <li><strong>正規化の位置</strong>：畳み込みの前後どちらに置くかで効果が変わる</li>
+                        <li><strong>γ、βパラメータ</strong>：学習可能なスケール・シフトパラメータの重要性</li>
+                        <li><strong>RNNでのバッチ正規化</strong>：時系列の長さで統計量が変化する問題</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>正規化層は、ディープニューラルネットワークの学習を安定化・高速化する重要な技術です。Batch Normalizationを皮切りに、Layer Normalization、Instance Normalization、Group Normalizationと発展し、それぞれ異なる用途で威力を発揮します。</p>
+                
+                <p>これらの技術は単なる学習の高速化にとどまらず、勾配フローの改善、正則化効果、活性化分布の制御など、多面的な効果をもたらします。現代のディープラーニングアーキテクチャでは、正規化層の適切な選択と配置が性能を大きく左右します。</p>
+                
+                <p>G検定では、各正規化手法の基本原理、統計量計算の違い、用途に応じた使い分けについて理解することが重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">正規化層（Normalization Layer）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ニューラルネットワークの各層で入力を統計的に正規化し、学習を安定化・高速化する層。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">バッチ正規化（Batch Normalization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ミニバッチ内の統計量を用いて正規化を行う手法。2015年に提案され、深層学習を大きく発展させた。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">レイヤー正規化（Layer Normalization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各サンプル内で正規化を行う手法。バッチサイズに依存せず、Transformerで標準採用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">インスタンス正規化（Instance Normalization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">各サンプルの各チャンネルで独立に正規化を行う手法。スタイル転送や画像生成で効果的。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">グループ正規化（Group Normalization）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">チャンネルを小さなグループに分けて正規化する手法。物体検出やセグメンテーションで有効。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Internal Covariate Shift</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">学習中に各層の入力分布が変化することで生じる問題。正規化により解決される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">スケール・シフトパラメータ（γ、β）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">正規化後に適用される学習可能なパラメータ。表現力の回復に使用される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">移動平均（Running Average）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">バッチ正規化で推論時に使用される、訓練中に蓄積された統計量の平均値。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">勾配消失・爆発問題</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深いネットワークで勾配が適切に伝播しない問題。正規化により大幅に改善される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">条件数（Condition Number）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">最適化問題の困難さを表す指標。正規化により改善され、学習が安定化する。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Spectral Normalization</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">重みの最大特異値で正規化する手法。GANの学習安定化に使用される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">AdaIN (Adaptive Instance Normalization)</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">スタイル情報を用いて適応的にインスタンス正規化を行う手法。スタイル転送で使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">正則化効果（Regularization Effect）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">正規化により意図せずに生じる過学習抑制効果。バッチ統計量のランダム性が原因。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">NFNet (Normalization-Free Network)</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">正規化を使わずに深いネットワークの学習を実現するアーキテクチャ。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study5-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 5-2
+                        </a>
+                        <a href="study5-4.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 5-4
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

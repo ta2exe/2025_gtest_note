@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[CHAPTER_NUMBER]: [CHAPTER_TITLE] - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<!-- 
+    🎯 CSS完全統一版テンプレート
+    
+    📋 使用方法:
+    1. [CHAPTER_CLASS] を置換: 
+       - chapter-cyan (Ch.1-3)
+       - chapter-yellow (Ch.4-6) 
+       - chapter-magenta (Ch.7-9)
+    2. [CHAPTER_NUMBER] を置換: "Chapter 4-5" 等
+    3. [CHAPTER_TITLE] を置換: シラバスの正式タイトル
+    4. [PREV_CHAPTER]/[NEXT_CHAPTER] を置換: ファイル名（拡張子なし）
+    5. シラバス内容を正確に転写
+    
+    🚨 重要: 
+    - インライン色指定は一切使用しない
+    - CSSクラスによる自動色適用に依存
+    - シラバスの目標・キーワードを正確に転写
+-->
+<body class="[CHAPTER_CLASS]">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">[CHAPTER_NUMBER]: [CHAPTER_TITLE]</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">[CHAPTER_NUMBER]</h1>
+                <h2 class="content-subtitle">[CHAPTER_TITLE]</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">[CHAPTER_CATEGORY]</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>[シラバスの目標1を正確に転写]</li>
+                        <li>[シラバスの目標2を正確に転写]</li>
+                        <li>[シラバスの目標3を正確に転写]</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>[キーワード1]</strong></li>
+                        <li><strong>[キーワード2]</strong></li>
+                        <li><strong>[キーワード3]</strong></li>
+                        <li><strong>[キーワード4]</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">[メイントピック名]</h1>
+                
+                <p>[導入説明文]</p>
+
+                <h2 id="basic-concept">基本概念</h2>
+                <p>[基本概念の説明]</p>
+
+                <h3 id="definition">定義</h3>
+                <ul>
+                    <li><strong>[用語1]</strong>：[定義1]</li>
+                    <li><strong>[用語2]</strong>：[定義2]</li>
+                    <li><strong>[用語3]</strong>：[定義3]</li>
+                </ul>
+
+                <!-- 数式テンプレート -->
+                <h2 id="mathematical-foundation">数学的基盤</h2>
+                
+                <p>基本的な数式：</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$[数式をここに記載]$$
+                </div>
+
+                <!-- 特別ボックス -->
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">💡 [ボックスタイトル]</h3>
+                    <p>[ボックス内容]</p>
+                </div>
+
+                <!-- アルゴリズム・コード例 -->
+                <h2 id="algorithm">アルゴリズム</h2>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔄 [アルゴリズム名]</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+[アルゴリズムの詳細手順]
+1. ステップ1
+2. ステップ2
+3. ステップ3
+                    </pre>
+                </div>
+
+                <!-- 問題・課題セクション -->
+                <h1 id="problems">主要な問題・課題</h1>
+
+                <h2 id="problem1">[問題名1]</h2>
+                <p>[問題の説明]</p>
+
+                <h3 id="problem1-mechanism">発生メカニズム</h3>
+                <ul>
+                    <li><strong>[原因1]</strong>：[説明1]</li>
+                    <li><strong>[原因2]</strong>：[説明2]</li>
+                    <li><strong>[原因3]</strong>：[説明3]</li>
+                </ul>
+
+                <h3 id="problem1-solutions">対策</h3>
+                <ul>
+                    <li><strong>[対策1]</strong>：[詳細1]</li>
+                    <li><strong>[対策2]</strong>：[詳細2]</li>
+                    <li><strong>[対策3]</strong>：[詳細3]</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>[頻出ポイント1]</strong>：[詳細1]</li>
+                        <li><strong>[頻出ポイント2]</strong>：[詳細2]</li>
+                        <li><strong>[頻出ポイント3]</strong>：[詳細3]</li>
+                        <li><strong>[頻出ポイント4]</strong>：[詳細4]</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>[間違い1]</strong>：[正しい理解]</li>
+                        <li><strong>[間違い2]</strong>：[正しい理解]</li>
+                        <li><strong>[間違い3]</strong>：[正しい理解]</li>
+                        <li><strong>[間違い4]</strong>：[正しい理解]</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>[章の総括文]</p>
+                
+                <p>[重要ポイントの再確認]</p>
+                
+                <p>[G検定との関連性]</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[用語1]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[用語1の定義]</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[用語2]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[用語2の定義]</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[用語3]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[用語3の定義]</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[用語4]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[用語4の定義]</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">[用語5]</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">[用語5の定義]</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="[PREV_CHAPTER].html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: [PREV_NUMBER]
+                        </a>
+                        <a href="[NEXT_CHAPTER].html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: [NEXT_NUMBER]
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

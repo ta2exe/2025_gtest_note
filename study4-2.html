@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4-2: 活性化関数 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-yellow">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 4-2: 活性化関数</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 4-2</h1>
+                <h2 class="content-subtitle">活性化関数</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">ディープラーニングの概要</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>代表的な活性化関数の定義・使い分け・注意点について、それぞれ説明できる</li>
+                        <li>ディープラーニングにおける活性化関数の役割を説明できる</li>
+                    </ul>
+                    
+                    <h3 style="color: #ffff00; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>Leaky ReLU 関数</strong></li>
+                        <li><strong>ReLU 関数</strong></li>
+                        <li><strong>tanh 関数</strong></li>
+                        <li><strong>シグモイド関数</strong></li>
+                        <li><strong>ソフトマックス関数</strong></li>
+                        <li><strong>勾配消失問題</strong></li>
+                    </ul>
+                </div>
+
+                <h1 id="overview">活性化関数とは何か</h1>
+                
+                <p>活性化関数（Activation Function）は、ニューラルネットワークの各ニューロンにおいて、入力信号を受け取って出力信号に変換する関数です。これは人間の神経細胞が電気信号を受け取り、ある閾値を超えたときに次の神経細胞に信号を伝達する仕組みを数学的にモデル化したものです。</p>
+
+                <p>活性化関数がなければ、ニューラルネットワークはいくら層を重ねても単純な線形変換の組み合わせにしかならず、複雑なパターンを学習することができません。活性化関数こそが、ニューラルネットワークに<strong>非線形性</strong>をもたらし、現実世界の複雑な問題を解決する能力を与える重要な要素なのです。</p>
+
+                <h1 id="role">ディープラーニングにおける役割</h1>
+
+                <h2 id="nonlinearity">非線形性の導入</h2>
+
+                <p>線形変換だけを重ねても、結果は常に線形関数になってしまいます。例えば、2つの線形関数 $f(x) = ax + b$ と $g(x) = cx + d$ を合成しても、結果は $g(f(x)) = c(ax + b) + d = (ca)x + (cb + d)$ という線形関数にしかなりません。</p>
+
+                <p>しかし、活性化関数という非線形関数を間に挟むことで、ネットワーク全体が非線形システムとなり、曲線的な境界や複雑なパターンを表現できるようになります。これが「深さ」の真の意味であり、層を重ねるごとにより抽象的で複雑な特徴を抽出できる理由です。</p>
+
+                <h2 id="feature-hierarchy">階層的特徴抽出</h2>
+
+                <p>ディープニューラルネットワークでは、各層が異なる抽象レベルの特徴を学習します：</p>
+                <ul>
+                    <li><strong>第1層</strong>：エッジや基本的なパターン</li>
+                    <li><strong>中間層</strong>：形状や部品レベルの特徴</li>
+                    <li><strong>上位層</strong>：オブジェクトや概念レベルの特徴</li>
+                </ul>
+
+                <p>この階層的学習を可能にするのが、各層での活性化関数による非線形変換です。</p>
+
+                <h1 id="classic-functions">古典的な活性化関数</h1>
+
+                <h2 id="sigmoid">シグモイド関数（Sigmoid Function）</h2>
+
+                <p>シグモイド関数は、ニューラルネットワークの初期から使われてきた古典的な活性化関数です。任意の実数値を0から1の範囲に変換し、滑らかなS字カーブを描きます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\sigma(x) = \frac{1}{1 + e^{-x}}$$
+                </div>
+
+                <p>この関数は生物学的には理にかなっており、神経細胞の「発火するかしないか」を確率的に表現できます。また、導関数が計算しやすく、$\sigma'(x) = \sigma(x)(1 - \sigma(x))$ という美しい性質を持ちます。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📊 シグモイド関数の特徴</h3>
+                    <ul>
+                        <li><strong>出力範囲</strong>：(0, 1) - 確率として解釈可能</li>
+                        <li><strong>単調増加</strong>：入力が大きくなれば出力も大きくなる</li>
+                        <li><strong>微分可能</strong>：すべての点で滑らかな曲線</li>
+                        <li><strong>中心が0.5</strong>：x=0で出力が0.5になる</li>
+                    </ul>
+                </div>
+
+                <p>しかし、シグモイド関数には深刻な問題があります。入力の絶対値が大きくなると、勾配が0に近づく<strong>勾配飽和</strong>現象が起こり、深いネットワークでの学習が困難になります。</p>
+
+                <h2 id="tanh">双曲線正接関数（tanh Function）</h2>
+
+                <p>tanh（ハイパーボリックタンジェント）関数は、シグモイド関数を改良したもので、出力範囲を-1から1に拡張しています。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}} = \frac{e^{2x} - 1}{e^{2x} + 1}$$
+                </div>
+
+                <p>実は、tanh関数はシグモイド関数を平行移動・拡大したものです：$\tanh(x) = 2\sigma(2x) - 1$</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🔄 tanhのシグモイドに対する優位性</h3>
+                    <ul>
+                        <li><strong>ゼロ中心</strong>：出力の平均が0に近く、学習が安定</li>
+                        <li><strong>対称性</strong>：正負両方向に同じ形状で拡張</li>
+                        <li><strong>勾配</strong>：シグモイドよりも勾配が大きく、学習が速い</li>
+                        <li><strong>飽和問題</strong>：依然として存在するが、シグモイドよりは軽微</li>
+                    </ul>
+                </div>
+
+                <h1 id="modern-functions">現代の活性化関数</h1>
+
+                <h2 id="relu">ReLU関数（Rectified Linear Unit）</h2>
+
+                <p>ReLU（Rectified Linear Unit：正規化線形ユニット）は、2010年代以降のディープラーニングブームを支えた革命的な活性化関数です。その単純さに反して、驚異的な性能向上をもたらしました。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{ReLU}(x) = \max(0, x) = \begin{cases} x & \text{if } x > 0 \\ 0 & \text{if } x \leq 0 \end{cases}$$
+                </div>
+
+                <p>ReLUの革命的な特徴は、その<strong>単純性</strong>にあります。正の値はそのまま出力し、負の値は0にする。これだけです。しかし、この単純さこそが深いネットワークの学習を可能にしました。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🚀 ReLUが革命的だった理由</h3>
+                    <ul>
+                        <li><strong>勾配消失問題の解決</strong>：正の領域で勾配が1のまま保たれる</li>
+                        <li><strong>計算効率</strong>：max(0,x)の計算は非常に高速</li>
+                        <li><strong>スパース性</strong>：約50%のニューロンが0になり、効率的な表現</li>
+                        <li><strong>生物学的妥当性</strong>：脳の神経細胞の動作に類似</li>
+                    </ul>
+                </div>
+
+                <p>ReLUの導入により、それまで困難だった深い（10層以上の）ネットワークの学習が可能になり、ImageNetでの画像認識精度が劇的に向上しました。</p>
+
+                <h2 id="relu-problems">ReLUの問題：Dying ReLU</h2>
+
+                <p>ReLUにも問題があります。最も深刻なのは<strong>Dying ReLU問題</strong>（死んだReLU問題）です。</p>
+
+                <p>学習中に重みが更新され、あるニューロンの入力が常に負になってしまうと、そのニューロンの出力は常に0となり、勾配も0になります。すると、そのニューロンは二度と学習に寄与できなくなってしまいます。これが「死んだ」状態です。</p>
+
+                <p>学習率が高すぎる場合や、重みの初期化が不適切な場合に、ネットワーク全体のニューロンの大部分が「死んで」しまうことがあります。</p>
+
+                <h2 id="leaky-relu">Leaky ReLU関数</h2>
+
+                <p>Dying ReLU問題を解決するために提案されたのがLeaky ReLU（漏れのあるReLU）です。負の領域でも小さな勾配を残すことで、ニューロンが完全に「死ぬ」ことを防ぎます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Leaky ReLU}(x) = \begin{cases} x & \text{if } x > 0 \\ \alpha x & \text{if } x \leq 0 \end{cases}$$
+                </div>
+
+                <p>ここで、$\alpha$は小さな正の定数（通常0.01）です。これにより、負の値でも微小な勾配$\alpha$が保たれ、学習の継続が可能になります。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">💡 Leaky ReLUの改善点</h3>
+                    <ul>
+                        <li><strong>Dying ReLU解決</strong>：負の領域でも学習が継続</li>
+                        <li><strong>計算効率維持</strong>：依然として高速な計算が可能</li>
+                        <li><strong>パラメータ調整</strong>：$\alpha$値による細かな制御が可能</li>
+                        <li><strong>実用性</strong>：多くの実問題で安定した性能を発揮</li>
+                    </ul>
+                </div>
+
+                <h1 id="softmax">ソフトマックス関数（Softmax Function）</h1>
+
+                <p>ソフトマックス関数は、多クラス分類問題の出力層で使われる特殊な活性化関数です。複数の値を確率分布に変換する役割を持ちます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{softmax}(x_i) = \frac{e^{x_i}}{\sum_{j=1}^{K} e^{x_j}}$$
+                </div>
+
+                <p>K個のクラスがある分類問題で、各クラスに対する「信頼度」を確率として表現します。すべての出力の合計は1になり、最も高い値を持つクラスが予測結果となります。</p>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 ソフトマックスの特徴</h3>
+                    <ul>
+                        <li><strong>確率分布化</strong>：すべての出力の合計が1</li>
+                        <li><strong>競合関係</strong>：一つが高くなれば他は低くなる</li>
+                        <li><strong>微分可能</strong>：すべての点で勾配計算が可能</li>
+                        <li><strong>多クラス対応</strong>：2クラス以上の分類に適用</li>
+                    </ul>
+                </div>
+
+                <p>例えば、画像認識で「犬: 0.7、猫: 0.2、鳥: 0.1」のような出力が得られ、最も確率の高い「犬」が予測結果になります。</p>
+
+                <h1 id="gradient-vanishing">勾配消失問題</h1>
+
+                <h2 id="problem-mechanism">問題の仕組み</h2>
+
+                <p>勾配消失問題（Vanishing Gradient Problem）は、深いニューラルネットワークの学習における最大の難題でした。この問題を理解することで、なぜReLUが革命的だったのかが分かります。</p>
+
+                <p>ニューラルネットワークは誤差逆伝播法により学習しますが、この過程で勾配（微分値）を各層に逆向きに伝播させます。しかし、各層で勾配が活性化関数の微分値と掛け合わされるため、微分値が小さい関数を使うと、層を遡るごとに勾配が指数的に小さくなってしまいます。</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <p><strong>勾配の減衰過程</strong></p>
+                    <p>出力層: 勾配 = 1.0</p>
+                    <p>層n: 勾配 = 1.0 × 0.25 = 0.25</p>
+                    <p>層n-1: 勾配 = 0.25 × 0.25 = 0.0625</p>
+                    <p>層n-2: 勾配 = 0.0625 × 0.25 = 0.0156</p>
+                    <p>...</p>
+                </div>
+
+                <h2 id="sigmoid-tanh-problems">シグモイド・tanh関数の問題</h2>
+
+                <p>シグモイド関数の微分の最大値は0.25、tanh関数の微分の最大値は1.0ですが、実際の学習では入力値によってはもっと小さな値になることが多く、多層になると勾配が消失してしまいます。</p>
+
+                <p>これが1990年代から2000年代にかけて、深いニューラルネットワークの学習が困難だった理由です。「ディープラーニングの冬の時代」とも呼ばれます。</p>
+
+                <h2 id="relu-solution">ReLUによる解決</h2>
+
+                <p>ReLUの登場により、この問題は劇的に改善されました：</p>
+                <ul>
+                    <li><strong>正の領域</strong>：微分値が1のため、勾配が減衰しない</li>
+                    <li><strong>負の領域</strong>：微分値が0だが、完全に消失するわけではない</li>
+                    <li><strong>計算効率</strong>：微分計算が非常に簡単</li>
+                </ul>
+
+                <p>これにより、10層、50層、さらには200層を超える非常に深いネットワークの学習が可能になったのです。</p>
+
+                <h1 id="function-selection">活性化関数の選択指針</h1>
+
+                <h2 id="by-layer-type">層の種類による選択</h2>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">📋 用途別推奨活性化関数</h3>
+                    <ul>
+                        <li><strong>隠れ層</strong>：ReLUまたはLeaky ReLU（最も一般的）</li>
+                        <li><strong>出力層（二値分類）</strong>：シグモイド関数</li>
+                        <li><strong>出力層（多クラス分類）</strong>：ソフトマックス関数</li>
+                        <li><strong>出力層（回帰）</strong>：線形関数（恒等関数）</li>
+                        <li><strong>RNN</strong>：tanh関数（メモリ機能のため）</li>
+                    </ul>
+                </div>
+
+                <h2 id="practical-considerations">実用的な考慮事項</h2>
+
+                <p><strong>学習の安定性</strong>：初期学習ではReLUが安定。問題が生じたらLeaky ReLUを試す。</p>
+
+                <p><strong>計算効率</strong>：リアルタイム処理が必要な場合はReLUが最適。</p>
+
+                <p><strong>問題の性質</strong>：出力の解釈が重要な場合は、シグモイドやソフトマックスで確率として表現。</p>
+
+                <h1 id="exam-focus">試験対策のポイント</h1>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffff00; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>関数の定義</strong>：各活性化関数の数式と特徴</li>
+                        <li><strong>勾配消失問題</strong>：シグモイド・tanhの問題とReLUによる解決</li>
+                        <li><strong>Dying ReLU</strong>：ReLUの問題とLeaky ReLUによる解決</li>
+                        <li><strong>用途別使い分け</strong>：隠れ層vs出力層、分類vs回帰</li>
+                        <li><strong>ソフトマックス</strong>：多クラス分類での確率分布化</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>ReLUの微分</strong>：x=0での微分は未定義だが、実装では0または1</li>
+                        <li><strong>ソフトマックスの適用</strong>：隠れ層ではなく出力層での使用</li>
+                        <li><strong>勾配消失の原因</strong>：活性化関数だけでなく重み初期化も影響</li>
+                        <li><strong>tanh vs シグモイド</strong>：tanhの方が一般的に学習が安定</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+
+                <p>活性化関数は、ニューラルネットワークに非線形性をもたらす重要な要素です。シグモイドやtanh関数の勾配消失問題を、ReLU関数が解決したことで、深いネットワークの学習が可能になり、現代のディープラーニングブームが始まりました。</p>
+
+                <p>各活性化関数にはそれぞれ特徴があり、<strong>用途に応じた選択</strong>が重要です。隠れ層では主にReLUやLeaky ReLU、出力層では問題の種類に応じてシグモイドやソフトマックスを使い分けます。</p>
+
+                <p>G検定では、各関数の数式、特徴、使い分けの理由を正確に理解することが重要です。特に勾配消失問題とその解決策、Dying ReLU問題とLeaky ReLUによる改善については詳しく押さえておきましょう。</p>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">活性化関数（Activation Function）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ニューラルネットワークの各ニューロンで、入力信号を出力信号に変換する関数。非線形性を導入する役割。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">シグモイド関数（Sigmoid Function）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">$\sigma(x) = \frac{1}{1 + e^{-x}}$で定義される、0-1範囲のS字曲線関数。確率として解釈可能。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">tanh関数（Hyperbolic Tangent）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">双曲線正接関数。-1から1の範囲でゼロ中心の出力を持つ。シグモイドより学習が安定。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">ReLU関数（Rectified Linear Unit）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">$\text{ReLU}(x) = \max(0, x)$で定義される関数。勾配消失問題を解決し、現代ディープラーニングの基盤。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">Leaky ReLU関数</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">負の領域でも小さな勾配を残すReLUの改良版。Dying ReLU問題を解決。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">ソフトマックス関数（Softmax Function）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数の値を確率分布に変換する関数。多クラス分類の出力層で使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">勾配消失問題（Vanishing Gradient Problem）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">深いネットワークで勾配が層を遡るごとに小さくなり、初期層が学習できなくなる問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">Dying ReLU問題</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">ReLUニューロンの入力が常に負になり、出力と勾配が0になって学習が停止する問題。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">非線形性（Nonlinearity）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">直線では表現できない複雑な関係。活性化関数により導入され、複雑なパターン学習を可能にする。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">勾配飽和（Gradient Saturation）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">活性化関数の出力が飽和領域に入り、勾配が0に近づく現象。学習の停滞を引き起こす。</dd>
+                    
+                    <dt style="font-weight: bold; color: #ffff00; margin-top: 15px;">スパース性（Sparsity）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">多くのニューロンの出力が0になる性質。ReLUの特徴で、効率的な表現と計算を可能にする。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study4-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #ffff00;"></i>
+                            Back: 4-1
+                        </a>
+
+                        <a href="study4-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 4-3
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #ffff00;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

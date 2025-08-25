@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2-1: 探索・推論 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-cyan">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 2-1: 探索・推論</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 2-1</h1>
+                <p class="content-subtitle">探索・推論</p>
+            </div>
+
+            <div class="content">
+                <h1 id="learning-objectives">学習目標</h1>
+                <p>この章では以下の内容を学習します：</p>
+                <ul>
+                    <li><strong>探索・推論の具体例</strong>を説明できる</li>
+                    <li><strong>探索・推論を実現する代表的な手法</strong>を説明できる</li>
+                </ul>
+
+                <h2 id="keywords">キーワード</h2>
+                <p><strong>α-β法</strong>, <strong>Mini-Max法</strong>, <strong>SHRDLU</strong>, <strong>STRIPS</strong>, <strong>探索木</strong>, <strong>ハノイの塔</strong>, <strong>幅優先探索</strong>, <strong>深さ優先探索</strong>, <strong>ブルートフォース</strong>, <strong>モンテカルロ法</strong></p>
+
+                <h1 id="search-reasoning-overview">探索・推論とは</h1>
+                <p><strong>探索・推論</strong>は、AI研究の初期から重要な分野で、問題解決のための体系的なアプローチを提供します。</p>
+
+                <h2 id="search-definition">探索の定義</h2>
+                <ul>
+                    <li><strong>問題空間</strong>: 可能な状態とその間の関係を表現</li>
+                    <li><strong>状態</strong>: 問題の特定時点での状況</li>
+                    <li><strong>操作（行動）</strong>: 状態間の遷移を引き起こす動作</li>
+                    <li><strong>目標</strong>: 到達したい最終状態</li>
+                </ul>
+
+                <h2 id="reasoning-definition">推論の定義</h2>
+                <ul>
+                    <li><strong>演繹推論</strong>: 一般原理から特定の結論を導出</li>
+                    <li><strong>帰納推論</strong>: 特定の事例から一般原理を導出</li>
+                    <li><strong>類推推論</strong>: 類似した状況からの推論</li>
+                </ul>
+
+                <h1 id="search-algorithms">探索アルゴリズム</h1>
+
+                <h2 id="search-tree">探索木</h2>
+                <p><strong>探索木（Search Tree）</strong>は、問題の状態空間を木構造で表現したものです。</p>
+
+                <h3 id="search-tree-components">探索木の構成要素</h3>
+                <ul>
+                    <li><strong>根ノード</strong>: 初期状態を表す</li>
+                    <li><strong>子ノード</strong>: 操作により到達可能な状態</li>
+                    <li><strong>葉ノード</strong>: 目標状態または行き止まり</li>
+                    <li><strong>枝</strong>: 状態間の遷移（操作）</li>
+                </ul>
+
+                <h3 id="search-tree-example">探索木の例：ハノイの塔</h3>
+                <p><strong>ハノイの塔</strong>は探索アルゴリズムの代表的な例題です：</p>
+                <ul>
+                    <li><strong>状態</strong>: 各棒の円盤配置</li>
+                    <li><strong>操作</strong>: 円盤を別の棒に移動</li>
+                    <li><strong>制約</strong>: 大きい円盤を小さい円盤の上に置けない</li>
+                    <li><strong>目標</strong>: 全円盤を目的の棒に移動</li>
+                </ul>
+
+                <p><strong>n枚の円盤</strong>のハノイの塔の最小手数：</p>
+                $$\text{最小手数} = 2^n - 1$$
+
+                <h2 id="breadth-first-search">幅優先探索（BFS）</h2>
+                <p><strong>幅優先探索（Breadth-First Search）</strong>は、探索木を横方向に展開していく手法です。</p>
+
+                <h3 id="bfs-algorithm">アルゴリズム</h3>
+                <ol>
+                    <li>開始状態をキューに追加</li>
+                    <li>キューから状態を取り出し調査</li>
+                    <li>目標状態なら終了、そうでなければ子状態をキューに追加</li>
+                    <li>2-3を繰り返す</li>
+                </ol>
+
+                <h3 id="bfs-characteristics">特徴</h3>
+                <ul>
+                    <li><strong>完全性</strong>: 解が存在すれば必ず発見</li>
+                    <li><strong>最適性</strong>: 最短経路を発見（コスト一様時）</li>
+                    <li><strong>計算量</strong>: 時間・空間ともに $O(b^d)$（$b$:分岐因子、$d$:深度）</li>
+                    <li><strong>メモリ使用量</strong>: 大量のメモリが必要</li>
+                </ul>
+
+                <h2 id="depth-first-search">深さ優先探索（DFS）</h2>
+                <p><strong>深さ優先探索（Depth-First Search）</strong>は、探索木を縦方向に掘り下げていく手法です。</p>
+
+                <h3 id="dfs-algorithm">アルゴリズム</h3>
+                <ol>
+                    <li>開始状態をスタックに追加</li>
+                    <li>スタックから状態を取り出し調査</li>
+                    <li>目標状態なら終了、そうでなければ子状態をスタックに追加</li>
+                    <li>2-3を繰り返す</li>
+                </ol>
+
+                <h3 id="dfs-characteristics">特徴</h3>
+                <ul>
+                    <li><strong>メモリ効率</strong>: 空間計算量 $O(bm)$（$m$:最大深度）</li>
+                    <li><strong>不完全性</strong>: 無限ループの可能性</li>
+                    <li><strong>非最適性</strong>: 最初に見つけた解が最適とは限らない</li>
+                    <li><strong>実装簡単</strong>: 再帰的実装が容易</li>
+                </ul>
+
+                <h2 id="brute-force">ブルートフォース</h2>
+                <p><strong>ブルートフォース（Brute Force）</strong>は、全ての可能性を総当たりで調べる手法です。</p>
+
+                <h3 id="brute-force-characteristics">特徴</h3>
+                <ul>
+                    <li><strong>確実性</strong>: 解が存在すれば必ず発見</li>
+                    <li><strong>単純性</strong>: アルゴリズムが理解しやすい</li>
+                    <li><strong>非効率性</strong>: 計算量が指数的に増加</li>
+                    <li><strong>適用例</strong>: パスワードクラック、チェス全手読み</li>
+                </ul>
+
+                <h1 id="game-theory-search">ゲーム理論と探索</h1>
+
+                <h2 id="minimax-algorithm">Mini-Max法</h2>
+                <p><strong>Mini-Max法</strong>は、2人零和ゲームで最適戦略を見つける探索アルゴリズムです。</p>
+
+                <h3 id="minimax-concept">基本概念</h3>
+                <ul>
+                    <li><strong>Max層</strong>: 自分の手番、評価値を最大化</li>
+                    <li><strong>Mini層</strong>: 相手の手番、評価値を最小化</li>
+                    <li><strong>葉ノード</strong>: ゲーム終了状態の評価値</li>
+                    <li><strong>バックアップ</strong>: 葉から根への評価値伝播</li>
+                </ul>
+
+                <h3 id="minimax-algorithm-steps">アルゴリズム手順</h3>
+                <ol>
+                    <li>ゲーム木を生成</li>
+                    <li>葉ノードの評価値を計算</li>
+                    <li>Mini層では最小値、Max層では最大値を選択</li>
+                    <li>根ノードまでバックアップ</li>
+                </ol>
+
+                <h3 id="minimax-evaluation">評価関数例</h3>
+                <p>チェスの評価関数：</p>
+                $$\text{評価値} = \sum_{i} w_i \times f_i(s)$$
+                <p>where $w_i$は重み、$f_i(s)$は状態$s$での特徴量</p>
+
+                <h2 id="alpha-beta-pruning">α-β法</h2>
+                <p><strong>α-β法（Alpha-Beta Pruning）</strong>は、Mini-Max法を効率化した探索手法です。</p>
+
+                <h3 id="alpha-beta-concept">剪定の概念</h3>
+                <ul>
+                    <li><strong>α値</strong>: Maxプレイヤーが保証できる最小値</li>
+                    <li><strong>β値</strong>: Miniプレイヤーが保証できる最大値</li>
+                    <li><strong>剪定条件</strong>: α ≥ β の時、それ以上の探索を中止</li>
+                </ul>
+
+                <h3 id="alpha-beta-efficiency">効率性</h3>
+                <ul>
+                    <li><strong>理想的ケース</strong>: 探索ノード数が $O(\sqrt{b^d})$ に削減</li>
+                    <li><strong>実用性</strong>: 多くの場合、2-3倍の高速化を実現</li>
+                    <li><strong>手順依存</strong>: 良い手順で探索すると効果大</li>
+                </ul>
+
+                <h1 id="monte-carlo-method">モンテカルロ法</h1>
+                <p><strong>モンテカルロ法</strong>は、乱数を用いた確率的探索手法です。</p>
+
+                <h2 id="monte-carlo-concept">基本概念</h2>
+                <ul>
+                    <li><strong>ランダムサンプリング</strong>: 確率的に状態を選択</li>
+                    <li><strong>統計的推定</strong>: 多数試行による期待値推定</li>
+                    <li><strong>収束性</strong>: 試行数増加により精度向上</li>
+                </ul>
+
+                <h2 id="monte-carlo-applications">応用例</h2>
+                <ul>
+                    <li><strong>Monte Carlo Tree Search (MCTS)</strong>: AlphaGoで使用</li>
+                    <li><strong>シミュレーション</strong>: ゲーム終了まで乱数で実行</li>
+                    <li><strong>数値積分</strong>: 複雑な積分の近似計算</li>
+                </ul>
+
+                <h3 id="mcts-formula">MCTS選択式（UCB1）</h3>
+                $$\text{UCB1} = \bar{X}_i + C\sqrt{\frac{\ln n}{n_i}}$$
+                <p>where $\bar{X}_i$は平均報酬、$C$は探索係数、$n$は総試行数、$n_i$は個別試行数</p>
+
+                <h1 id="historical-systems">歴史的システム</h1>
+
+                <h2 id="shrdlu">SHRDLU</h2>
+                <p><strong>SHRDLU</strong>は、テリー・ウィノグラードが1968-1970年に開発した自然言語理解システムです。</p>
+
+                <h3 id="shrdlu-features">特徴</h3>
+                <ul>
+                    <li><strong>ブロック世界</strong>: 単純化された3次元環境</li>
+                    <li><strong>自然言語対話</strong>: 英語での指示理解・実行</li>
+                    <li><strong>推論能力</strong>: 「なぜ？」「どのように？」への回答</li>
+                    <li><strong>プランニング</strong>: 複数ステップの行動計画</li>
+                </ul>
+
+                <h3 id="shrdlu-examples">対話例</h3>
+                <ul>
+                    <li><strong>Human:</strong> "Pick up a big red block."</li>
+                    <li><strong>SHRDLU:</strong> "OK." （赤いブロックを取る）</li>
+                    <li><strong>Human:</strong> "Why did you do that?"</li>
+                    <li><strong>SHRDLU:</strong> "To clear off the top of it."</li>
+                </ul>
+
+                <h3 id="shrdlu-limitations">限界</h3>
+                <ul>
+                    <li><strong>限定的環境</strong>: ブロック世界のみに特化</li>
+                    <li><strong>スケーラビリティ</strong>: 実世界への適用困難</li>
+                    <li><strong>知識の硬直性</strong>: 事前プログラム知識に依存</li>
+                </ul>
+
+                <h2 id="strips">STRIPS</h2>
+                <p><strong>STRIPS（Stanford Research Institute Problem Solver）</strong>は、自動プランニングの古典的システムです。</p>
+
+                <h3 id="strips-components">STRIPS表現</h3>
+                <ul>
+                    <li><strong>状態</strong>: 論理式の集合で表現</li>
+                    <li><strong>操作</strong>: 前提条件・削除リスト・追加リスト</li>
+                    <li><strong>目標</strong>: 達成すべき論理式</li>
+                </ul>
+
+                <h3 id="strips-example">STRIPSオペレータ例</h3>
+                <pre><code>操作: MOVE(x, y, z)
+前提条件: ON(x, y) ∧ CLEAR(x) ∧ CLEAR(z)
+削除リスト: ON(x, y), CLEAR(z)
+追加リスト: ON(x, z), CLEAR(y)</code></pre>
+
+                <h3 id="strips-algorithm">STRIPS探索</h3>
+                <ol>
+                    <li>目標と現状の差分を特定</li>
+                    <li>差分を解決する操作を選択</li>
+                    <li>操作の前提条件をサブゴールに設定</li>
+                    <li>再帰的に解決</li>
+                </ol>
+
+                <h1 id="key-points">試験対策キーポイント</h1>
+                
+                <h2 id="exam-essentials">必須暗記ポイント</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">📝 探索アルゴリズム</h3>
+                    <ul>
+                        <li><strong>幅優先探索</strong>: 完全性・最適性あり、メモリ大量使用</li>
+                        <li><strong>深さ優先探索</strong>: メモリ効率良、完全性なし</li>
+                        <li><strong>α-β法</strong>: Mini-Max法の効率化、剪定により高速化</li>
+                        <li><strong>モンテカルロ法</strong>: 確率的手法、AlphaGoで使用</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🎯 計算量</h3>
+                    <ul>
+                        <li><strong>BFS</strong>: 時間・空間ともに $O(b^d)$</li>
+                        <li><strong>DFS</strong>: 時間 $O(b^m)$、空間 $O(bm)$</li>
+                        <li><strong>α-β法</strong>: 理想的には $O(\sqrt{b^d})$</li>
+                        <li><strong>ハノイの塔</strong>: 最小手数 $2^n - 1$</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #00ffff; margin-top: 0;">🏛️ 歴史的システム</h3>
+                    <ul>
+                        <li><strong>SHRDLU</strong>: ブロック世界での自然言語理解</li>
+                        <li><strong>STRIPS</strong>: 自動プランニング、論理式表現</li>
+                        <li><strong>ハノイの塔</strong>: 探索問題の代表例</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>BFS・DFS</strong>の特徴を逆に理解（完全性・最適性）</li>
+                        <li><strong>α-β法</strong>をMini-Max法と別アルゴリズムと誤解</li>
+                        <li><strong>モンテカルロ法</strong>の確率的性質を理解不足</li>
+                        <li><strong>SHRDLU</strong>の限界（ブロック世界限定）を軽視</li>
+                    </ul>
+                </div>
+
+                <h1 id="summary">まとめ</h1>
+                <ul>
+                    <li><strong>探索アルゴリズム</strong>は問題解決の基本手法（BFS、DFS、α-β法）</li>
+                    <li><strong>Mini-Max法・α-β法</strong>はゲームAIの代表的手法</li>
+                    <li><strong>モンテカルロ法</strong>は確率的探索の重要手法</li>
+                    <li><strong>SHRDLU・STRIPS</strong>は初期AI研究の重要システム</li>
+                    <li>探索の<strong>完全性・最適性・計算量</strong>の理解が重要</li>
+                </ul>
+
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">α-β法（Alpha-Beta Pruning）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">Mini-Max法を効率化した探索手法。不要な枝を剪定して計算量を削減。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">Mini-Max法</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">2人零和ゲームで最適戦略を求める探索アルゴリズム。相手の最善手を想定した戦略選択。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">SHRDLU</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">テリー・ウィノグラード開発の自然言語理解システム。ブロック世界で対話的にタスク実行。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">STRIPS</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">スタンフォード研究所の自動プランニングシステム。論理式による状態・操作表現。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">探索木</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">問題の状態空間を木構造で表現。根ノード（初期状態）から葉ノード（目標状態）への経路探索。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ハノイの塔</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">探索問題の古典例。n枚の円盤の最小移動手数は $2^n - 1$。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">幅優先探索（BFS）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">探索木を横方向に展開。完全性・最適性ありだが大量メモリ使用。時間・空間計算量 $O(b^d)$。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">深さ優先探索（DFS）</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">探索木を縦方向に展開。メモリ効率良だが完全性・最適性なし。空間計算量 $O(bm)$。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">ブルートフォース</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">全可能性を総当たりで調査する手法。確実だが計算量が指数的増加。</dd>
+                    
+                    <dt style="font-weight: bold; color: #00ffff; margin-top: 15px;">モンテカルロ法</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">乱数を用いた確率的探索手法。Monte Carlo Tree Search（MCTS）としてAlphaGoで使用。</dd>
+                </dl>
+
+                <!-- Page Navigation -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study1-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: #00ffff;"></i>
+                            Back: 1-2
+                        </a>
+
+                        <a href="study2-2.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 2-2
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: #00ffff;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>

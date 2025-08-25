@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7-2: データの収集・加工・分析・学習 - G-Test Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- MathJax Configuration -->
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="chapter-magenta">
+    <header class="header">
+        <a href="index.html" class="logo">G-Test Note</a>
+        <button class="hamburger" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar TOC -->
+        <aside class="sidebar">
+            <div class="chapter-title">Chapter 7-2: データの収集・加工・分析・学習</div>
+            <nav class="toc" id="tableOfContents">
+                <!-- TOC will be generated dynamically -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content study">
+            <div class="content-header">
+                <h1 class="content-title">Chapter 7-2</h1>
+                <h2 class="content-subtitle">データの収集・加工・分析・学習</h2>
+                <div class="content-meta">
+                    <span class="chapter-label">AIの社会実装に向けて</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- シラバス対応セクション（必須） -->
+                <h1 id="syllabus">シラバス対応</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📋 学習目標</h3>
+                    <ul>
+                        <li>AIの学習対象となるデータを取得・利用するときに注意すべきことを理解する</li>
+                        <li>集めたデータを加工・分析・学習させるときの注意点を理解する</li>
+                        <li>データを共有しながら共同開発を進める場合の留意点を理解する</li>
+                    </ul>
+                    
+                    <h3 style="color: inherit; margin-top: 20px;">🔑 シラバス・キーワード</h3>
+                    <ul>
+                        <li><strong>アノテーション</strong></li>
+                        <li><strong>オープンデータセット</strong></li>
+                        <li><strong>コーパス</strong></li>
+                        <li><strong>データリーケージ</strong></li>
+                    </ul>
+                </div>
+
+                <!-- メインコンテンツ（シラバス準拠） -->
+                <h1 id="overview">データ中心AIの重要性</h1>
+                
+                <p>「データはAIの石油」と言われるように、機械学習モデルの性能は使用するデータの品質と量に大きく依存します。適切なデータ収集・加工・分析プロセスの確立は、AIプロジェクト成功の前提条件であり、データリーケージ等の落とし穴を回避しながら、高品質な学習データセットを構築することが重要です。</p>
+
+                <p>オープンデータセット活用、アノテーション品質管理、コーパス構築、データ共有時の注意点等を体系的に理解し、データ中心AIアプローチによる確実な価値創出を実現します。</p>
+
+                <h2 id="data-centric-ai">データ中心AI vs モデル中心AI</h2>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Model Performance} = f(\text{Algorithm}, \text{Data Quality}, \text{Data Quantity})$$
+                    $$\text{Data Quality} \gg \text{Algorithm Sophistication}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 パラダイムシフト</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>従来アプローチ（モデル中心）</strong>:
+・アルゴリズム改良に注力
+・固定データセットでのベンチマーク競争
+・論文発表・学会評価重視
+
+<strong>実用化アプローチ（データ中心）</strong>:
+・データ品質向上に注力
+・継続的なデータ改善サイクル
+・ビジネス価値・実用性重視
+
+<strong>Andrew Ng氏の提唱</strong>:
+「コードを固定し、データを体系的に改善する」
+・一貫した品質管理プロセス
+・ラベル付与基準の標準化
+・エラー分析による改善サイクル
+                    </pre>
+                </div>
+
+                <h1 id="data-collection">データ収集戦略</h1>
+
+                <h2 id="data-sources">データソースの分類</h2>
+
+                <h3 id="internal-data">内部データ</h3>
+                <ul>
+                    <li><strong>業務システムデータ</strong>：CRM・ERP・基幹システムの蓄積データ</li>
+                    <li><strong>ログデータ</strong>：Webアクセス・アプリケーション利用ログ</li>
+                    <li><strong>センサーデータ</strong>：IoT機器・製造装置からの取得データ</li>
+                    <li><strong>顧客データ</strong>：購買履歴・行動データ・フィードバック</li>
+                </ul>
+
+                <h3 id="external-data">外部データ</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🌐 外部データ活用</h3>
+                    <ul>
+                        <li><strong>オープンデータ</strong>：政府・自治体公開データ</li>
+                        <li><strong>オープンデータセット</strong>：学術研究用公開データセット</li>
+                        <li><strong>商用データ</strong>：データプロバイダーからの購入</li>
+                        <li><strong>パートナーデータ</strong>：提携企業との共有データ</li>
+                        <li><strong>クローリングデータ</strong>：Web スクレイピング取得（法的注意必要）</li>
+                    </ul>
+                </div>
+
+                <h2 id="open-datasets">オープンデータセット活用</h2>
+
+                <h3 id="famous-datasets">代表的オープンデータセット</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📊 主要データセット</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>画像認識</strong>:
+・ImageNet: 1400万画像、2万カテゴリ
+・COCO: 物体検出・セグメンテーション
+・CIFAR-10/100: 小画像分類
+・Open Images: Google公開大規模画像
+
+<strong>自然言語処理</strong>:
+・GLUE: 汎用言語理解ベンチマーク
+・SQuAD: 質問応答データセット
+・Common Crawl: Web クローリングテキスト
+・Wikipedia Corpus: 百科事典コーパス
+
+<strong>音声・マルチモーダル</strong>:
+・LibriSpeech: 英語音声認識
+・Mozilla Common Voice: 多言語音声
+・AudioSet: YouTube 音声イベント
+
+<strong>構造化データ</strong>:
+・UCI Machine Learning Repository
+・Kaggle Datasets: 競技用データ
+・政府統計データ: 各国オープンデータ
+                    </pre>
+                </div>
+
+                <h3 id="dataset-selection">データセット選択基準</h3>
+                <ul>
+                    <li><strong>ドメイン適合性</strong>：対象業務・問題領域との一致度</li>
+                    <li><strong>データ品質</strong>：ラベル精度・ノイズ含有率</li>
+                    <li><strong>ライセンス条件</strong>：商用利用可否・再配布制限</li>
+                    <li><strong>更新頻度</strong>：継続的更新の有無・最新性</li>
+                    <li><strong>コミュニティ</strong>：活発な利用・改善コミュニティ存在</li>
+                </ul>
+
+                <h1 id="annotation">アノテーション（ラベル付与）</h1>
+
+                <h2 id="annotation-types">アノテーション種類</h2>
+
+                <h3 id="image-annotation">画像アノテーション</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Image} + \text{Annotation} = \text{Supervised Learning Data}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🏷️ 画像アノテーション形式</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>分類（Classification）</strong>:
+・画像全体にカテゴリラベル付与
+・「猫」「犬」「車」等のクラス分類
+
+<strong>物体検出（Object Detection）</strong>:
+・バウンディングボックス + クラスラベル
+・座標情報: (x, y, width, height, class)
+
+<strong>セグメンテーション</strong>:
+・ピクセルレベルでの詳細領域分割
+・セマンティック: クラス別色分け
+・インスタンス: 個別物体の境界
+
+<strong>キーポイント検出</strong>:
+・顔特徴点・人体関節点等の座標
+・姿勢推定・顔認識での活用
+
+<strong>アノテーション品質確保</strong>:
+・複数人による独立ラベル付与
+・不一致箇所の再確認プロセス
+・専門知識が必要な場合のエキスパート関与
+                    </pre>
+                </div>
+
+                <h3 id="text-annotation">テキストアノテーション</h3>
+                <ul>
+                    <li><strong>感情分析</strong>：ポジティブ・ネガティブ・中立ラベル</li>
+                    <li><strong>固有表現抽出</strong>：人名・地名・組織名等の識別・境界</li>
+                    <li><strong>品詞タグ付け</strong>：名詞・動詞・形容詞等の文法情報</li>
+                    <li><strong>係り受け解析</strong>：文内単語間の依存関係</li>
+                    <li><strong>意味役割ラベリング</strong>：主語・目的語・述語の役割</li>
+                </ul>
+
+                <h2 id="annotation-quality">アノテーション品質管理</h2>
+
+                <h3 id="quality-metrics">品質評価指標</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Cohen's Kappa} = \frac{P_o - P_e}{1 - P_e}$$
+                    $$\text{where } P_o \text{: observed agreement, } P_e \text{: expected agreement}$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📏 品質管理手法</h3>
+                    <ul>
+                        <li><strong>Inter-Annotator Agreement</strong>：複数アノテーター間一致率</li>
+                        <li><strong>ゴールドスタンダード</strong>：エキスパートによる正解セット作成</li>
+                        <li><strong>サンプリング検証</strong>：定期的な品質確認・フィードバック</li>
+                        <li><strong>ガイドライン整備</strong>：判断基準・境界ケースの明文化</li>
+                        <li><strong>継続的教育</strong>：アノテーター向け研修・事例共有</li>
+                    </ul>
+                </div>
+
+                <h3 id="crowdsourcing-annotation">クラウドソーシング活用</h3>
+                <ul>
+                    <li><strong>プラットフォーム</strong>：Amazon Mechanical Turk・Labelbox・Scale AI</li>
+                    <li><strong>メリット</strong>：大量データの迅速処理・コスト削減</li>
+                    <li><strong>デメリット</strong>：品質ばらつき・専門性不足</li>
+                    <li><strong>品質確保</strong>：複数人による冗長ラベル・統計的品質管理</li>
+                </ul>
+
+                <h1 id="corpus-construction">コーパス構築</h1>
+
+                <h2 id="corpus-definition">コーパスとは</h2>
+                <p>自然言語処理研究・開発のために体系的に収集・整理されたテキストデータ集合：</p>
+
+                <h3 id="corpus-types">コーパスの種類</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">📚 コーパス分類</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>言語別</strong>:
+・単言語コーパス: 特定言語のみ
+・多言語コーパス: 複数言語を含む
+・パラレルコーパス: 翻訳対応ペア
+
+<strong>ドメイン別</strong>:
+・汎用コーパス: 多様なジャンル網羅
+・専門コーパス: 特定分野（医学・法律等）
+・話し言葉コーパス: 音声書き起こし
+
+<strong>アノテーション別</strong>:
+・生コーパス: 原文のみ
+・タグ付きコーパス: 品詞・構文情報付与
+・意味解析コーパス: 意味役割・感情等
+
+<strong>代表例</strong>:
+・Brown Corpus: 英語汎用コーパスの嚆矢
+・現代日本語書き言葉均衡コーパス(BCCWJ)
+・Penn Treebank: 構文解析用
+・WordNet: 語彙意味ネットワーク
+                    </pre>
+                </div>
+
+                <h2 id="corpus-construction-process">コーパス構築プロセス</h2>
+
+                <h3 id="design-phase">設計フェーズ</h3>
+                <ul>
+                    <li><strong>目的明確化</strong>：利用目的・対象タスクの特定</li>
+                    <li><strong>スコープ定義</strong>：言語・ドメイン・時代・サイズ設定</li>
+                    <li><strong>収集方針</strong>：バランス・代表性確保の基準</li>
+                    <li><strong>アノテーション仕様</strong>：付与情報の種類・形式</li>
+                </ul>
+
+                <h3 id="collection-phase">収集フェーズ</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">📥 テキスト収集方法</h3>
+                    <ul>
+                        <li><strong>既存文献</strong>：書籍・新聞・雑誌・学術論文</li>
+                        <li><strong>Web収集</strong>：ニュースサイト・ブログ・SNS（著作権注意）</li>
+                        <li><strong>音声書き起こし</strong>：講演・会議・対話の文字化</li>
+                        <li><strong>専門文書</strong>：技術文書・法的文書・医学文献</li>
+                        <li><strong>創作文</strong>：小説・詩・戯曲等の文学作品</li>
+                    </ul>
+                </div>
+
+                <h1 id="data-processing">データ加工・前処理</h1>
+
+                <h2 id="preprocessing-pipeline">前処理パイプライン</h2>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Raw Data} \rightarrow \text{Cleaning} \rightarrow \text{Transformation} \rightarrow \text{Feature Engineering} \rightarrow \text{ML-Ready Data}$$
+                </div>
+
+                <h3 id="data-cleaning">データクリーニング</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🧹 クリーニング作業</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>品質問題の特定</strong>:
+・欠損値（Missing Values）: NULL、空文字
+・重複データ（Duplicates）: 同一レコード複数存在
+・異常値（Outliers）: 統計的に極端な値
+・不整合（Inconsistency）: フォーマット・基準不一致
+
+<strong>対処方法</strong>:
+・欠損値: 削除・平均/中央値補完・予測補完
+・重複: 識別・削除・統合
+・異常値: 削除・置換・クリッピング
+・不整合: 標準化・正規化・マッピング
+
+<strong>自動化ツール</strong>:
+・OpenRefine: 対話的データクリーニング
+・Pandas: Python データ操作ライブラリ
+・Dask: 大規模データ並列処理
+・Great Expectations: データ品質テスト
+                    </pre>
+                </div>
+
+                <h2 id="feature-engineering">特徴量エンジニアリング</h2>
+
+                <h3 id="feature-types">特徴量の種類</h3>
+                <ul>
+                    <li><strong>数値特徴量</strong>：連続値・離散値の数値データ</li>
+                    <li><strong>カテゴリ特徴量</strong>：カテゴリ・ラベルデータ</li>
+                    <li><strong>時系列特徴量</strong>：時間軸を持つデータ</li>
+                    <li><strong>テキスト特徴量</strong>：自然言語テキスト</li>
+                    <li><strong>画像特徴量</strong>：画像・映像データ</li>
+                </ul>
+
+                <h3 id="feature-transformation">特徴量変換</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Normalization}: x' = \frac{x - \mu}{\sigma}$$
+                    $$\text{Min-Max Scaling}: x' = \frac{x - x_{min}}{x_{max} - x_{min}}$$
+                </div>
+
+                <ul>
+                    <li><strong>正規化・標準化</strong>：スケール調整・分布調整</li>
+                    <li><strong>エンコーディング</strong>：One-Hot・Label・Target Encoding</li>
+                    <li><strong>ビニング</strong>：連続値の離散化・区間分割</li>
+                    <li><strong>特徴量選択</strong>：重要度による選別・次元削減</li>
+                </ul>
+
+                <h1 id="data-leakage">データリーケージ</h1>
+
+                <h2 id="leakage-definition">データリーケージとは</h2>
+                <p>未来の情報や本来利用できない情報が学習データに混入し、過度に楽観的なモデル性能を示す現象：</p>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Test Accuracy} \gg \text{Real World Performance}$$
+                    $$\text{due to Information Leakage}$$
+                </div>
+
+                <h3 id="leakage-types">リーケージの種類</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🚨 リーケージパターン</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>Target Leakage</strong>:
+・目的変数と同じ情報を特徴量に含む
+・例: 「入院期間」で「退院可能性」予測
+
+<strong>Train-Test Contamination</strong>:
+・テストデータが学習に使用される
+・前処理でのデータ全体使用
+・交差検証での不適切な分割
+
+<strong>Temporal Leakage</strong>:
+・未来情報の使用
+・時系列予測での未来データ混入
+・例: 明日の株価で今日の売買判断
+
+<strong>Feature Leakage</strong>:
+・予測時に利用不可能な特徴量使用
+・例: 「診断結果」で「疾病リスク」予測
+
+<strong>Group Leakage</strong>:
+・同一グループデータの学習・テスト混在
+・例: 同一患者データの分散配置
+                    </pre>
+                </div>
+
+                <h2 id="leakage-prevention">リーケージ防止策</h2>
+
+                <h3 id="temporal-validation">時系列検証</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    $$\text{Train: } t_1 \rightarrow t_n, \quad \text{Valid: } t_{n+1} \rightarrow t_m, \quad \text{Test: } t_{m+1} \rightarrow t_k$$
+                </div>
+
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🛡️ 防止手法</h3>
+                    <ul>
+                        <li><strong>時系列分割</strong>：時間軸に沿った学習・テスト分離</li>
+                        <li><strong>グループ分割</strong>：関連データの同一セット配置</li>
+                        <li><strong>特徴量監査</strong>：予測時利用可能性の確認</li>
+                        <li><strong>パイプライン分離</strong>：前処理の学習・テスト独立実行</li>
+                        <li><strong>ドメイン知識活用</strong>：業務フロー理解による検証</li>
+                    </ul>
+                </div>
+
+                <h1 id="data-sharing">データ共有・共同開発</h1>
+
+                <h2 id="collaborative-development">共同開発における留意点</h2>
+
+                <h3 id="data-governance">データガバナンス</h3>
+                <ul>
+                    <li><strong>アクセス制御</strong>：役割ベース・属性ベースアクセス管理</li>
+                    <li><strong>バージョン管理</strong>：データセット変更履歴・系譜管理</li>
+                    <li><strong>品質管理</strong>：継続的品質監視・改善プロセス</li>
+                    <li><strong>メタデータ管理</strong>：データ起源・加工履歴の記録</li>
+                </ul>
+
+                <h3 id="privacy-protection">プライバシー保護技術</h3>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0; font-family: monospace;">
+                    <h3 style="color: inherit; margin-top: 0;">🔒 プライバシー保護手法</h3>
+                    <pre style="color: #ffffff; margin: 0;">
+<strong>差分プライバシー（Differential Privacy）</strong>:
+・統計的プライバシー保護の理論
+・ノイズ付加による個人識別防止
+・ε-差分プライバシーによる保護レベル定量化
+
+<strong>連合学習（Federated Learning）</strong>:
+・データを移動せずに分散学習
+・モデルパラメータのみ共有
+・医療・金融等の秘匿データ活用
+
+<strong>秘密計算（Secure Multi-party Computation）</strong>:
+・データを暗号化したまま計算
+・複数組織での秘匿データ活用
+・同態暗号・秘密分散等の技術
+
+<strong>匿名化・仮名化</strong>:
+・識別子除去・一般化・撹乱
+・k-匿名性・l-多様性・t-近似性
+・完全性とプライバシーのトレードオフ
+                    </pre>
+                </div>
+
+                <h2 id="legal-ethical-considerations">法的・倫理的考慮</h2>
+                <ul>
+                    <li><strong>個人情報保護法</strong>：同意取得・利用目的制限・安全管理措置</li>
+                    <li><strong>GDPR</strong>：EU市民データ処理での厳格要求</li>
+                    <li><strong>著作権法</strong>：コンテンツ利用・学習データ作成時の権利処理</li>
+                    <li><strong>契約管理</strong>：データ利用許諾・秘密保持・責任分界</li>
+                    <li><strong>倫理審査</strong>：研究倫理委員会・IRB承認</li>
+                </ul>
+
+                <!-- 試験対策セクション（必須） -->
+                <h1 id="exam-focus">試験対策のポイント</h1>
+                
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: inherit; margin-top: 0;">🎯 G検定で頻出する内容</h3>
+                    <ul>
+                        <li><strong>データ中心AI</strong>：データ品質がモデル性能を決定する重要性</li>
+                        <li><strong>アノテーション品質</strong>：Inter-Annotator Agreement・ガイドライン整備</li>
+                        <li><strong>オープンデータセット</strong>：ImageNet・COCO・GLUE等の代表例</li>
+                        <li><strong>コーパス構築</strong>：自然言語処理での体系的テキスト収集</li>
+                        <li><strong>データリーケージ</strong>：Target Leakage・Temporal Leakage等の典型例</li>
+                        <li><strong>特徴量エンジニアリング</strong>：正規化・エンコーディング・選択手法</li>
+                        <li><strong>データ共有</strong>：プライバシー保護・法的制約への対応</li>
+                        <li><strong>品質管理</strong>：継続的品質監視・改善プロセス</li>
+                    </ul>
+                </div>
+
+                <h2 id="common-mistakes">よくある間違い</h2>
+                <div style="background-color: #1a1a1a; border: 3px solid #000000; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #ffffff; margin-top: 0;">❌ 注意すべきポイント</h3>
+                    <ul>
+                        <li><strong>量 > 品質思考</strong>：大量の低品質データより少量高品質データが有効</li>
+                        <li><strong>アノテーション軽視</strong>：品質管理なしのクラウドソーシング依存</li>
+                        <li><strong>データリーケージ見逃し</strong>：楽観的性能に惑わされる</li>
+                        <li><strong>プライバシー軽視</strong>：法的リスク・社会的責任の軽視</li>
+                        <li><strong>前処理の学習・テスト混在</strong>：統計量計算での汚染</li>
+                        <li><strong>時系列データでの未来情報使用</strong>：実用性のない予測</li>
+                    </ul>
+                </div>
+
+                <!-- まとめセクション -->
+                <h1 id="summary">まとめ</h1>
+                
+                <p>AIプロジェクトの成功は、アルゴリズムよりもデータ品質に大きく依存します。適切なデータ収集・アノテーション・前処理・品質管理により、高品質な学習データセットを構築することが重要です。</p>
+                
+                <p>データリーケージの回避、オープンデータセット活用、コーパス構築、プライバシー保護技術など、実用的なデータ処理技術の習得と法的・倫理的配慮が、確実なAI社会実装の前提条件となります。</p>
+                
+                <p>G検定では、データ中心AIの考え方、主要なデータ処理技術、品質管理手法、共有時の注意点について体系的な理解が求められます。技術的詳細より、データ品質がAI性能に与える影響の理解が重要です。</p>
+
+                <!-- 用語集セクション（必須） -->
+                <h1 id="glossary">主な用語集</h1>
+                
+                <h2 id="key-terms">重要用語</h2>
+                <dl style="margin: 20px 0;">
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">アノテーション</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">機械学習用データに対するラベル付け作業。画像・テキスト・音声等にクラス・境界・属性情報を付与する。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">オープンデータセット</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">研究・開発用に一般公開されているデータセット。ImageNet・COCO・GLUE等が代表例。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">コーパス</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">自然言語処理のために体系的に収集・整理されたテキストデータ集合。品詞・構文情報等が付与される場合もある。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">データリーケージ</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">未来情報や本来利用不可能な情報が学習データに混入し、過度に楽観的なモデル性能を示す現象。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">データ中心AI</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">アルゴリズム改良より、データ品質向上に注力するAI開発アプローチ。Andrew Ng氏が提唱。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">特徴量エンジニアリング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">生データから機械学習に適した特徴量を抽出・変換・選択する作業。正規化・エンコーディング等を含む。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Inter-Annotator Agreement</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">複数のアノテーター間でのラベル付け一致度。Cohen's Kappa等の指標で品質評価する。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Target Leakage</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">目的変数と同じ情報・強く相関する情報が特徴量に含まれるデータリーケージの一種。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">Temporal Leakage</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">時系列データにおいて未来の情報が学習に使用されるデータリーケージ。予測時に利用不可能な情報の使用。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">差分プライバシー</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">統計的プライバシー保護の理論。適切なノイズ付加により個人識別を防止しつつ有用な統計情報を提供。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">連合学習</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データを各組織に保持したまま、モデルパラメータのみを共有して分散学習する手法。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">クラウドソーシング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">インターネットを通じて不特定多数に作業を発注する手法。アノテーション作業等で活用される。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">データクリーニング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">生データから欠損値・重複・異常値・不整合等の品質問題を特定・修正する前処理作業。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">One-Hot エンコーディング</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">カテゴリ変数を0と1のバイナリベクトルに変換する手法。各カテゴリに対応する次元のみ1、他は0。</dd>
+                    
+                    <dt style="font-weight: bold; color: inherit; margin-top: 15px;">正規化</dt>
+                    <dd style="margin-left: 20px; margin-bottom: 10px;">データの平均を0、標準偏差を1にするスケール変換。Z-score正規化とも呼ばれる。</dd>
+                </dl>
+
+                <!-- ページナビゲーション（必須） -->
+                <nav class="page-nav" style="border-top: 3px solid #000000; padding-top: 40px; margin-top: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="study7-1.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            <i class="fas fa-chevron-left" style="margin-right: 8px; color: inherit;"></i>
+                            Back: 7-1
+                        </a>
+                        <a href="study7-3.html" style="color: #ffffff; text-decoration: none; border: 3px solid #000000; padding: 15px 20px; text-transform: uppercase; font-weight: 600; transition: all 0.2s ease;">
+                            Next: 7-3
+                            <i class="fas fa-chevron-right" style="margin-left: 8px; color: inherit;"></i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <div class="menu-title">Menu</div>
+            <button class="close-btn" onclick="closeMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="menu-items">
+            <li class="menu-item">
+                <a href="sitemap.html" class="menu-link">
+                    <i class="fas fa-map" style="margin-right: 8px; color: #ffffff;"></i>
+                    Sitemap
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="help.html" class="menu-link">
+                    <i class="fas fa-question-circle" style="margin-right: 8px; color: #ffffff;"></i>
+                    Help
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="settings.html" class="menu-link">
+                    <i class="fas fa-cog" style="margin-right: 8px; color: #ffffff;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/toc-generator.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate table of contents from existing HTML content
+            generateTableOfContents();
+        });
+    </script>
+</body>
+</html>
