@@ -49,3 +49,7 @@ dist/
 
 # 旧ファイル
 old/
+
+# Claude Code
+.claude/
+Claude.md
