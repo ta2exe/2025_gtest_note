@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-4-6 最適化手法 - G検定学習ノート</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F0F0F0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* スクロールバーのデザイン */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(240, 240, 240, 0.6);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--magenta);
+      border-radius: 10px;
+      transition: background 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan);
+    }
+
+    /* Firefox用スクロールバー */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--magenta) rgba(240, 240, 240, 0.6);
+    }
+
+    /* サイドバー用のFirefoxスクロールバー */
+    .sidebar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
+    }
+
+    /* サイドバーのスクロールバー */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    /* サイドバーのスタイル */
+    .sidebar {
+      width: 20%;
+      background-color: var(--magenta);
+      color: var(--white);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--white);
+    }
+
+    .sidebar-nav {
+      list-style: none;
+    }
+
+    .sidebar-nav li {
+      margin-bottom: 0.8rem;
+    }
+
+    .sidebar-nav a {
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .sidebar-nav a:hover, .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar-nav i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツのスタイル */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    /* セクションのスタイル */
+    section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px dotted var(--cyan);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title i {
+      color: var(--magenta);
+      margin-right: 0.5rem;
+    }
+
+    /* タイトルセクションのスタイル */
+    #title-section {
+      background-color: var(--white);
+      text-align: center;
+      padding: 3rem 2rem;
+      position: relative;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      color: var(--dark-gray);
+      margin-bottom: 2rem;
+    }
+
+    .overview {
+      width: 80%;
+      margin: 0 auto;
+      background-color: var(--light-gray);
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .overview h3 {
+      color: var(--magenta);
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .overview ul {
+      list-style-position: inside;
+      padding-left: 1rem;
+    }
+
+    .overview li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* コンテンツスタイル */
+    p {
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: 1.4rem;
+      margin: 1.5rem 0 1rem 0;
+      color: var(--magenta);
+    }
+
+    h4 {
+      font-size: 1.2rem;
+      margin: 1.2rem 0 0.8rem 0;
+      color: var(--cyan);
+    }
+
+    ul, ol {
+      margin-bottom: 1rem;
+      padding-left: 2rem;
+      list-style-position: inside;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      color: var(--magenta);
+      font-weight: 700;
+    }
+
+    em {
+      color: var(--cyan);
+      font-style: normal;
+      font-weight: 500;
+    }
+
+    /* ハンドライティングボックス */
+    .handwritten-box {
+      background-color: var(--white);
+      border: 2px dashed var(--cyan);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      position: relative;
+      transform: rotate(-0.5deg);
+      font-family: 'Klee One', cursive;
+    }
+
+    .handwritten-box::before {
+      content: "📝";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--white);
+      padding: 0 10px;
+    }
+
+    /* ノートボックス */
+    .note-box {
+      background-color: var(--white);
+      border-left: 4px solid var(--yellow);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      background-color: var(--white);
+      padding: 0 5px;
+    }
+
+    /* キーワードのハイライト */
+    .keyword {
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      font-weight: 500;
+      padding: 0 2px;
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* テーブルスタイル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background-color: var(--white);
+    }
+
+    th, td {
+      padding: 0.8rem;
+      border: 1px solid var(--cyan);
+      text-align: left;
+    }
+
+    th {
+      background-color: rgba(0, 216, 232, 0.1);
+      color: var(--key);
+      font-weight: 700;
+    }
+
+    /* キーインサイトセクション */
+    #key-insights {
+      background-color: rgba(255, 230, 0, 0.05);
+    }
+
+    .insight-item {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border-left: 3px solid var(--magenta);
+    }
+
+    .insight-title {
+      font-weight: 700;
+      color: var(--magenta);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    /* テイクホームメッセージセクション */
+    #take-home {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+
+    .message-box {
+      background-color: var(--white);
+      border: 2px solid var(--magenta);
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 1rem auto;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .message-text {
+      font-size: 1.3rem;
+      color: var(--key);
+      font-weight: 500;
+      line-height: 1.6;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--dark-gray);
+      border-top: 1px solid var(--light-gray);
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+    }
+
+    /* レスポンシブデザイン */
+    @media (max-width: 992px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <h2 class="sidebar-title">1-4 ディープラーニングの概要</h2>
+    <ul class="sidebar-nav">
+      <li><a href="#title-section"><i class="fas fa-bookmark"></i> はじめに</a></li>
+      <li><a href="#intro-section"><i class="fas fa-info-circle"></i> 最適化手法とは</a></li>
+      <li><a href="#gradient-descent"><i class="fas fa-arrow-down"></i> 勾配降下法</a></li>
+      <li><a href="#variants-section"><i class="fas fa-code-branch"></i> 勾配降下法の種類</a></li>
+      <li><a href="#optimization-algorithms"><i class="fas fa-rocket"></i> 最適化アルゴリズム</a></li>
+      <li><a href="#hyperparameter"><i class="fas fa-sliders-h"></i> ハイパーパラメータ</a></li>
+      <li><a href="#terms-section"><i class="fas fa-book"></i> 用語集</a></li>
+      <li><a href="#key-insights"><i class="fas fa-lightbulb"></i> Key Insights</a></li>
+      <li><a href="#take-home"><i class="fas fa-key"></i> Take Home Message</a></li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
+    <!-- タイトルセクション -->
+    <section id="title-section">
+      <h1 class="main-title">1-4-6 最適化手法</h1>
+      <p class="subtitle">ディープラーニングの学習を効率的に進める最適化アルゴリズムを理解する</p>
+      <div class="overview">
+        <h3><i class="fas fa-bullseye"></i> 学習目標</h3>
+        <ul>
+          <li>勾配降下法の概要を理解する</li>
+          <li>勾配降下法の問題とそれを解決するための手法を列挙できる</li>
+          <li>勾配降下法の計算を効率化する方法を説明できる</li>
+          <li>ハイパーパラメータの概要と代表的な調整方法を列挙・説明できる</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 最適化手法の概要 -->
+    <section id="intro-section">
+      <h2 class="section-title"><i class="fas fa-info-circle"></i> 最適化手法とは</h2>
+      <p>ディープラーニングでは、モデルの<span class="keyword">パラメータ</span>（重みやバイアス）を調整することで、予測値と実際の値との誤差を最小化することを目指します。この誤差を最小化するための手法を<span class="keyword">最適化手法</span>と呼びます。</p>
+      
+      <div class="handwritten-box">
+        <p>最適化とは、簡単に言えば「最も良い答え（パラメータの組み合わせ）」を見つけること。ディープラーニングでは、誤差関数の値が最小になるパラメータを探す作業です。</p>
+        <p>山の頂上から谷底まで最短で降りるルートを探すように、誤差関数の「谷底」を効率的に見つける方法を考えるのが最適化手法です。</p>
+      </div>
+      
+      <h3>最適化の目的</h3>
+      <p>最適化の主な目的は以下の通りです：</p>
+      <ul>
+        <li>誤差関数の値を最小化する</li>
+        <li>効率的に学習を進める（少ない計算リソースで素早く収束させる）</li>
+        <li>局所最適解に陥らず、より良い解（大域最適解）を見つける</li>
+        <li>過学習を防ぎ、汎化性能の高いモデルを作成する</li>
+      </ul>
+      
+      <h3>最適化における課題</h3>
+      <p>ディープラーニングの最適化では、以下のような課題が存在します：</p>
+      <ol>
+        <li>誤差関数の複雑な形状（多くの局所最適解や鞍点）</li>
+        <li>勾配消失問題や勾配爆発問題による学習の停滞</li>
+        <li>大量のデータや複雑なモデル構造による計算コストの増大</li>
+        <li>ハイパーパラメータの適切な設定</li>
+      </ol>
+      
+      <div class="note-box">
+        <p>ディープラーニングの誤差関数は非常に複雑で、何十億、何兆ものパラメータを調整する必要があります。そのため、単純な方法では最適化が困難であり、さまざまな工夫が必要となります。</p>
+      </div>
+    </section>
+    
+    <!-- 勾配降下法 -->
+    <section id="gradient-descent">
+      <h2 class="section-title"><i class="fas fa-arrow-down"></i> 勾配降下法</h2>
+      <p><span class="keyword">勾配降下法（Gradient Descent）</span>は、ディープラーニングにおける最も基本的な最適化アルゴリズムです。誤差関数の勾配（傾き）を計算し、その勾配の方向に少しずつパラメータを更新していくことで、誤差関数の最小値を探索します。</p>
+      
+      <h3>勾配降下法の基本原理</h3>
+      <p>勾配降下法の基本的なアルゴリズムは次のとおりです：</p>
+      <ol>
+        <li>現在のパラメータにおける誤差関数の勾配（傾き）を計算する</li>
+        <li>勾配の方向（誤差が最も急激に増加する方向）とは逆の方向にパラメータを更新する</li>
+        <li>更新量は学習率（step size）によって調整される</li>
+        <li>収束するまで繰り返す</li>
+      </ol>
+      
+      <h4>数学的表現</h4>
+      <p>勾配降下法によるパラメータの更新式は以下のように表されます：</p>
+      <p>\[ \theta_{t+1} = \theta_t - \eta \nabla J(\theta_t) \]</p>
+      <p>ここで：</p>
+      <ul>
+        <li>\(\theta_t\) は時刻 t におけるパラメータ</li>
+        <li>\(\eta\) は学習率</li>
+        <li>\(\nabla J(\theta_t)\) は誤差関数 J の勾配</li>
+      </ul>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-6_01.png" alt="勾配降下法の概念図">
+        <figcaption>勾配降下法：誤差関数の勾配を計算し、その勾配の逆方向に進むことで、誤差関数の最小値を目指す</figcaption>
+      </div>
+      
+      <h3>勾配降下法の問題点</h3>
+      <p>勾配降下法にはいくつかの問題点があります：</p>
+      <ul>
+        <li><strong>局所最適解</strong>：複雑な誤差関数では、勾配降下法が局所最適解に陥りやすい</li>
+        <li><strong>鞍点</strong>：勾配がゼロになる点（鞍点）で学習が停滞する可能性がある</li>
+        <li><strong>学習率の設定</strong>：適切な学習率の設定が難しい
+          <ul>
+            <li>学習率が大きすぎると収束しない（発散する）</li>
+            <li>学習率が小さすぎると収束が遅くなる</li>
+          </ul>
+        </li>
+        <li><strong>計算コスト</strong>：大規模なデータセットでは全データの勾配計算が非効率</li>
+        <li><strong>二重降下現象</strong>：狭い谷や急勾配の場所では、最適解にたどり着くまでにジグザグな動きをする</li>
+      </ul>
+      
+      <div class="note-box">
+        <p>勾配降下法は単純ですが、多くの問題点があります。これらの問題を解決するために、様々な改良版アルゴリズムが提案されています。ただし、基本的な考え方（勾配の逆方向に進む）は同じであり、ディープラーニング最適化の根幹をなしています。</p>
+      </div>
+    </section>
+    
+    <!-- 勾配降下法の種類 -->
+    <section id="variants-section">
+      <h2 class="section-title"><i class="fas fa-code-branch"></i> 勾配降下法の種類</h2>
+      <p>勾配降下法には、データの使用方法によっていくつかの種類があります。それぞれに特徴があり、状況に応じて使い分けられています。</p>
+      
+      <h3>バッチ勾配降下法（Batch Gradient Descent）</h3>
+      <p><span class="keyword">バッチ勾配降下法</span>は、全てのデータを使って一度に勾配を計算し、パラメータを更新する方法です。</p>
+      <h4>特徴</h4>
+      <ul>
+        <li>全データを使うため、勾配の推定精度が高い</li>
+        <li>大規模データセットでは計算コストが高く、メモリ消費も大きい</li>
+        <li>パラメータ更新が遅い（1エポックにつき1回の更新）</li>
+      </ul>
+      
+      <h3>確率的勾配降下法（Stochastic Gradient Descent, SGD）</h3>
+      <p><span class="keyword">確率的勾配降下法</span>は、各イテレーションでランダムに選んだ1つのサンプルだけを使って勾配を計算し、パラメータを更新する方法です。</p>
+      <h4>特徴</h4>
+      <ul>
+        <li>パラメータ更新が頻繁（サンプルごとに更新）</li>
+        <li>勾配の推定にノイズが多く含まれる</li>
+        <li>局所最適解を抜け出しやすい（ノイズによるランダム性が助けになる）</li>
+        <li>収束が不安定になりやすい</li>
+      </ul>
+      
+      <h3>ミニバッチ勾配降下法（Mini-batch Gradient Descent）</h3>
+      <p><span class="keyword">ミニバッチ勾配降下法</span>は、データの一部（ミニバッチ）を使って勾配を計算し、パラメータを更新する方法です。バッチ勾配降下法とSGDの中間的な手法です。</p>
+      <h4>特徴</h4>
+      <ul>
+        <li>バッチ勾配降下法とSGDの利点を組み合わせた手法</li>
+        <li>現在のディープラーニングで最も広く使われている手法</li>
+        <li>適切なミニバッチサイズを選ぶことで、計算効率と更新の安定性のバランスが取れる</li>
+        <li>GPUなどの並列計算に適している</li>
+      </ul>
+      
+      <div class="handwritten-box">
+        <p>ミニバッチ勾配降下法は現代のディープラーニングの標準的な手法です！</p>
+        <p>一般的なミニバッチサイズは16, 32, 64, 128, 256などの2のべき乗の値が使われることが多いです。これはGPUのメモリ使用効率が良いためです。</p>
+        <p>大きなバッチサイズの利点：安定した勾配推定、並列化効率の向上</p>
+        <p>小さなバッチサイズの利点：メモリ消費の削減、正則化効果、収束の加速</p>
+      </div>
+      
+      <h3>その他の学習方法</h3>
+      <h4>オンライン学習（Online Learning）</h4>
+      <p><span class="keyword">オンライン学習</span>は、データが逐次的に入力される環境で、新しいデータが入力されるたびにモデルを更新する学習方法です。SGDに似ていますが、既存のデータを再利用せず、新しいデータのみを使用します。</p>
+      
+      <h4>エポック（Epoch）とイテレーション（Iteration）</h4>
+      <p><span class="keyword">エポック</span>は、学習データセット全体を1回学習することを指します。<span class="keyword">イテレーション</span>は、パラメータを1回更新することを指します。1エポックには複数のイテレーションが含まれます（ミニバッチ勾配降下法の場合）。</p>
+      
+      <div class="note-box">
+        <p>例えば、10,000サンプルのデータセットをバッチサイズ100で学習する場合、1エポックは100イテレーション（10,000÷100）になります。</p>
+      </div>
+    </section>
+    
+    <!-- 最適化アルゴリズム -->
+    <section id="optimization-algorithms">
+      <h2 class="section-title"><i class="fas fa-rocket"></i> 最適化アルゴリズム</h2>
+      <p>基本的な勾配降下法の問題点を解決するために、様々な拡張アルゴリズムが提案されています。これらのアルゴリズムは、収束速度の向上や局所最適解の回避など、様々な観点から改良が行われています。</p>
+      
+      <h3>モーメンタム（Momentum）</h3>
+      <p><span class="keyword">モーメンタム</span>は、過去の勾配の情報を利用して、パラメータ更新の方向に慣性（勢い）を持たせる手法です。</p>
+      <h4>特徴と利点</h4>
+      <ul>
+        <li>過去の更新量を指数関数的に減衰させながら累積する</li>
+        <li>勾配の方向が一貫している場合に加速効果が得られる</li>
+        <li>二重降下現象を緩和する</li>
+        <li>局所最適解を抜け出しやすくなる</li>
+      </ul>
+      <p>更新式は以下のようになります：</p>
+      <p>\[ v_t = \gamma v_{t-1} + \eta \nabla J(\theta_t) \]</p>
+      <p>\[ \theta_{t+1} = \theta_t - v_t \]</p>
+      <p>ここで \(\gamma\) はモーメンタム係数（通常0.9程度の値）です。</p>
+      
+      <h3>AdaGrad</h3>
+      <p><span class="keyword">AdaGrad</span>は、パラメータごとに異なる学習率を適応的に調整する手法です。</p>
+      <h4>特徴と利点</h4>
+      <ul>
+        <li>頻繁に更新されるパラメータは学習率を小さく、あまり更新されないパラメータは学習率を大きくする</li>
+        <li>勾配の二乗和を累積し、それに基づいて学習率を調整する</li>
+        <li>疎なデータに対して効果的</li>
+      </ul>
+      <p>更新式は以下のようになります：</p>
+      <p>\[ G_t = G_{t-1} + (\nabla J(\theta_t))^2 \]</p>
+      <p>\[ \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_t + \epsilon}} \nabla J(\theta_t) \]</p>
+      <p>ここで \(G_t\) は勾配の二乗和の累積、\(\epsilon\) はゼロ除算を防ぐための小さな定数です。</p>
+      
+      <div class="note-box">
+        <p>AdaGradの問題点は、学習が進むにつれて \(G_t\) が単調増加するため、学習率が徐々に小さくなりすぎて、学習が停滞することがあることです。</p>
+      </div>
+      
+      <h3>RMSprop</h3>
+      <p><span class="keyword">RMSprop</span>は、AdaGradの問題点を改良したアルゴリズムで、勾配の二乗和を指数移動平均で更新します。</p>
+      <h4>特徴と利点</h4>
+      <ul>
+        <li>過去の勾配の二乗和を忘却係数を用いて加重平均する</li>
+        <li>学習率の減少が緩やかになり、長時間の学習が可能</li>
+        <li>非定常な目的関数に対して効果的</li>
+      </ul>
+      <p>更新式は以下のようになります：</p>
+      <p>\[ G_t = \rho G_{t-1} + (1 - \rho)(\nabla J(\theta_t))^2 \]</p>
+      <p>\[ \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_t + \epsilon}} \nabla J(\theta_t) \]</p>
+      <p>ここで \(\rho\) は忘却係数（通常0.9程度の値）です。</p>
+      
+      <h3>Adam</h3>
+      <p><span class="keyword">Adam</span>（Adaptive Moment Estimation）は、モーメンタムとRMSpropを組み合わせた手法で、現在最も広く使われている最適化アルゴリズムの一つです。</p>
+      <h4>特徴と利点</h4>
+      <ul>
+        <li>一次モーメント（勾配の平均）と二次モーメント（勾配の二乗の平均）の両方を利用</li>
+        <li>初期のモーメント推定値のバイアスを補正する</li>
+        <li>多くのディープラーニングタスクで良好な性能を示す</li>
+        <li>ハイパーパラメータの初期値が比較的ロバスト</li>
+      </ul>
+      <p>Adamの更新式は複雑ですが、基本的にはモーメンタムとRMSpropの利点を組み合わせています。</p>
+      
+      <div class="handwritten-box">
+        <p>Adamは「万能選手」的な最適化アルゴリズムとして人気があり、多くのディープラーニングのフレームワークでデフォルトとして採用されています。</p>
+        <p>ただし、画像認識などのタスクでは、モーメンタム付きSGDの方が汎化性能が良いという報告もあります。タスクに応じて適切なアルゴリズムを選ぶことが重要です。</p>
+      </div>
+      
+      <h3>その他の最適化アルゴリズム</h3>
+      <p>その他にも多くの最適化アルゴリズムが提案されています：</p>
+      <ul>
+        <li><span class="keyword">AdaDelta</span>：RMSpropをさらに改良したアルゴリズム</li>
+        <li><span class="keyword">AMSBound</span>：Adamの収束性を改善したアルゴリズム</li>
+        <li><span class="keyword">AdaBound</span>：Adamの学習率に上限と下限を設定したアルゴリズム</li>
+      </ul>
+      
+      <div class="note-box">
+        <p>最適化アルゴリズムの選択は、問題の性質やデータセットの特性によって異なります。一般的には、Adamが多くの場合で良好な結果をもたらしますが、最終的な性能を追求する場合は複数のアルゴリズムを試して比較することが重要です。</p>
+      </div>
+    </section>
+    
+    <!-- ハイパーパラメータ -->
+    <section id="hyperparameter">
+      <h2 class="section-title"><i class="fas fa-sliders-h"></i> ハイパーパラメータ</h2>
+      <p><span class="keyword">ハイパーパラメータ</span>は、モデルの学習前に設定するパラメータで、学習過程で自動的に調整されるパラメータ（重みやバイアス）とは異なります。ハイパーパラメータの適切な設定はモデルの性能に大きく影響します。</p>
+      
+      <h3>主なハイパーパラメータ</h3>
+      <ul>
+        <li><span class="keyword">学習率（Learning Rate）</span>：パラメータ更新の大きさを制御する係数</li>
+        <li><span class="keyword">バッチサイズ（Batch Size）</span>：一度に学習に使用するデータの数</li>
+        <li><span class="keyword">エポック数（Number of Epochs）</span>：データセット全体を何回学習するか</li>
+        <li><span class="keyword">隠れ層の数とサイズ</span>：ネットワークの構造を決定するパラメータ</li>
+        <li><span class="keyword">正則化係数</span>：L1正則化やL2正則化の強さを制御する係数</li>
+        <li><span class="keyword">ドロップアウト率</span>：ドロップアウトでニューロンを無効化する確率</li>
+        <li><span class="keyword">モーメンタム係数</span>：モーメンタムの強さを制御する係数</li>
+        <li><span class="keyword">最適化アルゴリズムに関するパラメータ</span>：各アルゴリズム特有のパラメータ</li>
+      </ul>
+      
+      <h3>ハイパーパラメータ調整の手法</h3>
+      <p>ハイパーパラメータの調整には、以下のような手法があります：</p>
+      
+      <h4>グリッドサーチ（Grid Search）</h4>
+      <p><span class="keyword">グリッドサーチ</span>は、あらかじめ定義された範囲内の全ての組み合わせを試す方法です。</p>
+      <ul>
+        <li>確実に最適な組み合わせを発見できる</li>
+        <li>ハイパーパラメータの数が多いと計算コストが爆発的に増加する</li>
+      </ul>
+      
+      <h4>ランダムサーチ（Random Search）</h4>
+      <p><span class="keyword">ランダムサーチ</span>は、定義された範囲内からランダムにハイパーパラメータの組み合わせを選んで試す方法です。</p>
+      <ul>
+        <li>グリッドサーチより効率的に良い組み合わせを発見できることが多い</li>
+        <li>特に重要なハイパーパラメータが少数の場合に有効</li>
+      </ul>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-6_02.png" alt="グリッドサーチとランダムサーチの比較">
+        <figcaption>グリッドサーチとランダムサーチの比較。ランダムサーチの方が重要なパラメータの探索空間をより広くカバーできる場合がある</figcaption>
+      </div>
+      
+      <h4>ベイズ最適化（Bayesian Optimization）</h4>
+      <p><span class="keyword">ベイズ最適化</span>は、これまでの試行結果に基づいて次に試すべきハイパーパラメータの組み合わせを選ぶ方法です。</p>
+      <ul>
+        <li>過去の結果から学習し、有望な領域を重点的に探索する</li>
+        <li>少ない試行回数で効率的に最適値を発見できる</li>
+        <li>計算コストが高いモデルの調整に適している</li>
+      </ul>
+      
+      <h3>早期終了（Early Stopping）</h3>
+      <p><span class="keyword">早期終了</span>は、検証データセットの性能が向上しなくなったら学習を停止する技術です。</p>
+      <ul>
+        <li>過学習を防止する効果がある</li>
+        <li>学習時間の短縮にも貢献する</li>
+        <li>実質的に学習エポック数を自動調整するハイパーパラメータ調整手法</li>
+      </ul>
+      
+      <div class="handwritten-box">
+        <p>ハイパーパラメータ調整のコツ：</p>
+        <ol>
+          <li>まずは広い範囲でランダムサーチを行い、良い領域を特定する</li>
+          <li>その周辺で細かいグリッドサーチやベイズ最適化を行う</li>
+          <li>１つのハイパーパラメータを調整する際は、他のパラメータの影響も考慮する</li>
+          <li>学習率は最も重要なハイパーパラメータの一つなので、特に慎重に調整する</li>
+          <li>複数回の試行を行い、結果の安定性を確認する</li>
+        </ol>
+      </div>
+      
+      <h3>ノーフリーランチの定理</h3>
+      <p><span class="keyword">ノーフリーランチの定理（No Free Lunch Theorem）</span>は、すべての問題に対して最適なアルゴリズムやハイパーパラメータの組み合わせが存在しないことを示す定理です。</p>
+      <p>つまり、ある問題に対して良いパフォーマンスを示す最適化手法が、別の問題では必ずしも良いとは限らないということを意味します。そのため、各問題に応じた適切なアルゴリズムとハイパーパラメータの選択が重要になります。</p>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-6_03.png" alt="ノーフリーランチの定理">
+        <figcaption>ノーフリーランチの定理：すべての問題に対して最適なアルゴリズムやハイパーパラメータの組み合わせが存在しないことを示す定理</figcaption>
+      </div>
+
+
+      <div class="note-box">
+        <p>ハイパーパラメータの調整は、ディープラーニングにおいて非常に重要なプロセスですが、経験と試行錯誤が必要です。特に大規模なモデルでは、計算リソースの制約から完全な探索が困難なため、効率的な探索戦略が求められます。</p>
+      </div>
+    </section>
+    
+    <!-- 用語集 -->
+    <section id="terms-section">
+      <h2 class="section-title"><i class="fas fa-book"></i> 用語集</h2>
+      <p>最適化手法に関する重要な用語をまとめました。</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>用語</th>
+            <th>説明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>勾配降下法 (Gradient Descent)</td>
+            <td>誤差関数の勾配を計算し、その勾配の逆方向にパラメータを更新する最適化手法。</td>
+          </tr>
+          <tr>
+            <td>確率的勾配降下法 (SGD)</td>
+            <td>1つのサンプルを使って勾配を計算し、パラメータを更新する手法。</td>
+          </tr>
+          <tr>
+            <td>ミニバッチ学習</td>
+            <td>データの一部（ミニバッチ）を使って勾配を計算し、パラメータを更新する方法。</td>
+          </tr>
+          <tr>
+            <td>バッチ学習</td>
+            <td>全てのデータを使って一度に勾配を計算し、パラメータを更新する方法。</td>
+          </tr>
+          <tr>
+            <td>オンライン学習</td>
+            <td>データが逐次的に入力される環境で、新しいデータごとにモデルを更新する学習方法。</td>
+          </tr>
+          <tr>
+            <td>学習率</td>
+            <td>パラメータ更新の際の更新量を調整するハイパーパラメータ。</td>
+          </tr>
+          <tr>
+            <td>モーメンタム</td>
+            <td>過去の勾配の情報を利用して、パラメータ更新に慣性を持たせる手法。</td>
+          </tr>
+          <tr>
+            <td>局所最適解</td>
+            <td>誤差関数の値がその周囲より小さいが、大域的には最小ではない点。</td>
+          </tr>
+          <tr>
+            <td>大域最適解</td>
+            <td>誤差関数全体で最も値が小さい点。</td>
+          </tr>
+          <tr>
+            <td>鞍点</td>
+            <td>勾配がゼロになる点で、ある方向では極小だが別の方向では極大となる点。</td>
+          </tr>
+          <tr>
+            <td>エポック</td>
+            <td>学習データセット全体を1回学習すること。</td>
+          </tr>
+          <tr>
+            <td>イテレーション</td>
+            <td>パラメータを1回更新すること。</td>
+          </tr>
+          <tr>
+            <td>AdaGrad</td>
+            <td>パラメータごとに異なる学習率を適応的に調整する最適化アルゴリズム。</td>
+          </tr>
+          <tr>
+            <td>RMSprop</td>
+            <td>AdaGradを改良し、勾配の二乗和を指数移動平均で更新する最適化アルゴリズム。</td>
+          </tr>
+          <tr>
+            <td>Adam</td>
+            <td>モーメンタムとRMSpropを組み合わせた最適化アルゴリズム。</td>
+          </tr>
+          <tr>
+            <td>AdaDelta</td>
+            <td>RMSpropをさらに改良したアルゴリズム。学習率を自動的に調整する。</td>
+          </tr>
+          <tr>
+            <td>AdaBound</td>
+            <td>Adamの学習率に上限と下限を設定したアルゴリズム。</td>
+          </tr>
+          <tr>
+            <td>AMSBound</td>
+            <td>Adamの収束性を改善したアルゴリズム。</td>
+          </tr>
+          <tr>
+            <td>二重降下現象</td>
+            <td>狭い谷や急勾配の場所で、最適解にたどり着くまでにジグザグな動きをする現象。</td>
+          </tr>
+          <tr>
+            <td>早期終了</td>
+            <td>検証データセットの性能が向上しなくなったら学習を停止する技術。</td>
+          </tr>
+          <tr>
+            <td>グリッドサーチ</td>
+            <td>あらかじめ定義された範囲内の全ての組み合わせを試すハイパーパラメータ調整法。</td>
+          </tr>
+          <tr>
+            <td>ランダムサーチ</td>
+            <td>定義された範囲内からランダムにハイパーパラメータの組み合わせを選ぶ調整法。</td>
+          </tr>
+          <tr>
+            <td>ノーフリーランチの定理</td>
+            <td>すべての問題に対して最適なアルゴリズムが存在しないことを示す定理。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <!-- Key Insights -->
+    <section id="key-insights">
+      <h2 class="section-title"><i class="fas fa-lightbulb"></i> Key Insights</h2>
+      
+      <div class="insight-item">
+        <p class="insight-title">1. 勾配降下法は最適化の基本</p>
+        <p>勾配降下法はディープラーニングの最適化の基本となるアルゴリズムで、誤差関数の勾配の逆方向にパラメータを更新することで最小値を探索します。しかし、そのまま使うと効率が悪かったり局所解に陥りやすいという問題があります。</p>
+      </div>
+      
+      <div class="insight-item">
+        <p class="insight-title">2. ミニバッチ勾配降下法が標準的</p>
+        <p>ディープラーニングでは、バッチ勾配降下法とSGDの中間であるミニバッチ勾配降下法が標準的に使われています。これは計算効率と勾配推定の安定性のバランスが良く、GPUなどの並列計算に適しているためです。</p>
+      </div>
+      
+      <div class="insight-item">
+        <p class="insight-title">3. 改良された最適化アルゴリズムの特徴を理解する</p>
+        <p>モーメンタム、AdaGrad、RMSprop、Adamなどの改良されたアルゴリズムは、勾配降下法の問題点を解決するために作られています。それぞれの特徴を理解し、問題に応じて適切なアルゴリズムを選択することが重要です。特にAdamは多くの場合でバランスの良い性能を発揮するため広く使われています。</p>
+      </div>
+      
+      <div class="insight-item">
+        <p class="insight-title">4. ハイパーパラメータ調整は最適化の要</p>
+        <p>学習率やバッチサイズなどのハイパーパラメータは、モデルの性能に大きく影響します。グリッドサーチやランダムサーチ、ベイズ最適化などの手法を用いて効率的に最適なハイパーパラメータを見つけることが重要です。また、ノーフリーランチの定理が示すように、すべての問題に対して最適なアルゴリズムやハイパーパラメータの組み合わせは存在しないため、実際に試して評価することが必要です。</p>
+      </div>
+    </section>
+    
+    <!-- Take Home Message -->
+    <section id="take-home">
+      <h2 class="section-title"><i class="fas fa-key"></i> Take Home Message</h2>
+      
+      <div class="message-box">
+        <p class="message-text">最適化手法は、ディープラーニングの学習過程を効率的に進めるための重要な要素です。基本的な勾配降下法から始まり、様々な改良アルゴリズムが開発されてきました。モデルの性能を最大化するためには、適切な最適化アルゴリズムの選択と、ハイパーパラメータの調整が不可欠です。実際の問題には試行錯誤が必要ですが、基本原理を理解することで、効率的な最適化戦略を立てることができます。</p>
+      </div>
+    </section>
+
+    <!-- フッター -->
+    <footer>
+      <p>© 2024 G検定学習ノート | 作成日: 2024年4月 | Content: Claude | Images: ChatGPT</p>
+    </footer>
+
+    <!-- スクロールトップボタン -->
+    <div class="scroll-top" id="scrollTop">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+  </main>
+
+  <!-- JavaScript -->
+  <script>
+    // スムーズスクロール
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // スクロールトップボタン
+    const scrollTopBtn = document.getElementById('scrollTop');
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // スクロールに応じたサイドバーのアクティブ状態更新
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section');
+      let current = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      document.querySelectorAll('.sidebar-nav a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

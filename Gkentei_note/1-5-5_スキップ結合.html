@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-5-5 スキップ結合</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      
+      /* 基本フォント設定 */
+      --main-font: 'Zen Maru Gothic', sans-serif;
+      --heading-font: 'M PLUS Rounded 1c', sans-serif;
+      --handwritten-font: 'Klee One', cursive;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--main-font);
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 250px;
+      background-color: #000000; /* 黒背景 */
+      color: var(--white);
+      padding: 1.5rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    
+    .sidebar-title {
+      font-family: var(--heading-font);
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--cyan);
+    }
+    
+    .sidebar-menu {
+      list-style-type: none;
+    }
+    
+    .sidebar-menu li {
+      margin-bottom: 0.8rem;
+    }
+    
+    .sidebar-menu a {
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--cyan);
+    }
+    
+    .sidebar-menu i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 2rem;
+    }
+    
+    /* セクションコンテナ */
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* タイトルセクション */
+    .title-section {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(0, 216, 232, 0.1), rgba(255, 64, 160, 0.1));
+      border-radius: 12px;
+    }
+    
+    .main-title {
+      font-family: var(--heading-font);
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    /* セクションタイトル */
+    .section-title {
+      font-family: var(--heading-font);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      color: var(--key);
+      border-bottom: 2px solid var(--cyan);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+    
+    /* コンテントボックス */
+    .content-box {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      font-family: var(--handwritten-font);
+      background-color: var(--white);
+      border: 2px dashed var(--dark-gray);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      transform: rotate(-0.5deg);
+      box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      background-color: var(--white);
+      border-left: 4px solid var(--yellow);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      font-size: 1.5rem;
+    }
+    
+    /* テキストスタイル */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
+    .highlight {
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      font-weight: 500;
+    }
+    
+    .highlight-cyan {
+      background: linear-gradient(transparent 60%, var(--cyan) 60%);
+      font-weight: 500;
+    }
+    
+    .highlight-magenta {
+      background: linear-gradient(transparent 60%, var(--magenta) 60%);
+      font-weight: 500;
+    }
+    
+    /* リストスタイル */
+    ul, ol {
+      margin: 1rem 0 1.5rem 1.5rem;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* 用語集 */
+    .glossary {
+      margin: 2rem 0;
+    }
+    
+    .glossary-title {
+      font-family: var(--heading-font);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .glossary-title i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+    
+    .term-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .term-card {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-left: 3px solid var(--cyan);
+    }
+    
+    .term {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+    }
+    
+    .term-en {
+      font-style: italic;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .definition {
+      font-size: 0.95rem;
+    }
+    
+    /* 画像コンテナ */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* Key Insights */
+    .key-insights {
+      margin: 2rem 0;
+    }
+    
+    .insights-title {
+      font-family: var(--heading-font);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .insights-title i {
+      margin-right: 0.5rem;
+      color: var(--yellow);
+    }
+    
+    .insight-card {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      border-left: 3px solid var(--yellow);
+    }
+    
+    .insight-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .insight-title i {
+      margin-right: 0.5rem;
+      color: var(--yellow);
+      font-size: 0.9rem;
+    }
+    
+    /* Take Home Message */
+    .take-home {
+      margin: 3rem auto;
+      max-width: 90%;
+      background-color: var(--white);
+      border: 2px solid var(--magenta);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .take-home-title {
+      font-family: var(--heading-font);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .take-home-title i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+    
+    .take-home-message {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin: 0 auto;
+      max-width: 80%;
+    }
+    
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 3rem;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 45px;
+      height: 45px;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 99;
+    }
+    
+    .scroll-top.show {
+      opacity: 1;
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 200px;
+      }
+      
+      .main-content {
+        margin-left: 200px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .term-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <div class="sidebar-title">
+        ディープラーニングの要素技術
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="#intro"><i class="fas fa-info-circle"></i>はじめに</a></li>
+        <li><a href="#overview"><i class="fas fa-project-diagram"></i>スキップ結合の概要</a></li>
+        <li><a href="#role"><i class="fas fa-cogs"></i>ディープラーニングにおける役割</a></li>
+        <li><a href="#resnet"><i class="fas fa-network-wired"></i>ResNetの概要</a></li>
+        <li><a href="#application"><i class="fas fa-laptop-code"></i>応用例</a></li>
+        <li><a href="#glossary"><i class="fas fa-book"></i>用語集</a></li>
+        <li><a href="#key-insights"><i class="fas fa-lightbulb"></i>Key Insights</a></li>
+        <li><a href="#take-home"><i class="fas fa-key"></i>Take Home Message</a></li>
+      </ul>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- タイトルセクション -->
+      <section id="intro" class="title-section">
+        <h1 class="main-title">1-5-5 スキップ結合</h1>
+        <p class="subtitle">深層ニューラルネットワークにおける勾配消失問題を解決する革新的手法</p>
+        <div class="overview">
+          <p>G検定で問われる「スキップ結合」について学習します。</p>
+          <ul>
+            <li>スキップ結合の基本概念とメカニズム</li>
+            <li>深層ニューラルネットワークにおける勾配消失問題とスキップ結合の役割</li>
+            <li>ResNet（Residual Network）の構造と特徴</li>
+            <li>スキップ結合の活用事例と効果</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- スキップ結合の概要 -->
+      <section id="overview" class="section">
+        <h2 class="section-title"><i class="fas fa-project-diagram"></i>スキップ結合の概要</h2>
+        
+        <div class="content-box">
+          <p><span class="highlight">スキップ結合（Skip Connection）</span>とは、ディープラーニングネットワークにおいて、ある層の入力を数層先の出力に直接接続する構造のことです。これにより、ネットワークの複数の層をスキップ（飛び越し）して情報を伝達します。</p>
+          
+          <p>スキップ結合の基本的な考え方は、入力データ \(x\) が数層のニューラルネットワーク層 \(F(x)\) を通過した後、その出力に元の入力 \(x\) を足し合わせることで、\(F(x) + x\) という出力を得るというものです。</p>
+        </div>
+        
+        <div class="handwritten-box">
+          <p>普通のニューラルネットワーク：</p>
+          <p style="text-align: center; font-weight: bold;">出力 = F(x)</p>
+          
+          <p>スキップ結合のあるネットワーク：</p>
+          <p style="text-align: center; font-weight: bold;">出力 = F(x) + x</p>
+          
+          <p>この「+ x」が重要！入力をそのまま出力に足すことで、勾配が直接伝わる道ができます。</p>
+        </div>
+        
+        <div class="content-box">
+          <p>スキップ結合の主なタイプには以下の2つがあります：</p>
+          
+          <ol>
+            <li><span class="highlight-cyan">アイデンティティショートカット（Identity Shortcut）</span>：入力 \(x\) をそのまま出力に足し合わせるもの</li>
+            <li><span class="highlight-cyan">プロジェクションショートカット（Projection Shortcut）</span>：入力 \(x\) に線形変換（例：1×1畳み込み）を適用してから出力に足し合わせるもの</li>
+          </ol>
+          
+          <p>スキップ結合は、特に深い層を持つニューラルネットワークにおいて、次のような効果があります：</p>
+          
+          <ul>
+            <li>勾配消失問題の緩和</li>
+            <li>情報の効率的な伝播</li>
+            <li>より深いネットワークの学習を可能にする</li>
+            <li>学習の高速化</li>
+          </ul>
+        </div>
+        
+        <div class="note-box">
+          <p>スキップ結合は「残差接続（Residual Connection）」や「ショートカット接続（Shortcut Connection）」とも呼ばれることがあります。ResNetでは、スキップ結合を使った構造を「残差ブロック（Residual Block）」と呼びます。</p>
+        </div>
+      </section>
+      
+      <!-- ディープラーニングにおける役割 -->
+      <section id="role" class="section">
+        <h2 class="section-title"><i class="fas fa-cogs"></i>ディープラーニングにおける役割</h2>
+        
+        <div class="content-box">
+          <p>スキップ結合は、深層ニューラルネットワークが抱える根本的な問題を解決するために考案された技術です。特に、深い層を持つネットワークでは、以下の問題が発生します：</p>
+          
+          <ul>
+            <li><span class="highlight-magenta">勾配消失問題（Vanishing Gradient Problem）</span>：誤差逆伝播法で深い層まで勾配が伝わりにくくなる問題</li>
+            <li><span class="highlight-magenta">表現学習の難しさ</span>：深い層になるにつれて、有意義な特徴表現を学習しづらくなる問題</li>
+            <li><span class="highlight-magenta">劣化問題（Degradation Problem）</span>：層を深くすると理論上は精度が向上するはずなのに、実際には学習が難しくなり精度が低下する問題</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <p>なぜスキップ結合が有効なのか？</p>
+          <p>深いネットワークの学習が難しいのは、多くの層を通過することで<span style="text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--magenta);">勾配が消失したり爆発したりする</span>ためです。</p>
+          <p>スキップ結合は、勾配が流れる「高速道路」のような役割を果たします。入力から出力への直接的なパスを提供することで、勾配が効率よく伝わるようになります！</p>
+        </div>
+        
+        <div class="content-box">
+          <p>スキップ結合がディープラーニングにおいて果たす主な役割は以下の通りです：</p>
+          
+          <ol>
+            <li>
+              <strong>勾配消失問題の緩和</strong>：
+              <p>スキップ結合により、勾配は少なくとも1つのパス（ショートカットパス）を通じて直接伝播できるため、勾配消失が緩和されます。計算式で表すと、勾配 \(\frac{\partial L}{\partial x}\) は以下のようになります：</p>
+              <p style="text-align: center;">\(\frac{\partial L}{\partial x} = \frac{\partial L}{\partial (F(x) + x)} \cdot (F'(x) + 1)\)</p>
+              <p>この「+1」が重要で、これにより勾配が少なくとも1の大きさで伝わるパスが確保されます。</p>
+            </li>
+            
+            <li>
+              <strong>恒等写像の学習容易性</strong>：
+              <p>スキップ結合を使うと、ネットワークが恒等写像（入力をそのまま出力する変換）を学習するのが容易になります。層が深くなっても「何もしない」という選択肢が簡単に実現できます。</p>
+            </li>
+            
+            <li>
+              <strong>最適化の容易さ</strong>：
+              <p>残差関数 \(F(x) = H(x) - x\) を学習する方が、直接目標の関数 \(H(x)\) を学習するよりも簡単であることが実験的に示されています。</p>
+            </li>
+          </ol>
+        </div>
+        
+        <div class="note-box">
+          <p>スキップ結合の重要性は、<span class="highlight">非常に深いネットワーク（100層以上）の学習を可能にしたこと</span>にあります。これにより、ImageNetコンペティションなどで画期的な精度向上が実現しました。</p>
+        </div>
+      </section>
+      
+      <!-- ResNetの概要 -->
+      <section id="resnet" class="section">
+        <h2 class="section-title"><i class="fas fa-network-wired"></i>ResNetの概要</h2>
+        
+        <div class="content-box">
+          <p><span class="highlight">Residual Network（ResNet）</span>は、マイクロソフトリサーチの研究者たちによって2015年に提案された、スキップ結合を活用した深層畳み込みニューラルネットワークアーキテクチャです。ResNetは、ILSVRC（ImageNet Large Scale Visual Recognition Challenge）2015で優勝し、画像認識タスクにおける重要な転換点となりました。</p>
+          
+          <p>ResNetの最大の特徴は、<span class="highlight-cyan">残差ブロック（Residual Block）</span>と呼ばれる構造単位を使用していることです。この残差ブロックでは、スキップ結合を使って入力を数層先の出力に直接足し合わせています。</p>
+        </div>
+        
+        <div class="handwritten-box">
+          <p>残差ブロックの基本的な構造：</p>
+          <p>1. 入力 x を受け取る</p>
+          <p>2. 畳み込み層、バッチ正規化層、活性化関数（ReLU）を通過させる</p>
+          <p>3. さらに畳み込み層、バッチ正規化層を通過させる</p>
+          <p>4. この出力に元の入力 x を足し合わせる（スキップ結合！）</p>
+          <p>5. 最後に活性化関数（ReLU）を適用</p>
+        </div>
+        
+        <div class="content-box">
+          <p>ResNetの主なバリエーションには、次のようなものがあります：</p>
+          
+          <ul>
+            <li><strong>ResNet-18, ResNet-34</strong>：基本的な残差ブロックを使用</li>
+            <li><strong>ResNet-50, ResNet-101, ResNet-152</strong>：ボトルネック構造の残差ブロックを使用（計算効率の向上）</li>
+            <li><strong>ResNeXt</strong>：グループ畳み込みを取り入れた発展形</li>
+            <li><strong>Wide ResNet</strong>：チャネル数を増やして幅を広げたバージョン</li>
+          </ul>
+          
+          <p>ResNetが革新的だった理由は、単に精度が向上しただけでなく、<span class="highlight-magenta">深層学習のパラダイムそのものを変えた</span>点にあります。従来のモデルでは、層を深くするとかえって精度が低下する「劣化問題」がありましたが、ResNetはこの問題を解決し、100層を超える非常に深いネットワークの学習を可能にしました。</p>
+        </div>
+        
+        <div class="note-box">
+          <p>ResNetは、単に画像認識の精度を向上させただけでなく、転移学習のための事前学習モデルとしても広く使われています。また、ResNetの「残差学習」という考え方は、様々なタスクやアーキテクチャにも応用されています。</p>
+        </div>
+      </section>
+      
+      <!-- 応用例 -->
+      <section id="application" class="section">
+        <h2 class="section-title"><i class="fas fa-laptop-code"></i>応用例</h2>
+        
+        <div class="content-box">
+          <p>スキップ結合は、ResNet以降、様々なディープラーニングアーキテクチャに採用されています。主な応用例は以下の通りです：</p>
+          
+          <ol>
+            <li>
+              <strong>画像認識モデル</strong>：
+              <p>ResNetとその派生モデル（ResNeXt、Wide ResNetなど）、DenseNetなど、最先端の画像認識モデルの多くがスキップ結合を採用しています。</p>
+            </li>
+            
+            <li>
+              <strong>物体検出モデル</strong>：
+              <p>Faster R-CNN、Mask R-CNN、YOLOなどの物体検出モデルでは、バックボーンネットワークとしてResNetを使用することが一般的です。</p>
+            </li>
+            
+            <li>
+              <strong>セグメンテーションモデル</strong>：
+              <p>U-Net、FCN（Fully Convolutional Network）などのセグメンテーションモデルでは、エンコーダ部分とデコーダ部分の間にスキップ結合を使用して、位置情報の精度を向上させています。</p>
+            </li>
+            
+            <li>
+              <strong>自然言語処理</strong>：
+              <p>Transformerアーキテクチャでは、マルチヘッドアテンションブロックと全結合層の間にスキップ結合が使われています。BERTやGPTなどの言語モデルも、この構造を採用しています。</p>
+            </li>
+            
+            <li>
+              <strong>音声処理</strong>：
+              <p>WaveNetなどの音声生成モデルでも、スキップ結合が使われており、長時間依存関係の学習を助けています。</p>
+            </li>
+          </ol>
+        </div>
+        
+        <div class="handwritten-box">
+          <p>スキップ結合の応用の広がり：</p>
+          <p>スキップ結合は、単に層と層をつなぐだけでなく、様々な形で発展しています！</p>
+          <p>・DenseNetでは、すべての層を相互接続</p>
+          <p>・U-Netでは、ダウンサンプリングとアップサンプリングの間をスキップ結合</p>
+          <p>・Highway Networksでは、ゲート機構を持つスキップ結合</p>
+          <p>基本原理は同じでも、アイデアの応用は無限です！</p>
+        </div>
+        
+        <div class="note-box">
+          <p>スキップ結合は、現代のディープラーニングアーキテクチャにおいて必須の要素となっています。G検定では、スキップ結合の基本概念と、ResNetにおける応用を理解しておくことが重要です。</p>
+        </div>
+      </section>
+      
+      <!-- 用語集 -->
+      <section id="glossary" class="section">
+        <h2 class="section-title"><i class="fas fa-book"></i>用語集</h2>
+        
+        <div class="glossary">
+          <h3 class="glossary-title"><i class="fas fa-list"></i>重要キーワード</h3>
+          
+          <div class="term-container">
+            <div class="term-card">
+              <p class="term">スキップ結合</p>
+              <p class="term-en">Skip Connection</p>
+              <p class="definition">ディープラーニングネットワークにおいて、ある層の出力を数層先の入力に直接接続する構造。入力をそのまま出力に足し合わせることで、勾配消失問題を緩和し、深いネットワークの学習を容易にする。</p>
+            </div>
+            
+            <div class="term-card">
+              <p class="term">Residual Network</p>
+              <p class="term-en">ResNet</p>
+              <p class="definition">2015年にMicrosoftの研究者が提案した、スキップ結合を活用した深層畳み込みニューラルネットワークアーキテクチャ。画像認識タスクにおいて画期的な精度向上を実現した。</p>
+            </div>
+            
+            <div class="term-card">
+              <p class="term">残差ブロック</p>
+              <p class="term-en">Residual Block</p>
+              <p class="definition">ResNetの基本構成単位。畳み込み層、バッチ正規化層、活性化関数を持ち、入力を出力に直接足し合わせるスキップ結合を特徴とする。</p>
+            </div>
+            
+            <div class="term-card">
+              <p class="term">勾配消失問題</p>
+              <p class="term-en">Vanishing Gradient Problem</p>
+              <p class="definition">深層ニューラルネットワークにおいて、誤差逆伝播法の過程で勾配が入力層に近づくにつれて指数関数的に小さくなり、学習が困難になる問題。</p>
+            </div>
+            
+            <div class="term-card">
+              <p class="term">劣化問題</p>
+              <p class="term-en">Degradation Problem</p>
+              <p class="definition">ニューラルネットワークにおいて、層を深くするとかえって精度が低下する現象。学習の難しさに起因し、スキップ結合によって緩和される。</p>
+            </div>
+            
+            <div class="term-card">
+              <p class="term">恒等写像</p>
+              <p class="term-en">Identity Mapping</p>
+              <p class="definition">入力をそのまま出力する変換。スキップ結合により、ネットワークが必要に応じて恒等写像を学習しやすくなる。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Key Insights -->
+      <section id="key-insights" class="section">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i>Key Insights</h2>
+        
+        <div class="key-insights">
+          <div class="insight-card">
+            <h3 class="insight-title"><i class="fas fa-check-circle"></i>スキップ結合の本質</h3>
+            <p>スキップ結合は単なる接続の追加ではなく、勾配フローの改善を通じて深層ネットワークの学習を根本的に変える革新技術です。入力を出力に直接足し合わせる単純な操作が、深いネットワークの学習を可能にし、ディープラーニングの性能限界を押し上げました。</p>
+          </div>
+          
+          <div class="insight-card">
+            <h3 class="insight-title"><i class="fas fa-check-circle"></i>ResNetの革新性</h3>
+            <p>ResNetは単なるアーキテクチャの一つではなく、ディープラーニングにおけるパラダイムシフトを引き起こしました。スキップ結合を用いた残差学習という考え方は、「層が深いほど良い」という直感を実現可能にし、現代の画像認識モデルの基礎となっています。</p>
+          </div>
+          
+          <div class="insight-card">
+            <h3 class="insight-title"><i class="fas fa-check-circle"></i>応用の広がり</h3>
+            <p>スキップ結合の概念は画像認識に留まらず、自然言語処理、音声処理など様々な分野に応用されています。特にTransformerアーキテクチャでは、異なる形でのスキップ結合が重要な役割を果たしており、現代のAI技術の基盤となっています。</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Take Home Message -->
+      <section id="take-home" class="section">
+        <div class="take-home">
+          <h3 class="take-home-title"><i class="fas fa-key"></i>Take Home Message</h3>
+          <p class="take-home-message">
+            スキップ結合は、深層ニューラルネットワークにおける勾配消失問題と劣化問題を解決する革新的手法です。ResNetに代表されるように、入力を出力に直接足し合わせるシンプルな構造により、非常に深いネットワークの学習が可能になりました。この「層をスキップする接続」という概念は、現代のディープラーニングアーキテクチャに不可欠な要素となっています。
+          </p>
+        </div>
+      </section>
+      
+      <!-- スクロールトップボタン -->
+      <div class="scroll-top">
+        <i class="fas fa-arrow-up"></i>
+      </div>
+      
+      <!-- フッター -->
+      <footer>
+        <p>G検定学習ノート 1-5-5 スキップ結合</p>
+        <p>原稿とコード: Claude | 画像: ChatGPT</p>
+        <p>©2024 G検定対策</p>
+      </footer>
+    </div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // スクロールトップボタンの表示切り替え
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          scrollTopBtn.classList.add('show');
+        } else {
+          scrollTopBtn.classList.remove('show');
+        }
+      });
+      
+      // トップへスクロール
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+      
+      // ナビゲーションのスムーススクロール
+      const navLinks = document.querySelectorAll('.sidebar-menu a');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          window.scrollTo({
+            top: targetElement.offsetTop - 20,
+            behavior: 'smooth'
+          });
+          
+          // アクティブクラスの切り替え
+          navLinks.forEach(link => link.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+      
+      // スクロール位置に基づくナビゲーションのハイライト
+      window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('section');
+        const scrollPosition = window.pageYOffset;
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionBottom = sectionTop + section.offsetHeight;
+          const sectionId = section.getAttribute('id');
+          
+          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            navLinks.forEach(link => {
+              link.classList.remove('active');
+              if (link.getAttribute('href') === '#' + sectionId) {
+                link.classList.add('active');
+              }
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

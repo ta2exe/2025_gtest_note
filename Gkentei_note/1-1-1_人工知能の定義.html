@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-1-1 人工知能の定義</title>
+  <!-- FontAwesomeの読み込み -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fontsの読み込み -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- ファビコン設定 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+
+  <style>
+    /* CMYK カラーパレット */
+    :root {
+      --cyan: #00D8E8;       /* シアン (C) */
+      --magenta: #FF40A0;    /* マゼンタ (M) */
+      --yellow: #FFE600;     /* イエロー (Y) */
+      --key: #181818;        /* キー/ブラック (K) */
+      --dark-gray: #404040;  /* ダークグレー */
+      --light-gray: #F5F5F5; /* ライトグレー */
+      --white: #FFFFFF;      /* 白 */
+      
+      /* グラデーション用 */
+      --cyan-light: rgba(0, 216, 232, 0.1);
+      --magenta-light: rgba(255, 64, 160, 0.1);
+      --yellow-light: rgba(255, 230, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      color: var(--key);
+      background-color: var(--light-gray);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      background-color: var(--cyan);
+      color: var(--key);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .sidebar-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--white);
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      margin-top: 1.5rem;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.8rem;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 0.8rem;
+      text-decoration: none;
+      color: var(--key);
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .sidebar-menu a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background-color: var(--white);
+      transform: translateX(5px);
+    }
+
+    .sidebar-menu a.active {
+      border-left: 4px solid var(--magenta);
+      font-weight: 700;
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 0;
+      background-color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ヘッダー */
+    .header {
+      background: linear-gradient(135deg, var(--cyan-light), var(--magenta-light));
+      padding: 2.5rem 3rem 2rem;
+      border-bottom: 3px solid var(--yellow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background-color: var(--yellow-light);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .title {
+      font-family: 'Klee One', cursive;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: var(--key);
+      margin-bottom: 0.8rem;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .title i {
+      color: var(--magenta);
+      margin-right: 1rem;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.1rem;
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .goal-summary {
+      background-color: var(--white);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 1;
+      border: 2px solid var(--cyan);
+      margin-top: 1rem;
+    }
+
+    .goal-summary h3 {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .goal-summary h3 i {
+      color: var(--cyan);
+      margin-right: 0.5rem;
+    }
+
+    .goal-summary ul {
+      list-style-type: none;
+      padding-left: 1.5rem;
+    }
+
+    .goal-summary ul li {
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+
+    .goal-summary ul li:before {
+      content: "";
+      position: absolute;
+      left: -1.2rem;
+      top: 0.5rem;
+      width: 8px;
+      height: 8px;
+      background-color: var(--yellow);
+      border-radius: 50%;
+    }
+
+    /* コンテンツエリア */
+    .content {
+      padding: 2.5rem 3rem;
+    }
+
+    /* セクション共通スタイル */
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.8rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--light-gray);
+    }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background-color: var(--magenta);
+    }
+
+    .section-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px dashed var(--cyan);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title i {
+      color: var(--cyan);
+      margin-right: 0.8rem;
+    }
+
+    /* 段落 */
+    p {
+      margin-bottom: 1.2rem;
+      line-height: 1.7;
+    }
+
+    /* キーワード強調 */
+    .keyword {
+      font-weight: 700;
+      color: var(--key);
+      border-bottom: 2px dotted var(--cyan);
+      padding: 0 2px;
+    }
+
+    .important-keyword {
+      font-weight: 700;
+      color: var(--magenta);
+      background-color: var(--magenta-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* 例示ボックス */
+    .example-box {
+      background-color: var(--yellow-light);
+      border-left: 4px solid var(--yellow);
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+    }
+
+    .example-box h4 {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .example-box h4 i {
+      color: var(--yellow);
+      margin-right: 0.6rem;
+    }
+
+    /* メモボックス */
+    .note-box {
+      background-color: var(--cyan-light);
+      border-left: 4px solid var(--cyan);
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .note-box i.note-pin {
+      position: absolute;
+      top: -5px;
+      right: 10px;
+      color: var(--magenta);
+      font-size: 1.2rem;
+      transform: rotate(10deg);
+    }
+
+    /* 手書き風ボックス */
+    .handwritten-box {
+      border: 2px dashed var(--magenta);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      position: relative;
+      background-color: var(--white);
+      transform: rotate(-0.5deg);
+      box-shadow: 3px 3px 0 var(--cyan-light);
+    }
+
+    .handwritten-box::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      width: 40%;
+      height: 5px;
+      background-color: var(--yellow);
+      transform: rotate(1deg);
+    }
+
+    /* 引用ボックス */
+    .quote-box {
+      border-left: 4px solid var(--magenta);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      font-style: italic;
+      background-color: var(--light-gray);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* リスト */
+    ul, ol {
+      margin: 1rem 0;
+      padding-left: 2rem;
+    }
+
+    ul li, ol li {
+      margin-bottom: 0.6rem;
+    }
+
+    /* 画像コンテナ改善 */
+    .image-container {
+      text-align: center;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      max-width: 90%;
+      border: 1px solid var(--cyan-light);
+      overflow: hidden;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--light-gray);
+      transition: transform 0.3s ease;
+    }
+    
+    .image-container img:hover {
+      transform: scale(1.02);
+    }
+
+    .image-container figcaption {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--dark-gray);
+      font-family: 'Klee One', cursive;
+      padding: 0.5rem;
+      background-color: var(--cyan-light);
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* AIとロボットの関係図用のスペシャルスタイル */
+    .image-split-container {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: linear-gradient(to right, var(--cyan-light), var(--magenta-light));
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      max-width: 90%;
+    }
+    
+    .image-split-item {
+      flex: 1;
+      text-align: center;
+      padding: 1rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      margin: 0 0.5rem;
+    }
+    
+    .image-split-item h4 {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      margin-bottom: 0.8rem;
+      font-size: 1.1rem;
+    }
+    
+    .image-split-item img {
+      max-width: 100%;
+      border-radius: 6px;
+      border: 1px solid var(--light-gray);
+    }
+    
+    .center-divider {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 1rem;
+    }
+    
+    .center-divider .divider-text {
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+      background-color: var(--white);
+      color: var(--key);
+      padding: 0.5rem 1rem;
+      border-radius: 50%;
+      margin: 1rem 0;
+      height: 50px;
+      width: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 用語集 */
+    .glossary {
+      margin-top: 3rem;
+      padding: 2rem;
+      background-color: var(--light-gray);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .glossary-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid var(--yellow);
+      display: flex;
+      align-items: center;
+    }
+
+    .glossary-title i {
+      color: var(--yellow);
+      margin-right: 0.8rem;
+    }
+
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.2rem;
+    }
+
+    .glossary-table th, .glossary-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--cyan-light);
+    }
+
+    .glossary-table th {
+      background-color: var(--cyan-light);
+      font-weight: 700;
+      color: var(--key);
+    }
+
+    .glossary-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* テスト対策ポイント */
+    .test-points {
+      margin-top: 3rem;
+      padding: 2rem;
+      background-color: var(--magenta-light);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      border: 1px dashed var(--magenta);
+    }
+
+    .test-points-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid var(--magenta);
+      display: flex;
+      align-items: center;
+    }
+
+    .test-points-title i {
+      color: var(--magenta);
+      margin-right: 0.8rem;
+    }
+
+    /* Key Insights */
+    .key-insights {
+      margin-top: 3rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--yellow-light), var(--cyan-light));
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .key-insights-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .key-insights-title i {
+      color: var(--yellow);
+      margin-right: 0.8rem;
+    }
+
+    .insight-item {
+      background-color: var(--white);
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid var(--cyan);
+    }
+
+    .insight-item h4 {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.1rem;
+      color: var(--key);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .insight-item h4 i {
+      color: var(--cyan);
+      margin-right: 0.6rem;
+    }
+
+    /* Take Home Message */
+    .take-home {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 3rem 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.07);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .take-home::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--yellow));
+    }
+
+    .take-home-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .take-home-title i {
+      color: var(--yellow);
+      margin-right: 0.8rem;
+    }
+
+    .take-home-message {
+      font-family: 'Klee One', cursive;
+      font-size: 1.3rem;
+      font-weight: 600;
+      line-height: 1.8;
+      padding: 1.5rem;
+      background-color: var(--yellow-light);
+      border-radius: 8px;
+      margin: 0 auto;
+      max-width: 90%;
+      border: 2px dashed var(--yellow);
+    }
+
+    /* フッター */
+    .footer {
+      padding: 2rem;
+      text-align: center;
+      background-color: var(--light-gray);
+      color: var(--dark-gray);
+      border-top: 1px solid var(--cyan-light);
+      font-size: 0.9rem;
+    }
+
+    .footer p {
+      margin-bottom: 0.5rem;
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 50px;
+      height: 50px;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 100;
+    }
+
+    .scroll-top.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+      background-color: var(--cyan);
+    }
+
+    /* レスポンシブデザイン */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 25%;
+      }
+      .main-content {
+        width: 75%;
+        margin-left: 25%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+      .header, .content {
+        padding: 1.5rem;
+      }
+      .title {
+        font-size: 1.8rem;
+      }
+      .section {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="fas fa-robot"></i> G検定学習ノート
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#introduction" class="active"><i class="fas fa-brain"></i> 人工知能とは</a></li>
+      <li><a href="#ai-levels"><i class="fas fa-layer-group"></i> AIの4つのレベル</a></li>
+      <li><a href="#ai-effect"><i class="fas fa-magic"></i> AI効果</a></li>
+      <li><a href="#ai-vs-robot"><i class="fas fa-robot"></i> AIとロボットの違い</a></li>
+      <li><a href="#agent"><i class="fas fa-user-cog"></i> エージェント</a></li>
+      <li><a href="#glossary"><i class="fas fa-book"></i> 用語集</a></li>
+      <li><a href="#test-points"><i class="fas fa-pencil-alt"></i> テスト対策ポイント</a></li>
+      <li><a href="#key-insights"><i class="fas fa-lightbulb"></i> Key Insights</a></li>
+      <li><a href="#take-home"><i class="fas fa-key"></i> Take Home Message</a></li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
+    <!-- ヘッダー -->
+    <header class="header">
+      <h1 class="title"><i class="fas fa-robot"></i>1-1-1 人工知能の定義</h1>
+      <div class="subtitle">G検定合格に必要な人工知能の基礎知識</div>
+      
+      <div class="goal-summary">
+        <h3><i class="fas fa-bullseye"></i>学習目標</h3>
+        <ul>
+          <li>人工知能とは何か、具体例を用いて説明できる</li>
+          <li>人工知能のレベルを「単純な制御プログラム」「古典的な人工知能」「機械学習」「深層学習」の4つに分類し、それぞれがどのようなものか説明することができる</li>
+          <li>AI効果を説明できる</li>
+          <li>人工知能とロボットの違いを説明できる</li>
+        </ul>
+      </div>
+    </header>
+
+    <!-- コンテンツエリア -->
+    <div class="content">
+      <!-- 人工知能とは -->
+      <section id="introduction" class="section">
+        <h2 class="section-title"><i class="fas fa-brain"></i>人工知能とは</h2>
+        <p><span class="important-keyword">人工知能（Artificial Intelligence, AI）</span>とは、人間の知能が持つ学習・推論・認識・判断などの能力をコンピュータで模倣し、実現しようとする技術や研究分野のことです。</p>
+        
+        <div class="note-box">
+          <i class="fas fa-thumbtack note-pin"></i>
+          <p>人工知能という言葉は、1956年に開催された<span class="keyword">ダートマス会議</span>で初めて提唱されました。ジョン・マッカーシーらによって「人間の知能を必要とするあらゆる作業をコンピュータに行わせること」と定義されました。</p>
+        </div>
+
+        
+        <p>現在の人工知能技術は、特定のタスクに特化した「特化型AI（弱いAI）」が主流であり、人間のように汎用的な知能を持つ「汎用人工知能（強いAI）」はまだ実現していません。</p>
+        
+        <div class="handwritten-box">
+          <h3>人工知能研究の主要な目標</h3>
+          <ul>
+            <li>コンピュータに人間のような推論能力を持たせること</li>
+            <li>データから学習し、経験を通じて性能を向上させること</li>
+            <li>自然言語を理解し、コミュニケーションできるようにすること</li>
+            <li>視覚情報を理解し、物体認識や画像認識を行うこと</li>
+            <li>不確実な状況下での意思決定を可能にすること</li>
+          </ul>
+        </div>
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>人工知能の具体例</h4>
+          <ul>
+            <li><strong>音声アシスタント</strong>：Siri、Alexa、Google アシスタントなど</li>
+            <li><strong>画像認識システム</strong>：顔認識、物体検出、医療画像診断など</li>
+            <li><strong>自然言語処理</strong>：自動翻訳、文章要約、チャットボットなど</li>
+            <li><strong>レコメンデーションシステム</strong>：動画や商品のおすすめ機能など</li>
+            <li><strong>自動運転技術</strong>：周囲環境を認識し、最適な運転判断を行うシステム</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- AIの4つのレベル -->
+      <section id="ai-levels" class="section">
+        <h2 class="section-title"><i class="fas fa-layer-group"></i>人工知能の4つのレベル</h2>
+        <p>人工知能は、その処理方法や能力によって以下の4つのレベルに分類することができます。これらのレベルは、単純なものから高度なものへと進化してきた歴史的な流れも反映しています。</p>
+        
+        
+        <h3>1. 単純な制御プログラム</h3>
+        <p>これは最も基本的なレベルで、プログラマーが設定した特定のルールに基づいて動作するシステムです。「もし〜ならば〜する」という条件分岐を用いた論理的な制御が中心です。</p>
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>具体例</h4>
+          <ul>
+            <li>家電製品の自動制御（エアコンの温度調節など）</li>
+            <li>エレベーターの制御システム</li>
+            <li>信号機のタイミング制御</li>
+            <li>自動販売機の商品選択・お金計算システム</li>
+          </ul>
+        </div>
+        
+        <h3>2. 古典的な人工知能</h3>
+        <p>明示的なルールやアルゴリズムを用いて推論や問題解決を行うアプローチです。<span class="keyword">エキスパートシステム</span>や<span class="keyword">ルールベース</span>のシステムがこれに該当します。専門家の知識を「もし〜ならば〜」というルールの形式で表現し、これに基づいて推論を行います。</p>
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>具体例</h4>
+          <ul>
+            <li>チェスや将棋のゲームAI（Deep Blueなど）</li>
+            <li>医療診断システム（MYCIN）</li>
+            <li>初期の質問応答システム</li>
+            <li>探索アルゴリズムを用いた経路探索</li>
+          </ul>
+        </div>
+        
+        <h3>3. 機械学習（Machine Learning）</h3>
+        <p><span class="important-keyword">機械学習</span>は、データから規則性やパターンを学習し、新しいデータに対して予測や判断を行う技術です。明示的なプログラミングなしに、経験からの学習能力を持っています。アルゴリズムがデータから自動的にパターンを見つけ出し、そのパターンに基づいて予測や判断を行います。</p>
+        
+        <div class="note-box">
+          <i class="fas fa-thumbtack note-pin"></i>
+          <p>機械学習はあらかじめ人間がプログラムした特徴量を基に学習を行います。一方、深層学習は特徴量も自動的に学習できるため、より複雑なパターン認識が可能になります。</p>
+        </div>
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>具体例</h4>
+          <ul>
+            <li>スパムメールフィルター</li>
+            <li>レコメンデーションシステム（Amazonの「この商品を買った人はこんな商品も買っています」など）</li>
+            <li>顔認識システム</li>
+            <li>異常検知システム（クレジットカードの不正検知など）</li>
+            <li>天気予報システム</li>
+          </ul>
+        </div>
+        
+        <h3>4. 深層学習（Deep Learning）</h3>
+        <p><span class="important-keyword">ディープラーニング</span>は機械学習の一種で、多層のニューラルネットワークを用いて複雑なパターンを学習する技術です。大量のデータと計算リソースを利用して、より高度な認識や予測を可能にします。従来の機械学習と異なり、入力データから特徴を自動的に抽出できるため、人間による特徴量設計が不要になります。</p>
+        
+        <div class="quote-box">
+          「ディープラーニングは機械学習の一分野であり、機械学習は人工知能の一分野である」
+        </div>
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>具体例</h4>
+          <ul>
+            <li>画像認識（ImageNetチャレンジで高い精度を達成）</li>
+            <li>自然言語処理（LLM：大規模言語モデル、ChatGPTなど）</li>
+            <li>音声認識（Siri、Google アシスタントなど）</li>
+            <li>自動運転システム</li>
+            <li>AlphaGo（囲碁AI）</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>進化するAIの特徴比較</h3>
+          <ul>
+            <li><strong>単純な制御プログラム</strong>：明示的なルールのみ、学習能力なし</li>
+            <li><strong>古典的なAI</strong>：探索や論理的推論、知識ベース、限定的な領域</li>
+            <li><strong>機械学習</strong>：データからパターンを学習、人間が設計した特徴量に依存</li>
+            <li><strong>深層学習</strong>：多層構造で自動的に特徴抽出、大量データが必要、高い計算コスト</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- AI効果 -->
+      <section id="ai-effect" class="section">
+        <h2 class="section-title"><i class="fas fa-magic"></i>AI効果（AI Effect）</h2>
+        <p><span class="important-keyword">AI効果</span>とは、ある技術が人工知能として実現されると、それはもはや「本当の知能」ではないとみなされるという現象です。つまり、「人工知能が解決できるようになった問題は、もはや知能を必要とする問題ではない」と見なされる傾向があります。</p>
+        
+        <div class="quote-box">
+          「AIが何かを達成すると、それはもはやAIとは呼ばれなくなる」（ダグラス・ホフスタッターの観察）
+        </div>
+        
+        <p>この効果により、人工知能の定義は常に変化し続けています。かつては「チェスをプレイできる」ことは高度な知能の証と考えられていましたが、コンピュータがチェスの世界チャンピオンを打ち負かせるようになると、「それは単なる計算能力であって真の知能ではない」と見なされるようになりました。</p>
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>AI効果の具体例</h4>
+          <ul>
+            <li>1997年、IBMのDeep Blueがチェス世界チャンピオンのガルリ・カスパロフを破った時、「それは単なるブルートフォース計算であり、本当の知能ではない」と言われた</li>
+            <li>2016年、GoogleのAlphaGoが世界トップクラスの囲碁棋士である李世ドルを破った時も同様の議論が起きた</li>
+            <li>音声認識や画像認識が実用レベルに達すると、「それは単なるパターン認識であり、理解を伴わない」という評価がなされる</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>AI効果の本質</h3>
+          <p>AI効果は、人間が「知能」の定義を常に更新し続ける傾向を表しています。コンピュータが特定のタスクを達成できるようになると、そのタスクは「知能を必要としない」と再定義されるため、真の人工知能の基準は常に先送りにされる現象とも言えます。</p>
+        </div>
+        
+        <div class="note-box">
+          <i class="fas fa-thumbtack note-pin"></i>
+          <p>AI効果は「移動するゴールポスト」とも表現されます。人工知能の定義が常に変化し、達成されたものは「もはや知能ではない」と見なされるため、AIの定義が常に先へ先へと移動していくという意味です。</p>
+        </div>
+      </section>
+      
+      <!-- AIとロボットの違い -->
+      <section id="ai-vs-robot" class="section">
+        <h2 class="section-title"><i class="fas fa-robot"></i>人工知能とロボットの違い</h2>
+        <p>人工知能とロボットは密接に関連していますが、異なる概念です：</p>
+        
+        <div class="handwritten-box">
+          <ul>
+            <li><span class="important-keyword">人工知能（AI）</span>：知的な情報処理や意思決定を行うソフトウェアやアルゴリズムのこと</li>
+            <li><span class="keyword">ロボット</span>：物理的な身体を持ち、環境に作用する機械装置のこと</li>
+          </ul>
+        </div>
+        
+        <p>全てのロボットが人工知能を搭載しているわけではなく、また人工知能は必ずしも物理的な身体（ロボット）を必要としません。両者の関係は次のように整理できます：</p>
+        
+        <!-- AIとロボットの違いを視覚的に表現する分割コンテナ -->
+        <div class="image-container">
+          <img src="img/Gimage_1-1-1_02.png" alt="AIとロボットの違い">
+          <figcaption>人工知能（AI）：知的な情報処理や意思決定を行うソフトウェアやアルゴリズムのこと。<br>ロボット：物理的な身体を持ち、環境に作用する機械装置のこと</figcaption>
+        </div>
+
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>具体例で理解する</h4>
+          <table style="width:100%; border-collapse: collapse; margin:10px 0;">
+            <tr style="background-color: var(--cyan-light);">
+              <th style="padding:8px; text-align:left; border-bottom:1px solid var(--cyan);">分類</th>
+              <th style="padding:8px; text-align:left; border-bottom:1px solid var(--cyan);">具体例</th>
+            </tr>
+            <tr>
+              <td style="padding:8px; border-bottom:1px solid var(--cyan-light);"><strong>AIのみ</strong><br>(身体なし)</td>
+              <td style="padding:8px; border-bottom:1px solid var(--cyan-light);">Siri、ChatGPT、レコメンデーションシステム、スパムフィルター</td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border-bottom:1px solid var(--cyan-light);"><strong>ロボットのみ</strong><br>(AIなし)</td>
+              <td style="padding:8px; border-bottom:1px solid var(--cyan-light);">産業用ロボットアーム、リモコン制御ロボット、単純な自動ドア</td>
+            </tr>
+            <tr>
+              <td style="padding:8px;"><strong>AIとロボットの両方</strong></td>
+              <td style="padding:8px;">自律型ロボット掃除機、自動運転車、Pepper（感情認識ロボット）</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div class="note-box">
+          <i class="fas fa-thumbtack note-pin"></i>
+          <p>一般に「ロボット」と呼ばれる機器でも、実は単純なプログラムで動作しており、学習や適応といったAIの特性を持たないものも多くあります。逆に、ChatGPTのような高度なAIシステムは物理的な身体を持たず、クラウド上で動作しています。</p>
+        </div>
+      </section>
+      
+      <!-- エージェント -->
+      <section id="agent" class="section">
+        <h2 class="section-title"><i class="fas fa-user-cog"></i>エージェント（Agent）</h2>
+        <p><span class="important-keyword">エージェント</span>とは、環境を知覚し、その環境に対して自律的に行動する主体のことを指します。人工知能の文脈では、センサーを通じて環境から情報を受け取り、その情報に基づいて意思決定を行い、アクチュエーターを通じて環境に作用する存在です。</p>
+        
+        <div class="handwritten-box">
+          <h3>エージェントの4つの特性</h3>
+          <ul>
+            <li><strong>自律性</strong>：外部からの直接的な介入なしに行動できる</li>
+            <li><strong>反応性</strong>：環境の変化に応じて適切に反応する</li>
+            <li><strong>能動性</strong>：目標を持ち、その達成に向けて自発的に行動する</li>
+            <li><strong>社会性</strong>：他のエージェントと相互作用する能力がある</li>
+          </ul>
+        </div>
+        
+        
+        <p>エージェントは人工知能の重要な概念であり、特に自律型システムの設計において中心的な役割を果たします。単純なリアクティブエージェントから、学習や計画能力を持つ高度なエージェントまで様々なタイプが存在します。</p>
+        
+        <div class="example-box">
+          <h4><i class="fas fa-lightbulb"></i>エージェントの具体例</h4>
+          <ul>
+            <li><strong>Web検索エージェント</strong>：ユーザーの検索クエリに基づいて関連情報を収集・提示する</li>
+            <li><strong>自動取引エージェント</strong>：市場の状況を監視し、設定された条件に基づいて自動的に取引を行う</li>
+            <li><strong>ゲーム内のAIキャラクター</strong>：ゲーム環境を知覚し、状況に応じて行動を決定する</li>
+            <li><strong>バーチャルアシスタント</strong>：Siri、Alexa、Google アシスタントなど、ユーザーの要求に応じてタスクを実行する</li>
+            <li><strong>自律型ロボット</strong>：環境を認識し、自律的に移動や作業を行う</li>
+          </ul>
+        </div>
+        
+        <div class="note-box">
+          <i class="fas fa-thumbtack note-pin"></i>
+          <p>エージェントという概念は、AIが単なるアルゴリズムではなく、環境と相互作用しながら目標達成に向けて行動する存在であるという視点を提供します。これは特に「環境の中で学習し、適応していく」能力を持つAIシステムを考える上で重要な枠組みです。</p>
+        </div>
+      </section>
+      
+      <!-- 用語集 -->
+      <section id="glossary" class="glossary">
+        <h2 class="glossary-title"><i class="fas fa-book"></i>用語集</h2>
+        <table class="glossary-table">
+          <tr>
+            <th>用語</th>
+            <th>定義</th>
+          </tr>
+          <tr>
+            <td>人工知能<br>(Artificial Intelligence, AI)</td>
+            <td>人間の知能が持つ学習・推論・認識・判断などの能力をコンピュータで模倣し、実現しようとする技術や研究分野</td>
+          </tr>
+          <tr>
+            <td>機械学習<br>(Machine Learning)</td>
+            <td>データから規則性やパターンを学習し、新しいデータに対して予測や判断を行うAIの一分野</td>
+          </tr>
+          <tr>
+            <td>ディープラーニング<br>(Deep Learning)</td>
+            <td>多層のニューラルネットワークを用いて複雑なパターンを学習する機械学習の一種</td>
+          </tr>
+          <tr>
+            <td>AI効果<br>(AI Effect)</td>
+            <td>ある技術が人工知能として実現されると、それはもはや「本当の知能」ではないとみなされる現象</td>
+          </tr>
+          <tr>
+            <td>エージェント<br>(Agent)</td>
+            <td>環境を知覚し、その環境に対して自律的に行動する主体</td>
+          </tr>
+          <tr>
+            <td>ダートマス会議<br>(Dartmouth Conference)</td>
+            <td>1956年に開催された会議で、「人工知能」という言葉が初めて提唱された</td>
+          </tr>
+          <tr>
+            <td>強いAI<br>(Strong AI)</td>
+            <td>人間のような汎用的な知能を持ち、自己意識や理解を伴うAI</td>
+          </tr>
+          <tr>
+            <td>弱いAI<br>(Weak AI)</td>
+            <td>特定のタスクに特化した、限定的な知能を持つAI</td>
+          </tr>
+        </table>
+      </section>
+      
+      <!-- テスト対策ポイント -->
+      <section id="test-points" class="test-points">
+        <h2 class="test-points-title"><i class="fas fa-pencil-alt"></i>テスト対策ポイント</h2>
+        <ul>
+          <li>人工知能の定義を正確に覚えておく（ダートマス会議での定義を含む）</li>
+          <li>AI効果の概念と具体例を説明できるようにする</li>
+          <li>人工知能を4つのレベル（単純制御、古典的AI、機械学習、深層学習）に分類し、それぞれの特徴と具体例を理解する</li>
+          <li>人工知能とロボットの違いを明確に区別できるようにする</li>
+          <li>エージェントの特性（自律性、反応性、能動性、社会性）を理解する</li>
+          <li>ディープラーニングと機械学習の関係性について説明できるようにする</li>
+          <li>強いAI（汎用人工知能）と弱いAI（特化型AI）の違いについて理解する</li>
+        </ul>
+        
+        <div class="note-box">
+          <i class="fas fa-exclamation-circle"></i>
+          <p>特に<span class="important-keyword">AI効果</span>と人工知能の<span class="important-keyword">4つのレベルの区別</span>は、過去の試験でよく出題されています。</p>
+        </div>
+      </section>
+      
+      <!-- Key Insights -->
+      <section id="key-insights" class="key-insights">
+        <h2 class="key-insights-title"><i class="fas fa-lightbulb"></i>Key Insights</h2>
+        
+        <div class="insight-item">
+          <h4><i class="fas fa-check-circle"></i>人工知能は進化し続ける概念</h4>
+          <p>人工知能の定義は時代とともに変化しており、AI効果によって「真の知能」の基準は常に先へ移動しています。これは人工知能の研究が進化し続けていることの表れでもあります。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h4><i class="fas fa-check-circle"></i>AIの4つのレベルは発展段階を表す</h4>
+          <p>単純な制御プログラム→古典的な人工知能→機械学習→深層学習という4つのレベルは、AIの発展段階を表しています。各レベルは前のレベルを包含する形で拡張されています。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h4><i class="fas fa-check-circle"></i>AIとロボットは別の概念</h4>
+          <p>人工知能はソフトウェアやアルゴリズムであり、ロボットは物理的な装置です。両者は組み合わせて使用されることが多いですが、必ずしも一緒に存在する必要はありません。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h4><i class="fas fa-check-circle"></i>エージェントの概念が自律的AIの基礎</h4>
+          <p>エージェントの概念は、環境と相互作用する自律的なAIを理解する上で重要なフレームワークです。知覚→処理→行動のサイクルが、あらゆる知的システムの基本です。</p>
+        </div>
+      </section>
+      
+      <!-- Take Home Message -->
+      <section id="take-home" class="take-home">
+        <h2 class="take-home-title"><i class="fas fa-key"></i>Take Home Message</h2>
+        <div class="take-home-message">
+          人工知能は単なる技術ではなく、「知能とは何か」という哲学的問いを含む進化し続ける研究分野です。その本質を理解するには、4つのレベルの違いとAI効果の概念を把握することが鍵となります。
+        </div>
+      </section>
+    </div>
+    
+    <!-- フッター -->
+    <footer class="footer">
+      <p>G検定学習ノート - 1-1-1 人工知能の定義</p>
+      <p>作成日: <time datetime="2024-03-31">2024年3月31日</time></p>
+      <p>グラレコ風HTMLノート v1.0</p>
+    </footer>
+    
+    <!-- スクロールトップボタン -->
+    <div class="scroll-top">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+  </main>
+
+  <script>
+    // サイドバーのアクティブ項目を設定する関数
+    function setActiveMenuItem() {
+      const sections = document.querySelectorAll('section');
+      const menuItems = document.querySelectorAll('.sidebar-menu a');
+      
+      window.addEventListener('scroll', function() {
+        let current = '';
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (pageYOffset >= (sectionTop - 200)) {
+            current = section.getAttribute('id');
+          }
+        });
+        
+        menuItems.forEach(item => {
+          item.classList.remove('active');
+          if (item.getAttribute('href') === `#${current}`) {
+            item.classList.add('active');
+          }
+        });
+      });
+    }
+    
+    // スクロールトップボタンの表示/非表示を制御する関数
+    function handleScrollTopButton() {
+      const scrollTopButton = document.querySelector('.scroll-top');
+      
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          scrollTopButton.classList.add('active');
+        } else {
+          scrollTopButton.classList.remove('active');
+        }
+      });
+      
+      scrollTopButton.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+    
+    // サイドバーメニューのスムーススクロール
+    function setupSmoothScroll() {
+      const menuLinks = document.querySelectorAll('.sidebar-menu a');
+      
+      menuLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          const targetSection = document.querySelector(targetId);
+          
+          window.scrollTo({
+            top: targetSection.offsetTop - 20,
+            behavior: 'smooth'
+          });
+        });
+      });
+    }
+    
+    // ページ読み込み時に実行
+    document.addEventListener('DOMContentLoaded', function() {
+      setActiveMenuItem();
+      handleScrollTopButton();
+      setupSmoothScroll();
+    });
+  </script>
+</body>
+</html> 

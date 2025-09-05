@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-6-9 モデルの軽量化 - G検定ノート</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- MathJax for formulas -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    /* CMYK カラーパレット */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* サイドメニュー */
+    .side-menu {
+      width: 280px;
+      background-color: var(--magenta);
+      color: var(--white);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+    
+    .side-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .side-menu::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    
+    .side-menu::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 3px;
+    }
+    
+    .side-menu::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.7);
+    }
+    
+    .side-menu h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--white);
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+    
+    .side-menu ul {
+      list-style-type: none;
+    }
+    
+    .side-menu li {
+      margin-bottom: 0.8rem;
+    }
+    
+    .side-menu a {
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem 0.8rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      position: relative;
+      font-size: 0.95rem;
+    }
+    
+    .side-menu a:hover, .side-menu a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+    
+    .side-menu a i {
+      width: 25px;
+      text-align: center;
+      margin-right: 8px;
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      max-width: calc(100% - 280px);
+    }
+    
+    /* セクションスタイル */
+    section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* タイトルセクション */
+    .title-section {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(120deg, rgba(0, 216, 232, 0.1), rgba(255, 64, 160, 0.1));
+      position: relative;
+    }
+    
+    .title-section h1 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      color: var(--key);
+      position: relative;
+      display: inline-block;
+    }
+    
+    .title-section h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      border-radius: 2px;
+    }
+    
+    .title-section .subtitle {
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 2rem;
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+    }
+    
+    /* 概要リスト */
+    .summary-list {
+      text-align: left;
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: rgba(255, 255, 255, 0.6);
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(0, 216, 232, 0.2);
+    }
+    
+    .summary-list h3 {
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 1rem;
+      font-family: 'Klee One', cursive;
+      display: flex;
+      align-items: center;
+    }
+    
+    .summary-list h3 i {
+      color: var(--cyan);
+      margin-right: 10px;
+    }
+    
+    .summary-list ul {
+      list-style-position: outside;
+      padding-left: 2rem;
+    }
+    
+    .summary-list li {
+      margin-bottom: 0.8rem;
+      position: relative;
+    }
+    
+    /* セクションタイトル */
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      border-bottom: 2px solid var(--magenta);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      position: relative;
+    }
+    
+    .section-title i {
+      color: var(--magenta);
+      margin-right: 12px;
+      font-size: 1.2em;
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      border: 2px dashed var(--cyan);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.7);
+      position: relative;
+      font-family: 'Klee One', cursive;
+      transform: rotate(-0.5deg);
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 1.5rem;
+      transform: rotate(10deg);
+    }
+    
+    .handwritten-box h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--dark-gray);
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      border-left: 4px solid var(--yellow);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      background-color: rgba(255, 230, 0, 0.05);
+      position: relative;
+    }
+    
+    .note-box h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+      color: var(--dark-gray);
+      display: flex;
+      align-items: center;
+    }
+    
+    .note-box h4 i {
+      color: var(--yellow);
+      margin-right: 10px;
+    }
+    
+    /* キーワードスタイル */
+    .keyword {
+      font-weight: 700;
+      color: var(--key);
+      background: linear-gradient(transparent 60%, rgba(255, 64, 160, 0.2) 40%);
+      padding: 0 2px;
+    }
+    
+    .keyword-en {
+      font-weight: normal;
+      font-style: italic;
+      font-size: 0.9em;
+      color: var(--dark-gray);
+    }
+    
+    /* 用語集テーブル */
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    
+    .glossary-table th, .glossary-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .glossary-table th {
+      background-color: rgba(0, 216, 232, 0.1);
+      color: var(--dark-gray);
+      font-weight: 500;
+    }
+    
+    .glossary-table td:first-child {
+      font-weight: 500;
+      width: 25%;
+    }
+    
+    .glossary-table tr:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* コンセプトボックス */
+    .concept-box {
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: linear-gradient(120deg, rgba(0, 216, 232, 0.05), rgba(255, 64, 160, 0.05));
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .concept-box h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--magenta);
+      display: flex;
+      align-items: center;
+    }
+    
+    .concept-box h3 i {
+      margin-right: 10px;
+    }
+    
+    /* プロセスフロー */
+    .process-flow {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .process-step {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+    }
+    
+    .process-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: -15px;
+      top: 50%;
+      width: 30px;
+      height: 2px;
+      background: var(--magenta);
+      border-top: 2px dashed var(--magenta);
+    }
+    
+    .process-step-icon {
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      background-color: var(--white);
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      color: var(--magenta);
+      font-size: 1.5rem;
+      position: relative;
+    }
+    
+    .process-step-icon::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: 50%;
+      border: 2px dashed var(--magenta);
+      animation: spin 30s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .process-step-title {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* キーインサイト */
+    .key-insights {
+      margin: 2rem 0;
+      padding: 2rem;
+      background-color: rgba(0, 216, 232, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .key-insights h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid var(--cyan);
+      padding-bottom: 0.5rem;
+    }
+    
+    .key-insights h2 i {
+      margin-right: 12px;
+    }
+    
+    .insight-item {
+      margin-bottom: 1.5rem;
+      display: flex;
+    }
+    
+    .insight-number {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      margin-right: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .insight-content h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+    }
+    
+    /* テイクホームメッセージ */
+    .take-home-message {
+      margin: 2rem auto;
+      max-width: 800px;
+      padding: 2rem;
+      background: linear-gradient(120deg, var(--cyan), var(--magenta));
+      color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .take-home-message h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .take-home-message h2 i {
+      margin-right: 12px;
+    }
+    
+    .take-home-message p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+    }
+    
+    .message-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .take-home-message::before {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    
+    .take-home-message::after {
+      content: "";
+      position: absolute;
+      bottom: -30px;
+      left: -30px;
+      width: 120px;
+      height: 120px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background-color: var(--light-gray);
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      margin-top: 3rem;
+      border-top: 1px solid #eee;
+    }
+    
+    footer p {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 99;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+    }
+    
+    .scroll-top:hover {
+      background-color: var(--cyan);
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 1024px) {
+      .side-menu {
+        width: 240px;
+      }
+      .main-content {
+        margin-left: 240px;
+        max-width: calc(100% - 240px);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .side-menu {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      .main-content {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 1rem;
+      }
+      .process-step:not(:last-child)::after {
+        display: none;
+      }
+      .process-flow {
+        flex-direction: column;
+      }
+      .process-step {
+        margin-bottom: 2rem;
+      }
+    }
+
+    /* 通常のリストのスタイル */
+    section ul:not(.side-menu ul):not(.summary-list ul) {
+      list-style-position: outside;
+      padding-left: 2rem;
+      margin: 1rem 0;
+    }
+
+    section ul:not(.side-menu ul):not(.summary-list ul) li {
+      margin-bottom: 0.8rem;
+      position: relative;
+    }
+
+    section ol:not(.side-menu ol) {
+      list-style-position: outside;
+      padding-left: 2rem;
+      margin: 1rem 0;
+    }
+
+    section ol:not(.side-menu ol) li {
+      margin-bottom: 0.8rem;
+      position: relative;
+    }
+
+    /* コンセプトボックス内のリスト */
+    .concept-box ul, .handwritten-box ul, .handwritten-box ol, .note-box ul {
+      list-style-position: outside;
+      padding-left: 2rem;
+      margin: 0.8rem 0;
+    }
+
+    .concept-box li, .handwritten-box li, .note-box li {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドメニュー -->
+  <aside class="side-menu">
+    <h2><i class="fas fa-layer-group"></i> ディープラーニングの応用例</h2>
+    <ul>
+      <li><a href="#section-intro"><i class="fas fa-info-circle"></i> はじめに</a></li>
+      <li><a href="#section-background"><i class="fas fa-question-circle"></i> 軽量化の背景</a></li>
+      <li><a href="#section-usecase"><i class="fas fa-briefcase"></i> ユースケース</a></li>
+      <li><a href="#section-methods"><i class="fas fa-tools"></i> 軽量化手法</a></li>
+      <li><a href="#section-examples"><i class="fas fa-laptop-code"></i> 実装例</a></li>
+      <li><a href="#section-challenges"><i class="fas fa-exclamation-triangle"></i> 課題と限界</a></li>
+      <li><a href="#section-glossary"><i class="fas fa-book"></i> 用語集</a></li>
+      <li><a href="#section-insights"><i class="fas fa-lightbulb"></i> Key Insights</a></li>
+      <li><a href="#section-take-home"><i class="fas fa-key"></i> Take Home Message</a></li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
+    <!-- タイトルセクション -->
+    <section id="section-intro" class="title-section">
+      <h1><i class="fas fa-compress-alt"></i> 1-6-9 モデルの軽量化</h1>
+      <p class="subtitle">ディープラーニングモデルを小さく、速く、効率的に</p>
+      
+      <div class="summary-list">
+        <h3><i class="fas fa-clipboard-list"></i> 学習目標</h3>
+        <ul>
+          <li>モデルの軽量化が必要な背景について理解する</li>
+          <li>モデルの軽量化が必要なユースケースについて理解する</li>
+          <li>代表的なモデル軽量化手法について理解する</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 背景セクション -->
+    <section id="section-background">
+      <h2 class="section-title"><i class="fas fa-question-circle"></i> モデルの軽量化が必要な背景</h2>
+      
+      <p>近年のディープラーニングモデルは複雑化・大規模化し、優れた性能を実現する一方で計算コストやメモリ使用量が急増しています。これにより様々な課題が生まれ、モデル軽量化の必要性が高まっています。</p>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-weight-hanging"></i> ディープラーニングモデルの課題</h3>
+        <ul>
+          <li>計算コスト増大：最新のモデルでは学習に数百～数千GPUが必要なケースも</li>
+          <li>メモリ消費量増加：大規模モデルはGPUメモリを大量に消費</li>
+          <li>消費電力増加：環境負荷やエネルギーコストの問題</li>
+          <li>リアルタイム処理の困難：推論時間が長くなり実用性低下</li>
+          <li>デバイス制約：モバイルや組み込み機器での使用が困難</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <h3>モデル軽量化のメリット</h3>
+        <p>モデルの軽量化は単にモデルサイズを小さくすることだけではなく、以下のような多くの利点をもたらします：</p>
+        <ol>
+          <li><strong>省電力・低コスト</strong>：計算リソースや電力消費を抑え、運用コストを削減</li>
+          <li><strong>高速化</strong>：推論処理の高速化によりリアルタイム性が向上</li> 
+          <li><strong>エッジコンピューティング実現</strong>：限られたリソースのエッジデバイスでの動作を可能に</li>
+          <li><strong>環境負荷低減</strong>：AIによる電力消費・CO2排出量の削減に貢献</li>
+          <li><strong>アクセシビリティ向上</strong>：高性能なハードウェアがなくても高度なAIが利用可能に</li>
+        </ol>
+      </div>
+      
+      <div class="note-box">
+        <h4><i class="fas fa-exclamation-circle"></i> 重要ポイント</h4>
+        <p><span class="keyword">エッジAI</span><span class="keyword-en">(Edge AI)</span>の実現には、モデルの軽量化が不可欠です。エッジAIとはクラウドサーバーではなく、センサーやデバイスに近い「エッジ」でAI処理を行うアプローチです。これにより通信遅延の解消、プライバシー保護、オフライン動作などのメリットが得られますが、限られた計算リソースでの処理が求められます。</p>
+      </div>
+    </section>
+
+    <!-- ユースケースセクション -->
+    <section id="section-usecase">
+      <h2 class="section-title"><i class="fas fa-briefcase"></i> モデル軽量化が必要なユースケース</h2>
+      
+      <p>モデル軽量化が特に重要となる代表的なユースケースをいくつか見ていきましょう。これらの分野では、限られたリソースの中で高度なAI機能を実現するためにモデル軽量化が必須となります。</p>
+      
+      <div class="process-flow">
+        <div class="process-step">
+          <div class="process-step-icon">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+          <div class="process-step-title">モバイルアプリケーション</div>
+          <p>スマートフォンなどの限られたメモリと処理能力の中で顔認識、音声認識、翻訳などのAI機能を実現。バッテリー消費と発熱の抑制も重要。</p>
+        </div>
+        
+        <div class="process-step">
+          <div class="process-step-icon">
+            <i class="fas fa-car"></i>
+          </div>
+          <div class="process-step-title">自動運転・車載システム</div>
+          <p>リアルタイム物体検出、危険予測などのミリ秒単位の高速処理が求められ、限られた車載コンピュータリソースでの処理が必要。</p>
+        </div>
+        
+        <div class="process-step">
+          <div class="process-step-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="process-step-title">IoTデバイス</div>
+          <p>家電、センサー、ウェアラブルなどの極めて限られたリソースでのAI機能実現。クラウド接続なしでのローカル処理が求められる。</p>
+        </div>
+      </div>
+
+      <div class="process-flow">
+        <div class="process-step">
+          <div class="process-step-icon">
+            <i class="fas fa-laptop-medical"></i>
+          </div>
+          <div class="process-step-title">医療機器</div>
+          <p>画像診断や生体信号解析などをオンプレミスで実行するための軽量化。特にポータブル機器でのリアルタイム診断に重要。</p>
+        </div>
+        
+        <div class="process-step">
+          <div class="process-step-icon">
+            <i class="fas fa-video"></i>
+          </div>
+          <div class="process-step-title">監視カメラ</div>
+          <p>人物検出や異常検知をエッジで処理し、プライバシーを保護しながらリアルタイム解析を可能に。</p>
+        </div>
+        
+        <div class="process-step">
+          <div class="process-step-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <div class="process-step-title">AR/VRデバイス</div>
+          <p>空間認識、ジェスチャー認識などの高度な処理を低遅延で実現し、没入感のある体験を提供。</p>
+        </div>
+      </div>
+      
+      <div class="note-box">
+        <h4><i class="fas fa-exclamation-circle"></i> エッジAIの重要性</h4>
+        <p>多くのエッジデバイスでは、クラウドへのデータ送信が困難または望ましくない場合があります。プライバシー上の懸念、通信コスト、通信遅延、通信が不安定な環境などの理由から、ローカルでの処理が求められるケースが増えています。このような場合、モデルの軽量化技術がエッジAIの実現に大きく貢献します。</p>
+      </div>
+    </section>
+
+    <!-- 軽量化手法セクション -->
+    <section id="section-methods">
+      <h2 class="section-title"><i class="fas fa-tools"></i> 代表的なモデル軽量化手法</h2>
+      
+      <p>ディープラーニングモデルの軽量化には様々な手法があります。それぞれの手法はトレードオフが異なり、用途によって適切な手法を選択・組み合わせることが重要です。G検定では下記の代表的な手法を理解することが求められます。</p>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-compress"></i> 量子化 <span class="keyword-en">(Quantization)</span></h3>
+        <p>モデルのパラメータや活性化値の精度（ビット数）を落とす手法です。例えば32ビット浮動小数点（float32）の重みを8ビット整数（int8）に変換することで、メモリ使用量を1/4に削減できます。</p>
+        <ul>
+          <li><strong>動的量子化</strong>：推論時のみ量子化を適用</li>
+          <li><strong>静的量子化</strong>：モデル自体を量子化形式で保存</li>
+          <li><strong>量子化対応学習（QAT）</strong>：量子化を考慮した再学習を行い精度低下を抑制</li>
+        </ul>
+        <p>精度低下の対策として、重要な層は高精度のまま残し、あまり重要でない層のみ量子化するハイブリッドアプローチも一般的です。</p>
+      </div>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-cut"></i> プルーニング <span class="keyword-en">(Pruning)</span></h3>
+        <p>モデル内の重要度の低いパラメータ（重み）や接続、フィルタなどを削減する手法です。ディープラーニングモデルには冗長性があり、一部のパラメータを削除しても性能が大きく低下しないことがわかっています。</p>
+        <ul>
+          <li><strong>非構造的プルーニング</strong>：個々の重みを削減（スパース化）</li>
+          <li><strong>構造的プルーニング</strong>：ニューロン、チャネル、フィルタなど構造単位で削減</li>
+          <li><strong>反復的プルーニング</strong>：プルーニングと再学習を繰り返し徐々に削減</li>
+        </ul>
+        <p>プルーニングにより、理論上はモデルサイズを数%～90%以上削減できますが、特殊なハードウェアやソフトウェアがないとスパース行列の恩恵を受けられない場合があります。</p>
+      </div>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-graduation-cap"></i> 蒸留 <span class="keyword-en">(Distillation)</span></h3>
+        <p>大きな教師モデル（Teacher Model）の知識を、小さな生徒モデル（Student Model）に転移させる手法です。教師モデルの出力する確率分布を模倣するように生徒モデルを学習させます。</p>
+        <p>蒸留の主なアプローチ：</p>
+        <ul>
+          <li><strong>応答ベース蒸留</strong>：教師モデルの最終出力（ソフトマックス出力など）を模倣</li>
+          <li><strong>特徴ベース蒸留</strong>：中間層の特徴表現を模倣</li>
+          <li><strong>関係ベース蒸留</strong>：サンプル間の関係性を保持</li>
+        </ul>
+        <p>蒸留は小さなモデルでも大きなモデルに近い性能を実現でき、特に分類問題において効果的です。</p>
+      </div>
+
+      <div class="handwritten-box">
+        <h3>宝くじ仮説 <span class="keyword-en">(Lottery Ticket Hypothesis)</span></h3>
+        <p>2019年にFrankle氏とCarbin氏によって提案された仮説で、大規模なニューラルネットワークの中には「宝くじ当選券」のような「幸運な初期値を持つサブネットワーク」が存在し、それだけを取り出して学習させても元のネットワークと同等の性能が得られるというものです。</p>
+        <p>この仮説に基づき、モデルの初期化時に存在した「幸運なサブネットワーク」を見つけ出す手法が研究されています。これにより、小さいながらも高性能なネットワークを実現できる可能性があります。</p>
+      </div>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-project-diagram"></i> モデル圧縮 <span class="keyword-en">(Model Compression)</span></h3>
+        <p>その他の代表的なモデル圧縮手法として以下があります：</p>
+        <ul>
+          <li><strong>低ランク分解</strong>：重み行列を低ランク行列の積に分解し、パラメータ数を削減</li>
+          <li><strong>重み共有</strong>：類似した重みをグループ化して共有する（例：深層畳み込みや行列分解）</li>
+          <li><strong>知識の蒸留</strong>：大きなモデルの知識を小さなモデルへ転移</li>
+          <li><strong>ニューラルアーキテクチャ検索 (NAS)</strong>：効率的なモデル構造を自動探索</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <h4><i class="fas fa-exclamation-circle"></i> 重要ポイント</h4>
+        <p>実際のモデル軽量化では、上記の手法を組み合わせて使用するケースが多いです。例えば、まずプルーニングでモデルを小型化し、その後量子化で更に圧縮するといったアプローチです。また、タスクの特性や対象デバイスの制約に合わせて最適な手法を選択することが重要です。</p>
+      </div>
+    </section>
+
+    <!-- 実装例セクション -->
+    <section id="section-examples">
+      <h2 class="section-title"><i class="fas fa-laptop-code"></i> 軽量化モデルの実装例</h2>
+      
+      <p>モデル軽量化の技術は様々な分野で活用されています。代表的な軽量化モデルの例を見てみましょう。</p>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-mobile"></i> モバイル向け軽量モデル</h3>
+        <ul>
+          <li><strong>MobileNet</strong>：深さ方向分離畳み込み（Depthwise Separable Convolution）を用いた軽量CNNモデル。標準の畳み込み層と比較して計算量を大幅に削減しながら、高い認識精度を維持。</li>
+          <li><strong>EfficientNet</strong>：モデルスケーリングの方法を最適化し、少ないパラメータ数で高い精度を実現したCNNモデル。ネットワークの深さ、幅、解像度を同時にスケールする手法を採用。</li>
+          <li><strong>MobileViT</strong>：モバイルデバイス向けに最適化された軽量Vision Transformerモデル。CNNとTransformerの利点を組み合わせた設計。</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-language"></i> 軽量言語モデル</h3>
+        <ul>
+          <li><strong>DistilBERT</strong>：BERTを知識蒸留によって圧縮したモデル。元のBERTの97%の性能を維持しながら、パラメータ数を40%削減、処理速度を60%向上。</li>
+          <li><strong>TinyBERT</strong>：より小さなBERTモデルで、二段階蒸留アプローチを採用。一般的な言語理解タスクで高性能を維持しながら軽量化。</li>
+          <li><strong>MobileBERT</strong>：BERTのモバイル向け最適化版。ボトルネック構造と知識蒸留を組み合わせて軽量化。</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-industry"></i> エッジAIフレームワーク</h3>
+        <ul>
+          <li><strong>TensorFlow Lite</strong>：モバイルやIoTデバイス向けの軽量機械学習フレームワーク。量子化や最適化ツールを提供。</li>
+          <li><strong>ONNX Runtime</strong>：様々なハードウェアでの推論最適化を支援するクロスプラットフォームフレームワーク。</li>
+          <li><strong>PyTorch Mobile</strong>：PyTorchモデルをモバイルデバイスで実行するための最適化ツールセット。</li>
+          <li><strong>CoreML</strong>：Appleのエコシステム向けの機械学習フレームワーク。iOS/macOSデバイスで効率的に動作。</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <h3>MobileNetの進化</h3>
+        <p>MobileNetは軽量モデルの代表例で、複数のバージョンがリリースされ、継続的に改良されています：</p>
+        <ul>
+          <li><strong>MobileNetV1</strong>：深さ方向分離畳み込みの導入</li>
+          <li><strong>MobileNetV2</strong>：逆残差ブロックとリニアボトルネックの導入</li>
+          <li><strong>MobileNetV3</strong>：ニューラルアーキテクチャ検索と新たな活性化関数の導入</li>
+        </ul>
+        <p>例えば、MobileNetV1は標準の畳み込み層と比較して計算量を約9倍削減し、MobileNetV2はさらにパラメータ数を30%削減しました。これらのモデルは多くのスマートフォンアプリで使用され、限られたリソースで高度なAI機能を実現しています。</p>
+      </div>
+      
+      <div class="note-box">
+        <h4><i class="fas fa-exclamation-circle"></i> 重要ポイント</h4>
+        <p>軽量モデルの設計では、単にパラメータ数を減らすだけでなく、対象ハードウェアの特性に最適化することが重要です。例えば、モバイルGPUやNPU（ニューラルプロセッシングユニット）に適した演算を多用するなど、ハードウェアアクセラレーションを最大限に活用する設計が効果的です。</p>
+      </div>
+    </section>
+
+    <!-- 課題と限界セクション -->
+    <section id="section-challenges">
+      <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> モデル軽量化の課題と限界</h2>
+      
+      <p>モデル軽量化は多くのメリットをもたらしますが、いくつかの課題や限界も存在します。これらを理解することで、適切な軽量化戦略を選択できます。</p>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-balance-scale"></i> 精度と効率のトレードオフ</h3>
+        <p>モデル軽量化の最大の課題は、効率性（サイズ、速度）と精度のバランスです。一般的に以下のようなトレードオフが存在します：</p>
+        <ul>
+          <li><strong>精度低下</strong>：過度な軽量化はモデルの表現力を低下させ、精度を犠牲にする可能性</li>
+          <li><strong>ドメイン適応性の低下</strong>：軽量化により新しいデータやタスクへの適応能力が低下することがある</li>
+          <li><strong>頑健性の低下</strong>：ノイズや外れ値に対する耐性が弱くなる可能性</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3><i class="fas fa-cogs"></i> 実装上の課題</h3>
+        <ul>
+          <li><strong>ハードウェア対応</strong>：特定の軽量化手法（例：量子化、スパース化）を効率的に実行できるハードウェアやソフトウェアが必要</li>
+          <li><strong>開発コスト</strong>：軽量化プロセスには専門知識と追加の開発・テスト工程が必要</li>
+          <li><strong>ランタイムサポート</strong>：特に量子化やスパース化モデルを効率的に実行するためには、専用のランタイムが必要</li>
+          <li><strong>最適化の難しさ</strong>：ハイパーパラメータ調整や最適な軽量化手法の選択が困難</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <h3>小さいことの限界</h3>
+        <p>2020年代に入り、大規模言語モデル（LLM）に代表される「大きいことが重要」という潮流が顕著になっています。モデルサイズの拡大によって意図しなかった創発的な能力が生まれることが示されており、単純な軽量化だけでは解決できない課題も出てきています。</p>
+        <p>これに対して、以下のようなアプローチが研究されています：</p>
+        <ul>
+          <li><strong>スケール法則の研究</strong>：モデルサイズとパフォーマンスの関係をより深く理解</li>
+          <li><strong>特定タスク特化型のモデル構築</strong>：汎用性を犠牲にして特定タスクで高性能な小型モデルを開発</li>
+          <li><strong>ハイブリッドアプローチ</strong>：重要な部分のみ大規模モデルを使用し、その他は軽量モデルで対応</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <h4><i class="fas fa-exclamation-circle"></i> 将来の方向性</h4>
+        <p>モデル軽量化の分野は急速に進化しており、将来的には新しいハードウェアアーキテクチャ（例：ニューロモーフィックコンピューティング）やアルゴリズム（例：スパース学習、量子コンピューティング対応アルゴリズム）によって、現在の限界を超える可能性があります。特に、モデルを直接軽量化するのではなく、特定のタスクに必要な部分だけを動的に活性化させる「条件付き計算」や「動的ネットワーク」などのアプローチが注目されています。</p>
+      </div>
+    </section>
+
+    <!-- 用語集セクション -->
+    <section id="section-glossary">
+      <h2 class="section-title"><i class="fas fa-book"></i> 用語集</h2>
+      
+      <p>モデル軽量化に関連する重要な用語をまとめました。これらはG検定のキーワードとして重要です。</p>
+      
+      <table class="glossary-table">
+        <thead>
+          <tr>
+            <th>用語</th>
+            <th>説明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>エッジAI<br><span class="keyword-en">(Edge AI)</span></td>
+            <td>クラウドではなく、デバイス自体やエッジデバイス上でAI処理を実行するアプローチ。低遅延、オフライン処理、プライバシー保護などのメリットがある。</td>
+          </tr>
+          <tr>
+            <td>量子化<br><span class="keyword-en">(Quantization)</span></td>
+            <td>モデルのパラメータや活性化値の精度（ビット数）を落とし、メモリ使用量や計算コストを削減する手法。例えば32ビット浮動小数点を8ビット整数に変換するなど。</td>
+          </tr>
+          <tr>
+            <td>プルーニング<br><span class="keyword-en">(Pruning)</span></td>
+            <td>モデル内の重要度の低いパラメータ（重み）や接続、フィルタなどを削減する手法。モデルの冗長性を取り除き、サイズを小さくする。</td>
+          </tr>
+          <tr>
+            <td>蒸留<br><span class="keyword-en">(Distillation)</span></td>
+            <td>大きな教師モデル（Teacher Model）の知識を、小さな生徒モデル（Student Model）に転移させる手法。教師モデルの出力する確率分布を模倣するように生徒モデルを学習させる。</td>
+          </tr>
+          <tr>
+            <td>宝くじ仮説<br><span class="keyword-en">(Lottery Ticket Hypothesis)</span></td>
+            <td>大規模なニューラルネットワークの中には「宝くじ当選券」のような「幸運な初期値を持つサブネットワーク」が存在し、それだけを取り出して学習させても元のネットワークと同等の性能が得られるという仮説。</td>
+          </tr>
+          <tr>
+            <td>モデル圧縮<br><span class="keyword-en">(Model Compression)</span></td>
+            <td>ディープラーニングモデルのサイズを小さくするための様々な手法の総称。量子化、プルーニング、知識蒸留、低ランク分解などが含まれる。</td>
+          </tr>
+          <tr>
+            <td>深さ方向分離畳み込み<br><span class="keyword-en">(Depthwise Separable Convolution)</span></td>
+            <td>標準的な畳み込み層を、チャンネルごとに適用する深さ方向畳み込み（depthwise convolution）と1x1の畳み込み（pointwise convolution）に分解する手法。計算コストを大幅に削減できる。</td>
+          </tr>
+          <tr>
+            <td>MobileNet</td>
+            <td>Googleが開発した、モバイルデバイス向けの軽量なCNNアーキテクチャ。深さ方向分離畳み込みを使用し、計算効率と精度のバランスを実現。</td>
+          </tr>
+          <tr>
+            <td>EfficientNet</td>
+            <td>ネットワークの深さ、幅、解像度を同時に最適にスケールすることで、少ないパラメータ数で高い精度を実現したCNNモデル。</td>
+          </tr>
+          <tr>
+            <td>TensorFlow Lite</td>
+            <td>モバイルやIoTデバイス向けの軽量機械学習フレームワーク。モデルの軽量化や最適化のためのツールを提供する。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Key Insightsセクション -->
+    <section id="section-insights" class="key-insights">
+      <h2><i class="fas fa-lightbulb"></i> Key Insights</h2>
+      
+      <div class="insight-item">
+        <div class="insight-number">1</div>
+        <div class="insight-content">
+          <h3>軽量化が求められる理由は「エッジAI」の台頭</h3>
+          <p>AIモデルをモバイルデバイスやIoT機器などの「エッジ」で動作させるニーズが高まっており、限られたリソースで効率的に動作する軽量モデルが求められています。プライバシー保護、低遅延、オフライン動作などのメリットが、軽量化技術の発展を促進しています。</p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">2</div>
+        <div class="insight-content">
+          <h3>主要な軽量化手法は三つ</h3>
+          <p>G検定で覚えるべき主要な軽量化手法は「<span class="keyword">量子化</span>」「<span class="keyword">プルーニング</span>」「<span class="keyword">蒸留</span>」の三つです。量子化はパラメータの精度を下げ、プルーニングは不要なパラメータを削除し、蒸留は大きなモデルの知識を小さなモデルに転移させます。実際のアプリケーションではこれらを組み合わせて使用することが一般的です。</p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">3</div>
+        <div class="insight-content">
+          <h3>効率性と精度のトレードオフが課題</h3>
+          <p>モデル軽量化の最大の課題は、モデルの効率性（サイズ、速度）と精度のバランスです。過度な軽量化はモデルの表現力を低下させ、精度を犠牲にする可能性があります。このトレードオフを適切に管理するためには、ユースケースやハードウェア制約を十分に考慮した上で、最適な軽量化戦略を選択することが重要です。</p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">4</div>
+        <div class="insight-content">
+          <h3>「宝くじ仮説」と小さくても高性能なモデルの可能性</h3>
+          <p><span class="keyword">宝くじ仮説</span>は、大規模ネットワーク内に存在する「幸運な初期値を持つサブネットワーク」を見つけることで、小さくても高性能なモデルを構築できる可能性を示しています。この考え方は、効率的なモデル設計やモデル軽量化の新たなアプローチとして注目されています。</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Take Home Messageセクション -->
+    <section id="section-take-home" class="take-home-message">
+      <div class="message-content">
+        <h2><i class="fas fa-key"></i> Take Home Message</h2>
+        <p>モデル軽量化は、AIを限られたリソースで効率的に動作させるための重要な技術です。量子化、プルーニング、蒸留などの手法を適切に組み合わせることで、精度を大きく犠牲にすることなく、モデルのサイズ・計算コスト・消費電力を削減できます。特にエッジAIの実現に不可欠な技術であり、今後もIoTデバイスやモバイルアプリケーションの進化とともに発展し続けるでしょう。</p>
+      </div>
+    </section>
+    
+    <!-- フッター -->
+    <footer>
+      <p>1-6-9 モデルの軽量化 - G検定学習ノート</p>
+      <p>最終更新：2024年4月</p>
+      <p>Content: Claude 3.5 Sonnet | Design: Claude 3.5 Sonnet</p>
+    </footer>
+  </main>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // スクロールトップボタンの表示制御
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+      });
+      
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+      
+      // サイドメニューのアクティブ状態制御
+      const sections = document.querySelectorAll('section');
+      const menuLinks = document.querySelectorAll('.side-menu a');
+      
+      function setActiveMenuItem() {
+        let currentSectionId = '';
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          
+          if (window.pageYOffset >= sectionTop - 200 && 
+              window.pageYOffset < sectionTop + sectionHeight - 200) {
+            currentSectionId = section.getAttribute('id');
+          }
+        });
+        
+        menuLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${currentSectionId}`) {
+            link.classList.add('active');
+          }
+        });
+      }
+      
+      window.addEventListener('scroll', setActiveMenuItem);
+      
+      // スムーススクロール
+      menuLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          const targetSection = document.querySelector(targetId);
+          
+          if (targetSection) {
+            window.scrollTo({
+              top: targetSection.offsetTop,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

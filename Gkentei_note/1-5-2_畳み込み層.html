@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-5-2 畳み込み層 | G検定ノート</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    :root {
+      /* CMYK パレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      
+      /* フォント設定 */
+      --main-font: 'Zen Maru Gothic', sans-serif;
+      --title-font: 'M PLUS Rounded 1c', sans-serif;
+      --handwritten-font: 'Klee One', cursive;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--main-font);
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 280px;
+      background-color: var(--yellow); /* イエロー背景 */
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+    
+    .sidebar-title {
+      font-family: var(--title-font);
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--key);
+      position: relative;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--cyan);
+    }
+    
+    .section-title {
+      font-family: var(--title-font);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 1.5rem 0 1rem;
+      color: var(--key);
+    }
+    
+    .nav-list {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-item a {
+      display: block;
+      padding: 0.6rem 1rem;
+      color: var(--key);
+      text-decoration: none;
+      font-size: 0.9rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-item a:hover, .nav-item a.active {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--magenta);
+      transform: translateX(5px);
+    }
+    
+    .nav-item a i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      max-width: calc(100% - 280px);
+    }
+    
+    /* セクション共通スタイル */
+    .section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* ヘッダーセクション */
+    .header-section {
+      background: linear-gradient(135deg, var(--white) 60%, rgba(0, 216, 232, 0.2) 100%);
+      padding: 3rem 2rem;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 3rem;
+    }
+    
+    .header-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(255, 64, 160, 0.2) 0%, rgba(255, 230, 0, 0.1) 70%, transparent 100%);
+      border-radius: 50%;
+      transform: translate(30%, -30%);
+      z-index: 0;
+    }
+    
+    .main-title {
+      font-family: var(--title-font);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .subtitle {
+      font-family: var(--main-font);
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .overview {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--magenta);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .overview-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      color: var(--key);
+    }
+    
+    .overview-title i {
+      color: var(--magenta);
+      margin-right: 0.5rem;
+    }
+    
+    .overview-list {
+      list-style-position: inside;
+    }
+    
+    .overview-list li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    
+    /* セクションタイトル */
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px dashed var(--cyan);
+      padding-bottom: 0.8rem;
+    }
+    
+    .section-header i {
+      font-size: 1.5rem;
+      color: var(--cyan);
+      margin-right: 1rem;
+    }
+    
+    .section-header h2 {
+      font-family: var(--title-font);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--key);
+    }
+    
+    /* テキストスタイル */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+    
+    strong {
+      color: var(--magenta);
+      font-weight: 700;
+    }
+    
+    /* リストスタイル */
+    ul, ol {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-left: 4px solid var(--cyan);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      font-size: 1.5rem;
+      background-color: var(--white);
+      border-radius: 50%;
+      padding: 0.2rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .note-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--cyan);
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      font-family: var(--handwritten-font);
+      background-color: rgba(255, 230, 0, 0.1);
+      border: 2px dashed var(--yellow);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 12px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+      transform: rotate(-0.5deg);
+    }
+    
+    .handwritten-box-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--key);
+      border-bottom: 1px solid var(--yellow);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* キーワードボックス */
+    .keyword-box {
+      margin: 2rem 0;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    
+    .keyword-header {
+      background-color: var(--magenta);
+      color: var(--white);
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+    
+    .keyword-header i {
+      margin-right: 0.8rem;
+    }
+    
+    .keyword-content {
+      padding: 1.5rem;
+    }
+    
+    .keyword-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .keyword-item {
+      background-color: rgba(0, 216, 232, 0.1);
+      border: 1px solid var(--cyan);
+      border-radius: 30px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .keyword-item i {
+      color: var(--cyan);
+      margin-right: 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    /* テーブルスタイル */
+    .table-container {
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    thead {
+      background-color: var(--cyan);
+      color: var(--white);
+    }
+    
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+    
+    /* 用語解説テーブル */
+    .term-table th:first-child {
+      width: 30%;
+    }
+    
+    /* 吹き出し */
+    .speech-bubble {
+      position: relative;
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50px;
+      border: 10px solid transparent;
+      border-top-color: var(--white);
+    }
+    
+    /* インサイトボックス */
+    .insight-section {
+      background: linear-gradient(135deg, var(--white) 60%, rgba(255, 64, 160, 0.1) 100%);
+      padding: 2rem;
+      border-radius: 12px;
+      margin-top: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .insight-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px dashed var(--magenta);
+      padding-bottom: 0.8rem;
+    }
+    
+    .insight-header i {
+      font-size: 1.5rem;
+      color: var(--magenta);
+      margin-right: 1rem;
+    }
+    
+    .insight-header h2 {
+      font-family: var(--title-font);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--key);
+    }
+    
+    .insight-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .insight-item {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-top: 3px solid var(--magenta);
+    }
+    
+    .insight-item-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--magenta);
+    }
+    
+    /* テイクホームメッセージ */
+    .take-home-section {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, var(--white) 60%, rgba(255, 230, 0, 0.2) 100%);
+      border-radius: 12px;
+      margin-top: 3rem;
+      position: relative;
+    }
+    
+    .take-home-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .take-home-header i {
+      font-size: 1.8rem;
+      color: var(--yellow);
+      margin-right: 1rem;
+    }
+    
+    .take-home-header h2 {
+      font-family: var(--title-font);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--key);
+    }
+    
+    .take-home-message {
+      font-family: var(--handwritten-font);
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--key);
+      line-height: 1.8;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      max-width: 80%;
+      margin: 0 auto;
+      border: 2px dashed var(--yellow);
+    }
+    
+    /* フッター */
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--cyan);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1000;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .scroll-top:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      
+      .sidebar-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        max-width: 100%;
+      }
+      
+      .main-title {
+        font-size: 2rem;
+      }
+      
+      .header-section {
+        padding: 2rem 1rem;
+      }
+      
+      .section {
+        padding: 1.5rem;
+      }
+      
+      .take-home-message {
+        max-width: 100%;
+        font-size: 1.2rem;
+      }
+      
+      .insight-items {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <h1 class="sidebar-title">ディープラーニングの要素技術</h1>
+    
+    <nav>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="#intro"><i class="fas fa-book-open"></i>はじめに</a></li>
+        <li class="nav-item"><a href="#outline"><i class="fas fa-project-diagram"></i>畳み込み層の概要</a></li>
+        <li class="nav-item"><a href="#operation"><i class="fas fa-cogs"></i>畳み込み操作の仕組み</a></li>
+        <li class="nav-item"><a href="#parameters"><i class="fas fa-sliders-h"></i>パラメータと特徴</a></li>
+        <li class="nav-item"><a href="#types"><i class="fas fa-th"></i>様々な畳み込み手法</a></li>
+        <li class="nav-item"><a href="#applications"><i class="fas fa-laptop-code"></i>応用例と利点</a></li>
+        <li class="nav-item"><a href="#comparison"><i class="fas fa-exchange-alt"></i>全結合層との比較</a></li>
+        <li class="nav-item"><a href="#keywords"><i class="fas fa-key"></i>キーワード解説</a></li>
+        <li class="nav-item"><a href="#insights"><i class="fas fa-lightbulb"></i>Key Insights</a></li>
+        <li class="nav-item"><a href="#take-home"><i class="fas fa-home"></i>Take Home Message</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div class="main-content">
+    <!-- ヘッダーセクション -->
+    <section id="intro" class="header-section">
+      <h1 class="main-title">1-5-2 畳み込み層</h1>
+      <p class="subtitle">画像を効率的に処理するニューラルネットワークの中核要素</p>
+      
+      <div class="overview">
+        <h3 class="overview-title"><i class="fas fa-check-circle"></i>学習の目標</h3>
+        <ul class="overview-list">
+          <li>畳み込み層の基礎的な知識を理解する</li>
+          <li>全結合層と畳み込み層の差異について、説明できる</li>
+          <li>畳み込み層の役割について説明できる</li>
+          <li>畳み込み層のパラメータ数について理解する</li>
+          <li>畳み込み層が適用できるデータの特性について理解する</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 畳み込み層の概要セクション -->
+    <section id="outline" class="section">
+      <div class="section-header">
+        <i class="fas fa-project-diagram"></i>
+        <h2>畳み込み層の概要</h2>
+      </div>
+      
+      <p><strong>畳み込み層</strong>（Convolutional Layer）は、<strong>畳み込みニューラルネットワーク（CNN: Convolutional Neural Network）</strong>の中核をなす層であり、画像などの格子状データを効率的に処理するために設計されています。</p>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-box-title">畳み込み層とは？</h3>
+        <p>畳み込み層は、入力データの局所的な特徴を抽出するための層です。画像処理において、ピクセル間の空間的な関係性を維持しながら特徴を抽出できる点が最大の特徴です。</p>
+      </div>
+      
+      <p>通常のニューラルネットワークの全結合層（Fully Connected Layer）では、入力の各要素がすべての出力ニューロンに接続されますが、畳み込み層では<strong>局所的な領域のみに着目する</strong>点が大きく異なります。</p>
+      
+      <p>畳み込み層の主な特徴は以下の通りです：</p>
+      <ul>
+        <li><strong>局所的な特徴抽出</strong>：小さな領域（受容野）のパターンを検出</li>
+        <li><strong>パラメータ共有</strong>：同じフィルタを画像全体に適用することでパラメータ数を削減</li>
+        <li><strong>位置不変性</strong>：特徴がどの位置にあっても検出可能</li>
+        <li><strong>階層的な特徴表現</strong>：浅い層では単純な特徴、深い層では複雑な特徴を抽出</li>
+      </ul>
+      
+      <div class="note-box">
+        <h3 class="note-title">畳み込み操作の直感的理解</h3>
+        <p>畳み込み操作は、画像処理におけるフィルタリング操作と考えることができます。例えば、エッジ検出、ぼかし、シャープ化などの画像フィルタは畳み込み操作の一種です。CNNでは、これらのフィルタ（カーネルとも呼ばれる）の値が学習によって自動的に決定されます。</p>
+      </div>
+      
+      <p>畳み込み層の出力は<strong>特徴マップ（Feature Map）</strong>と呼ばれ、入力データの特定の特徴が活性化された領域を示します。複数のフィルタを適用することで、様々な種類の特徴を抽出することができます。</p>
+    </section>
+
+    <!-- 畳み込み操作の仕組みセクション -->
+    <section id="operation" class="section">
+      <div class="section-header">
+        <i class="fas fa-cogs"></i>
+        <h2>畳み込み操作の仕組み</h2>
+      </div>
+      
+      <p>畳み込み操作は、<strong>カーネル</strong>（または<strong>フィルタ</strong>）と呼ばれる小さな行列を入力データ上でスライドさせながら、要素ごとの積和演算を行う処理です。</p>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-box-title">畳み込み操作の数学的な定義</h3>
+        <p>2次元の入力 \(I\) に対してカーネル \(K\) を用いた畳み込み操作の出力 \(O\) は以下のように計算されます：</p>
+        <p>\[O(i,j) = \sum_{m} \sum_{n} I(i+m, j+n) \cdot K(m,n)\]</p>
+        <p>ここで、\(m, n\) はカーネル内の位置を表します。</p>
+      </div>
+      
+      <p>畳み込み操作の基本的な手順は以下の通りです：</p>
+      <ol>
+        <li>カーネル（3×3や5×5などの小さな行列）を入力の左上に配置</li>
+        <li>カーネルと重なった入力の各要素との積を計算</li>
+        <li>すべての積の和を出力の対応する位置に配置</li>
+        <li>カーネルを一定間隔（ストライド）で移動し、同じ操作を繰り返す</li>
+        <li>入力全体をカバーするまで続ける</li>
+      </ol>
+      
+      <div class="note-box">
+        <h3 class="note-title">重要な用語</h3>
+        <p><strong>カーネル（Kernel）/フィルタ（Filter）</strong>：入力データに適用される重み行列</p>
+        <p><strong>ストライド（Stride）</strong>：カーネルを移動させる間隔</p>
+        <p><strong>パディング（Padding）</strong>：入力データの周囲に追加する値（通常は0）</p>
+        <p><strong>特徴マップ（Feature Map）</strong>：畳み込み操作の出力結果</p>
+      </div>
+      
+      <p>実際の畳み込み層では、入力チャネルごとに畳み込み操作を適用し、その結果を合計して1つの出力チャネルを生成します。さらに、複数のフィルタを使用することで、複数の出力チャネル（複数の特徴マップ）を得ることができます。</p>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-5-2_01.png" alt="畳み込み操作の仕組み">
+        <figcaption>畳み込み操作では、カーネルを入力データ上でスライドさせながら積和演算を行い、特徴マップを生成します。この図では3×3のカーネルを使用した畳み込み操作を示しています。</figcaption>
+      </div>
+      
+      <p>カラー画像（RGB画像）の場合、入力は3チャネル（R、G、B）を持ちます。この場合、カーネルも3チャネル分の深さを持ち、各チャネルごとに畳み込み操作を行い、その結果を合計して出力チャネルを生成します。</p>
+    </section>
+
+    <!-- パラメータと特徴セクション -->
+    <section id="parameters" class="section">
+      <div class="section-header">
+        <i class="fas fa-sliders-h"></i>
+        <h2>パラメータと特徴</h2>
+      </div>
+      
+      <p>畳み込み層には複数のハイパーパラメータが存在し、これらが層の動作と出力の特性を決定します。また、パラメータ共有などの重要な概念があります。</p>
+      
+      <h3>畳み込み層の主要パラメータ</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>パラメータ</th>
+              <th>説明</th>
+              <th>影響</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>フィルタサイズ</strong></td>
+              <td>カーネルの空間的な大きさ（3×3, 5×5など）</td>
+              <td>受容野の大きさ、捉えられる特徴の複雑さに影響</td>
+            </tr>
+            <tr>
+              <td><strong>フィルタ数</strong></td>
+              <td>使用するカーネルの数</td>
+              <td>出力チャネル数、抽出できる特徴の種類に影響</td>
+            </tr>
+            <tr>
+              <td><strong>ストライド</strong></td>
+              <td>カーネルの移動間隔</td>
+              <td>出力サイズ、特徴の解像度に影響</td>
+            </tr>
+            <tr>
+              <td><strong>パディング</strong></td>
+              <td>入力の周囲に追加するピクセル</td>
+              <td>出力サイズ、端の情報の保持に影響</td>
+            </tr>
+            <tr>
+              <td><strong>Dilation Rate</strong></td>
+              <td>カーネル内の要素間の間隔</td>
+              <td>受容野の拡大に影響（Atrous/Dilated Convolutionで使用）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <h3>パラメータ数の計算</h3>
+      <p>畳み込み層のパラメータ数は以下の式で計算できます：</p>
+      <div class="handwritten-box">
+        <p>\[\text{パラメータ数} = (K_h \times K_w \times C_{in} + 1) \times C_{out}\]</p>
+        <p>ここで：</p>
+        <ul>
+          <li>\(K_h, K_w\)：カーネルの高さと幅</li>
+          <li>\(C_{in}\)：入力チャネル数</li>
+          <li>\(C_{out}\)：出力チャネル数</li>
+          <li>+1はバイアス項</li>
+        </ul>
+      </div>
+      
+      <p>例えば、入力が3チャネル（RGB）で、5×5のカーネルを10個使用する場合：</p>
+      <p>(5 × 5 × 3 + 1) × 10 = 760 パラメータ</p>
+      <p>これは同サイズの入力に対する全結合層と比較して大幅に少ないパラメータ数です。</p>
+      
+      <div class="note-box">
+        <h3 class="note-title">パラメータ共有の重要性</h3>
+        <p>畳み込み層の大きな特徴の一つは<strong>パラメータ共有</strong>です。同じカーネルを入力全体に適用することで、位置に関わらず同じパターンを検出できるようになります。これにより：
+        <ul>
+          <li>パラメータ数が大幅に削減される</li>
+          <li>位置不変性（translation invariance）が獲得される</li>
+          <li>データ効率が向上する</li>
+          <li>過学習リスクが軽減される</li>
+        </ul>
+      </div>
+      
+      <h3>出力サイズの計算</h3>
+      <p>畳み込み層の出力サイズは以下の式で計算できます：</p>
+      <div class="handwritten-box">
+        <p>\[\text{出力サイズ} = \frac{W - K + 2P}{S} + 1\]</p>
+        <p>ここで：</p>
+        <ul>
+          <li>\(W\)：入力サイズ</li>
+          <li>\(K\)：カーネルサイズ</li>
+          <li>\(P\)：パディングサイズ</li>
+          <li>\(S\)：ストライド</li>
+        </ul>
+      </div>
+      
+      <p>例えば、32×32の入力に5×5のカーネルをストライド1、パディング2で適用すると：</p>
+      <p>(32 - 5 + 2×2) / 1 + 1 = 32</p>
+      <p>つまり、出力サイズは32×32となり、入力サイズが保持されます。</p>
+    </section>
+
+    <!-- 様々な畳み込み手法セクション -->
+    <section id="types" class="section">
+      <div class="section-header">
+        <i class="fas fa-th"></i>
+        <h2>様々な畳み込み手法</h2>
+      </div>
+      
+      <p>標準的な畳み込み操作以外にも、様々な変種が開発されています。これらは特定の問題に対処したり、効率を改善したりするために設計されています。</p>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>畳み込み手法</th>
+              <th>説明</th>
+              <th>特徴・利点</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>標準畳み込み</strong><br>(Standard Convolution)</td>
+              <td>基本的な畳み込み操作</td>
+              <td>空間的な特徴を抽出する基本的な方法</td>
+            </tr>
+            <tr>
+              <td><strong>Atrous畳み込み</strong><br>(Atrous Convolution / <br>Dilated Convolution)</td>
+              <td>カーネル内の要素間に間隔を挿入した畳み込み</td>
+              <td>受容野を拡大しながらパラメータ数を維持<br>セマンティックセグメンテーションなどで有効</td>
+            </tr>
+            <tr>
+              <td><strong>Depthwise Separable畳み込み</strong></td>
+              <td>空間方向とチャネル方向の畳み込みを分離</td>
+              <td>パラメータ数と計算量を大幅に削減<br>MobileNetなどの軽量モデルで使用</td>
+            </tr>
+            <tr>
+              <td><strong>転置畳み込み</strong><br>(Transposed Convolution)</td>
+              <td>通常の畳み込みの逆操作に相当</td>
+              <td>特徴マップのサイズを拡大<br>自動エンコーダやセグメンテーションで使用</td>
+            </tr>
+            <tr>
+              <td><strong>1×1畳み込み</strong><br>(1×1 Convolution / <br>Pointwise Convolution)</td>
+              <td>1×1のフィルタを使用した畳み込み</td>
+              <td>チャネル数の調整<br>特徴の線形結合による次元削減や拡張</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <h3>Atrous Convolution（Dilated Convolution）</h3>
+      <p><strong>Atrous Convolution</strong>（または<strong>Dilated Convolution</strong>）は、カーネル内の要素間に間隔（dilation rate）を挿入する手法です。これにより、パラメータ数を増やさずに受容野を拡大することができます。</p>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-box-title">Atrous Convolutionの利点</h3>
+        <p>1. より広い範囲の情報を捉えることができる</p>
+        <p>2. 解像度の低下を抑えながら広い受容野を獲得できる</p>
+        <p>3. マルチスケールな特徴抽出が可能になる</p>
+      </div>
+      
+      <p>Atrous Convolutionは特に<strong>セマンティックセグメンテーション</strong>のモデル（DeepLab等）で広く使用されています。</p>
+      
+      <h3>Depthwise Separable Convolution</h3>
+      <p><strong>Depthwise Separable Convolution</strong>は、従来の畳み込み操作を2つのステップに分解する手法です：</p>
+      <ol>
+        <li><strong>Depthwise Convolution</strong>：各入力チャネルに対して別々のフィルタを適用</li>
+        <li><strong>Pointwise Convolution</strong>：1×1の畳み込みを使用してチャネル間の情報を結合</li>
+      </ol>
+      
+      <p>この手法により、パラメータ数と計算量を大幅に削減することができます。例えば、標準の畳み込みと比較すると：</p>
+      <div class="handwritten-box">
+        <p><strong>標準畳み込み</strong>のパラメータ数：\(K_h \times K_w \times C_{in} \times C_{out}\)</p>
+        <p><strong>Depthwise Separable畳み込み</strong>のパラメータ数：\(K_h \times K_w \times C_{in} + C_{in} \times C_{out}\)</p>
+      </div>
+      
+      <p>MobileNet、Xception、EfficientNetなどの効率的なアーキテクチャでよく使用されています。</p>
+      
+      <div class="note-box">
+        <h3 class="note-title">G検定出題ポイント</h3>
+        <p>特に<strong>Atrous Convolution</strong>と<strong>Depthwise Separable Convolution</strong>はG検定でも重要な出題ポイントです。それぞれの特徴と利点を理解しておきましょう。</p>
+      </div>
+    </section>
+
+    <!-- 応用例と利点セクション -->
+    <section id="applications" class="section">
+      <div class="section-header">
+        <i class="fas fa-laptop-code"></i>
+        <h2>応用例と利点</h2>
+      </div>
+      
+      <p>畳み込み層は様々なタイプのデータに適用できますが、特に<strong>格子状の構造を持つデータ</strong>（画像、時系列データなど）に対して強力です。</p>
+      
+      <h3>畳み込み層が適する主なデータタイプ</h3>
+      <ul>
+        <li><strong>画像データ</strong>：2次元の空間的な相関を持つデータ</li>
+        <li><strong>動画データ</strong>：3次元（空間×時間）の相関を持つデータ</li>
+        <li><strong>時系列データ</strong>：1次元の時間的な相関を持つデータ（1D畳み込みを使用）</li>
+        <li><strong>3Dボクセルデータ</strong>：3次元の空間的な相関を持つデータ（医療画像など）</li>
+      </ul>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-box-title">畳み込み層の主な利点</h3>
+        <p>1. <strong>局所的な特徴抽出</strong>：画像のエッジ、テクスチャなどの局所的パターンを検出できる</p>
+        <p>2. <strong>パラメータ共有</strong>：同じフィルタを画像全体に適用するため、パラメータ数が少ない</p>
+        <p>3. <strong>平行移動不変性</strong>：特徴がどの位置にあっても同様に検出できる</p>
+        <p>4. <strong>階層的な特徴表現</strong>：浅い層では単純な特徴、深い層では複雑な特徴を学習</p>
+      </div>
+      
+      <h3>代表的な応用例</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>応用分野</th>
+              <th>具体例</th>
+              <th>使用されるCNNアーキテクチャ例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>画像分類</strong></td>
+              <td>写真に写っているオブジェクトの識別</td>
+              <td>ResNet, VGG, EfficientNet</td>
+            </tr>
+            <tr>
+              <td><strong>物体検出</strong></td>
+              <td>画像内の複数オブジェクトの位置特定と分類</td>
+              <td>YOLO, Faster R-CNN, SSD</td>
+            </tr>
+            <tr>
+              <td><strong>セマンティックセグメンテーション</strong></td>
+              <td>画像内の各ピクセルのクラス分類</td>
+              <td>U-Net, DeepLab, FCN</td>
+            </tr>
+            <tr>
+              <td><strong>顔認識</strong></td>
+              <td>人物の顔の識別や感情分析</td>
+              <td>FaceNet, ArcFace</td>
+            </tr>
+            <tr>
+              <td><strong>医療画像解析</strong></td>
+              <td>X線、CTスキャン、MRIなどの解析</td>
+              <td>U-Net, V-Net</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="note-box">
+        <h3 class="note-title">CNNの進化</h3>
+        <p>畳み込みニューラルネットワークは2012年のAlexNetによるImageNet競技会での成功以降、急速に発展しました。ResNetやEfficientNetなどのアーキテクチャの登場により、さらに深く効率的なネットワークが可能になりました。最近では、Vision Transformerなどの新しいアーキテクチャも登場していますが、これらも局所的な特徴抽出には畳み込み層を活用しています。</p>
+      </div>
+    </section>
+    
+    <!-- 全結合層との比較セクション -->
+    <section id="comparison" class="section">
+      <div class="section-header">
+        <i class="fas fa-exchange-alt"></i>
+        <h2>全結合層との比較</h2>
+      </div>
+      
+      <p>畳み込み層と全結合層は、ニューラルネットワークにおける基本的な構成要素ですが、その特性と用途は大きく異なります。</p>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>比較項目</th>
+              <th>畳み込み層</th>
+              <th>全結合層</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>接続パターン</strong></td>
+              <td>入力の局所的な領域のみに接続</td>
+              <td>すべての入力ニューロンがすべての出力ニューロンに接続</td>
+            </tr>
+            <tr>
+              <td><strong>パラメータ共有</strong></td>
+              <td>同じフィルタを入力全体に適用</td>
+              <td>各接続に独立したパラメータ</td>
+            </tr>
+            <tr>
+              <td><strong>パラメータ数</strong></td>
+              <td>少ない（効率的）</td>
+              <td>多い（非効率的）</td>
+            </tr>
+            <tr>
+              <td><strong>空間情報の保持</strong></td>
+              <td>空間的な構造を保持</td>
+              <td>空間的な構造を失う（フラット化）</td>
+            </tr>
+            <tr>
+              <td><strong>位置不変性</strong></td>
+              <td>特徴の位置に依存しない</td>
+              <td>特徴の位置に強く依存</td>
+            </tr>
+            <tr>
+              <td><strong>主な用途</strong></td>
+              <td>特徴抽出、空間的パターン検出</td>
+              <td>特徴の統合、最終的な分類・予測</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <h3>パラメータ数の比較例</h3>
+      <p>32×32×3（RGB画像）の入力に対して比較してみましょう：</p>
+      <div class="handwritten-box">
+        <p><strong>全結合層の場合</strong>：</p>
+        <p>入力サイズ：32×32×3 = 3,072</p>
+        <p>出力サイズ：1,000（例として）</p>
+        <p>パラメータ数：3,072×1,000 = 3,072,000</p>
+        
+        <p><strong>畳み込み層の場合</strong>：</p>
+        <p>5×5のカーネル、16フィルタ、ストライド1、パディング2</p>
+        <p>パラメータ数：(5×5×3+1)×16 = 1,216</p>
+      </div>
+      
+      <p>この例から分かるように、<strong>畳み込み層は全結合層に比べて大幅にパラメータ数が少なく</strong>、データ効率が高いことが分かります。</p>
+      
+      <div class="note-box">
+        <h3 class="note-title">CNNにおける層の組み合わせ</h3>
+        <p>一般的なCNNアーキテクチャでは、<strong>畳み込み層を使って特徴抽出を行い、最後に全結合層を使って分類</strong>を行うという構成が多いです。畳み込み層で抽出された特徴マップは、グローバルプーリングや平坦化（flattening）を経て全結合層に入力されます。</p>
+        <p>ただし、最近のアーキテクチャでは、全結合層を使わず、グローバルアベレージプーリング（Global Average Pooling）とそれに続く1×1畳み込みを使うケースも増えています。これによりパラメータ数をさらに削減しています。</p>
+      </div>
+      
+      <h3>選択指針</h3>
+      <ul>
+        <li><strong>畳み込み層を使うべき場合</strong>：空間的な構造を持つデータ（画像など）を処理する場合や、パラメータ効率を重視する場合</li>
+        <li><strong>全結合層を使うべき場合</strong>：空間的な構造を持たないデータを処理する場合や、ネットワークの最終層で特徴を統合する場合</li>
+      </ul>
+    </section>
+
+    <!-- キーワード解説セクション -->
+    <section id="keywords" class="section">
+      <div class="section-header">
+        <i class="fas fa-key"></i>
+        <h2>キーワード解説</h2>
+      </div>
+      
+      <div class="keyword-box">
+        <div class="keyword-header">
+          <i class="fas fa-tags"></i>
+          <h3>G検定シラバスの重要キーワード</h3>
+        </div>
+        <div class="keyword-content">
+          <ul class="keyword-list">
+            <li class="keyword-item"><i class="fas fa-tag"></i>畳み込み層 (Convolutional Layer)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>カーネル (Kernel)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>フィルタ (Filter)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>ストライド (Stride)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>パディング (Padding)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>特徴マップ (Feature Map)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>畳み込み操作 (Convolution Operation)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>畳み込みニューラルネットワーク (CNN)</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>Atrous Convolution</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>Depthwise Separable Convolution</li>
+            <li class="keyword-item"><i class="fas fa-tag"></i>Dilation Convolution</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <table class="term-table">
+          <thead>
+            <tr>
+              <th>用語</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>畳み込み層</strong><br>(Convolutional Layer)</td>
+              <td>画像などの格子状データから局所的な特徴を抽出するための層。カーネル（フィルタ）を入力データにスライドさせながら適用することで、空間的な構造を保持したまま特徴を抽出する。</td>
+            </tr>
+            <tr>
+              <td><strong>カーネル / フィルタ</strong><br>(Kernel / Filter)</td>
+              <td>畳み込み操作に使用される重み行列。通常は3×3や5×5などの小さな正方形の行列で、入力データの特定の特徴を検出するように学習される。</td>
+            </tr>
+            <tr>
+              <td><strong>ストライド</strong><br>(Stride)</td>
+              <td>畳み込み操作においてカーネルを移動させる間隔。ストライドが大きいほど出力の解像度が下がり、計算量が減少する。</td>
+            </tr>
+            <tr>
+              <td><strong>パディング</strong><br>(Padding)</td>
+              <td>入力データの周囲に追加する値（通常は0）。パディングにより、出力サイズを調整したり、端の情報の欠落を防いだりする。</td>
+            </tr>
+            <tr>
+              <td><strong>特徴マップ</strong><br>(Feature Map)</td>
+              <td>畳み込み層の出力結果。入力データに対してフィルタを適用した結果であり、特定の特徴の存在を表す活性化マップ。</td>
+            </tr>
+            <tr>
+              <td><strong>畳み込み操作</strong><br>(Convolution Operation)</td>
+              <td>カーネルを入力データ上でスライドさせながら、各位置で要素ごとの積の和を計算する操作。画像処理におけるフィルタリング操作に相当する。</td>
+            </tr>
+            <tr>
+              <td><strong>畳み込みニューラルネットワーク</strong><br>(CNN: Convolutional Neural Network)</td>
+              <td>畳み込み層を中心に構成されたニューラルネットワーク。画像認識などの視覚的タスクに広く使用される。</td>
+            </tr>
+            <tr>
+              <td><strong>Atrous Convolution / <br>Dilated Convolution</strong></td>
+              <td>カーネル内の要素間に間隔（dilation rate）を挿入した畳み込み。パラメータ数を増やさずに受容野を拡大できる。セマンティックセグメンテーションなどで有効。</td>
+            </tr>
+            <tr>
+              <td><strong>Depthwise Separable Convolution</strong></td>
+              <td>通常の畳み込みを「Depthwise Convolution」と「Pointwise Convolution」の2段階に分解した手法。パラメータ数と計算コストを大幅に削減できる。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Key Insightsセクション -->
+    <section id="insights" class="insight-section">
+      <div class="insight-header">
+        <i class="fas fa-lightbulb"></i>
+        <h2>Key Insights</h2>
+      </div>
+      
+      <div class="insight-items">
+        <div class="insight-item">
+          <h3 class="insight-item-title">1. 局所的特徴抽出とパラメータ共有</h3>
+          <p>畳み込み層は局所的な領域のみを見る「局所的接続」と、同じフィルタを画像全体に適用する「パラメータ共有」という2つの重要な特性を持ちます。この特性により、全結合層と比較して少ないパラメータ数で効率的に特徴を抽出できます。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h3 class="insight-item-title">2. 畳み込み層のパラメータと特性</h3>
+          <p>フィルタサイズ、フィルタ数、ストライド、パディングなどのパラメータによって畳み込み層の挙動が決まります。特に、出力サイズは<code>(W - K + 2P) / S + 1</code>の式で計算され、パラメータ数は<code>(K_h × K_w × C_in + 1) × C_out</code>で求められます。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h3 class="insight-item-title">3. 様々な畳み込み手法の特徴</h3>
+          <p>Atrous ConvolutionとDepthwise Separable Convolutionは重要な派生手法です。前者は受容野を拡大し、後者はパラメータ効率を高めます。これらの手法は特にモバイルやエッジデバイスなど計算リソースが限られた環境で重要です。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h3 class="insight-item-title">4. 全結合層との使い分け</h3>
+          <p>畳み込み層は局所的な特徴抽出に適し、全結合層は特徴の統合に適しています。CNNでは通常、畳み込み層で特徴抽出を行い、最後に全結合層で分類を行います。ただし、最近のモデルでは全結合層の代わりにグローバルプーリングと1×1畳み込みを使うことも増えています。</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Take Home Messageセクション -->
+    <section id="take-home" class="take-home-section">
+      <div class="take-home-header">
+        <i class="fas fa-home"></i>
+        <h2>Take Home Message</h2>
+      </div>
+      
+      <div class="take-home-message">
+        畳み込み層は、空間的構造を保持しながら効率的に特徴を抽出できる画期的な仕組みであり、現代の画像認識技術の基盤となっています。パラメータ共有と局所的接続の特性により、少ないパラメータで高い表現力を実現し、CNNの成功の鍵となっています。
+      </div>
+    </section>
+    
+    <!-- フッター -->
+    <footer class="footer">
+      <p>G検定学習ノート | 作成日: 2024年4月3日</p>
+      <p>Content: Claude | Images: ChatGPT</p>
+    </footer>
+    
+    <!-- スクロールトップボタン -->
+    <div class="scroll-top">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+  </div>
+
+  <script>
+    // スクロールトップボタンの表示・非表示
+    const scrollTopBtn = document.querySelector('.scroll-top');
+    
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 200) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+    
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // ナビゲーションのアクティブ状態
+    const navLinks = document.querySelectorAll('.nav-item a');
+    const sections = document.querySelectorAll('section');
+    
+    window.addEventListener('scroll', () => {
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        
+        if (window.pageYOffset >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+    
+    // スムーススクロール
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        window.scrollTo({
+          top: targetElement.offsetTop,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

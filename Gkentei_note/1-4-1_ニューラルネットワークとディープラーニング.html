@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ニューラルネットワークとディープラーニング - G検定学習ノート</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;      /* 明るいシアン */
+      --magenta: #FF40A0;   /* 明るいマゼンタ */
+      --yellow: #FFE600;    /* レモンイエロー */
+      --key: #181818;       /* テキスト用ブラック */
+      --dark-gray: #404040; /* 補助テキスト */
+      --white: #FFFFFF;     /* 背景用ホワイト */
+      
+      /* フォント設定 */
+      --header-font: 'M PLUS Rounded 1c', sans-serif;
+      --body-font: 'Zen Maru Gothic', sans-serif;
+      --accent-font: 'Klee One', cursive;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--body-font);
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 22%;
+      position: fixed;
+      height: 100vh;
+      background-color: var(--key); /* 黒背景 */
+      padding: 2rem 1rem;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+    
+    /* Webkit用スクロールバーカスタマイズ（Chrome, Safari） */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .sidebar-title {
+      font-family: var(--header-font);
+      font-size: 1.3rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--cyan);
+      font-weight: 700;
+      color: var(--white);
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.8rem;
+    }
+    
+    .nav-link {
+      display: block;
+      padding: 0.8rem;
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+      color: var(--cyan);
+    }
+    
+    /* メインコンテンツ */
+    main {
+      margin-left: 22%;
+      width: 78%;
+      padding: 2rem;
+    }
+    
+    section {
+      margin-bottom: 4rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: var(--header-font);
+      margin-bottom: 1.5rem;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      border-bottom: 3px solid var(--cyan);
+      padding-bottom: 0.8rem;
+      display: inline-block;
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      color: var(--key);
+      position: relative;
+      padding-left: 1.8rem;
+    }
+    
+    h2:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.2rem;
+      height: 1.2rem;
+      background-color: var(--cyan);
+      border-radius: 50%;
+    }
+    
+    h3 {
+      font-size: 1.4rem;
+      color: var(--key);
+      border-left: 4px solid var(--magenta);
+      padding-left: 1rem;
+    }
+    
+    p {
+      margin-bottom: 1.2rem;
+      font-size: 1.05rem;
+    }
+    
+    /* ユーティリティクラス */
+    .highlight-text {
+      color: var(--magenta);
+      font-weight: bold;
+    }
+    
+    .highlight-bg {
+      background-color: rgba(255, 64, 160, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+    
+    /* ページトップへ戻るボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 50px;
+      height: 50px;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .scroll-top.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .scroll-top:hover {
+      transform: translateY(-5px);
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <i class="fas fa-brain"></i> ディープラーニングの応用例
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="#header" class="nav-link active">
+          <i class="fas fa-home"></i> 概要
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#neural-network" class="nav-link">
+          <i class="fas fa-network-wired"></i> ニューラルネットワーク
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#deep-learning" class="nav-link">
+          <i class="fas fa-project-diagram"></i> ディープラーニング
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#computation-resources" class="nav-link">
+          <i class="fas fa-microchip"></i> 計算リソース
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#processors" class="nav-link">
+          <i class="fas fa-server"></i> CPU・GPU・TPU
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#key-insights" class="nav-link">
+          <i class="far fa-lightbulb"></i> Key Insights
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#take-home" class="nav-link">
+          <i class="fas fa-key"></i> Take Home Message
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#glossary" class="nav-link">
+          <i class="fas fa-book"></i> 用語集
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main>
+    <!-- ヘッダーセクション -->
+    <section id="header" class="header-section">
+      <div class="header-bg-design">
+        <div class="header-icon"><i class="fas fa-brain"></i></div>
+        <div class="header-circle circle1"></div>
+        <div class="header-circle circle2"></div>
+        <div class="header-circle circle3"></div>
+        <div class="header-dots"></div>
+      </div>
+      <h1 class="header-title">ニューラルネットワークとディープラーニング</h1>
+      <div class="header-subtitle">人工知能の仕組みを理解する基礎</div>
+      <div class="summary-list">
+        <ul>
+          <li>ニューラルネットワークの基礎的な知識と構造</li>
+          <li>ニューラルネットワークとディープラーニングの関係性</li>
+          <li>ディープラーニングに必要なデータ量と計算リソース</li>
+          <li>CPU・GPU・TPUそれぞれの特徴と役割</li>
+          <li>ディープラーニングが効果を発揮する適用場面</li>
+        </ul>
+      </div>
+    </section>
+
+    <style>
+      /* ヘッダーセクションのスタイル強化 */
+      .header-section {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 3rem 2rem;
+        background-color: rgba(0, 216, 232, 0.05);
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-bg-design {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        opacity: 0.8;
+      }
+
+      .header-icon {
+        position: absolute;
+        right: 10%;
+        top: 20%;
+        font-size: 8rem;
+        color: rgba(0, 216, 232, 0.1);
+        transform: rotate(15deg);
+      }
+
+      .header-circle {
+        position: absolute;
+        border-radius: 50%;
+      }
+
+      .circle1 {
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 64, 160, 0.05) 0%, rgba(255, 64, 160, 0) 70%);
+        top: -50px;
+        left: -50px;
+      }
+
+      .circle2 {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 230, 0, 0.05) 0%, rgba(255, 230, 0, 0) 70%);
+        bottom: -100px;
+        right: -50px;
+      }
+
+      .circle3 {
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(0, 216, 232, 0.05) 0%, rgba(0, 216, 232, 0) 70%);
+        bottom: 50px;
+        left: 15%;
+      }
+
+      .header-dots {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(var(--dark-gray) 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.05;
+      }
+
+      .header-title {
+        position: relative;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--key);
+        text-shadow: 2px 2px 0 rgba(0, 216, 232, 0.1);
+        display: inline-block;
+        z-index: 1;
+      }
+
+      .header-subtitle {
+        position: relative;
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        color: var(--dark-gray);
+        font-family: var(--accent-font);
+        z-index: 1;
+      }
+
+      .summary-list {
+        position: relative;
+        text-align: left;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1.5rem 2rem;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 216, 232, 0.2);
+        z-index: 1;
+      }
+
+      .summary-list ul {
+        list-style-type: none;
+      }
+
+      .summary-list li {
+        margin-bottom: 0.8rem;
+        position: relative;
+        padding-left: 2rem;
+      }
+
+      .summary-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.5rem;
+        width: 12px;
+        height: 12px;
+        background-color: var(--cyan);
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(0, 216, 232, 0.2);
+      }
+
+      .summary-list li:nth-child(2n)::before {
+        background-color: var(--magenta);
+        box-shadow: 0 0 0 2px rgba(255, 64, 160, 0.2);
+      }
+
+      .summary-list li:nth-child(3n)::before {
+        background-color: var(--yellow);
+        box-shadow: 0 0 0 2px rgba(255, 230, 0, 0.2);
+      }
+    </style>
+
+    <!-- ニューラルネットワークセクション -->
+    <section id="neural-network">
+      <h2><i class="fas fa-network-wired"></i> ニューラルネットワークの基礎</h2>
+      
+      <div class="concept-box">
+        <h3>ニューラルネットワークとは</h3>
+        <p>
+          <span class="highlight-text">ニューラルネットワーク</span>は、人間の脳内にある神経細胞（ニューロン）のネットワーク構造を模倣した計算モデルです。
+          入力された情報を層と呼ばれる複数のニューロン群で処理し、最終的に出力層から結果を得ます。
+        </p>
+      </div>
+      
+      <h3>ニューラルネットワークの構造</h3>
+      <p>
+        ニューラルネットワークは主に以下の3つの層から構成されています：
+      </p>
+      
+      <div class="layer-structure">
+        <div class="layer-box">
+          <i class="fas fa-sign-in-alt layer-icon"></i>
+          <h4>入力層 (Input Layer)</h4>
+          <p>データを受け取り、ネットワークに送り込む最初の層です。各ノードはデータの特徴量を表します。</p>
+        </div>
+        
+        <div class="layer-box">
+          <i class="fas fa-cogs layer-icon"></i>
+          <h4>隠れ層 (Hidden Layer)</h4>
+          <p>入力層と出力層の間にある層で、実際の計算処理が行われます。複数の隠れ層を持つことがあります。</p>
+        </div>
+        
+        <div class="layer-box">
+          <i class="fas fa-sign-out-alt layer-icon"></i>
+          <h4>出力層 (Output Layer)</h4>
+          <p>ネットワークの最終結果を出力する層です。分類問題ではクラスの数だけノードを持ちます。</p>
+        </div>
+      </div>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-1_01.png" alt="ニューラルネットワークの基本構造">
+        <figcaption>ニューラルネットワークの基本構造：入力層、隠れ層、出力層からなる階層構造</figcaption>
+      </div>
+      
+      <h3>単純パーセプトロン</h3>
+      <p>
+        <span class="highlight-text">単純パーセプトロン (Simple Perceptron)</span> は、ニューラルネットワークの最も基本的な形です。
+        入力値に重みを掛けて合計し、活性化関数を通して出力を得る仕組みです。
+        しかし、単純パーセプトロンは線形分離可能な問題にしか対応できないという限界がありました。
+      </p>
+      
+      <h3>多層パーセプトロン</h3>
+      <p>
+        <span class="highlight-text">多層パーセプトロン (Multi-Layer Perceptron, MLP)</span> は、
+        複数の層を持つニューラルネットワークで、非線形の問題も解決できるようになりました。
+        隠れ層を持つことで、より複雑なパターン認識が可能になります。
+      </p>
+    </section>
+
+    <style>
+      /* ニューラルネットワークセクション用スタイル */
+      .concept-box {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        background-color: rgba(0, 216, 232, 0.08);
+        border-radius: 10px;
+        border: 2px dashed var(--cyan);
+        position: relative;
+      }
+      
+      .layer-structure {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin: 2rem 0;
+        gap: 1.5rem;
+      }
+      
+      .layer-box {
+        flex: 1;
+        min-width: 250px;
+        padding: 1.5rem;
+        border-radius: 10px;
+        background-color: rgba(255, 230, 0, 0.05);
+        border: 1px solid var(--yellow);
+        position: relative;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s;
+      }
+      
+      .layer-box:hover {
+        transform: translateY(-5px);
+      }
+      
+      .layer-icon {
+        font-size: 1.8rem;
+        color: var(--magenta);
+        margin-bottom: 0.8rem;
+      }
+      
+      .layer-box h4 {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+        color: var(--key);
+      }
+      
+      /* 画像コンテナのスタイル */
+      .image-container {
+        margin: 1.5rem 0;
+        text-align: center;
+        max-width: 100%;
+      }
+      
+      .image-container img {
+        max-width: 75%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e0e0;
+      }
+      
+      .image-container figcaption {
+        margin-top: 0.8rem;
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+        font-style: italic;
+        text-align: center;
+        padding: 0 10%;
+        line-height: 1.5;
+        border-bottom: 1px dashed var(--cyan);
+        padding-bottom: 0.5rem;
+        display: inline-block;
+      }
+    </style>
+
+    <!-- ディープラーニングセクション -->
+    <section id="deep-learning">
+      <h2><i class="fas fa-brain"></i> ディープラーニングの理解</h2>
+      
+      <div class="concept-box">
+        <h3>ディープラーニングとは</h3>
+        <p>
+          ディープラーニングは多層のニューラルネットワークを用いた機械学習の一種で、データから直接特徴を学習する能力を持ちます。
+          従来の機械学習手法と異なり、特徴抽出を人間が行う必要がなく、生データから自動的に階層的な特徴表現を獲得できることが大きな特徴です。
+        </p>
+      </div>
+      
+      <h3>ニューラルネットワークからディープラーニングへ</h3>
+      <div class="dl-evolution">
+        <div class="evolution-step">
+          <div class="step-header">
+            <div class="year">1950s〜</div>
+            <div class="title">単純パーセプトロン</div>
+          </div>
+          <div class="step-content">
+            <div class="step-image perceptron"></div>
+            <div class="step-description">
+              <p>Frank Rosenblattによって考案された最も単純なニューラルネットワーク。線形分離可能な問題しか解けないという限界があった。</p>
+              <div class="limitation">線形分離不可能な問題（XOR問題など）を解決できない</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="evolution-step">
+          <div class="step-header">
+            <div class="year">1980s〜</div>
+            <div class="title">多層パーセプトロン</div>
+          </div>
+          <div class="step-content">
+            <div class="step-image mlp"></div>
+            <div class="step-description">
+              <p>隠れ層を持つネットワーク構造と誤差逆伝播法（バックプロパゲーション）の発明により、非線形問題が解決可能に。</p>
+              <div class="limitation">勾配消失問題、過学習、計算コストが課題</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="evolution-step">
+          <div class="step-header">
+            <div class="year">2006〜</div>
+            <div class="title">深層学習の復活</div>
+          </div>
+          <div class="step-content">
+            <div class="step-image dbn"></div>
+            <div class="step-description">
+              <p>Hinton らによる層別事前学習法の提案。深い層を持つネットワークの効率的な学習が可能に。</p>
+              <div class="advancement">制限付きボルツマンマシン (RBM)、オートエンコーダによる事前学習</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="evolution-step">
+          <div class="step-header">
+            <div class="year">2012〜</div>
+            <div class="title">現代のディープラーニング</div>
+          </div>
+          <div class="step-content">
+            <div class="step-image modern-dl"></div>
+            <div class="step-description">
+              <p>AlexNetによるImageNet勝利を皮切りに、様々なアーキテクチャと技術革新が登場。現在も急速に発展中。</p>
+              <div class="advancement">CNN, RNN, LSTM, GAN, Transformer, 自己教師あり学習など</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h3>ディープラーニングが従来の機械学習と異なる点</h3>
+      <div class="dl-vs-ml">
+        <div class="comparison-card">
+          <div class="card-header">特徴抽出</div>
+          <div class="comparison-content">
+            <div class="comparison-item">
+              <div class="comparison-title">従来の機械学習</div>
+              <div class="comparison-desc">
+                <i class="fas fa-user"></i> 人間が特徴を設計・抽出
+              </div>
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-title">ディープラーニング</div>
+              <div class="comparison-desc">
+                <i class="fas fa-robot"></i> モデルが自動的に特徴を学習
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="comparison-card">
+          <div class="card-header">データ量の要求</div>
+          <div class="comparison-content">
+            <div class="comparison-item">
+              <div class="comparison-title">従来の機械学習</div>
+              <div class="comparison-desc">
+                <i class="fas fa-database"></i> 比較的少量のデータでも可能
+              </div>
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-title">ディープラーニング</div>
+              <div class="comparison-desc">
+                <i class="fas fa-server"></i> 大量のデータが必要
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="comparison-card">
+          <div class="card-header">計算リソース</div>
+          <div class="comparison-content">
+            <div class="comparison-item">
+              <div class="comparison-title">従来の機械学習</div>
+              <div class="comparison-desc">
+                <i class="fas fa-laptop"></i> 比較的少ない計算リソース
+              </div>
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-title">ディープラーニング</div>
+              <div class="comparison-desc">
+                <i class="fas fa-microchip"></i> 高性能なGPU/TPUが必要
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="comparison-card">
+          <div class="card-header">モデルの複雑さ</div>
+          <div class="comparison-content">
+            <div class="comparison-item">
+              <div class="comparison-title">従来の機械学習</div>
+              <div class="comparison-desc">
+                <i class="fas fa-cogs"></i> シンプルな数学モデル
+              </div>
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-title">ディープラーニング</div>
+              <div class="comparison-desc">
+                <i class="fas fa-network-wired"></i> 複雑な多層構造
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h3>ディープラーニングの代表的アーキテクチャ</h3>
+      <div class="dl-architectures">
+        <div class="architecture">
+          <div class="architecture-icon"><i class="fas fa-image"></i></div>
+          <div class="architecture-content">
+            <h4>CNN (畳み込みニューラルネットワーク)</h4>
+            <div class="architecture-desc">
+              <p>
+                畳み込み層とプーリング層を特徴とするネットワーク。空間的な特徴を捉えるのに優れており、
+                画像認識、物体検出、セグメンテーションなどの視覚タスクに広く使用されています。
+              </p>
+              <div class="architecture-example">例：LeNet, AlexNet, VGG, ResNet, Inception</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="architecture">
+          <div class="architecture-icon"><i class="fas fa-file-alt"></i></div>
+          <div class="architecture-content">
+            <h4>RNN/LSTM (再帰型ニューラルネットワーク/長短期記憶)</h4>
+            <div class="architecture-desc">
+              <p>
+                シーケンシャルデータを処理するためのネットワーク。内部状態を持ち、時系列データの
+                前後関係を学習できます。自然言語処理、音声認識、時系列予測などに使用されます。
+              </p>
+              <div class="architecture-example">例：Vanilla RNN, LSTM, GRU, Bidirectional RNN</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="architecture">
+          <div class="architecture-icon"><i class="fas fa-random"></i></div>
+          <div class="architecture-content">
+            <h4>GAN (敵対的生成ネットワーク)</h4>
+            <div class="architecture-desc">
+              <p>
+                Generator(生成器)とDiscriminator(識別器)の2つのネットワークが敵対的に学習する構造。
+                高品質な画像生成、スタイル変換、データ拡張などに使用されます。
+              </p>
+              <div class="architecture-example">例：DCGAN, CycleGAN, StyleGAN, BigGAN</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="architecture">
+          <div class="architecture-icon"><i class="fas fa-language"></i></div>
+          <div class="architecture-content">
+            <h4>Transformer</h4>
+            <div class="architecture-desc">
+              <p>
+                Self-Attentionメカニズムを中心としたアーキテクチャ。RNNの限界を克服し、
+                並列処理が可能。自然言語処理、画像認識、音声処理など幅広い分野で成功を収めています。
+              </p>
+              <div class="architecture-example">例：BERT, GPT, ViT (Vision Transformer), DALL-E</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      /* ディープラーニングセクション用スタイル */
+      .dl-evolution {
+        margin: 2rem 0 3rem;
+      }
+      
+      .evolution-step {
+        margin-bottom: 2.5rem;
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+      }
+      
+      .step-header {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: var(--key);
+        color: white;
+      }
+      
+      .evolution-step:nth-child(1) .step-header {
+        background-color: var(--cyan);
+      }
+      
+      .evolution-step:nth-child(2) .step-header {
+        background-color: var(--cyan);
+      }
+      
+      .evolution-step:nth-child(3) .step-header {
+        background-color: var(--magenta);
+      }
+      
+      .evolution-step:nth-child(4) .step-header {
+        background-color: var(--magenta);
+      }
+      
+      .year {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-right: 1.5rem;
+        padding-right: 1.5rem;
+        border-right: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      
+      .title {
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+      
+      .step-content {
+        display: flex;
+        padding: 1.5rem;
+      }
+      
+      .step-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.03);
+        margin-right: 1.5rem;
+        flex-shrink: 0;
+      }
+      
+      .perceptron {
+        background: 
+          radial-gradient(circle at center, var(--cyan) 5%, transparent 6%),
+          linear-gradient(90deg, transparent 45%, var(--cyan) 46%, var(--cyan) 54%, transparent 55%),
+          linear-gradient(90deg, transparent 20%, var(--yellow) 21%, var(--yellow) 29%, transparent 30%);
+        background-position: center, center, center;
+        background-size: 100% 100%, 100% 10%, 100% 10%;
+        background-repeat: no-repeat;
+      }
+      
+      .mlp {
+        background: 
+          radial-gradient(circle at 30% 30%, var(--cyan) 5%, transparent 6%),
+          radial-gradient(circle at 30% 70%, var(--cyan) 5%, transparent 6%),
+          radial-gradient(circle at 70% 30%, var(--yellow) 5%, transparent 6%),
+          radial-gradient(circle at 70% 70%, var(--yellow) 5%, transparent 6%),
+          radial-gradient(circle at 50% 50%, var(--magenta) 5%, transparent 6%);
+        background-position: center, center, center, center, center;
+        background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+        background-repeat: no-repeat;
+      }
+      
+      .dbn {
+        background: 
+          radial-gradient(circle at 20% 20%, var(--cyan) 3%, transparent 4%),
+          radial-gradient(circle at 20% 40%, var(--cyan) 3%, transparent 4%),
+          radial-gradient(circle at 20% 60%, var(--cyan) 3%, transparent 4%),
+          radial-gradient(circle at 20% 80%, var(--cyan) 3%, transparent 4%),
+          radial-gradient(circle at 50% 30%, var(--magenta) 3%, transparent 4%),
+          radial-gradient(circle at 50% 50%, var(--magenta) 3%, transparent 4%),
+          radial-gradient(circle at 50% 70%, var(--magenta) 3%, transparent 4%),
+          radial-gradient(circle at 80% 40%, var(--yellow) 3%, transparent 4%),
+          radial-gradient(circle at 80% 60%, var(--yellow) 3%, transparent 4%);
+        background-position: center, center, center, center, center, center, center, center, center;
+        background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+        background-repeat: no-repeat;
+      }
+      
+      .modern-dl {
+        background: 
+          linear-gradient(0deg, rgba(0, 216, 232, 0.2) 0%, rgba(0, 216, 232, 0.2) 20%, transparent 21%),
+          linear-gradient(0deg, rgba(255, 64, 160, 0.2) 30%, rgba(255, 64, 160, 0.2) 50%, transparent 51%),
+          linear-gradient(0deg, rgba(255, 230, 0, 0.2) 60%, rgba(255, 230, 0, 0.2) 80%, transparent 81%),
+          linear-gradient(90deg, transparent 20%, var(--key) 21%, var(--key) 22%, transparent 23%,
+                         transparent 48%, var(--key) 49%, var(--key) 50%, transparent 51%,
+                         transparent 78%, var(--key) 79%, var(--key) 80%, transparent 81%);
+      }
+      
+      .step-description {
+        flex: 1;
+      }
+      
+      .step-description p {
+        margin-top: 0;
+        margin-bottom: 1rem;
+      }
+      
+      .limitation {
+        background-color: rgba(255, 0, 0, 0.05);
+        border-left: 3px solid var(--magenta);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      
+      .advancement {
+        background-color: rgba(0, 128, 0, 0.05);
+        border-left: 3px solid var(--cyan);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      
+      .dl-vs-ml {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+      }
+      
+      .comparison-card {
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+      }
+      
+      .card-header {
+        padding: 1rem;
+        background-color: var(--key);
+        color: white;
+        font-weight: bold;
+        text-align: center;
+      }
+      
+      .comparison-card:nth-child(1) .card-header {
+        background-color: var(--cyan);
+      }
+      
+      .comparison-card:nth-child(2) .card-header {
+        background-color: var(--magenta);
+      }
+      
+      .comparison-card:nth-child(3) .card-header {
+        background-color: var(--yellow);
+      }
+      
+      .comparison-card:nth-child(4) .card-header {
+        background-color: var(--key);
+      }
+      
+      .comparison-content {
+        padding: 1rem;
+      }
+      
+      .comparison-item {
+        padding: 0.8rem 0;
+        border-bottom: 1px dashed #e0e0e0;
+      }
+      
+      .comparison-item:last-child {
+        border-bottom: none;
+      }
+      
+      .comparison-title {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      
+      .comparison-desc {
+        display: flex;
+        align-items: center;
+      }
+      
+      .comparison-desc i {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+      }
+      
+      .dl-architectures {
+        margin: 2rem 0;
+      }
+      
+      .architecture {
+        display: flex;
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1.5rem;
+      }
+      
+      .architecture-icon {
+        font-size: 2rem;
+        margin-right: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      
+      .architecture:nth-child(1) .architecture-icon {
+        color: var(--cyan);
+        background-color: rgba(0, 216, 232, 0.1);
+      }
+      
+      .architecture:nth-child(2) .architecture-icon {
+        color: var(--magenta);
+        background-color: rgba(255, 64, 160, 0.1);
+      }
+      
+      .architecture:nth-child(3) .architecture-icon {
+        color: var(--yellow);
+        background-color: rgba(255, 230, 0, 0.1);
+      }
+      
+      .architecture:nth-child(4) .architecture-icon {
+        color: var(--key);
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+      
+      .architecture-content {
+        flex: 1;
+      }
+      
+      .architecture-content h4 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        color: var(--key);
+      }
+      
+      .architecture-desc p {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+      }
+      
+      .architecture-example {
+        font-style: italic;
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+        padding: 0.5rem 0;
+        border-top: 1px dashed #e0e0e0;
+      }
+    </style>
+
+    <!-- 計算リソースセクション -->
+    <section id="computation-resources">
+      <h2><i class="fas fa-microchip"></i> 必要なデータ量と計算リソース</h2>
+      
+      <h3>ディープラーニングに必要なデータ量</h3>
+      <p>
+        ディープラーニングモデルは、通常、従来の機械学習手法よりもはるかに多くのデータを必要とします。
+        これは、モデルが多数のパラメータを持ち、それらを適切に調整するためには大量の学習データが必要だからです。
+      </p>
+      
+      <div class="data-requirements">
+        <div class="data-item">
+          <i class="fas fa-database"></i>
+          <h4>画像認識</h4>
+          <p>数十万〜数百万枚の画像</p>
+        </div>
+        <div class="data-item">
+          <i class="fas fa-language"></i>
+          <h4>自然言語処理</h4>
+          <p>数GB〜数TBのテキストデータ</p>
+        </div>
+        <div class="data-item">
+          <i class="fas fa-music"></i>
+          <h4>音声認識</h4>
+          <p>数千時間の音声データ</p>
+        </div>
+      </div>
+      
+      <h3>計算リソースの要件</h3>
+      <p>
+        ディープラーニングは計算コストが非常に高く、特に以下のリソースが重要です：
+      </p>
+      
+      <div class="resource-box">
+        <div class="resource-item">
+          <i class="fas fa-memory"></i>
+          <h4>メモリ容量</h4>
+          <p>大規模なモデルでは数十GB〜数百GBのRAMやGPUメモリが必要</p>
+        </div>
+        <div class="resource-item">
+          <i class="fas fa-clock"></i>
+          <h4>計算時間</h4>
+          <p>モデルの規模によっては、学習に数時間〜数週間かかる場合もある</p>
+        </div>
+        <div class="resource-item">
+          <i class="fas fa-bolt"></i>
+          <h4>電力消費</h4>
+          <p>GPUを使用した学習は高い電力を消費（環境負荷の観点からも注目される）</p>
+        </div>
+      </div>
+      
+      <h3>ディープラーニングが適用可能な場面</h3>
+      <p>
+        ディープラーニングは以下のような条件が揃った場合に特に効果を発揮します：
+      </p>
+      
+      <div class="application-scenarios">
+        <div class="scenario">
+          <i class="fas fa-check-circle scenario-icon scenario-positive"></i>
+          <p>大量のデータが利用可能な場合</p>
+        </div>
+        <div class="scenario">
+          <i class="fas fa-check-circle scenario-icon scenario-positive"></i>
+          <p>問題が複雑で従来の手法では解決が難しい場合</p>
+        </div>
+        <div class="scenario">
+          <i class="fas fa-check-circle scenario-icon scenario-positive"></i>
+          <p>十分な計算リソースが利用可能な場合</p>
+        </div>
+        <div class="scenario">
+          <i class="fas fa-check-circle scenario-icon scenario-positive"></i>
+          <p>特徴量設計が難しい問題（画像、音声、自然言語など）</p>
+        </div>
+        <div class="scenario">
+          <i class="fas fa-times-circle scenario-icon scenario-negative"></i>
+          <p>データが少ない場合は過学習のリスクが高い</p>
+        </div>
+        <div class="scenario">
+          <i class="fas fa-times-circle scenario-icon scenario-negative"></i>
+          <p>説明可能性が重要な場面では不向き</p>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      /* ディープラーニングセクション用スタイル */
+      .comparison-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin: 2rem 0;
+        gap: 1rem;
+      }
+      
+      .comparison-item {
+        flex: 1;
+        min-width: 280px;
+        padding: 1.5rem;
+        background-color: rgba(0, 216, 232, 0.05);
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      }
+      
+      .comparison-item h4 {
+        font-size: 1.1rem;
+        color: var(--key);
+        margin-bottom: 1rem;
+        border-bottom: 2px dashed var(--cyan);
+        padding-bottom: 0.5rem;
+      }
+      
+      .comparison-item ul {
+        list-style-position: inside;
+        margin-left: 0.5rem;
+      }
+      
+      .comparison-item li {
+        margin-bottom: 0.5rem;
+      }
+      
+      .comparison-divider {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        font-size: 1.5rem;
+        color: var(--dark-gray);
+      }
+      
+      .note-box {
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background-color: rgba(255, 230, 0, 0.1);
+        border-left: 4px solid var(--yellow);
+        border-radius: 0 10px 10px 0;
+      }
+      
+      .note-box h4 {
+        color: var(--key);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .note-box ul {
+        margin-left: 1.5rem;
+      }
+      
+      .note-box li {
+        margin-bottom: 0.5rem;
+      }
+      
+      /* 計算リソースセクション用スタイル */
+      .data-requirements, .resource-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin: 2rem 0;
+      }
+      
+      .data-item, .resource-item {
+        flex: 1;
+        min-width: 220px;
+        text-align: center;
+        padding: 1.5rem;
+        background-color: rgba(255, 64, 160, 0.05);
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s;
+      }
+      
+      .data-item:hover, .resource-item:hover {
+        transform: translateY(-5px);
+      }
+      
+      .data-item i, .resource-item i {
+        font-size: 2rem;
+        color: var(--magenta);
+        margin-bottom: 1rem;
+      }
+      
+      .data-item h4, .resource-item h4 {
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+      }
+      
+      .application-scenarios {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+      
+      .scenario {
+        padding: 1rem;
+        background-color: var(--white);
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+      }
+      
+      .scenario i {
+        margin-right: 0.8rem;
+        font-size: 1.2rem;
+      }
+      
+      .scenario i.fa-check-circle {
+        color: #4CAF50;
+      }
+      
+      .scenario i.fa-times-circle {
+        color: #F44336;
+      }
+      
+      /* シナリオのアイコン色をCMYKパレットに修正 */
+      .scenario-icon {
+        margin-right: 0.8rem;
+        font-size: 1.2rem;
+      }
+      
+      .scenario-positive {
+        color: var(--cyan);
+      }
+      
+      .scenario-negative {
+        color: var(--magenta);
+      }
+    </style>
+
+    <!-- CPU・GPU・TPUセクション -->
+    <section id="processors">
+      <h2><i class="fas fa-server"></i> CPU・GPU・TPUの特徴と役割</h2>
+      
+      <div class="concept-box">
+        <h3>ディープラーニングと計算プロセッサ</h3>
+        <p>
+          ディープラーニングでは大量の並列計算が必要となり、それぞれの処理ユニットには異なる特徴と役割があります。
+          適切な計算リソースの選択はモデルの学習速度と効率性に大きく影響します。
+        </p>
+      </div>
+      
+      <div class="processor-grid">
+        <div class="processor-card">
+          <div class="processor-header">
+            <i class="fas fa-microchip"></i>
+            <h3>CPU</h3>
+            <span>Central Processing Unit</span>
+          </div>
+          <div class="processor-content">
+            <h4>特徴</h4>
+            <ul>
+              <li>汎用的な処理に優れている</li>
+              <li>高いクロック周波数</li>
+              <li>複雑な制御フローを効率的に処理</li>
+              <li>少数の強力なコアを持つ</li>
+            </ul>
+            <h4>ディープラーニングでの役割</h4>
+            <ul>
+              <li>小規模なモデルの学習</li>
+              <li>データの前処理</li>
+              <li>シーケンシャルな処理</li>
+              <li>推論処理（小規模なモデル）</li>
+            </ul>
+            <div class="processor-meter">
+              <span class="meter-label">処理速度（並列計算）</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 30%;"></div>
+              </div>
+            </div>
+            <div class="processor-meter">
+              <span class="meter-label">消費電力効率</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 40%;"></div>
+              </div>
+            </div>
+            <div class="processor-meter">
+              <span class="meter-label">ディープラーニング適合性</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 25%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="processor-card">
+          <div class="processor-header">
+            <i class="fas fa-desktop"></i>
+            <h3>GPU</h3>
+            <span>Graphics Processing Unit</span>
+          </div>
+          <div class="processor-content">
+            <h4>特徴</h4>
+            <ul>
+              <li>数千の小さなコアを持つ</li>
+              <li>並列計算に最適化されている</li>
+              <li>高いメモリ帯域幅</li>
+              <li>行列演算に高い性能</li>
+            </ul>
+            <h4>ディープラーニングでの役割</h4>
+            <ul>
+              <li>モデルの学習（主要用途）</li>
+              <li>大規模な行列演算</li>
+              <li>バッチ処理</li>
+              <li>複雑なモデルの推論</li>
+            </ul>
+            <div class="processor-meter">
+              <span class="meter-label">処理速度（並列計算）</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 85%;"></div>
+              </div>
+            </div>
+            <div class="processor-meter">
+              <span class="meter-label">消費電力効率</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 70%;"></div>
+              </div>
+            </div>
+            <div class="processor-meter">
+              <span class="meter-label">ディープラーニング適合性</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 90%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="processor-card">
+          <div class="processor-header">
+            <i class="fas fa-brain"></i>
+            <h3>TPU</h3>
+            <span>Tensor Processing Unit</span>
+          </div>
+          <div class="processor-content">
+            <h4>特徴</h4>
+            <ul>
+              <li>ディープラーニング専用設計</li>
+              <li>テンソル演算に最適化</li>
+              <li>高いエネルギー効率</li>
+              <li>Matrix Multiplier Unit (MXU)を搭載</li>
+            </ul>
+            <h4>ディープラーニングでの役割</h4>
+            <ul>
+              <li>大規模モデルの高速学習</li>
+              <li>推論の高速化</li>
+              <li>クラウドベースの学習</li>
+              <li>エッジデバイスでの推論（Edge TPU）</li>
+            </ul>
+            <div class="processor-meter">
+              <span class="meter-label">処理速度（並列計算）</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 95%;"></div>
+              </div>
+            </div>
+            <div class="processor-meter">
+              <span class="meter-label">消費電力効率</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 90%;"></div>
+              </div>
+            </div>
+            <div class="processor-meter">
+              <span class="meter-label">ディープラーニング適合性</span>
+              <div class="meter">
+                <div class="meter-fill" style="width: 99%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h3>なぜGPUやTPUがディープラーニングに適しているか</h3>
+      <p>
+        ディープラーニングの計算は主に行列の乗算から成り立っています。
+        GPUは数千の小さなコアを持ち、これらの行列計算を並列に処理できるため、
+        CPUと比較して10〜100倍の処理速度を実現できます。
+      </p>
+      <p>
+        TPUはさらに一歩進んで、ディープラーニングのワークロードに特化した設計となっており、
+        特に行列乗算ユニット（MXU）が効率的なテンソル演算を可能にしています。
+        その結果、GPUよりもさらに高速で電力効率の良い処理が可能です。
+      </p>
+      
+      <div class="comparison-chart">
+        <div class="chart-label">学習速度比較（相対値・例）</div>
+        <div class="chart-bar-container">
+          <div class="chart-bar-group">
+            <div class="chart-bar-label">CPU</div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="width: 10%;">1x</div>
+            </div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar-label">GPU</div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="width: 50%;">30x</div>
+            </div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar-label">TPU</div>
+            <div class="chart-bar-wrapper">
+              <div class="chart-bar" style="width: 80%;">80x</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      /* CPU・GPU・TPUセクション用スタイル */
+      .processor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+      }
+      
+      .processor-card {
+        background-color: var(--white);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s;
+        border: 1px solid #e0e0e0;
+      }
+      
+      .processor-card:hover {
+        transform: translateY(-5px);
+      }
+      
+      .processor-header {
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+      }
+      
+      .processor-header i {
+        font-size: 2.5rem;
+        margin-bottom: 0.8rem;
+      }
+      
+      .processor-card:nth-child(1) .processor-header {
+        background-color: rgba(0, 216, 232, 0.1);
+      }
+      
+      .processor-card:nth-child(1) .processor-header i {
+        color: var(--cyan);
+      }
+      
+      .processor-card:nth-child(2) .processor-header {
+        background-color: rgba(255, 64, 160, 0.1);
+      }
+      
+      .processor-card:nth-child(2) .processor-header i {
+        color: var(--magenta);
+      }
+      
+      .processor-card:nth-child(3) .processor-header {
+        background-color: rgba(255, 230, 0, 0.1);
+      }
+      
+      .processor-card:nth-child(3) .processor-header i {
+        color: var(--yellow);
+      }
+      
+      .processor-header h3 {
+        font-size: 1.8rem;
+        margin: 0.5rem 0;
+        border: none;
+        padding: 0;
+      }
+      
+      .processor-header span {
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+        font-style: italic;
+      }
+      
+      .processor-content {
+        padding: 1.5rem;
+      }
+      
+      .processor-content h4 {
+        font-size: 1.1rem;
+        margin: 1rem 0 0.5rem;
+        color: var(--key);
+      }
+      
+      .processor-content ul {
+        list-style-position: inside;
+        margin-left: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .processor-content li {
+        margin-bottom: 0.4rem;
+        font-size: 0.95rem;
+      }
+      
+      .processor-meter {
+        margin-bottom: 1rem;
+      }
+      
+      .meter-label {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+      }
+      
+      .meter {
+        height: 8px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      
+      .processor-card:nth-child(1) .meter-fill {
+        background-color: var(--cyan);
+        height: 100%;
+      }
+      
+      .processor-card:nth-child(2) .meter-fill {
+        background-color: var(--magenta);
+        height: 100%;
+      }
+      
+      .processor-card:nth-child(3) .meter-fill {
+        background-color: var(--yellow);
+        height: 100%;
+      }
+      
+      .comparison-chart {
+        margin: 2rem 0;
+        background-color: rgba(0, 0, 0, 0.02);
+        padding: 1.5rem;
+        border-radius: 10px;
+      }
+      
+      .chart-label {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-weight: bold;
+      }
+      
+      .chart-bar-container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      
+      .chart-bar-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      
+      .chart-bar-label {
+        width: 60px;
+        text-align: right;
+        padding-right: 1rem;
+        font-weight: bold;
+      }
+      
+      .chart-bar-wrapper {
+        flex: 1;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        height: 30px;
+        overflow: hidden;
+      }
+      
+      .chart-bar {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+      
+      .chart-bar-group:nth-child(1) .chart-bar {
+        background-color: var(--cyan);
+      }
+      
+      .chart-bar-group:nth-child(2) .chart-bar {
+        background-color: var(--magenta);
+      }
+      
+      .chart-bar-group:nth-child(3) .chart-bar {
+        background-color: var(--yellow);
+      }
+    </style>
+
+    <!-- Key Insightsセクション -->
+    <section id="key-insights">
+      <h2><i class="far fa-lightbulb"></i> Key Insights</h2>
+      
+      <div class="key-insights-container">
+        <div class="key-insight-item">
+          <div class="key-insight-number">1</div>
+          <div class="key-insight-content">
+            <h3>ニューラルネットワークとディープラーニングの関係性</h3>
+            <p>
+              ディープラーニングはニューラルネットワークの一種であり、多数の隠れ層（通常5層以上）を持つ深いネットワーク構造が特徴です。
+              隠れ層が多くなることで、より複雑なパターンを学習できる反面、大量のデータと計算リソースが必要になります。
+            </p>
+          </div>
+        </div>
+        
+        <div class="key-insight-item">
+          <div class="key-insight-number">2</div>
+          <div class="key-insight-content">
+            <h3>ディープラーニングの学習に必要なリソース</h3>
+            <p>
+              ディープラーニングモデルの学習には、大量のデータ、高い計算能力、十分なメモリ容量が必要です。
+              データが少ない場合は過学習のリスクが高まり、計算リソースが不足すると学習時間が膨大になるか、
+              そもそも学習が困難になります。
+            </p>
+          </div>
+        </div>
+        
+        <div class="key-insight-item">
+          <div class="key-insight-number">3</div>
+          <div class="key-insight-content">
+            <h3>GPU・TPUとディープラーニングの相性</h3>
+            <p>
+              GPUやTPUはディープラーニングの計算に非常に適しています。これは行列演算を並列処理できる
+              アーキテクチャを持つためで、特にTPUはディープラーニング専用に設計されており、
+              効率的なテンソル演算が可能です。CPUと比較して10〜100倍の処理速度を実現します。
+            </p>
+          </div>
+        </div>
+        
+        <div class="key-insight-item">
+          <div class="key-insight-number">4</div>
+          <div class="key-insight-content">
+            <h3>ディープラーニングの適用場面</h3>
+            <p>
+              ディープラーニングは、大量のデータがあり、問題が複雑で、従来の手法では解決が難しい場合に
+              特に効果を発揮します。画像認識、自然言語処理、音声認識などのタスクで優れた性能を示しますが、
+              データが少ない場合や説明可能性が重要な場面では不向きな場合があります。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Take Home Messageセクション -->
+    <section id="take-home">
+      <h2><i class="fas fa-key"></i> Take Home Message</h2>
+      
+      <div class="take-home-box">
+        <div class="take-home-icon">
+          <i class="fas fa-brain"></i>
+        </div>
+        <div class="take-home-content">
+          <p>
+            ディープラーニングは多層のニューラルネットワークを使って複雑なパターンを学習する技術です。
+            大量のデータと高い計算リソース（特にGPUやTPU）を必要としますが、画像認識や自然言語処理などで
+            従来の手法を上回る性能を発揮します。実務で活用する際は、データ量や計算リソースを考慮し、
+            問題の性質に応じて適切な手法を選択することが重要です。
+          </p>
+        </div>
+      </div>
+    </section>
+    
+
+
+    <style>
+      /* Key Insightsセクション用スタイル */
+      .key-insights-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      
+      .key-insight-item {
+        display: flex;
+        background-color: var(--white);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      }
+      
+      .key-insight-number {
+        width: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--yellow);
+        color: var(--key);
+        font-size: 2rem;
+        font-weight: bold;
+        font-family: var(--header-font);
+      }
+      
+      .key-insight-content {
+        flex: 1;
+        padding: 1.5rem;
+      }
+      
+      .key-insight-content h3 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        color: var(--key);
+        border: none;
+        padding: 0;
+        font-size: 1.3rem;
+      }
+      
+      .key-insight-content p {
+        margin: 0;
+        color: var(--dark-gray);
+        line-height: 1.6;
+      }
+      
+      /* Take Home Messageセクション用スタイル */
+      .take-home-box {
+        display: flex;
+        background: linear-gradient(135deg, rgba(0, 216, 232, 0.1) 0%, rgba(255, 64, 160, 0.1) 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 1rem 0;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 1px dashed var(--magenta);
+      }
+      
+      .take-home-icon {
+        flex: 0 0 80px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        font-size: 3rem;
+        color: var(--magenta);
+        padding-top: 0.5rem;
+      }
+      
+      .take-home-content {
+        flex: 1;
+      }
+      
+      .take-home-content p {
+        font-size: 1.2rem;
+        line-height: 1.8;
+        color: var(--key);
+        margin: 0;
+        font-family: var(--accent-font);
+        font-weight: 600;
+      }
+      
+      /* フッタースタイル */
+      footer {
+        margin-top: 4rem;
+        padding: 2rem 0;
+        border-top: 1px solid #e0e0e0;
+        color: var(--dark-gray);
+      }
+      
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      
+      .footer-title {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      
+      .footer-date, .footer-attribution {
+        font-size: 0.9rem;
+      }
+      
+      /* モバイル対応 */
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+        
+        .sidebar {
+          width: 100%;
+          position: relative;
+          height: auto;
+          max-height: 300px;
+        }
+        
+        main {
+          margin-left: 0;
+          width: 100%;
+        }
+        
+        .key-insight-item {
+          flex-direction: column;
+        }
+        
+        .key-insight-number {
+          width: 100%;
+          padding: 0.5rem 0;
+        }
+        
+        .take-home-box {
+          flex-direction: column;
+          text-align: center;
+        }
+        
+        .take-home-icon {
+          margin-bottom: 1rem;
+        }
+        
+        .footer-content {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+    </style>
+
+    <!-- 用語集セクション -->
+    <section id="glossary">
+      <h2><i class="fas fa-book"></i> 用語集</h2>
+      
+      <div class="glossary-container">
+        <div class="glossary-item">
+          <div class="term">ニューラルネットワーク (Neural Network)</div>
+          <div class="definition">
+            人間の脳内の神経細胞（ニューロン）の接続構造を模倣した数学的モデル。入力層、隠れ層、出力層からなる。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">ディープラーニング (Deep Learning)</div>
+          <div class="definition">
+            多層のニューラルネットワークを用いた機械学習手法。複雑なパターンの抽出や高度な特徴表現の学習が可能。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">入力層 (Input Layer)</div>
+          <div class="definition">
+            ニューラルネットワークの最初の層。データの特徴量を受け取る層。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">隠れ層 (Hidden Layer)</div>
+          <div class="definition">
+            入力層と出力層の間にある層。ここで特徴の抽出や変換が行われる。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">出力層 (Output Layer)</div>
+          <div class="definition">
+            ニューラルネットワークの最終層。予測結果や分類結果を出力する。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">単純パーセプトロン (Simple Perceptron)</div>
+          <div class="definition">
+            最も基本的なニューラルネットワークの形態。入力に重みをかけて合計し、活性化関数を通して出力する。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">多層パーセプトロン (Multi-Layer Perceptron, MLP)</div>
+          <div class="definition">
+            複数の層を持つニューラルネットワーク。非線形問題を解決できる能力を持つ。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">CPU (Central Processing Unit)</div>
+          <div class="definition">
+            コンピュータの中央処理装置。汎用的な処理を行う主要なプロセッサ。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">GPU (Graphics Processing Unit)</div>
+          <div class="definition">
+            グラフィック処理用プロセッサ。多数の小さなコアを持ち、並列計算に優れている。ディープラーニングの学習に広く使用される。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">TPU (Tensor Processing Unit)</div>
+          <div class="definition">
+            Googleが開発したAI専用プロセッサ。テンソル演算に特化しており、ディープラーニングの計算に最適化されている。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">活性化関数 (Activation Function)</div>
+          <div class="definition">
+            ニューロンの出力を決定する非線形関数。ReLU、シグモイド、tanhなどがある。非線形性を導入することで複雑なパターンの学習を可能にする。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">重み (Weight)</div>
+          <div class="definition">
+            ニューラルネットワークにおける入力信号の重要度を表すパラメータ。学習によって調整される。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">バイアス (Bias)</div>
+          <div class="definition">
+            活性化関数の閾値を調整するパラメータ。ニューロンの発火のしやすさを制御する。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">順伝播 (Forward Propagation)</div>
+          <div class="definition">
+            入力層から出力層へ向かって信号が伝わる過程。予測値の計算に使用される。
+          </div>
+        </div>
+        
+        <div class="glossary-item">
+          <div class="term">逆伝播 (Backpropagation)</div>
+          <div class="definition">
+            出力層から入力層へ向かって誤差を伝播させる学習アルゴリズム。重みとバイアスを更新するために使用される。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      /* 用語集セクション用スタイル */
+      .glossary-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+        gap: 1.2rem;
+        margin-top: 2rem;
+      }
+      
+      .glossary-item {
+        padding: 1.5rem;
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid var(--magenta);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      
+      .glossary-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      
+      .glossary-item:nth-child(3n+1) {
+        border-left-color: var(--cyan);
+      }
+      
+      .glossary-item:nth-child(3n+2) {
+        border-left-color: var(--magenta);
+      }
+      
+      .glossary-item:nth-child(3n) {
+        border-left-color: var(--yellow);
+      }
+      
+      .term {
+        font-weight: bold;
+        margin-bottom: 0.8rem;
+        color: var(--key);
+        font-size: 1.1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px dashed #e0e0e0;
+      }
+      
+      .definition {
+        color: var(--dark-gray);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+    </style>
+  </main>
+
+  <!-- ページトップへ戻るボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+
+
+
+  <script>
+    // ページ内スムーススクロール
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // スクロールに応じたナビゲーションのアクティブ状態
+    window.addEventListener('scroll', function() {
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      let currentSection = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 200) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+          link.classList.add('active');
+        }
+      });
+      
+      // トップへ戻るボタンの表示/非表示
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('active');
+      } else {
+        scrollTopBtn.classList.remove('active');
+      }
+    });
+    
+    // トップへ戻るボタンクリック時の動作
+    document.querySelector('.scroll-top').addEventListener('click', function() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G検定 学習ノート 総合インデックス</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  <style>
+    :root {
+      /* CMYK カラースキーム */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      background-color: var(--cyan);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      /* スクロールバーをデザイン */
+      scrollbar-width: thin;
+      scrollbar-color: var(--magenta) rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Chrome, Safari, Operaのスクロールバーデザイン */
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: var(--magenta);
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--white);
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      border-bottom: 2px dashed var(--white);
+      padding-bottom: 0.5rem;
+    }
+    
+    .category-title {
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--white);
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .category-title i {
+      margin-right: 0.5rem;
+    }
+    
+    .nav-menu {
+      list-style: none;
+      margin-left: 0.5rem;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.5rem;
+    }
+    
+    .nav-link {
+      display: block;
+      padding: 0.4rem 0.5rem;
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+    
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+    
+    .header {
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+      text-align: center;
+      border-bottom: 2px dashed var(--cyan);
+    }
+    
+    .title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1rem;
+    }
+    
+    .subtitle {
+      font-family: 'Klee One', cursive;
+      font-size: 1.5rem;
+      color: var(--magenta);
+      margin-bottom: 1.5rem;
+    }
+    
+    .section {
+      margin-bottom: 3rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      border-bottom: 2px solid var(--yellow);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title i {
+      margin-right: 10px;
+      color: var(--magenta);
+    }
+    
+    /* カードグリッド */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .card {
+      background-color: var(--white);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-header {
+      background-color: var(--cyan);
+      color: var(--white);
+      padding: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .card-title {
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .card-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .tag-list {
+      margin-top: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .tag {
+      background-color: rgba(0, 216, 232, 0.1);
+      border: 1px solid var(--cyan);
+      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.8rem;
+      color: var(--dark-gray);
+    }
+    
+    /* フッター */
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--light-gray);
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        padding: 1rem;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 1rem;
+      }
+      
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <h1 class="sidebar-title">G検定 学習ノート</h1>
+      
+      <h2 class="category-title"><i class="fas fa-brain"></i> 人工知能とは</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="1-1-1_人工知能の定義.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-1-1 人工知能の定義</a></li>
+        <li class="nav-item"><a href="1-1-2_人工知能分野で議論される問題.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-1-2 人工知能分野で議論される問題</a></li>
+      </ul>
+      
+      <h2 class="category-title"><i class="fas fa-project-diagram"></i> 人工知能をめぐる動向</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="1-2-1_探索・推論.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-2-1 探索・推論</a></li>
+        <li class="nav-item"><a href="1-2-2_知識表現とエキスパートシステム.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-2-2 知識表現とエキスパートシステム</a></li>
+        <li class="nav-item"><a href="1-2-3_機械学習.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-2-3 機械学習</a></li>
+        <li class="nav-item"><a href="1-2-4_ディープラーニング.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-2-4 ディープラーニング</a></li>
+      </ul>
+      
+      <h2 class="category-title"><i class="fas fa-cogs"></i> 機械学習の概要</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="1-3-1_教師あり学習.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-3-1 教師あり学習</a></li>
+        <li class="nav-item"><a href="1-3-2_教師なし学習.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-3-2 教師なし学習</a></li>
+        <li class="nav-item"><a href="1-3-3_強化学習.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-3-3 強化学習</a></li>
+        <li class="nav-item"><a href="1-3-4_モデルの選択・評価.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-3-4 モデルの選択・評価</a></li>
+      </ul>
+      
+      <h2 class="category-title"><i class="fas fa-network-wired"></i> ディープラーニングの概要</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="1-4-1_ニューラルネットワークとディープラーニング.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-4-1 ニューラルネットワークとディープラーニング</a></li>
+        <li class="nav-item"><a href="1-4-2_活性化関数.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-4-2 活性化関数</a></li>
+        <li class="nav-item"><a href="1-4-3_誤差関数.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-4-3 誤差関数</a></li>
+        <li class="nav-item"><a href="1-4-4_正則化.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-4-4 正則化</a></li>
+        <li class="nav-item"><a href="1-4-5_誤差逆伝播法.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-4-5 誤差逆伝播法</a></li>
+        <li class="nav-item"><a href="1-4-6_最適化手法.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-4-6 最適化手法</a></li>
+      </ul>
+      
+      <h2 class="category-title"><i class="fas fa-cubes"></i> ディープラーニングの要素技術</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="1-5-1_全結合層.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-1 全結合層</a></li>
+        <li class="nav-item"><a href="1-5-2_畳み込み層.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-2 畳み込み層</a></li>
+        <li class="nav-item"><a href="1-5-3_正規化層.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-3 正規化層</a></li>
+        <li class="nav-item"><a href="1-5-4_プーリング層.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-4 プーリング層</a></li>
+        <li class="nav-item"><a href="1-5-5_スキップ結合.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-5 スキップ結合</a></li>
+        <li class="nav-item"><a href="1-5-6_回帰結合層.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-6 回帰結合層</a></li>
+        <li class="nav-item"><a href="1-5-7_Attention.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-7 Attention</a></li>
+        <li class="nav-item"><a href="1-5-8_オートエンコーダ.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-8 オートエンコーダ</a></li>
+        <li class="nav-item"><a href="1-5-9_データ拡張.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-5-9 データ拡張</a></li>
+      </ul>
+      
+      <h2 class="category-title"><i class="fas fa-laptop-code"></i> ディープラーニングの応用例</h2>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="1-6-1_画像認識.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-1 画像認識</a></li>
+        <li class="nav-item"><a href="1-6-2_自然言語処理.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-2 自然言語処理</a></li>
+        <li class="nav-item"><a href="1-6-3_音声処理.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-3 音声処理</a></li>
+        <li class="nav-item"><a href="1-6-4_深層強化学習.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-4 深層強化学習</a></li>
+        <li class="nav-item"><a href="1-6-5_データ生成.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-5 データ生成</a></li>
+        <li class="nav-item"><a href="1-6-6_転移学習・ファインチューニング.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-6 転移学習・ファインチューニング</a></li>
+        <li class="nav-item"><a href="1-6-7_マルチモーダル.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-7 マルチモーダル</a></li>
+        <li class="nav-item"><a href="1-6-8_モデルの解釈性.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-8 モデルの解釈性</a></li>
+        <li class="nav-item"><a href="1-6-9_モデルの軽量化.html" class="nav-link" target="_blank"><i class="fas fa-file-alt"></i>1-6-9 モデルの軽量化</a></li>
+      </ul>
+    </aside>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- ヘッダー -->
+      <header class="header">
+        <h1 class="title">G検定 学習ノート</h1>
+        <p class="subtitle">グラフィックレコーディング風ノートで効率的に学習</p>
+        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-lightbulb" style="color: var(--yellow); font-size: 1.5rem;"></i>
+            <span>視覚的な情報整理</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-brain" style="color: var(--magenta); font-size: 1.5rem;"></i>
+            <span>記憶に残る学習体験</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-graduation-cap" style="color: var(--cyan); font-size: 1.5rem;"></i>
+            <span>G検定合格をサポート</span>
+          </div>
+        </div>
+      </header>
+      
+      <!-- メインセクション -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-info-circle"></i> ノート使用方法</h2>
+        <div style="background-color: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+          <p>このG検定学習ノートは、グラフィックレコーディング風のデザインで情報を視覚的に整理し、記憶に残りやすくしています。効果的な使い方は以下の通りです：</p>
+          <ul style="list-style-type: none; margin-top: 1rem;">
+            <li style="margin-bottom: 0.8rem; display: flex; align-items: center;">
+              <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+              <span>左側のメニューから知りたいトピックを選択</span>
+            </li>
+            <li style="margin-bottom: 0.8rem; display: flex; align-items: center;">
+              <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+              <span>各ノートのキーワードと概念を視覚的に確認</span>
+            </li>
+            <li style="margin-bottom: 0.8rem; display: flex; align-items: center;">
+              <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+              <span>「Key Insights」と「Take Home Message」で要点を復習</span>
+            </li>
+            <li style="display: flex; align-items: center;">
+              <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+              <span>下部のユニット一覧から関連するトピックをチェック</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- ユニット一覧の作成はこの後 -->
+      
+      <!-- 人工知能とは -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-brain"></i> 人工知能とは</h2>
+        <div class="card-grid">
+          <div class="card">
+            <a href="1-1-1_人工知能の定義.html" class="card-link" target="_blank">
+              <div class="card-header">1-1-1</div>
+              <div class="card-body">
+                <h3 class="card-title">人工知能の定義</h3>
+                <p>人工知能の基本概念と種類について学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">AI効果</span>
+                  <span class="tag">エージェント</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-1-2_人工知能分野で議論される問題.html" class="card-link" target="_blank">
+              <div class="card-header">1-1-2</div>
+              <div class="card-body">
+                <h3 class="card-title">人工知能分野で議論される問題</h3>
+                <p>AI分野の哲学的・技術的な課題を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">チューリングテスト</span>
+                  <span class="tag">シンギュラリティ</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 人工知能をめぐる動向 -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-project-diagram"></i> 人工知能をめぐる動向</h2>
+        <div class="card-grid">
+          <div class="card">
+            <a href="1-2-1_探索・推論.html" class="card-link" target="_blank">
+              <div class="card-header">1-2-1</div>
+              <div class="card-body">
+                <h3 class="card-title">探索・推論</h3>
+                <p>古典的AIの中心技術である探索と推論について学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">探索木</span>
+                  <span class="tag">Mini-Max法</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-2-2_知識表現とエキスパートシステム.html" class="card-link" target="_blank">
+              <div class="card-header">1-2-2</div>
+              <div class="card-body">
+                <h3 class="card-title">知識表現とエキスパートシステム</h3>
+                <p>知識をコンピュータで表現・処理する方法を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">オントロジー</span>
+                  <span class="tag">MYCIN</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-2-3_機械学習.html" class="card-link" target="_blank">
+              <div class="card-header">1-2-3</div>
+              <div class="card-body">
+                <h3 class="card-title">機械学習</h3>
+                <p>データから学習するアプローチについて理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">ビッグデータ</span>
+                  <span class="tag">レコメンデーションエンジン</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-2-4_ディープラーニング.html" class="card-link" target="_blank">
+              <div class="card-header">1-2-4</div>
+              <div class="card-body">
+                <h3 class="card-title">ディープラーニング</h3>
+                <p>多層ニューラルネットワークを用いた学習アプローチを学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">AlphaGo</span>
+                  <span class="tag">LLM</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 機械学習の概要 -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-cogs"></i> 機械学習の概要</h2>
+        <div class="card-grid">
+          <div class="card">
+            <a href="1-3-1_教師あり学習.html" class="card-link" target="_blank">
+              <div class="card-header">1-3-1</div>
+              <div class="card-body">
+                <h3 class="card-title">教師あり学習</h3>
+                <p>正解データからパターンを学ぶ手法について理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">分類問題</span>
+                  <span class="tag">回帰問題</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-3-2_教師なし学習.html" class="card-link" target="_blank">
+              <div class="card-header">1-3-2</div>
+              <div class="card-body">
+                <h3 class="card-title">教師なし学習</h3>
+                <p>データの内部構造を見つける手法を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">クラスタリング</span>
+                  <span class="tag">次元削減</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-3-3_強化学習.html" class="card-link" target="_blank">
+              <div class="card-header">1-3-3</div>
+              <div class="card-body">
+                <h3 class="card-title">強化学習</h3>
+                <p>試行錯誤を通じて報酬を最大化する学習法を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">Q学習</span>
+                  <span class="tag">マルコフ決定過程</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-3-4_モデルの選択・評価.html" class="card-link" target="_blank">
+              <div class="card-header">1-3-4</div>
+              <div class="card-body">
+                <h3 class="card-title">モデルの選択・評価</h3>
+                <p>機械学習モデルの評価方法と選択基準を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">交差検証</span>
+                  <span class="tag">過学習</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ディープラーニングの概要 -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-network-wired"></i> ディープラーニングの概要</h2>
+        <div class="card-grid">
+          <div class="card">
+            <a href="1-4-1_ニューラルネットワークとディープラーニング.html" class="card-link" target="_blank">
+              <div class="card-header">1-4-1</div>
+              <div class="card-body">
+                <h3 class="card-title">ニューラルネットワークとディープラーニング</h3>
+                <p>ディープラーニングの基本構造と特徴を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">多層パーセプトロン</span>
+                  <span class="tag">GPU</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-4-2_活性化関数.html" class="card-link" target="_blank">
+              <div class="card-header">1-4-2</div>
+              <div class="card-body">
+                <h3 class="card-title">活性化関数</h3>
+                <p>ニューラルネットワークの非線形性を生み出す関数を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">ReLU関数</span>
+                  <span class="tag">シグモイド関数</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-4-3_誤差関数.html" class="card-link" target="_blank">
+              <div class="card-header">1-4-3</div>
+              <div class="card-body">
+                <h3 class="card-title">誤差関数</h3>
+                <p>モデルの出力と目標値の差を評価する関数について理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">交差エントロピー</span>
+                  <span class="tag">平均二乗誤差</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-4-4_正則化.html" class="card-link" target="_blank">
+              <div class="card-header">1-4-4</div>
+              <div class="card-body">
+                <h3 class="card-title">正則化</h3>
+                <p>過学習を防ぐための手法と考え方を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">L1正則化</span>
+                  <span class="tag">ドロップアウト</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-4-5_誤差逆伝播法.html" class="card-link" target="_blank">
+              <div class="card-header">1-4-5</div>
+              <div class="card-body">
+                <h3 class="card-title">誤差逆伝播法</h3>
+                <p>ニューラルネットワークの学習アルゴリズムを理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">連鎖律</span>
+                  <span class="tag">勾配消失問題</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-4-6_最適化手法.html" class="card-link" target="_blank">
+              <div class="card-header">1-4-6</div>
+              <div class="card-body">
+                <h3 class="card-title">最適化手法</h3>
+                <p>ニューラルネットワークの学習を効率化する手法を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">Adam</span>
+                  <span class="tag">勾配降下法</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ディープラーニングの要素技術 -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-cubes"></i> ディープラーニングの要素技術</h2>
+        <div class="card-grid">
+          <div class="card">
+            <a href="1-5-1_全結合層.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-1</div>
+              <div class="card-body">
+                <h3 class="card-title">全結合層</h3>
+                <p>ニューラルネットワークの基本構成要素を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">重み</span>
+                  <span class="tag">線形関数</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-2_畳み込み層.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-2</div>
+              <div class="card-body">
+                <h3 class="card-title">畳み込み層</h3>
+                <p>画像認識などに用いられる局所的特徴抽出の仕組みを学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">カーネル</span>
+                  <span class="tag">フィルタ</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-3_正規化層.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-3</div>
+              <div class="card-body">
+                <h3 class="card-title">正規化層</h3>
+                <p>学習を安定化させる正規化手法について理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">バッチ正規化</span>
+                  <span class="tag">レイヤー正規化</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-4_プーリング層.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-4</div>
+              <div class="card-body">
+                <h3 class="card-title">プーリング層</h3>
+                <p>特徴の集約と次元削減を行う手法について学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">最大値プーリング</span>
+                  <span class="tag">平均値プーリング</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-5_スキップ結合.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-5</div>
+              <div class="card-body">
+                <h3 class="card-title">スキップ結合</h3>
+                <p>深いネットワークの学習を安定させる接続方法を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">ResNet</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-6_回帰結合層.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-6</div>
+              <div class="card-body">
+                <h3 class="card-title">回帰結合層</h3>
+                <p>時系列データを扱うニューラルネットワークを学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">RNN</span>
+                  <span class="tag">LSTM</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-7_Attention.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-7</div>
+              <div class="card-body">
+                <h3 class="card-title">Attention</h3>
+                <p>入力の重要な部分に注目するメカニズムを理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">Self-Attention</span>
+                  <span class="tag">Transformer</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-8_オートエンコーダ.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-8</div>
+              <div class="card-body">
+                <h3 class="card-title">オートエンコーダ</h3>
+                <p>教師なし学習のためのニューラルネットワーク構造を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">VAE</span>
+                  <span class="tag">次元削減</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-5-9_データ拡張.html" class="card-link" target="_blank">
+              <div class="card-header">1-5-9</div>
+              <div class="card-body">
+                <h3 class="card-title">データ拡張</h3>
+                <p>訓練データを人工的に増やす手法について理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">Cutout</span>
+                  <span class="tag">Random Flip</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ディープラーニングの応用例 -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-laptop-code"></i> ディープラーニングの応用例</h2>
+        <div class="card-grid">
+          <div class="card">
+            <a href="1-6-1_画像認識.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-1</div>
+              <div class="card-body">
+                <h3 class="card-title">画像認識</h3>
+                <p>画像からパターンを読み取る技術と応用例を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">CNN</span>
+                  <span class="tag">物体検出</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-2_自然言語処理.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-2</div>
+              <div class="card-body">
+                <h3 class="card-title">自然言語処理</h3>
+                <p>人間の言語を処理する技術とモデルを理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">BERT</span>
+                  <span class="tag">LLM</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-3_音声処理.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-3</div>
+              <div class="card-body">
+                <h3 class="card-title">音声処理</h3>
+                <p>音声認識や合成に関する技術を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">WaveNet</span>
+                  <span class="tag">MFCC</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-4_深層強化学習.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-4</div>
+              <div class="card-body">
+                <h3 class="card-title">深層強化学習</h3>
+                <p>ディープラーニングと強化学習を組み合わせた技術を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">DQN</span>
+                  <span class="tag">AlphaStar</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-5_データ生成.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-5</div>
+              <div class="card-body">
+                <h3 class="card-title">データ生成</h3>
+                <p>AIによる画像や音声、テキスト生成技術を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">GAN</span>
+                  <span class="tag">Diffusion Model</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-6_転移学習・ファインチューニング.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-6</div>
+              <div class="card-body">
+                <h3 class="card-title">転移学習・ファインチューニング</h3>
+                <p>学習済みモデルを別のタスクに適用する手法を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">事前学習</span>
+                  <span class="tag">Few-shot</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-7_マルチモーダル.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-7</div>
+              <div class="card-body">
+                <h3 class="card-title">マルチモーダル</h3>
+                <p>複数の情報形式を扱うAIモデルと応用を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">CLIP</span>
+                  <span class="tag">Text-To-Image</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-8_モデルの解釈性.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-8</div>
+              <div class="card-body">
+                <h3 class="card-title">モデルの解釈性</h3>
+                <p>AIの判断理由を理解・説明する手法を学びます。</p>
+                <div class="tag-list">
+                  <span class="tag">XAI</span>
+                  <span class="tag">SHAP</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="card">
+            <a href="1-6-9_モデルの軽量化.html" class="card-link" target="_blank">
+              <div class="card-header">1-6-9</div>
+              <div class="card-body">
+                <h3 class="card-title">モデルの軽量化</h3>
+                <p>AIモデルを小型化・効率化する手法を理解します。</p>
+                <div class="tag-list">
+                  <span class="tag">量子化</span>
+                  <span class="tag">プルーニング</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 学習トラッキングセクション -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-tasks"></i> 学習進捗管理</h2>
+        <div style="background-color: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+          <p style="margin-bottom: 1rem;">G検定の範囲は広いですが、計画的に学習を進めましょう。学習したユニットにチェックを入れて進捗を管理できます。</p>
+          
+          <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+            <div style="width: 48%;">
+              <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--magenta);">学習計画の立て方</h3>
+              <ul style="list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.8rem; display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>1日1-2ユニットを目安に学習計画を立てる</span>
+                </li>
+                <li style="margin-bottom: 0.8rem; display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>関連する内容をまとめて学習すると効率的</span>
+                </li>
+                <li style="display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>定期的に復習して知識を定着させる</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div style="width: 48%;">
+              <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--magenta);">おすすめ学習順序</h3>
+              <ol style="padding-left: 1.5rem;">
+                <li style="margin-bottom: 0.5rem;">人工知能の基本概念（1-1-1～1-1-2）</li>
+                <li style="margin-bottom: 0.5rem;">AIの発展と種類（1-2-1～1-2-4）</li>
+                <li style="margin-bottom: 0.5rem;">機械学習の基礎（1-3-1～1-3-4）</li>
+                <li style="margin-bottom: 0.5rem;">ディープラーニングの基礎（1-4-1～1-4-6）</li>
+                <li style="margin-bottom: 0.5rem;">ディープラーニングの構成要素（1-5-1～1-5-9）</li>
+                <li>最新応用事例の理解（1-6-1～1-6-9）</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ランダム学習セクション -->
+      <section class="section">
+        <h2 class="section-title"><i class="fas fa-random"></i> ランダム学習</h2>
+        <div style="background-color: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+          <p style="margin-bottom: 1.5rem;">最初から順番に勉強していくと、ダートマス会議など最初の部分ばかり繰り返し学習してしまう傾向があります。ランダムに選んだトピックから学習を始めることで、より幅広い知識を効率的に身につけましょう。</p>
+          
+          <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
+            <button id="randomTopicBtn" style="background-color: var(--magenta); border: none; color: white; padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 64, 160, 0.3); transition: all 0.3s ease;">ランダムトピックを選ぶ</button>
+            <div id="randomTopicResult" style="margin-top: 1.5rem; padding: 1rem; border-radius: 10px; background-color: var(--white); border: 2px dashed var(--cyan); text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 500px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+              <p>↑ボタンをクリックして、今日の学習トピックを選びましょう！</p>
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="width: 48%; min-width: 280px;">
+              <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--magenta); display: flex; align-items: center;">
+                <i class="fas fa-check-double" style="margin-right: 0.5rem; color: var(--yellow);"></i> ランダム学習のメリット
+              </h3>
+              <ul style="list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.8rem; display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>最初のトピックに偏らず、幅広い知識を獲得できる</span>
+                </li>
+                <li style="margin-bottom: 0.8rem; display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>新しい視点から概念の関連性を発見できる</span>
+                </li>
+                <li style="display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>学習のマンネリ化を防ぎ、モチベーションを維持できる</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div style="width: 48%; min-width: 280px;">
+              <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--magenta); display: flex; align-items: center;">
+                <i class="fas fa-star" style="margin-right: 0.5rem; color: var(--yellow);"></i> 効果的な使い方
+              </h3>
+              <ul style="list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.8rem; display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>週に1日は「ランダムデー」として新しいトピックを選ぶ</span>
+                </li>
+                <li style="margin-bottom: 0.8rem; display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>選ばれたトピックの前提知識も併せて確認する</span>
+                </li>
+                <li style="display: flex; align-items: flex-start;">
+                  <i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.8rem; margin-top: 0.3rem;"></i>
+                  <span>学んだトピックを自分の言葉で説明してみる</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- フッター -->
+      <footer class="footer">
+        <p>G検定 学習ノート | 作成日: 2024年9月</p>
+        <p>Content written by Claude 3.7 Sonnet | Designed with ❤️ for G検定学習者</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // 現在の日付を取得して表示
+    document.addEventListener('DOMContentLoaded', function() {
+      const footerElement = document.querySelector('.footer');
+      if (footerElement) {
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('ja-JP', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        footerElement.innerHTML += `<p>最終更新日: ${formattedDate}</p>`;
+      }
+      
+      // ランダムトピック選択の機能を実装
+      const randomTopicBtn = document.getElementById('randomTopicBtn');
+      const randomTopicResult = document.getElementById('randomTopicResult');
+      
+      // 全トピックのリストを作成
+      const allTopics = [
+        { id: '1-1-1', title: '人工知能の定義', path: '1-1-1_人工知能の定義.html' },
+        { id: '1-1-2', title: '人工知能分野で議論される問題', path: '1-1-2_人工知能分野で議論される問題.html' },
+        { id: '1-2-1', title: '探索・推論', path: '1-2-1_探索・推論.html' },
+        { id: '1-2-2', title: '知識表現とエキスパートシステム', path: '1-2-2_知識表現とエキスパートシステム.html' },
+        { id: '1-2-3', title: '機械学習', path: '1-2-3_機械学習.html' },
+        { id: '1-2-4', title: 'ディープラーニング', path: '1-2-4_ディープラーニング.html' },
+        { id: '1-3-1', title: '教師あり学習', path: '1-3-1_教師あり学習.html' },
+        { id: '1-3-2', title: '教師なし学習', path: '1-3-2_教師なし学習.html' },
+        { id: '1-3-3', title: '強化学習', path: '1-3-3_強化学習.html' },
+        { id: '1-3-4', title: 'モデルの選択・評価', path: '1-3-4_モデルの選択・評価.html' },
+        { id: '1-4-1', title: 'ニューラルネットワークとディープラーニング', path: '1-4-1_ニューラルネットワークとディープラーニング.html' },
+        { id: '1-4-2', title: '活性化関数', path: '1-4-2_活性化関数.html' },
+        { id: '1-4-3', title: '誤差関数', path: '1-4-3_誤差関数.html' },
+        { id: '1-4-4', title: '正則化', path: '1-4-4_正則化.html' },
+        { id: '1-4-5', title: '誤差逆伝播法', path: '1-4-5_誤差逆伝播法.html' },
+        { id: '1-4-6', title: '最適化手法', path: '1-4-6_最適化手法.html' },
+        { id: '1-5-1', title: '全結合層', path: '1-5-1_全結合層.html' },
+        { id: '1-5-2', title: '畳み込み層', path: '1-5-2_畳み込み層.html' },
+        { id: '1-5-3', title: '正規化層', path: '1-5-3_正規化層.html' },
+        { id: '1-5-4', title: 'プーリング層', path: '1-5-4_プーリング層.html' },
+        { id: '1-5-5', title: 'スキップ結合', path: '1-5-5_スキップ結合.html' },
+        { id: '1-5-6', title: '回帰結合層', path: '1-5-6_回帰結合層.html' },
+        { id: '1-5-7', title: 'Attention', path: '1-5-7_Attention.html' },
+        { id: '1-5-8', title: 'オートエンコーダ', path: '1-5-8_オートエンコーダ.html' },
+        { id: '1-5-9', title: 'データ拡張', path: '1-5-9_データ拡張.html' },
+        { id: '1-6-1', title: '画像認識', path: '1-6-1_画像認識.html' },
+        { id: '1-6-2', title: '自然言語処理', path: '1-6-2_自然言語処理.html' },
+        { id: '1-6-3', title: '音声処理', path: '1-6-3_音声処理.html' },
+        { id: '1-6-4', title: '深層強化学習', path: '1-6-4_深層強化学習.html' },
+        { id: '1-6-5', title: 'データ生成', path: '1-6-5_データ生成.html' },
+        { id: '1-6-6', title: '転移学習・ファインチューニング', path: '1-6-6_転移学習・ファインチューニング.html' },
+        { id: '1-6-7', title: 'マルチモーダル', path: '1-6-7_マルチモーダル.html' },
+        { id: '1-6-8', title: 'モデルの解釈性', path: '1-6-8_モデルの解釈性.html' },
+        { id: '1-6-9', title: 'モデルの軽量化', path: '1-6-9_モデルの軽量化.html' }
+      ];
+      
+      // ボタンクリック時の処理
+      randomTopicBtn.addEventListener('click', function() {
+        // アニメーション効果
+        randomTopicResult.style.opacity = '0.5';
+        randomTopicBtn.disabled = true;
+        randomTopicBtn.style.opacity = '0.7';
+        
+        // ランダムな項目を選択
+        const randomIndex = Math.floor(Math.random() * allTopics.length);
+        const selectedTopic = allTopics[randomIndex];
+        
+        // 少し遅延させてアニメーション効果を出す
+        setTimeout(function() {
+          // 結果表示用のHTMLを作成
+          const resultHTML = `
+            <div style="width: 100%;">
+              <p style="font-weight: bold; font-size: 1.2rem; margin-bottom: 0.5rem;">${selectedTopic.id} ${selectedTopic.title}</p>
+              <a href="${selectedTopic.path}" class="card-link" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background-color: var(--cyan); color: white; border-radius: 5px; text-decoration: none; font-weight: bold;">
+                <i class="fas fa-arrow-right"></i> 学習を始める
+              </a>
+            </div>
+          `;
+          
+          // 結果表示
+          randomTopicResult.innerHTML = resultHTML;
+          randomTopicResult.style.opacity = '1';
+          randomTopicBtn.disabled = false;
+          randomTopicBtn.style.opacity = '1';
+          
+          // ボタンのテキストを変更
+          randomTopicBtn.textContent = '別のトピックを選ぶ';
+        }, 500);
+      });
+      
+      // ボタンのホバーエフェクト
+      randomTopicBtn.addEventListener('mouseover', function() {
+        this.style.transform = 'translateY(-3px)';
+        this.style.boxShadow = '0 6px 15px rgba(255, 64, 160, 0.4)';
+      });
+      
+      randomTopicBtn.addEventListener('mouseout', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 4px 10px rgba(255, 64, 160, 0.3)';
+      });
+    });
+  </script>
+</body>
+</html> 

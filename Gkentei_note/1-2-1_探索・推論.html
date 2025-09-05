@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-2-1 - 探索・推論</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* 基本スタイル */
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: 280px;
+      background-color: var(--light-gray);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      border-right: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--magenta);
+    }
+
+    .sidebar-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--magenta);
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-subtitle {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 0.8rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.95rem;
+      color: var(--key);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(255, 64, 160, 0.1);
+      color: var(--magenta);
+    }
+
+    .nav-icon {
+      margin-right: 0.8rem;
+      width: 20px;
+      text-align: center;
+      color: var(--magenta);
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      max-width: calc(100% - 280px);
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 6px;
+      height: 100%;
+      background-color: var(--cyan);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      border-bottom: 2px solid var(--yellow);
+      padding-bottom: 0.5rem;
+    }
+
+    .section-icon {
+      margin-right: 0.8rem;
+      color: var(--cyan);
+    }
+
+    .concept-box {
+      background-color: rgba(255, 230, 0, 0.1);
+      border: 2px solid var(--yellow);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .concept-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .concept-title i {
+      margin-right: 0.6rem;
+      color: var(--yellow);
+    }
+
+    .highlight {
+      background: linear-gradient(transparent 60%, rgba(255, 230, 0, 0.4) 40%);
+      font-weight: 700;
+    }
+
+    .keyword {
+      color: var(--cyan);
+      font-weight: 600;
+      border-bottom: 1px dashed var(--cyan);
+    }
+
+    .note-box {
+      background-color: rgba(0, 216, 232, 0.1);
+      border-left: 4px solid var(--cyan);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+      position: relative;
+    }
+
+    .note-box::before {
+      content: '📌';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      font-size: 1.2rem;
+    }
+
+    .process-flow {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .process-step {
+      flex: 1;
+      text-align: center;
+      padding: 1rem;
+      background-color: rgba(255, 64, 160, 0.1);
+      border-radius: 8px;
+      border: 2px dashed var(--magenta);
+      position: relative;
+      z-index: 1;
+    }
+
+    .process-step:not(:last-child) {
+      margin-right: 2rem;
+    }
+
+    .process-step::after {
+      content: '\f061';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: -1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--magenta);
+      font-size: 1.2rem;
+      z-index: 2;
+    }
+
+    .process-step:last-child::after {
+      display: none;
+    }
+
+    .bubble {
+      position: relative;
+      background-color: var(--white);
+      border: 2px solid var(--cyan);
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .bubble::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-top-color: var(--cyan);
+      bottom: -20px;
+      left: 30px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.8rem 1rem;
+      text-align: left;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    th {
+      background-color: var(--cyan);
+      color: var(--white);
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 3rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      right: 2rem;
+      bottom: 2rem;
+      width: 50px;
+      height: 50px;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    .scroll-top.show {
+      opacity: 1;
+    }
+
+    /* アニメーション要素 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    /* 箇条書きスタイル調整 */
+    .concept-box ul, 
+    .concept-box ol,
+    .section ul,
+    .section ol {
+      padding-left: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .concept-box li,
+    .section li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 240px;
+      }
+      .main-content {
+        margin-left: 240px;
+        max-width: calc(100% - 240px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+      }
+      .main-content {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 1rem;
+      }
+      .process-flow {
+        flex-direction: column;
+      }
+      .process-step {
+        margin-bottom: 2rem;
+        margin-right: 0 !important;
+      }
+      .process-step::after {
+        content: '\f063';
+        right: 50%;
+        top: unset;
+        bottom: -1.5rem;
+        transform: translateX(50%);
+      }
+    }
+
+        /* 画像コンテナのスタイル */
+        .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">1-2-1 探索・推論</h2>
+        <p class="sidebar-subtitle">G検定対策ノート</p>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#intro" class="nav-link active">
+            <i class="fas fa-compass nav-icon"></i>はじめに
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#search" class="nav-link">
+            <i class="fas fa-search nav-icon"></i>探索とは
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#reasoning" class="nav-link">
+            <i class="fas fa-brain nav-icon"></i>推論とは
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#search-methods" class="nav-link">
+            <i class="fas fa-route nav-icon"></i>代表的な探索手法
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#examples" class="nav-link">
+            <i class="fas fa-flask nav-icon"></i>探索・推論の実例
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#keyword-list" class="nav-link">
+            <i class="fas fa-key nav-icon"></i>キーワード一覧
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#key-insights" class="nav-link">
+            <i class="fas fa-lightbulb nav-icon"></i>Key Insights
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#take-home" class="nav-link">
+            <i class="fas fa-home nav-icon"></i>Take Home Message
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- タイトルセクション -->
+      <section class="section animate" id="intro">
+        <h2 class="section-title">
+          <i class="fas fa-compass section-icon"></i>探索・推論とは
+        </h2>
+        <div class="concept-box">
+          <h3 class="concept-title">
+            <i class="fas fa-info-circle"></i>G検定目標
+          </h3>
+          <ul>
+            <li>探索・推論の<span class="highlight">具体例</span>を説明できる</li>
+            <li>探索・推論を実現する<span class="highlight">代表的な手法</span>を説明できる</li>
+          </ul>
+        </div>
+        
+        <p>人工知能の歴史の中で、<span class="keyword">探索</span>と<span class="keyword">推論</span>は最も古くから研究されてきた基本的な問題解決技術です。これらは1950年代から1980年代にかけての人工知能研究の中心的なアプローチでした。</p>
+        
+        <div class="process-flow">
+          <div class="process-step">
+            <i class="fas fa-search fa-2x" style="color: var(--magenta);"></i>
+            <p>探索</p>
+            <small>可能な選択肢から最適解を見つける</small>
+          </div>
+          <div class="process-step">
+            <i class="fas fa-brain fa-2x" style="color: var(--magenta);"></i>
+            <p>推論</p>
+            <small>論理的な規則に基づいて結論を導く</small>
+          </div>
+          <div class="process-step">
+            <i class="fas fa-robot fa-2x" style="color: var(--magenta);"></i>
+            <p>問題解決</p>
+            <small>AIによる知的な課題の解決</small>
+          </div>
+        </div>
+        
+        <div class="note-box">
+          <p>探索と推論はルールベースのAIアプローチに分類され、現在の機械学習やディープラーニングとは異なる歴史的な文脈を持ちます。しかし、これらの技術は現代のAIシステムにも組み込まれており、特定の問題に対しては依然として有効なアプローチです。</p>
+        </div>
+      </section>
+      
+      <!-- 探索セクション -->
+      <section class="section animate" id="search">
+        <h2 class="section-title">
+          <i class="fas fa-search section-icon"></i>探索とは
+        </h2>
+        
+        <p><span class="keyword">探索（Search）</span>とは、問題の解決策を見つけるために可能な状態空間を系統的に調査することです。ゲームAIやパズル解法、経路探索など、多くの問題に適用されます。</p>
+        
+        <div class="concept-box">
+          <h3 class="concept-title">
+            <i class="fas fa-project-diagram"></i>探索の基本要素
+          </h3>
+          <ul>
+            <li><strong>状態空間</strong>：問題のすべての可能な状態の集合</li>
+            <li><strong>初期状態</strong>：探索の開始点</li>
+            <li><strong>目標状態</strong>：到達したい状態</li>
+            <li><strong>操作・遷移</strong>：ある状態から別の状態への移動方法</li>
+            <li><strong>探索木</strong>：状態と遷移を表現するデータ構造</li>
+          </ul>
+        </div>
+        
+        <div class="bubble">
+          <p>探索の本質は、問題を「状態」と「遷移」として捉え、初期状態から目標状態への効率的な経路を見つけることです。</p>
+        </div>
+        
+        <h3 style="margin-top: 2rem; color: var(--magenta);">探索木の例: ハノイの塔</h3>
+        
+        <p><span class="keyword">ハノイの塔（Tower of Hanoi）</span>は古典的な探索問題です。n枚の円盤を一本の杭から別の杭に移動させる問題で、以下のルールがあります：</p>
+        
+        <ul>
+          <li>一度に動かせるのは1枚だけ</li>
+          <li>大きな円盤の上に小さな円盤しか置けない</li>
+        </ul>
+        
+        <p>この問題は探索木を用いて解くことができます。各状態（円盤の配置）をノードとし、合法的な移動を辺とした木構造を作成して探索します。</p>
+        
+        <div class="note-box">
+          <p>ハノイの塔の最小手数は2^n - 1で計算できます。例えば3枚の円盤なら7手、4枚なら15手が必要です。これは探索空間の指数関数的な増大を示す例として重要です。</p>
+        </div>
+
+        <!--    --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-2-1_01.png" alt="ハノイの塔の画像">
+          <figcaption>ハノイの塔：円盤を移動させる操作を表す</figcaption>
+        </div>
+
+      </section>
+      
+      <!-- 推論セクション -->
+      <section class="section animate" id="reasoning">
+        <h2 class="section-title">
+          <i class="fas fa-brain section-icon"></i>推論とは
+        </h2>
+        
+        <p><span class="keyword">推論（Reasoning）</span>とは、既知の事実や規則から新しい結論を導き出すプロセスです。論理的な規則を用いて、新しい知識を生成することを目的としています。</p>
+        
+        <div class="concept-box">
+          <h3 class="concept-title">
+            <i class="fas fa-sitemap"></i>推論の種類
+          </h3>
+          <ul>
+            <li><strong>演繹推論</strong>：一般的な法則から特定の結論を導く（例：全ての人間は死ぬ → ソクラテスは人間 → ソクラテスは死ぬ）</li>
+            <li><strong>帰納推論</strong>：特定の事例から一般的な法則を導く（例：今まで見た全てのカラスは黒い → 全てのカラスは黒い）</li>
+            <li><strong>アブダクション（仮説推論）</strong>：観察された結果から、その原因を推測する（例：地面が濡れている → おそらく雨が降った）</li>
+          </ul>
+        </div>
+        
+        <h3 style="margin-top: 2rem; color: var(--magenta);">AI における推論の実装</h3>
+        
+        <p>AIシステムにおける推論の実装には、主に以下のアプローチがあります：</p>
+        
+        <ol>
+          <li><strong>論理プログラミング</strong>：Prologなどの言語を用いて、論理規則と事実からなるナレッジベースを構築</li>
+          <li><strong>エキスパートシステム</strong>：IF-THEN型の規則を用いた推論機構</li>
+          <li><strong>確率的推論</strong>：ベイジアンネットワークなどを用いた不確実性を扱う推論</li>
+        </ol>
+        
+        <div class="note-box">
+          <p>推論は人工知能の中でも「説明可能性」が高いアプローチです。ディープラーニングがブラックボックス的な性質を持つのに対し、推論ベースのシステムは結論に至るプロセスを明示的に追跡できます。</p>
+        </div>
+      </section>
+      
+      <!-- 探索手法セクション -->
+      <section class="section animate" id="search-methods">
+        <h2 class="section-title">
+          <i class="fas fa-route section-icon"></i>代表的な探索手法
+        </h2>
+        
+        <p>探索問題を解くための代表的な手法には以下のようなものがあります：</p>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>探索手法</th>
+                <th>特徴</th>
+                <th>長所/短所</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="keyword">幅優先探索（Breadth-First Search）</span></td>
+                <td>最も浅いノードから順に探索する</td>
+                <td>最短経路を保証するが、メモリ使用量が多い</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">深さ優先探索（Depth-First Search）</span></td>
+                <td>可能な限り深く探索してから戻る</td>
+                <td>メモリ効率が良いが、最短経路を保証しない</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">aẞ法（Alpha-Beta Pruning）</span></td>
+                <td>ミニマックス探索の枝刈り手法</td>
+                <td>探索空間を効率的に削減する</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">Mini-Max法</span></td>
+                <td>対戦ゲームの最適手を探索</td>
+                <td>相手の最善手を想定して自分の最適手を選ぶ</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">ブルートフォース（総当たり）</span></td>
+                <td>すべての可能性を調べる</td>
+                <td>確実だが計算量が膨大</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">モンテカルロ法</span></td>
+                <td>ランダムサンプリングによる統計的探索</td>
+                <td>複雑な問題に対して近似解を提供</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h3 style="margin-top: 2rem; color: var(--magenta);">幅優先探索と深さ優先探索の比較</h3>
+        
+        <div class="process-flow">
+          <div class="process-step">
+            <i class="fas fa-arrows-alt-h fa-2x" style="color: var(--magenta);"></i>
+            <p>幅優先探索</p>
+            <small>階層ごとに横方向に探索</small>
+          </div>
+          <div class="process-step">
+            <i class="fas fa-arrows-alt-v fa-2x" style="color: var(--magenta);"></i>
+            <p>深さ優先探索</p>
+            <small>一本の枝を最後まで探索</small>
+          </div>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title">
+            <i class="fas fa-chess"></i>ミニマックス法とαβ法
+          </h3>
+          <p><span class="keyword">ミニマックス法（Mini-Max Method）</span>は、将棋や囲碁、チェスなどの二人零和有限確定完全情報ゲームで使われる探索アルゴリズムです。自分の手番では利得を最大化し、相手の手番では利得を最小化することを想定して最適手を探索します。</p>
+          <p><span class="keyword">αβ法（Alpha-Beta Pruning）</span>は、ミニマックス法の効率を改善するための枝刈り技術です。探索する必要のない部分木を特定して計算を省略します。</p>
+        </div>
+        
+        <div class="note-box">
+          <p>αβ法はチェスAIなどで広く使われており、探索効率を大幅に向上させます。理論上、探索ノード数を最大で√N（Nは総ノード数）まで削減できます。</p>
+        </div>
+        
+        <h3 style="margin-top: 2rem; color: var(--magenta);">モンテカルロ法</h3>
+        
+        <p><span class="keyword">モンテカルロ法（Monte Carlo Method）</span>は、ランダムサンプリングを用いて数値解を求める手法です。特に、探索空間が広大で従来の探索手法が使えない問題に適用されます。</p>
+        
+        <p>例：囲碁AIのAlphaGoでは、モンテカルロ木探索（MCTS）を用いて、膨大な手の可能性から有望な手を効率的に評価していました。</p>
+      </section>
+      
+      <!-- 探索・推論の実例セクション -->
+      <section class="section animate" id="examples">
+        <h2 class="section-title">
+          <i class="fas fa-flask section-icon"></i>探索・推論の実例
+        </h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title">
+            <i class="fas fa-robot"></i>SHRDLU
+          </h3>
+          <p><span class="keyword">SHRDLU</span>（シャードルーと読む）は1970年代に開発された自然言語理解システムで、ブロックワールドと呼ばれる仮想環境で物体を操作するコマンドを理解・実行できました。</p>
+          <p>例えば「赤いブロックを青い立方体の上に置け」といった指示を理解し、適切な動作計画（プランニング）を行います。これは自然言語理解、知識表現、探索、推論を組み合わせた初期のAIシステムの好例です。</p>
+          <p class="note-box" style="margin-top: 0.8rem; font-size: 0.9rem;">
+            ※「SHRDLU」という変わった名前は、英語の活版印刷機のリノタイプで最も頻繁に使われる12文字「ETAOIN SHRDLU」から取られています。これらの文字が並んだキーボード配列だったため、開発者のテリー・ウィノグラードがシステム名として採用しました。
+          </p>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title">
+            <i class="fas fa-project-diagram"></i>STRIPS
+          </h3>
+          <p><span class="keyword">STRIPS（Stanford Research Institute Problem Solver）</span>は1971年に開発された自動プランニングシステムです。</p>
+          <p>SHRDLUのようなシステムの背後で動作し、現在の状態から目標状態へ到達するための行動プランを生成します。各行動は「前提条件」と「効果」で定義され、ゴールに向かって探索を行います。</p>
+        </div>
+        
+        <h3 style="margin-top: 2rem; color: var(--magenta);">現代の探索・推論応用例</h3>
+        
+        <ul>
+          <li><strong>ナビゲーションシステム</strong>：地図上の最短経路を探索</li>
+          <li><strong>ゲームAI</strong>：チェス、将棋、囲碁などのボードゲーム</li>
+          <li><strong>医療診断システム</strong>：症状から可能性のある疾患を推論</li>
+          <li><strong>自動プランニング</strong>：ロボット動作や工程の最適化</li>
+          <li><strong>定理証明</strong>：数学的定理の自動証明</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>古典的な探索・推論アルゴリズムは、現代では機械学習やディープラーニングと組み合わせて使われることが多くなっています。例えば、AlphaGoはニューラルネットワークとモンテカルロ木探索を組み合わせています。</p>
+        </div>
+      </section>
+      
+      <!-- キーワード一覧セクション -->
+      <section class="section animate" id="keyword-list">
+        <h2 class="section-title">
+          <i class="fas fa-key section-icon"></i>キーワード一覧
+        </h2>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>キーワード</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>aẞ法 (Alpha-Beta Pruning)</td>
+                <td>ミニマックス法の枝刈り手法で、探索効率を大幅に向上させる</td>
+              </tr>
+              <tr>
+                <td>Mini-Max法 (Mini-Max Method)</td>
+                <td>対戦ゲームにおいて、自分の利得を最大化し相手の利得を最小化する戦略を探索する手法</td>
+              </tr>
+              <tr>
+                <td>SHRDLU</td>
+                <td>1970年代に開発された初期の自然言語理解システム</td>
+              </tr>
+              <tr>
+                <td>STRIPS (Stanford Research Institute Problem Solver)</td>
+                <td>自動プランニングのための問題解決システム</td>
+              </tr>
+              <tr>
+                <td>探索木 (Search Tree)</td>
+                <td>問題の状態と遷移を木構造で表現したデータ構造</td>
+              </tr>
+              <tr>
+                <td>ハノイの塔 (Tower of Hanoi)</td>
+                <td>古典的な探索問題の一つ。複数の円盤を規則に従って移動させる</td>
+              </tr>
+              <tr>
+                <td>幅優先探索 (Breadth-First Search)</td>
+                <td>浅い層から順に探索を進める手法。最短経路を保証する</td>
+              </tr>
+              <tr>
+                <td>深さ優先探索 (Depth-First Search)</td>
+                <td>一つの経路をできるだけ深く探索してから戻る手法</td>
+              </tr>
+              <tr>
+                <td>ブルートフォース (Brute Force)</td>
+                <td>すべての可能性を調べる総当たり的な手法</td>
+              </tr>
+              <tr>
+                <td>モンテカルロ法 (Monte Carlo Method)</td>
+                <td>ランダムサンプリングを用いた統計的な手法</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      
+      <!-- Key Insightsセクション -->
+      <section class="section animate" id="key-insights">
+        <h2 class="section-title">
+          <i class="fas fa-lightbulb section-icon"></i>Key Insights
+        </h2>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+          <div style="flex: 1; min-width: 250px; background-color: rgba(0, 216, 232, 0.1); padding: 1rem; border-radius: 8px; border-top: 3px solid var(--cyan);">
+            <h3 style="color: var(--cyan); margin-bottom: 0.5rem;">1. 探索は問題解決の基本</h3>
+            <p>探索は初期状態から目標状態への経路を見つけるプロセスで、多くのAI問題の基礎となります。</p>
+          </div>
+          
+          <div style="flex: 1; min-width: 250px; background-color: rgba(255, 64, 160, 0.1); padding: 1rem; border-radius: 8px; border-top: 3px solid var(--magenta);">
+            <h3 style="color: var(--magenta); margin-bottom: 0.5rem;">2. 推論は知識から新知識を導く</h3>
+            <p>推論は既知の事実や規則から新しい結論を導き出す論理的プロセスです。</p>
+          </div>
+          
+          <div style="flex: 1; min-width: 250px; background-color: rgba(255, 230, 0, 0.1); padding: 1rem; border-radius: 8px; border-top: 3px solid var(--yellow);">
+            <h3 style="color: var(--key); margin-bottom: 0.5rem;">3. 効率的なアルゴリズムが重要</h3>
+            <p>探索空間は指数関数的に増大するため、効率的な探索アルゴリズム（αβ法など）が不可欠です。</p>
+          </div>
+        </div>
+        
+        <div class="note-box" style="margin-top: 2rem;">
+          <p>探索と推論は古典的なAI技術ですが、現代のAIシステムにも組み込まれており、特定の問題に対しては依然として重要なアプローチです。機械学習やディープラーニングと組み合わせることで、より強力なAIシステムが実現できます。</p>
+        </div>
+      </section>
+      
+      <!-- Take Home Messageセクション -->
+      <section class="section animate" id="take-home">
+        <h2 class="section-title">
+          <i class="fas fa-home section-icon"></i>Take Home Message
+        </h2>
+        
+        <div style="background-color: rgba(255, 64, 160, 0.05); border: 2px solid var(--magenta); border-radius: 12px; padding: 2rem; text-align: center; margin-top: 1rem;">
+          <i class="fas fa-quote-left fa-2x" style="color: var(--magenta); margin-bottom: 1rem;"></i>
+          <p style="font-size: 1.2rem; font-weight: 500; line-height: 1.8;">
+            探索と推論は<span class="highlight">AIの基礎となる問題解決技術</span>であり、
+            <span class="highlight">現代のAIでも重要な役割</span>を果たしています。
+            代表的な手法（<span class="keyword">幅優先探索</span>、<span class="keyword">深さ優先探索</span>、<span class="keyword">αβ法</span>など）と
+            実例（<span class="keyword">SHRDLU</span>、<span class="keyword">STRIPS</span>）を理解しましょう。
+          </p>
+        </div>
+      </section>
+      
+      <!-- フッター -->
+      <footer class="footer">
+        <p>作成: 2024年　G検定対策グラフィックレコーディングノート</p>
+        <p>原稿とコード: Claude 3.7 Sonnet | 手法: グラフィックレコーディング</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // スクロール処理
+    const scrollTop = document.querySelector('.scroll-top');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.section');
+
+    // スクロールトップボタンの表示/非表示
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTop.classList.add('show');
+      } else {
+        scrollTop.classList.remove('show');
+      }
+    });
+
+    // スクロールトップボタンクリック時の処理
+    scrollTop.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // ナビゲーションリンクのスムーススクロール
+    navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 20,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    // スクロール位置に応じてナビゲーションをハイライト
+    window.addEventListener('scroll', () => {
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        
+        if (pageYOffset >= sectionTop - 100) {
+          current = '#' + section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

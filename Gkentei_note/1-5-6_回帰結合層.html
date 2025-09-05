@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-5-6 回帰結合層 | G検定対策ノート</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      
+      /* フォント */
+      --font-handwritten: 'Klee One', cursive;
+      --font-rounded: 'M PLUS Rounded 1c', sans-serif;
+      --font-main: 'Zen Maru Gothic', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--font-main);
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* レイアウト構造 */
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      background-color: var(--magenta);
+      color: var(--white);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      
+      /* スクロールバーのスタイリング */
+      scrollbar-width: thin; /* Firefox用 */
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox用 */
+    }
+    
+    /* Webkit系ブラウザ（Chrome、Safari）用スクロールバースタイル */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Edge, IE用 */
+    @supports (-ms-overflow-style: none) {
+      .sidebar {
+        -ms-overflow-style: none;
+      }
+    }
+    
+    .sidebar-title {
+      font-family: var(--font-rounded);
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--white);
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.8rem;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      color: var(--white);
+      text-decoration: none;
+      padding: 0.5rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 1.5rem;
+      text-align: center;
+    }
+    
+    .nav-link.active {
+      background-color: var(--white);
+      color: var(--magenta);
+      font-weight: 500;
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+    
+    /* タイトルセクション */
+    .title-section {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px dashed var(--magenta);
+    }
+    
+    .main-title {
+      font-family: var(--font-rounded);
+      font-size: 2.5rem;
+      color: var(--magenta);
+      margin-bottom: 1rem;
+    }
+    
+    .subtitle {
+      font-family: var(--font-handwritten);
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    .overview-list {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: left;
+      background-color: rgba(255, 64, 160, 0.05);
+      padding: 1.5rem 2rem;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .overview-list li {
+      margin-bottom: 0.8rem;
+      list-style-position: inside;
+      padding-left: 1rem;
+    }
+    
+    /* セクションスタイル */
+    section {
+      margin-bottom: 4rem;
+      position: relative;
+    }
+    
+    .section-title {
+      font-family: var(--font-rounded);
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid var(--yellow);
+      padding-bottom: 0.5rem;
+    }
+    
+    .section-title i {
+      margin-right: 0.8rem;
+      font-size: 1.5rem;
+    }
+    
+    .content-box {
+      background-color: var(--white);
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+    }
+    
+    .handwritten-box {
+      background-color: var(--white);
+      border: 2px dashed var(--yellow);
+      border-radius: 10px;
+      padding: 1.5rem;
+      font-family: var(--font-handwritten);
+      position: relative;
+      margin: 2rem 0;
+      transform: rotate(-0.5deg);
+    }
+    
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -15px;
+      left: 20px;
+      font-size: 1.5rem;
+    }
+    
+    .concept-title {
+      font-weight: 700;
+      color: var(--magenta);
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+    
+    .note-box {
+      border-left: 4px solid var(--cyan);
+      padding: 1rem 1.5rem;
+      background-color: rgba(0, 216, 232, 0.05);
+      margin: 1.5rem 0;
+    }
+    
+    .highlight {
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      font-weight: 500;
+    }
+    
+    .keyword {
+      color: var(--magenta);
+      font-weight: 600;
+    }
+    
+    /* リストスタイル */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+      list-style-position: inside;
+    }
+    
+    ul li, ol li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* テーブルスタイル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    
+    th, td {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+    }
+    
+    th {
+      background-color: var(--magenta);
+      color: var(--white);
+      font-weight: 500;
+      text-align: left;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba(255, 64, 160, 0.05);
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* プロセスフロー */
+    .process-flow {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .process-step {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+    }
+    
+    .process-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      color: var(--cyan);
+    }
+    
+    .step-number {
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 0.5rem;
+    }
+    
+    .step-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* アイコンコンテナ */
+    .icon-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    
+    .icon-item {
+      text-align: center;
+      width: 100px;
+    }
+    
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: var(--magenta);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 0.8rem;
+      font-size: 2rem;
+    }
+    
+    .icon-text {
+      font-size: 0.9rem;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 3rem;
+      height: 3rem;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 100;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+    }
+    
+    /* フッター */
+    footer {
+      margin-left: 20%;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--dark-gray);
+      border-top: 1px solid #eee;
+    }
+    
+    /* レスポンシブ対応 */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 30%;
+      }
+      .main-content, footer {
+        margin-left: 30%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      .main-content, footer {
+        margin-left: 0;
+      }
+      .process-flow {
+        flex-direction: column;
+      }
+      .process-step:not(:last-child)::after {
+        content: "↓";
+        position: static;
+        display: block;
+        margin: 0.5rem 0;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title">ディープラーニングの要素技術</h2>
+      <nav>
+        <ul class="nav-menu" id="nav-menu">
+          <li class="nav-item">
+            <a href="#intro" class="nav-link">
+              <i class="fas fa-circle-info"></i>
+              <span>概要</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#rnn-overview" class="nav-link">
+              <i class="fas fa-network-wired"></i>
+              <span>RNNの基本構造</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#rnn-types" class="nav-link">
+              <i class="fas fa-code-branch"></i>
+              <span>RNNの種類</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#bptt" class="nav-link">
+              <i class="fas fa-arrow-right-arrow-left"></i>
+              <span>BPTTによる学習</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#rnn-problems" class="nav-link">
+              <i class="fas fa-triangle-exclamation"></i>
+              <span>RNNの課題</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#lstm-gru" class="nav-link">
+              <i class="fas fa-door-open"></i>
+              <span>LSTM・GRU</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#bidirectional" class="nav-link">
+              <i class="fas fa-arrows-left-right"></i>
+              <span>双方向RNN</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#applications" class="nav-link">
+              <i class="fas fa-rocket"></i>
+              <span>応用例</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#key-insights" class="nav-link">
+              <i class="fas fa-lightbulb"></i>
+              <span>Key Insights</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#take-home" class="nav-link">
+              <i class="fas fa-key"></i>
+              <span>Take Home Message</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#glossary" class="nav-link">
+              <i class="fas fa-book"></i>
+              <span>用語集</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- タイトルセクション -->
+      <div class="title-section">
+        <h1 class="main-title">1-5-6 回帰結合層</h1>
+        <p class="subtitle">時系列データを扱うためのディープラーニング技術</p>
+        <ul class="overview-list">
+          <li>回帰結合層の概要と動作原理を理解する</li>
+          <li>回帰結合層を含むネットワークであるRNNの特徴と構造を把握する</li>
+          <li>RNNの学習方法（BPTT）と課題（勾配消失・爆発問題）を理解する</li>
+          <li>代表的なRNNの派生モデル（LSTM、GRU、双方向RNN）の特徴を知る</li>
+          <li>RNNが得意とするタスクと応用例を学ぶ</li>
+        </ul>
+      </div>
+      
+      <!-- 概要セクション -->
+      <section id="intro">
+        <h2 class="section-title">
+          <i class="fas fa-circle-info"></i>
+          概要
+        </h2>
+        <div class="content-box">
+          <p>
+            <span class="keyword">回帰結合層</span>は、ニューラルネットワークにおいて過去の情報を記憶し、それを現在の判断に活用するための特殊な層です。通常のニューラルネットワークでは入力と出力の関係は静的ですが、回帰結合層を用いることで<span class="highlight">時間的な依存関係</span>を考慮した学習が可能になります。
+          </p>
+          <p>
+            この回帰結合層を含むネットワークが<span class="keyword">リカレントニューラルネットワーク (Recurrent Neural Network, RNN)</span>です。RNNは文章、音声、動画など<span class="highlight">時系列データ</span>の処理に適したモデルで、過去の情報を内部状態として保持し、次の予測に活用する仕組みを持っています。
+          </p>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">なぜ回帰結合層が必要なのか？</p>
+            <p>
+              通常のニューラルネットワークでは、入力と出力の関係は「いま」の1時点だけで完結します。しかし実世界のデータ、特に文章や音声などは、前後の文脈が意味を持ちます。例えば「彼は本を読んだ」と「彼が読んだのは本だ」は同じ単語でも意味が違います。こうした時間的なつながりのあるデータを扱うために、過去の情報を記憶できる回帰結合層が開発されました。
+            </p>
+          </div>
+          
+          <div class="note-box">
+            <p>
+              回帰結合層では、前の時点での出力を次の時点での入力の一部として利用します。これにより、ネットワークは過去の情報を「記憶」しながら学習を進めることができます。
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- RNNの基本構造セクション -->
+      <section id="rnn-overview">
+        <h2 class="section-title">
+          <i class="fas fa-network-wired"></i>
+          RNNの基本構造
+        </h2>
+        <div class="content-box">
+          <p>
+            <span class="keyword">リカレントニューラルネットワーク (RNN)</span>は、同じニューロンが繰り返し使われる構造を持ち、時系列に沿って情報を処理します。基本的な構造は以下の要素から成り立っています：
+          </p>
+          
+          <div class="icon-container">
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-arrow-right-to-bracket"></i>
+              </div>
+              <p class="icon-text">入力層</p>
+            </div>
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-sync"></i>
+              </div>
+              <p class="icon-text">回帰結合層</p>
+            </div>
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-arrow-right-from-bracket"></i>
+              </div>
+              <p class="icon-text">出力層</p>
+            </div>
+          </div>
+          
+          <p>
+            RNNの特徴は、<span class="highlight">隠れ状態（hidden state）</span>と呼ばれる内部表現を持ち、これを時間ステップごとに更新しながら処理を進めることです。基本的なRNNの計算は以下のように表現されます：
+          </p>
+          
+          <div class="note-box">
+            <p>隠れ状態の更新式：</p>
+            <p>\( h_t = f(W_{hx} \cdot x_t + W_{hh} \cdot h_{t-1} + b_h) \)</p>
+            <p>出力の計算式：</p>
+            <p>\( y_t = g(W_{yh} \cdot h_t + b_y) \)</p>
+            <p>ここで：</p>
+            <ul>
+              <li>\( h_t \)：時刻tでの隠れ状態</li>
+              <li>\( x_t \)：時刻tでの入力</li>
+              <li>\( y_t \)：時刻tでの出力</li>
+              <li>\( W_{hx}, W_{hh}, W_{yh} \)：重み行列</li>
+              <li>\( b_h, b_y \)：バイアス項</li>
+              <li>\( f, g \)：活性化関数（通常はtanhやReLUなど）</li>
+            </ul>
+          </div>
+          
+          <p>
+            RNNの特徴として、<span class="keyword">パラメータ共有</span>が挙げられます。時系列の各時点で同じ重みとバイアスを使用するため、シーケンスの長さに関わらず学習パラメータの数は一定です。
+          </p>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">RNNの基本動作イメージ</p>
+            <p>
+              RNNは「内部メモリ」を持つニューラルネットワークだと考えるとわかりやすいです。例えば、「昨日、私は友達と映画を見た」という文章を一単語ずつ処理する場合：
+            </p>
+            <ol>
+              <li>「昨日」という単語を入力→ある隠れ状態が生成される</li>
+              <li>その隠れ状態を保持しながら「私は」を入力→新しい隠れ状態が生成される</li>
+              <li>同様に「友達と」「映画を」「見た」と処理していく</li>
+            </ol>
+            <p>
+              この過程で、文の最初の方の情報も保持しながら処理することで、文全体の意味を理解できるようになります。
+            </p>
+          </div>
+          
+          <p>
+            RNNは入力と出力のパターンによって様々なタスクに対応できます：
+          </p>
+          
+          <ul>
+            <li><span class="keyword">一対一</span>：標準的なニューラルネットワーク（時系列ではない）</li>
+            <li><span class="keyword">一対多</span>：画像から説明文を生成するなど</li>
+            <li><span class="keyword">多対一</span>：感情分析など、シーケンスから単一の出力を得る</li>
+            <li><span class="keyword">多対多（同期）</span>：単語ごとの品詞タグ付けなど</li>
+            <li><span class="keyword">多対多（非同期）</span>：機械翻訳など、入出力の長さが異なる場合</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- RNNの種類セクション -->
+      <section id="rnn-types">
+        <h2 class="section-title">
+          <i class="fas fa-code-branch"></i>
+          RNNの種類
+        </h2>
+        <div class="content-box">
+          <p>
+            RNNには様々な派生モデルがあり、代表的なものとして<span class="keyword">エルマンネットワーク</span>と<span class="keyword">ジョルダンネットワーク</span>があります。
+          </p>
+          
+          <div class="process-flow">
+            <div class="process-step">
+              <div class="step-number">1</div>
+              <h4 class="step-title">エルマンネットワーク</h4>
+              <p>隠れ層の出力を次の時点の隠れ層の入力として使用</p>
+            </div>
+            <div class="process-step">
+              <div class="step-number">2</div>
+              <h4 class="step-title">ジョルダンネットワーク</h4>
+              <p>ネットワークの出力を次の時点の隠れ層の入力として使用</p>
+            </div>
+          </div>
+          
+          <p>
+            これらのネットワークはそれぞれ異なる形式で情報の「記憶」を実現しています。エルマンネットワークは内部状態を直接的に伝播させるのに対し、ジョルダンネットワークは出力からのフィードバックを利用します。
+          </p>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">エルマンネットワークとジョルダンネットワークの違い</p>
+            <p>
+              両者の違いは「何を次の時点に渡すか」です。エルマンネットワークは隠れ層の状態（中間表現）をそのまま次に渡すのに対し、ジョルダンネットワークは出力層の結果を次に渡します。エルマンネットワークの方が内部情報をより多く保持できるため、現在では主にエルマン型が使われています。
+            </p>
+          </div>
+          
+          <div class="note-box">
+            <p>
+              RNNは時系列データを扱えますが、実はどれだけ長い過去の情報を有効に利用できるかという点では制限があります。この問題に対処するためにLSTMやGRUなどの改良版が開発されました。
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- BPTTによる学習セクション -->
+      <section id="bptt">
+        <h2 class="section-title">
+          <i class="fas fa-arrow-right-arrow-left"></i>
+          BPTTによる学習
+        </h2>
+        <div class="content-box">
+          <p>
+            RNNの学習には<span class="keyword">Back Propagation Through Time (BPTT)</span>と呼ばれる手法が使われます。これは通常の誤差逆伝播法を時間方向に拡張したものです。
+          </p>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">BPTTの基本概念</p>
+            <p>
+              BPTTでは、RNNを時間方向に展開して考えます。例えば3時点の時系列データを扱う場合、同じRNNユニットが3回繰り返し使われると見なし、これを3つの別々のレイヤーが連なったネットワークと考えます。そして各時点での誤差を計算し、それを時間をさかのぼって伝播させながら重みを更新していきます。
+            </p>
+          </div>
+          
+          <p>
+            BPTTの基本的な手順は以下の通りです：
+          </p>
+          
+          <ol>
+            <li>時系列データを順方向に処理し、各時点での出力と隠れ状態を保存する（Forward Pass）</li>
+            <li>最終時点での出力と正解値の誤差を計算する</li>
+            <li>誤差を時間方向に逆伝播させながら、各時点での勾配を計算する（Backward Pass）</li>
+            <li>全時点での勾配を集約し、パラメータを更新する</li>
+          </ol>
+          
+          <div class="note-box">
+            <p>
+              BPTTでは、時系列データ全体に対して誤差逆伝播を行うため、シーケンスが長い場合は計算コストが高くなります。また、長いシーケンスでは<span class="keyword">勾配消失問題</span>や<span class="keyword">勾配爆発問題</span>が発生しやすくなります。
+            </p>
+          </div>
+          
+          <p>
+            実際の実装では、計算効率や問題の軽減のために、以下のような変種が使われることが多いです：
+          </p>
+          
+          <ul>
+            <li><span class="keyword">切り詰めBPTT (Truncated BPTT)</span>：長いシーケンスを一定の長さで区切って学習する</li>
+            <li><span class="keyword">教師強制 (Teacher Forcing)</span>：学習時に前の時点での予測値ではなく正解値を次の入力として使用する</li>
+          </ul>
+          
+          <p>
+            <span class="keyword">教師強制</span>は特に重要で、RNNの学習を安定させるために広く使われています。これにより、予測誤差が累積するのを防ぎ、効率的な学習が可能になります。
+          </p>
+        </div>
+      </section>
+      
+      <!-- RNNの課題セクション -->
+      <section id="rnn-problems">
+        <h2 class="section-title">
+          <i class="fas fa-triangle-exclamation"></i>
+          RNNの課題
+        </h2>
+        <div class="content-box">
+          <p>
+            RNNには以下のような主要な課題があります：
+          </p>
+          
+          <div class="icon-container">
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-arrow-down"></i>
+              </div>
+              <p class="icon-text">勾配消失</p>
+            </div>
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-arrow-up"></i>
+              </div>
+              <p class="icon-text">勾配爆発</p>
+            </div>
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-brain"></i>
+              </div>
+              <p class="icon-text">信用割当</p>
+            </div>
+          </div>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">勾配消失・爆発問題とは？</p>
+            <p>
+              RNNでは、誤差を時間をさかのぼって伝播させるとき、勾配（誤差の変化量）が時間とともに指数関数的に小さくなったり（消失）、逆に大きくなりすぎたり（爆発）することがあります。特に長いシーケンスを扱う場合、シーケンスの初期段階の情報がうまく学習に反映されなくなる問題があります。
+            </p>
+          </div>
+          
+          <p>
+            <span class="keyword">勾配消失問題 (Vanishing Gradient Problem)</span>：
+          </p>
+          <ul>
+            <li>時間をさかのぼるほど勾配が急速に小さくなり、長期的な依存関係を学習できなくなる</li>
+            <li>主にtanhやシグモイド関数のような活性化関数の性質に起因</li>
+            <li>結果として、RNNは短い時間範囲の依存関係しか捉えられなくなる</li>
+          </ul>
+          
+          <p>
+            <span class="keyword">勾配爆発問題 (Exploding Gradient Problem)</span>：
+          </p>
+          <ul>
+            <li>勾配が時間と共に急速に大きくなり、学習が不安定になる</li>
+            <li>重みの更新が大きすぎて発散する原因となる</li>
+            <li>対策として勾配クリッピングなどの手法が用いられる</li>
+          </ul>
+          
+          <p>
+            <span class="keyword">信用割当問題 (Credit Assignment Problem)</span>：
+          </p>
+          <ul>
+            <li>長いシーケンスにおいて、どの入力が出力に対して重要な影響を与えたかを特定することが難しい</li>
+            <li>例えば「彼はロシア語を話せる。彼は...住んでいた。」という文で、「...」の部分に何が入るかを予測する場合、「ロシア」という情報が重要だが、通常のRNNでは長い文脈を覚えておくのが難しい</li>
+          </ul>
+          
+          <div class="note-box">
+            <p>
+              これらの問題に対処するために、<span class="highlight">Long Short-Term Memory (LSTM)</span>や<span class="highlight">Gated Recurrent Unit (GRU)</span>といった改良版のRNNが開発されました。これらはゲート機構を導入することで、長期的な依存関係の学習を可能にしています。
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- LSTM・GRUセクション -->
+      <section id="lstm-gru">
+        <h2 class="section-title">
+          <i class="fas fa-door-open"></i>
+          LSTM・GRU
+        </h2>
+        <div class="content-box">
+          <p>
+            RNNの課題を解決するために開発された主要なアーキテクチャが<span class="keyword">Long Short-Term Memory (LSTM)</span>と<span class="keyword">Gated Recurrent Unit (GRU)</span>です。どちらも<span class="highlight">ゲート機構</span>を導入することで、長期的な依存関係を学習できる能力を向上させています。
+          </p>
+          
+          <h3 class="concept-title">LSTM（Long Short-Term Memory）</h3>
+          <p>
+            LSTMは1997年にHochreiterとSchmidhuberによって提案されたモデルで、以下の3つのゲートを持ちます：
+          </p>
+          
+          <div class="icon-container">
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-trash-can"></i>
+              </div>
+              <p class="icon-text">忘却ゲート</p>
+            </div>
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-plus"></i>
+              </div>
+              <p class="icon-text">入力ゲート</p>
+            </div>
+            <div class="icon-item">
+              <div class="icon-circle">
+                <i class="fas fa-share"></i>
+              </div>
+              <p class="icon-text">出力ゲート</p>
+            </div>
+          </div>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">LSTMのしくみをざっくり言うと...</p>
+            <p>
+              LSTMは「セルの状態」という長期記憶と「隠れ状態」という短期記憶を持ち、それぞれを制御するゲート（スイッチのようなもの）があります。
+            </p>
+            <ol>
+              <li><strong>忘却ゲート</strong>：「この情報は忘れてもいいかな？」を判断し、不要な情報を捨てる</li>
+              <li><strong>入力ゲート</strong>：「この新しい情報は記憶すべきかな？」を判断し、覚えるべき情報を選択する</li>
+              <li><strong>出力ゲート</strong>：「今持っている情報から何を出力しようかな？」を判断し、出力する情報を選択する</li>
+            </ol>
+            <p>
+              この仕組みにより、関連性の高い情報を長期間記憶し、不要な情報を忘れることができます。例えば、「ジョンは英語を話せる。彼はイギリスに...住んでいた」という文で、「イギリス」と「英語」の関連性を覚えておける力がLSTMの強みです。
+            </p>
+          </div>
+          
+          <h3 class="concept-title">GRU（Gated Recurrent Unit）</h3>
+          <p>
+            GRUは2014年にChoらによって提案された、LSTMをシンプル化したモデルです。GRUは以下の2つのゲートを持ちます：
+          </p>
+          
+          <ul>
+            <li><span class="keyword">リセットゲート</span>：過去の情報をどの程度無視するかを制御</li>
+            <li><span class="keyword">更新ゲート</span>：過去の情報をどの程度保持するかを制御</li>
+          </ul>
+          
+          <div class="note-box">
+            <p>
+              GRUはLSTMと比較して：
+            </p>
+            <ul>
+              <li>パラメータ数が少なく、計算効率が良い</li>
+              <li>構造がシンプルなため実装が容易</li>
+              <li>多くのタスクでLSTMと同等かそれ以上の性能を示すことがある</li>
+              <li>特に短〜中程度の時系列データで効果的</li>
+            </ul>
+          </div>
+          
+          <p>
+            どちらのモデルも、通常のRNNと比較して以下の利点があります：
+          </p>
+          
+          <ul>
+            <li>長期的な依存関係を効果的に学習できる</li>
+            <li>勾配消失問題が大幅に軽減される</li>
+            <li>情報の選択的な記憶と忘却が可能</li>
+          </ul>
+          
+          <p>
+            実際のタスクでは、問題の性質や計算リソースに応じて、LSTMとGRUのどちらかを選択します。複雑なタスクや長い時系列データを扱う場合はLSTMが、効率性を重視する場合はGRUが選ばれることが多いです。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 双方向RNNセクション -->
+      <section id="bidirectional">
+        <h2 class="section-title">
+          <i class="fas fa-arrows-left-right"></i>
+          双方向RNN
+        </h2>
+        <div class="content-box">
+          <p>
+            <span class="keyword">双方向RNN (Bidirectional RNN)</span>は、時系列データを前方向と後方向の両方から処理することで、より豊かな文脈情報を活用する拡張モデルです。
+          </p>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">双方向RNNの基本概念</p>
+            <p>
+              通常のRNNは過去から現在への一方向の情報の流れしか考慮できませんが、多くの場合（特に自然言語処理）では、未来の情報も現在の解釈に役立ちます。例えば「大きな（　）が道を渡った」という文で（　）に入る単語は、「渡った」という未来の情報があると「動物」だと推測しやすくなります。双方向RNNはこのような前後の文脈を両方使えるようにしたモデルです。
+            </p>
+          </div>
+          
+          <p>
+            双方向RNNの主な特徴：
+          </p>
+          
+          <ul>
+            <li>前方向と後方向の2つのRNNで構成される</li>
+            <li>前方向RNNは時系列を順方向に処理し、後方向RNNは逆順に処理する</li>
+            <li>両方のRNNの隠れ状態を組み合わせて出力を生成する</li>
+            <li>通常のRNN、LSTM、GRUなど、どのタイプのRNNでも双方向化できる</li>
+          </ul>
+          
+          <div class="note-box">
+            <p>
+              双方向RNNは特に以下のようなタスクで有効です：
+            </p>
+            <ul>
+              <li>単語の品詞タグ付け</li>
+              <li>固有表現抽出</li>
+              <li>感情分析</li>
+              <li>機械翻訳</li>
+              <li>音声認識</li>
+            </ul>
+          </div>
+          
+          <p>
+            ただし、双方向RNNには制約もあります：
+          </p>
+          
+          <ul>
+            <li>リアルタイム処理には不向きである（シーケンス全体を見てから処理するため）</li>
+            <li>計算コストが通常のRNNの約2倍になる</li>
+            <li>メモリ使用量も増加する</li>
+          </ul>
+          
+          <p>
+            双方向LSTMや双方向GRUは現在の自然言語処理タスクにおいて広く使われており、特に<span class="highlight">BERT</span>などの事前学習モデルの基盤技術として重要な役割を果たしています。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 応用例セクション -->
+      <section id="applications">
+        <h2 class="section-title">
+          <i class="fas fa-rocket"></i>
+          応用例
+        </h2>
+        <div class="content-box">
+          <p>
+            RNNとその派生モデルは、時系列データを扱う様々なタスクで活用されています。主な応用例には以下のようなものがあります：
+          </p>
+          
+          <h3 class="concept-title">自然言語処理 (NLP)</h3>
+          <ul>
+            <li><span class="keyword">機械翻訳</span>：Seq2Seqモデルを用いた文章の翻訳</li>
+            <li><span class="keyword">文書要約</span>：長い文章から重要なポイントを抽出・要約</li>
+            <li><span class="keyword">感情分析</span>：テキストから感情や意見を抽出</li>
+            <li><span class="keyword">質問応答</span>：質問に対する回答の生成</li>
+            <li><span class="keyword">文章生成</span>：特定のスタイルや内容の文章を自動生成</li>
+          </ul>
+          
+          <h3 class="concept-title">音声処理</h3>
+          <ul>
+            <li><span class="keyword">音声認識</span>：音声を文字に変換</li>
+            <li><span class="keyword">話者識別</span>：音声から話者を特定</li>
+            <li><span class="keyword">音声合成</span>：テキストから自然な音声を生成</li>
+          </ul>
+          
+          <h3 class="concept-title">時系列予測</h3>
+          <ul>
+            <li><span class="keyword">株価予測</span>：過去の株価データから将来の動向を予測</li>
+            <li><span class="keyword">気象予報</span>：天気データから将来の気象を予測</li>
+            <li><span class="keyword">エネルギー需要予測</span>：電力使用量などの予測</li>
+          </ul>
+          
+          <h3 class="concept-title">その他の応用</h3>
+          <ul>
+            <li><span class="keyword">動画解析</span>：フレーム間の時間的関係を活用した解析</li>
+            <li><span class="keyword">異常検知</span>：時系列データにおける異常パターンの検出</li>
+            <li><span class="keyword">ジェスチャー認識</span>：人間の動きの時間的パターンを認識</li>
+            <li><span class="keyword">楽曲生成</span>：特定のスタイルの音楽を自動生成</li>
+          </ul>
+          
+          <div class="handwritten-box">
+            <p class="concept-title">RNNからTransformerへの流れ</p>
+            <p>
+              RNNは長年、時系列データ処理の標準的なアプローチでしたが、近年はAttentionメカニズムを活用した<span class="highlight">Transformer</span>アーキテクチャが主流になりつつあります。Transformerは並列計算が可能で長距離依存関係を効果的に捉えられるため、特に大規模な自然言語処理タスクで優れた性能を示しています。しかし、RNNはリソースが限られた環境や特定のタスクではまだ重要な選択肢です。
+            </p>
+          </div>
+          
+          <div class="note-box">
+            <p>
+              RNNとその派生モデルは、データに時間的または順序的な依存関係がある場合に特に有効です。しかし、長いシーケンスを扱う場合は計算効率の観点からTransformerベースのモデルも検討すべきでしょう。
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Key Insightsセクション -->
+      <section id="key-insights">
+        <h2 class="section-title">
+          <i class="fas fa-lightbulb"></i>
+          Key Insights
+        </h2>
+        <div class="content-box">
+          <div class="handwritten-box" style="transform: rotate(0.3deg);">
+            <ol>
+              <li>
+                <p class="concept-title">回帰結合層は「記憶」を持つニューラルネットワーク</p>
+                <p>回帰結合層は過去の情報を現在の判断に活かすための仕組みで、RNNの中核をなす技術です。これにより、時系列データや順序に依存するデータを効果的に処理できます。</p>
+              </li>
+              <li>
+                <p class="concept-title">RNNには勾配消失・爆発問題が存在する</p>
+                <p>通常のRNNでは長いシーケンスを処理する際に勾配消失・爆発問題が発生し、長期的な依存関係を学習することが困難になります。これがRNNの主要な課題です。</p>
+              </li>
+              <li>
+                <p class="concept-title">LSTM・GRUはゲート機構で問題を解決</p>
+                <p>ゲート機構を持つLSTMとGRUは、長期的な依存関係を学習できるようになり、勾配消失問題を大幅に軽減しました。どちらを選ぶかはタスクや計算リソースに応じて判断します。</p>
+              </li>
+              <li>
+                <p class="concept-title">双方向RNNは前後の文脈を活用できる</p>
+                <p>双方向RNNは前方向と後方向の両方から情報を処理することで、より豊かな文脈情報を活用できます。特に自然言語処理タスクで効果を発揮します。</p>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Take Home Messageセクション -->
+      <section id="take-home">
+        <h2 class="section-title">
+          <i class="fas fa-key"></i>
+          Take Home Message
+        </h2>
+        <div class="content-box" style="text-align: center;">
+          <div style="max-width: 700px; margin: 0 auto; background-color: rgba(255, 64, 160, 0.1); padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);">
+            <i class="fas fa-quote-left" style="font-size: 2rem; color: var(--magenta); margin-bottom: 1rem;"></i>
+            <p style="font-size: 1.3rem; font-weight: 500; line-height: 1.6; color: var(--key);">
+              RNNとその派生モデル（LSTM、GRU）は<span class="highlight">時間的な依存関係</span>を持つデータを処理するための重要な技術です。各モデルには特徴があり、タスクに応じて適切なものを選択することが重要です。
+            </p>
+            <i class="fas fa-quote-right" style="font-size: 2rem; color: var(--magenta); margin-top: 1rem; display: block; text-align: right;"></i>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 用語集セクション -->
+      <section id="glossary">
+        <h2 class="section-title">
+          <i class="fas fa-book"></i>
+          用語集
+        </h2>
+        <div class="content-box">
+          <table>
+            <thead>
+              <tr>
+                <th>用語</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="keyword">回帰結合層</span></td>
+                <td>ニューラルネットワークにおいて過去の情報を記憶し、それを現在の判断に活用するための特殊な層。時系列データの処理に適しています。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">リカレントニューラルネットワーク (RNN)</span><br>Recurrent Neural Network</td>
+                <td>回帰結合層を持つニューラルネットワークで、時系列データの処理に適したモデル。同じパラメータを時系列の各ステップで共有します。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">Back Propagation Through Time (BPTT)</span></td>
+                <td>RNNの学習アルゴリズムで、通常の誤差逆伝播法を時間方向に拡張したもの。時系列データを時間的に展開して誤差を計算します。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">勾配消失問題</span><br>Vanishing Gradient Problem</td>
+                <td>誤差逆伝播の過程で、時間をさかのぼるほど勾配が急速に小さくなり、長期的な依存関係を学習できなくなる問題。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">勾配爆発問題</span><br>Exploding Gradient Problem</td>
+                <td>誤差逆伝播の過程で、勾配が急速に大きくなりすぎ、学習が不安定になる問題。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">Long Short-Term Memory (LSTM)</span></td>
+                <td>忘却ゲート、入力ゲート、出力ゲートを持つRNNの改良版。長期的な依存関係を学習できるように設計されています。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">Gated Recurrent Unit (GRU)</span></td>
+                <td>リセットゲートと更新ゲートを持つLSTMの簡略版。LSTMと同等の性能を持ちながら、パラメータ数が少なく計算効率が良いという特徴があります。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">ゲート機構</span><br>Gate Mechanism</td>
+                <td>ニューラルネットワークにおいて情報の流れを制御する仕組み。どの情報を保持し、どの情報を更新するかを学習できます。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">双方向RNN</span><br>Bidirectional RNN</td>
+                <td>時系列データを前方向と後方向の両方から処理するRNNの拡張モデル。より豊かな文脈情報を活用できます。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">エルマンネットワーク</span><br>Elman Network</td>
+                <td>隠れ層の出力を次の時点の隠れ層の入力として使用するRNNの基本形。シンプルなRNNとも呼ばれます。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">ジョルダンネットワーク</span><br>Jordan Network</td>
+                <td>ネットワークの出力を次の時点の隠れ層の入力として使用するRNNの一種。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">教師強制</span><br>Teacher Forcing</td>
+                <td>RNNの学習時に、前の時点での予測値ではなく正解値を次の入力として使用する手法。学習を安定させる効果があります。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">時系列データ</span><br>Time Series Data</td>
+                <td>時間順に並んだデータ。テキスト、音声、株価、気象データなどが該当します。</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">信用割当問題</span><br>Credit Assignment Problem</td>
+                <td>長いシーケンスにおいて、どの入力が出力に対して重要な影響を与えたかを特定することが難しい問題。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top" id="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+  
+  <!-- フッター -->
+  <footer>
+    <p>© 2024 G検定対策ノート | 原稿とコード: Claude | 画像: ChatGPT</p>
+  </footer>
+  
+  <script>
+    // ページ読み込み完了時に実行
+    document.addEventListener('DOMContentLoaded', function() {
+      // スクロールトップボタンの表示制御
+      const scrollTopBtn = document.getElementById('scroll-top');
+      
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+      });
+      
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+      
+      // ページ内リンクのスムーススクロール
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth'
+            });
+            
+            // アクティブクラスの更新
+            document.querySelectorAll('.nav-link').forEach(link => {
+              link.classList.remove('active');
+            });
+            this.classList.add('active');
+          }
+        });
+      });
+      
+      // スクロール位置に応じたナビゲーションのハイライト
+      const sections = document.querySelectorAll('section[id]');
+      
+      window.addEventListener('scroll', function() {
+        let current = '';
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          
+          if (pageYOffset >= sectionTop - 200) {
+            current = section.getAttribute('id');
+          }
+        });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

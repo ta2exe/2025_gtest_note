@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-3-3 - 強化学習</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* CMYK カラーパレット */
+    :root {
+      --cyan: #00D8E8;      /* 明るいシアン */
+      --magenta: #FF40A0;   /* 明るいマゼンタ */
+      --yellow: #FFE600;    /* レモンイエロー */
+      --key: #181818;       /* テキスト用ブラック */
+      --dark-gray: #404040; /* 補助テキスト */
+      --white: #FFFFFF;     /* 背景用ホワイト */
+      --black: #000000;     /* サイドバー背景 */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバースタイル */
+    .sidebar {
+      width: 20%;
+      background-color: var(--black);
+      color: var(--white);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--cyan);
+    }
+
+    .sidebar-header h3 {
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+      font-size: 1.5rem;
+      color: var(--cyan);
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .nav-item {
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--white);
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--cyan);
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツスタイル */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    .section-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.5rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px dashed var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title i {
+      color: var(--magenta);
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    /* コンテンツボックススタイル */
+    .content-box {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 2px solid var(--cyan);
+      position: relative;
+    }
+
+    .hand-drawn-box {
+      border: 2px dashed var(--magenta);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      transform: rotate(-0.5deg);
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .hand-drawn-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 1.2rem;
+      transform: rotate(10deg);
+    }
+
+    .concept-title {
+      font-weight: bold;
+      color: var(--magenta);
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    /* リストスタイル */
+    ul, ol {
+      padding-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* キーワードスタイル */
+    .keyword {
+      color: var(--key);
+      font-weight: bold;
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      padding: 0 2px;
+    }
+
+    .english-term {
+      color: var(--dark-gray);
+      font-style: italic;
+      font-size: 0.9em;
+    }
+
+    /* 吹き出しスタイル */
+    .bubble {
+      position: relative;
+      background: var(--white);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      border: 2px solid var(--cyan);
+    }
+
+    .bubble:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      width: 0;
+      height: 0;
+      border: 20px solid transparent;
+      border-top-color: var(--cyan);
+      border-bottom: 0;
+      margin-left: -20px;
+      margin-bottom: -20px;
+    }
+
+    /* テーブルスタイル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+
+    th, td {
+      padding: 0.8rem;
+      border: 1px solid var(--dark-gray);
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--cyan);
+      color: var(--key);
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+
+    /* フッタースタイル */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--dark-gray);
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+
+    /* ノートスタイル */
+    .note {
+      border-left: 4px solid var(--yellow);
+      padding: 0.8rem 1.2rem;
+      margin: 1.2rem 0;
+      background-color: rgba(255, 230, 0, 0.05);
+    }
+
+    /* スキップトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--cyan);
+      color: var(--key);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-top:hover {
+      background-color: var(--magenta);
+      transform: translateY(-3px);
+    }
+
+    /* アイコンコンテナ */
+    .icon-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .icon-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 120px;
+    }
+
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: var(--cyan);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      color: var(--key);
+      font-size: 2rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Key Insightsスタイル */
+    .key-insights {
+      background-color: rgba(255, 230, 0, 0.1);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .key-insights h3 {
+      color: var(--key);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .key-insights h3 i {
+      color: var(--yellow);
+    }
+
+    .key-insights ol {
+      padding-left: 2.5rem;
+    }
+
+    .key-insights li {
+      margin-bottom: 0.8rem;
+    }
+
+    /* Take Home Messageスタイル */
+    .take-home {
+      background-color: var(--white);
+      border: 2px solid var(--magenta);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem auto;
+      max-width: 80%;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .take-home h3 {
+      color: var(--magenta);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .take-home p {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    /* 用語集スタイル */
+    .glossary {
+      margin-top: 2rem;
+    }
+
+    .glossary-title {
+      font-size: 1.3rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--cyan);
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+
+
+    /* レスポンシブデザイン */
+    @media (max-width: 1200px) {
+      .sidebar {
+        width: 25%;
+      }
+      .main-content {
+        width: 75%;
+        margin-left: 25%;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 30%;
+      }
+      .main-content {
+        width: 70%;
+        margin-left: 30%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 1rem;
+      }
+      .take-home {
+        max-width: 100%;
+      }
+    }
+    
+    /* タイトルセクションスタイル */
+    .title-section {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem 2rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    
+    .title-section h1 {
+      font-size: 2.5rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+    }
+    
+    .title-section h2 {
+      font-size: 1.5rem;
+      color: var(--magenta);
+      margin-bottom: 1.5rem;
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+    }
+    
+    .title-section .summary {
+      max-width: 80%;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      border: 2px dashed var(--cyan);
+      border-radius: 10px;
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+    
+    .title-section .summary-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .title-section .summary-title i {
+      color: var(--cyan);
+    }
+    
+    .title-section .summary ul {
+      text-align: left;
+      margin: 0 auto;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h3>強化学習</h3>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#intro" class="nav-item"><i class="fas fa-info-circle"></i> はじめに</a>
+        <a href="#basic-concepts" class="nav-item"><i class="fas fa-brain"></i> 基本概念</a>
+        <a href="#differences" class="nav-item"><i class="fas fa-not-equal"></i> 他学習との違い</a>
+        <a href="#approaches" class="nav-item"><i class="fas fa-route"></i> 代表的アプローチ</a>
+        <a href="#methods" class="nav-item"><i class="fas fa-tools"></i> 強化学習手法</a>
+        <a href="#business" class="nav-item"><i class="fas fa-briefcase"></i> ビジネス応用</a>
+        <a href="#key-insights" class="nav-item"><i class="fas fa-star"></i> Key Insights</a>
+        <a href="#take-home" class="nav-item"><i class="fas fa-key"></i> Take Home Message</a>
+        <a href="#glossary" class="nav-item"><i class="fas fa-book"></i> 用語集</a>
+      </nav>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- タイトルセクション -->
+      <section class="title-section">
+        <h1>強化学習</h1>
+        <h2>自ら試行錯誤し環境との相互作用から学ぶAI</h2>
+        
+        <div class="summary">
+          <div class="summary-title">
+            <i class="fas fa-clipboard-list"></i>
+            <span>概要</span>
+          </div>
+          <ul>
+            <li>強化学習はエージェントが環境と相互作用しながら報酬を最大化する学習法</li>
+            <li>教師あり/なし学習とは異なり、試行錯誤と報酬シグナルによって学習する</li>
+            <li>価値関数の学習と方策の学習の2つの主要アプローチがある</li>
+            <li>ゲームAI、ロボット制御、推薦システムなど幅広い分野で応用される</li>
+            <li>環境のフィードバックから自律的に行動を改善できる点が最大の特徴</li>
+          </ul>
+        </div>
+
+      </section>
+
+      <!-- はじめに -->
+      <section id="intro" class="section">
+        <h2 class="section-title"><i class="fas fa-info-circle"></i> はじめに</h2>
+        <p>
+          <span class="keyword">強化学習</span>（Reinforcement Learning）は、機械学習の一分野であり、エージェントが環境と相互作用しながら最適な行動を学習するアプローチです。人間や動物の学習方法に似ており、報酬と罰を通じて学習する方法とも言えます。
+        </p>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">強化学習の基本サイクル</div>
+          <p>エージェントは、<span class="keyword">環境</span>（environment）から与えられる<span class="keyword">状態</span>（state）を観測し、<span class="keyword">行動</span>（action）を選択します。その行動に対して環境から<span class="keyword">報酬</span>（reward）を得て、環境が次の状態に変化します。このサイクルを繰り返しながら、エージェントは報酬の総和（累積報酬）を最大化するように行動を改善していきます。</p>
+        </div>
+        <!-- 画像の説明をいれる --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-3-3_01.png" alt="強化学習の基本サイクル">
+          <figcaption>強化学習の基本サイクル</figcaption>
+        </div>        
+        <p>
+          強化学習は、明示的な教師データなしで学習できる点が特徴です。教師あり学習のように「正解」を与えられるのではなく、自らの行動の結果として得られる報酬から学ぶため、<span class="keyword">試行錯誤</span>（trial and error）による学習とも呼ばれます。
+        </p>
+        
+        <div class="note">
+          <strong>ポイント：</strong>強化学習の目標は単に報酬を得ることではなく、<span class="keyword">累積報酬</span>（cumulative reward）を最大化することです。これは短期的な報酬だけでなく、長期的な報酬も考慮した行動選択が必要であることを意味します。
+        </div>
+      
+        
+
+      </section>
+
+      <!-- 基本概念 -->
+      <section id="basic-concepts" class="section">
+        <h2 class="section-title"><i class="fas fa-brain"></i> 基本概念</h2>
+        
+        <p>
+          強化学習を理解するためには、いくつかの基本的な概念を押さえる必要があります。それらは強化学習の理論的枠組みである<span class="keyword">マルコフ決定過程</span>（Markov Decision Process, MDP）にも関連しています。
+        </p>
+        
+        <div class="content-box">
+          <h3 style="color: var(--magenta); margin-bottom: 1rem;">強化学習の基本要素</h3>
+          <ul>
+            <li><strong>エージェント（Agent）</strong>：学習し、行動を選択する主体</li>
+            <li><strong>環境（Environment）</strong>：エージェントが相互作用する外部世界</li>
+            <li><strong>状態（State）</strong>：環境の現在の状況を表す情報</li>
+            <li><strong>行動（Action）</strong>：エージェントが選択できる選択肢</li>
+            <li><strong>報酬（Reward）</strong>：行動に対するフィードバック信号</li>
+            <li><strong>方策（Policy）</strong>：状態から行動へのマッピング（行動選択戦略）</li>
+            <li><strong>価値関数（Value Function）</strong>：将来の累積報酬の期待値</li>
+          </ul>
+        </div>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">マルコフ決定過程（MDP）</div>
+          <p><span class="keyword">マルコフ決定過程</span>は、強化学習の数学的枠組みであり、次の要素で構成されます：</p>
+          <ul>
+            <li>状態の集合 S</li>
+            <li>行動の集合 A</li>
+            <li>状態遷移確率 P(s'|s,a)：状態sで行動aを取ったときに次の状態がs'になる確率</li>
+            <li>報酬関数 R(s,a,s')：状態sで行動aを取り状態s'に遷移したときの報酬</li>
+            <li><span class="keyword">割引率</span>（Discount Factor）γ：将来の報酬をどれだけ重視するかを表すパラメータ（0≤γ≤1）</li>
+          </ul>
+        </div>
+        
+        <p>
+          強化学習において、エージェントの目標は<span class="keyword">累積報酬</span>（累積リターン）を最大化することです。累積報酬は通常、将来の報酬を割り引いた和として定義されます：
+        </p>
+        
+        <div class="bubble">
+          <p style="text-align: center; font-family: 'Times New Roman', serif; font-size: 1.2rem;">
+            Gt = Rt+1 + γRt+2 + γ<sup>2</sup>Rt+3 + ... = Σ<sub>k=0</sub><sup>∞</sup> γ<sup>k</sup>Rt+k+1
+          </p>
+          <p style="margin-top: 1rem;">
+            ここで、<strong>Gt</strong>は時刻tからの累積報酬、<strong>Rt+1</strong>は次のステップでの報酬、<strong>γ</strong>は割引率です。割引率が小さいほど近い将来の報酬を重視し、大きいほど遠い将来の報酬も考慮します。
+          </p>
+        </div>
+        
+        <div class="icon-container">
+          <div class="icon-box">
+            <div class="icon-circle">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <p>状態価値関数</p>
+          </div>
+          <div class="icon-box">
+            <div class="icon-circle">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <p>行動価値関数</p>
+          </div>
+          <div class="icon-box">
+            <div class="icon-circle">
+              <i class="fas fa-chess-knight"></i>
+            </div>
+            <p>方策</p>
+          </div>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">強化学習で重要な価値関数</h3>
+        
+        <ul>
+          <li>
+            <strong><span class="keyword">状態価値関数</span>（State Value Function）V<sup>π</sup>(s)</strong>：
+            <p>方策πの下で状態sからスタートして得られる期待累積報酬</p>
+          </li>
+          <li>
+            <strong><span class="keyword">行動価値関数</span>（Action Value Function）Q<sup>π</sup>(s,a)</strong>：
+            <p>方策πの下で状態sで行動aを取り、その後も方策πに従って行動したときの期待累積報酬</p>
+          </li>
+        </ul>
+        
+        <div class="note">
+          <strong>用語の注意点：</strong>行動価値関数は<span class="keyword">Q関数</span>とも呼ばれ、Q学習などの手法で中心的な役割を果たします。一方、状態価値関数はV関数とも呼ばれます。方策（policy）は記号πで表されることが多いです。
+        </div>
+      </section>
+
+      <!-- 他学習との違い -->
+      <section id="differences" class="section">
+        <h2 class="section-title"><i class="fas fa-not-equal"></i> 他学習との違い</h2>
+        
+        <p>
+          強化学習は、教師あり学習や教師なし学習とは異なるアプローチです。それぞれの学習方法の特徴を比較しましょう。
+        </p>
+        
+        <div class="content-box">
+          <h3 style="color: var(--magenta); margin-bottom: 1rem;">機械学習の3つのパラダイム</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>学習法</th>
+                <th>データの特徴</th>
+                <th>学習の目的</th>
+                <th>代表的な問題</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>教師あり学習</strong></td>
+                <td>入力と正解ラベルのペア</td>
+                <td>入力から正解ラベルを予測する関数の学習</td>
+                <td>分類、回帰</td>
+              </tr>
+              <tr>
+                <td><strong>教師なし学習</strong></td>
+                <td>入力データのみ（ラベルなし）</td>
+                <td>データの構造やパターンの発見</td>
+                <td>クラスタリング、次元削減</td>
+              </tr>
+              <tr>
+                <td><strong>強化学習</strong></td>
+                <td>状態、行動、報酬のシーケンス</td>
+                <td>累積報酬を最大化する方策の学習</td>
+                <td>ゲーム、ロボット制御、資源配分</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">強化学習の特徴</div>
+          <ul>
+            <li><strong>遅延報酬</strong>：行動の結果が後になって判明することが多く、即時のフィードバックがない</li>
+            <li><strong>探索と活用のトレードオフ</strong>：新しい行動を試す（探索）か、既知の良い行動を選ぶ（活用）かのバランスが重要</li>
+            <li><strong>環境との相互作用</strong>：エージェントの行動が環境の状態に影響を与え、それが次の決定に影響する</li>
+            <li><strong>シーケンシャルな決定</strong>：一連の決定の連鎖が重要であり、単一の決定ではなく決定の系列が評価される</li>
+          </ul>
+        </div>
+        
+        <p>
+          強化学習が他の学習方法と特に異なる点は、<span class="keyword">試行錯誤</span>による学習と、<span class="keyword">探索と活用のトレードオフ</span>（Exploration-Exploitation Tradeoff）があることです。これは、エージェントが良い行動戦略を学ぶために、未知の行動を探索するか、既知の良い行動を活用するかというジレンマです。
+        </p>
+        
+        <div class="bubble">
+          <p>
+            <strong>教師あり学習</strong>では「これが正解です」というラベル付きデータがあり、<strong>教師なし学習</strong>では「これらのデータからパターンを見つけてください」という課題があります。一方、<strong>強化学習</strong>では「これをやったらどうなるか試してみて、報酬をもとに学んでください」というアプローチです。
+          </p>
+        </div>
+        
+        <div class="note">
+          <strong>試験対策ポイント：</strong>強化学習では明示的な「正解」は与えられません。エージェントは実際に行動して環境からフィードバック（報酬）を得て学習します。この点が教師あり学習との最大の違いです。
+        </div>
+      </section>
+
+      <!-- 代表的アプローチ -->
+      <section id="approaches" class="section">
+        <h2 class="section-title"><i class="fas fa-route"></i> 代表的アプローチ</h2>
+        
+        <p>
+          強化学習には、大きく分けて<span class="keyword">価値関数の学習</span>と<span class="keyword">方策の学習</span>という2つの主要なアプローチがあります。それぞれ異なる考え方と手法を持ちます。
+        </p>
+        
+        <div class="content-box">
+          <h3 style="color: var(--magenta); margin-bottom: 1rem;">価値関数の学習 vs 方策の学習</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>アプローチ</th>
+                <th>学習対象</th>
+                <th>特徴</th>
+                <th>代表的アルゴリズム</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>価値関数の学習</strong></td>
+                <td>状態や状態・行動の価値を推定する関数</td>
+                <td>価値関数から最適方策を導出</td>
+                <td>Q学習、SARSA</td>
+              </tr>
+              <tr>
+                <td><strong>方策の学習</strong></td>
+                <td>状態から行動への直接的なマッピング</td>
+                <td>方策を直接最適化</td>
+                <td>方策勾配法、REINFORCE</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">価値関数の学習</h3>
+        
+        <p>
+          <span class="keyword">価値関数の学習</span>（Value-based Learning）では、各状態や状態・行動ペアの価値を推定し、その価値に基づいて行動を選択します。この手法では、価値関数を学習し、その価値関数から最適な方策を導出します。
+        </p>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">価値関数からの方策導出</div>
+          <p>価値関数（特に<span class="keyword">行動価値関数</span>）が与えられたとき、通常は「各状態で最も価値の高い行動を選ぶ」という貪欲法（greedy policy）で方策を定義します：</p>
+          <p style="text-align: center; font-family: 'Times New Roman', serif; margin: 1rem 0;">
+            π(s) = argmax<sub>a</sub> Q(s,a)
+          </p>
+          <p>
+            ただし、学習の過程では「探索」のために、ε-greedy方策やUCB方策などの手法を用いて、ときどき最適でない行動も選択します。
+          </p>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">方策の学習</h3>
+        
+        <p>
+          <span class="keyword">方策の学習</span>（Policy-based Learning）では、状態から行動へのマッピングである方策自体をパラメータ化し、直接最適化します。方策をパラメータθで表現し、期待累積報酬を最大化するようにθを調整します。
+        </p>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">方策勾配法</div>
+          <p><span class="keyword">方策勾配法</span>（Policy Gradient Method）は、方策のパラメータθに関する期待累積報酬の勾配を計算し、その方向にパラメータを更新することで方策を改善します。</p>
+          <p>代表的なアルゴリズムとして<span class="keyword">REINFORCE</span>があり、これは<span class="keyword">モンテカルロ法</span>を用いてサンプルベースで勾配を推定します。</p>
+        </div>
+        
+        <div class="bubble">
+          <p>
+            <strong>価値関数の学習</strong>は「この状態で各行動を取るとどのくらいの報酬が得られるか」を学びます。一方、<strong>方策の学習</strong>は「この状態ではどの行動を取るべきか」を直接学びます。価値関数の学習は離散的な行動空間に適していることが多く、方策の学習は連続的な行動空間でも適用できます。
+          </p>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">アクター・クリティックアプローチ</h3>
+        
+        <p>
+          <span class="keyword">アクター・クリティック</span>（Actor-Critic）手法は、価値関数の学習と方策の学習を組み合わせたハイブリッドなアプローチです。
+        </p>
+        
+        <div class="icon-container">
+          <div class="icon-box">
+            <div class="icon-circle">
+              <i class="fas fa-user-alt"></i>
+            </div>
+            <p>アクター（方策）</p>
+          </div>
+          <div class="icon-box">
+            <div class="icon-circle">
+              <i class="fas fa-balance-scale"></i>
+            </div>
+            <p>クリティック（価値関数）</p>
+          </div>
+        </div>
+        
+        <ul>
+          <li><strong>アクター（Actor）</strong>：方策を表現し、行動を選択します（方策の学習）</li>
+          <li><strong>クリティック（Critic）</strong>：現在の方策の性能を評価します（価値関数の学習）</li>
+        </ul>
+        
+        <p>
+          クリティックからの評価（状態価値関数や行動価値関数）を用いて、アクターは方策を改善します。これにより、方策勾配法の高い分散問題を軽減できます。
+        </p>
+        
+        <div class="note">
+          <strong>ポイント：</strong>価値関数の学習は最終的な方策が貪欲になる傾向があり、方策の学習は方策の勾配推定の分散が高いという問題があります。アクター・クリティック手法はこれらの弱点を相互に補完し合うことを目指しています。
+        </div>
+      </section>
+
+      <!-- 強化学習手法 -->
+      <section id="methods" class="section">
+        <h2 class="section-title"><i class="fas fa-tools"></i> 強化学習手法</h2>
+        
+        <p>
+          強化学習には様々な手法があります。ここでは、代表的な強化学習アルゴリズムについて解説します。それぞれの手法には特徴と適用場面があります。
+        </p>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">価値関数ベースの手法</h3>
+        
+        <div class="content-box">
+          <h4 style="color: var(--magenta); margin-bottom: 1rem;"><i class="fas fa-chart-line"></i> Q学習（Q-Learning）</h4>
+          <p>
+            <span class="keyword">Q学習</span>（Q-Learning）は、最も基本的かつ広く使われている価値関数ベースの強化学習アルゴリズムです。モデルフリー（環境のモデルを必要としない）でオフポリシー（現在の方策と異なる方策で生成されたデータから学習できる）という特徴があります。
+          </p>
+          <div class="hand-drawn-box">
+            <div class="concept-title">Q学習の更新式</div>
+            <p style="text-align: center; font-family: 'Times New Roman', serif; margin: 1rem 0;">
+              Q(s,a) ← Q(s,a) + α[r + γ・max<sub>a'</sub>Q(s',a') - Q(s,a)]
+            </p>
+            <p>
+              ここで、αは学習率、γは割引率、rは報酬、sは現在の状態、aは選択した行動、s'は次の状態です。式の中の[...]の部分はTD誤差（Temporal Difference Error）と呼ばれます。
+            </p>
+          </div>
+          <p>
+            Q学習では、現在の方策に関係なく、次の状態での最大のQ値（max<sub>a'</sub>Q(s',a')）を使用して更新します。これにより、学習中に探索を行いながらも、最終的に最適なQ関数に収束します。
+          </p>
+        </div>
+        
+        <div class="content-box">
+          <h4 style="color: var(--magenta); margin-bottom: 1rem;"><i class="fas fa-random"></i> SARSA</h4>
+          <p>
+            <span class="keyword">SARSA</span>（State-Action-Reward-State-Action）は、Q学習と似ていますが、オンポリシー（現在の方策で生成されたデータから学習する）という点が異なります。
+          </p>
+          <div class="hand-drawn-box">
+            <div class="concept-title">SARSAの更新式</div>
+            <p style="text-align: center; font-family: 'Times New Roman', serif; margin: 1rem 0;">
+              Q(s,a) ← Q(s,a) + α[r + γ・Q(s',a') - Q(s,a)]
+            </p>
+            <p>
+              ここで、a'は現在の方策π（通常はε-greedy方策）に従って選択した次の行動です。Q学習と異なり、次の状態での最大のQ値ではなく、実際に選択する次の行動のQ値を使用します。
+            </p>
+          </div>
+          <p>
+            SARSAは実際に取る行動を基に学習するため、Q学習より安全な方策を学習する傾向があります。例えば、崖を歩く問題では、Q学習は最短経路を取ろうとして崖に落ちるリスクを取るのに対し、SARSAは崖から離れた安全な経路を学習します。
+          </p>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">方策ベースの手法</h3>
+        
+        <div class="content-box">
+          <h4 style="color: var(--magenta); margin-bottom: 1rem;"><i class="fas fa-arrow-up"></i> REINFORCE</h4>
+          <p>
+            <span class="keyword">REINFORCE</span>は、最も基本的な方策勾配アルゴリズムです。モンテカルロ手法を用いて、一連のエピソードから累積報酬を計算し、方策の勾配を推定します。
+          </p>
+          <div class="hand-drawn-box">
+            <div class="concept-title">REINFORCEのアルゴリズム</div>
+            <ol>
+              <li>現在の方策πに従って一連の行動を選択し、一つのエピソードを生成する</li>
+              <li>各ステップtにおける報酬Rtを記録する</li>
+              <li>各ステップtにおいて、累積報酬Gtを計算する</li>
+              <li>方策パラメータθを、勾配∇<sub>θ</sub>log π<sub>θ</sub>(a<sub>t</sub>|s<sub>t</sub>)・Gtに基づいて更新する</li>
+            </ol>
+          </div>
+          <p>
+            REINFORCEは単純ですが、サンプルの分散が大きく、学習が不安定になりやすいという欠点があります。これを改善するために、ベースライン（baseline）と呼ばれる基準値を導入したり、アクター・クリティック法と組み合わせたりすることがあります。
+          </p>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">アクター・クリティック手法</h3>
+        
+        <div class="content-box">
+          <h4 style="color: var(--magenta); margin-bottom: 1rem;"><i class="fas fa-users"></i> A3C</h4>
+          <p>
+            <span class="keyword">A3C</span>（Asynchronous Advantage Actor-Critic）は、並列計算を活用したアクター・クリティックアルゴリズムです。複数のエージェントが独立して環境と相互作用し、中央のネットワークパラメータを非同期に更新します。
+          </p>
+          <p>
+            「Advantage」は行動の優位性（状態価値からの相対的な価値の向上）を表し、A(s,a) = Q(s,a) - V(s)と定義されます。これにより、行動の相対的な良さを評価し、方策勾配の分散を低減します。
+          </p>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">探索手法</h3>
+        
+        <div class="content-box">
+          <h4 style="color: var(--magenta); margin-bottom: 1rem;"><i class="fas fa-search"></i> 代表的な探索戦略</h4>
+          <ul>
+            <li>
+              <strong><span class="keyword">ε-greedy方策</span>（ε-greedy Policy）</strong>：
+              <p>確率εで任意の行動をランダムに選択し、確率1-εで現在最適と考えられる行動を選択する方法。εは通常、学習が進むにつれて減少させます。</p>
+            </li>
+            <li>
+              <strong><span class="keyword">UCB方策</span>（Upper Confidence Bound Policy）</strong>：
+              <p>行動の価値の推定値と、その行動が十分に試されていないことによる不確実性を考慮する方法。「楽観の原理」に基づいており、不確実性が高い行動ほど高く評価されます。</p>
+            </li>
+            <li>
+              <strong><span class="keyword">パンディットアルゴリズム</span>（Bandit Algorithm）</strong>：
+              <p>複数の選択肢（バンディット）から最適なものを選び続ける問題に対するアルゴリズム。強化学習の単純な形態として、多腕バンディット問題（Multi-armed Bandit Problem）がよく知られています。</p>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="note">
+          <strong>試験対策ポイント：</strong>Q学習はオフポリシー、SARSAはオンポリシーという違いがあります。また、<span class="keyword">マルコフ決定過程</span>、<span class="keyword">価値関数</span>、<span class="keyword">方策</span>、<span class="keyword">割引率</span>などの基本概念と、それぞれの手法がどのように関連しているかを理解することが重要です。
+        </div>
+      </section>
+
+      <!-- ビジネス応用 -->
+      <section id="business" class="section">
+        <h2 class="section-title"><i class="fas fa-briefcase"></i> ビジネス応用</h2>
+        
+        <p>
+          強化学習は様々な実世界の問題に応用されています。特に、試行錯誤を通じて学習できる性質は、解析的な解が得られない複雑な問題に適しています。
+        </p>
+        
+        <div class="content-box">
+          <h3 style="color: var(--magenta); margin-bottom: 1rem;">強化学習の主なビジネス応用分野</h3>
+          <div class="icon-container">
+            <div class="icon-box">
+              <div class="icon-circle">
+                <i class="fas fa-gamepad"></i>
+              </div>
+              <p>ゲームAI</p>
+            </div>
+            <div class="icon-box">
+              <div class="icon-circle">
+                <i class="fas fa-robot"></i>
+              </div>
+              <p>ロボティクス</p>
+            </div>
+            <div class="icon-box">
+              <div class="icon-circle">
+                <i class="fas fa-shopping-cart"></i>
+              </div>
+              <p>レコメンデーション</p>
+            </div>
+            <div class="icon-box">
+              <div class="icon-circle">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <p>金融取引</p>
+            </div>
+          </div>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">ゲームAI</h3>
+        
+        <p>
+          強化学習は、複雑なゲーム環境での意思決定に非常に効果的です。特に、大規模な状態空間を持つゲームにおいて、人間を超える性能を達成しています。
+        </p>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">強化学習を活用した代表的なゲームAI</div>
+          <ul>
+            <li>
+              <strong>アルファ碁（AlphaGo）</strong>：
+              <p>深層強化学習と探索アルゴリズムを組み合わせ、囲碁において世界チャンピオンを破りました。</p>
+            </li>
+            <li>
+              <strong>アルファスター（AlphaStar）</strong>：
+              <p>リアルタイム戦略ゲーム「StarCraft II」のプレイを学習し、プロプレイヤーに匹敵する実力を獲得しました。</p>
+            </li>
+            <li>
+              <strong>OpenAI Five</strong>：
+              <p>チームベースのゲーム「Dota 2」で、協調行動を含む複雑な戦略を学習しました。</p>
+            </li>
+          </ul>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">ロボティクスと自動制御</h3>
+        
+        <p>
+          強化学習は、ロボットの動作制御や自動運転など、実世界の物理的環境での制御問題に応用されています。
+        </p>
+        
+        <div class="content-box">
+          <h4 style="color: var(--magenta); margin-bottom: 1rem;">ロボティクスにおける強化学習の応用例</h4>
+          <ul>
+            <li>
+              <strong>ロボットの歩行動作学習</strong>：
+              <p>2足歩行や4足歩行など、複雑なロボットの動作を強化学習によって獲得します。</p>
+            </li>
+            <li>
+              <strong>ドローンの自律飛行</strong>：
+              <p>障害物を避けながら目標地点に到達するための飛行制御を学習します。</p>
+            </li>
+            <li>
+              <strong>物体操作（マニピュレーション）</strong>：
+              <p>ロボットアームによる物体の把持、組み立て、整理などのタスクを学習します。</p>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="bubble">
+          <p>
+            ロボティクスでの強化学習応用では、<strong>sim2real</strong>（シミュレーションから実機への転移）と<strong>ドメインランダマイゼーション</strong>が重要です。現実世界でのデータ収集は時間とコストがかかるため、シミュレーション環境で学習し、その知識を実機に転移させる手法が用いられます。
+          </p>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">レコメンデーションシステム</h3>
+        
+        <p>
+          強化学習は、ユーザーの興味や嗜好に応じた商品やコンテンツの推薦に活用されています。短期的な推薦の精度だけでなく、長期的なユーザー満足度を考慮した推薦が可能です。
+        </p>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">レコメンデーションにおける強化学習の応用</div>
+          <ul>
+            <li><strong>状態</strong>：ユーザープロファイル、過去の行動履歴、コンテキスト情報など</li>
+            <li><strong>行動</strong>：推薦する商品やコンテンツの選択</li>
+            <li><strong>報酬</strong>：クリック、購入、視聴時間、ユーザー満足度の指標など</li>
+          </ul>
+          <p>
+            強化学習によるレコメンデーションシステムでは、ユーザーの即時の反応だけでなく、長期的なエンゲージメントや多様性なども考慮した推薦戦略を学習できます。
+          </p>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">資源配分と最適化</h3>
+        
+        <p>
+          強化学習は、限られた資源を効率的に配分する問題に適用されています。例えば、クラウドコンピューティング環境でのリソース割り当て、エネルギー管理、在庫管理などです。
+        </p>
+        
+        <div class="content-box">
+          <h4 style="color: var(--magenta); margin-bottom: 1rem;">資源配分における強化学習の応用例</h4>
+          <ul>
+            <li>
+              <strong>データセンターの電力管理</strong>：
+              <p>サーバーの負荷予測と冷却システムの制御により、電力消費を最適化</p>
+            </li>
+            <li>
+              <strong>交通信号制御</strong>：
+              <p>交通量に応じて信号のタイミングを最適化し、渋滞を緩和</p>
+            </li>
+            <li>
+              <strong>配車/配送最適化</strong>：
+              <p>リアルタイムの需要と供給に基づいて車両の割り当てを最適化</p>
+            </li>
+          </ul>
+        </div>
+        
+        <h3 style="color: var(--cyan); margin: 1.5rem 0 1rem;">金融取引</h3>
+        
+        <p>
+          強化学習は、株式取引やポートフォリオ管理などの金融分野でも応用されています。市場の状態を観測し、最適な取引戦略を学習することが目標です。
+        </p>
+        
+        <div class="hand-drawn-box">
+          <div class="concept-title">金融取引における強化学習の応用</div>
+          <ul>
+            <li><strong>状態</strong>：価格推移、取引量、企業の財務指標、マクロ経済指標など</li>
+            <li><strong>行動</strong>：売買の判断、ポートフォリオの調整</li>
+            <li><strong>報酬</strong>：利益、リスク調整後リターン、シャープレシオなど</li>
+          </ul>
+          <p>
+            金融市場は不確実性が高く、状態空間が複雑で、部分観測の問題もあります。強化学習は、こうした環境下でもデータから直接戦略を学習できる利点があります。
+          </p>
+        </div>
+        
+        <div class="note">
+          <strong>ビジネス応用の課題：</strong>実世界での強化学習応用には、学習の安定性、解釈可能性、安全性、倫理的考慮など、様々な課題があります。特に、探索段階でのリスクや、学習時のデータ効率の問題は重要です。これらの課題に対処するため、シミュレーション環境での事前学習や、人間の専門知識の活用など、様々なアプローチが研究されています。
+        </div>
+      </section>
+
+      <!-- Key Insights -->
+      <section id="key-insights" class="section key-insights">
+        <h3><i class="fas fa-star"></i> Key Insights</h3>
+        <ol>
+          <li>
+            <strong>強化学習は試行錯誤による学習</strong>
+            <p>強化学習は、環境との相互作用から得られるフィードバック（報酬）に基づいて学習します。正解ラベルを与えられるのではなく、自ら行動し、その結果から学ぶことが特徴です。</p>
+          </li>
+          <li>
+            <strong>マルコフ決定過程が理論的な枠組み</strong>
+            <p>強化学習の多くの問題は、マルコフ決定過程（MDP）として定式化されます。状態、行動、遷移確率、報酬関数、割引率などの要素で構成されます。</p>
+          </li>
+          <li>
+            <strong>価値関数の学習と方策の学習の2つのアプローチ</strong>
+            <p>強化学習には、状態や行動の価値を学習する方法と、直接行動選択の方針（方策）を学習する方法があります。どちらも状況に応じて適切な選択が必要です。</p>
+          </li>
+          <li>
+            <strong>探索と活用のバランスが重要</strong>
+            <p>未知の選択肢を試す「探索」と、既知の良い選択肢を選ぶ「活用」のバランスが、強化学習の性能に大きく影響します。これを制御するための様々な手法（ε-greedy方策やUCB方策など）が提案されています。</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Take Home Message -->
+      <section id="take-home" class="section take-home">
+        <h3><i class="fas fa-key"></i> Take Home Message</h3>
+        <p>
+          強化学習は、教師あり学習や教師なし学習とは異なり、環境との相互作用を通じて試行錯誤しながら学ぶAIの一分野です。価値関数の学習と方策の学習という2つの主要アプローチがあり、それぞれ特徴的なアルゴリズム（Q学習、SARSA、REINFORCE、Actor-Criticなど）が存在します。ゲームAIからロボティクス、レコメンデーション、資源最適化まで幅広い応用がありますが、実世界への適用には様々な課題も残されています。
+        </p>
+      </section>
+
+      <!-- 用語集 -->
+      <section id="glossary" class="section">
+        <h2 class="section-title"><i class="fas fa-book"></i> 用語集</h2>
+        
+        <div class="glossary">
+          <h3 class="glossary-title">強化学習の基本用語</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>用語</th>
+                <th>英語表記</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="keyword">強化学習</span></td>
+                <td>Reinforcement Learning</td>
+                <td>環境との相互作用に基づいて報酬を最大化するよう行動方針を学習する機械学習の一種</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">マルコフ決定過程</span></td>
+                <td>Markov Decision Process (MDP)</td>
+                <td>状態、行動、遷移確率、報酬関数、割引率から構成される強化学習の理論的枠組み</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">状態価値関数</span></td>
+                <td>State Value Function</td>
+                <td>ある状態からスタートして特定の方策に従った場合の期待累積報酬</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">行動価値関数</span></td>
+                <td>Action Value Function (Q-function)</td>
+                <td>ある状態である行動を取り、その後特定の方策に従った場合の期待累積報酬</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">方策</span></td>
+                <td>Policy</td>
+                <td>状態から行動へのマッピング、つまり各状態でどの行動を取るかを決める関数</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">割引率</span></td>
+                <td>Discount Factor</td>
+                <td>将来の報酬をどの程度重視するかを決めるパラメータ（0〜1の値）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="glossary">
+          <h3 class="glossary-title">強化学習アルゴリズム</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>用語</th>
+                <th>英語表記</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="keyword">Q学習</span></td>
+                <td>Q-Learning</td>
+                <td>行動価値関数を直接推定する代表的なオフポリシー価値ベース強化学習アルゴリズム</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">SARSA</span></td>
+                <td>State-Action-Reward-State-Action</td>
+                <td>実際に選択する行動に基づいて学習する代表的なオンポリシー価値ベース強化学習アルゴリズム</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">方策勾配法</span></td>
+                <td>Policy Gradient Method</td>
+                <td>方策を直接最適化する手法で、方策のパラメータを勾配方向に更新</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">REINFORCE</span></td>
+                <td>REINFORCE</td>
+                <td>モンテカルロサンプリングを用いた基本的な方策勾配アルゴリズム</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">アクター・クリティック</span></td>
+                <td>Actor-Critic</td>
+                <td>方策（アクター）と価値関数（クリティック）を同時に学習するハイブリッドアプローチ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="glossary">
+          <h3 class="glossary-title">探索・活用関連用語</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>用語</th>
+                <th>英語表記</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="keyword">ε-greedy方策</span></td>
+                <td>ε-greedy Policy</td>
+                <td>確率εでランダムな行動を選び、確率1-εで最善と思われる行動を選ぶ探索戦略</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">UCB方策</span></td>
+                <td>Upper Confidence Bound Policy</td>
+                <td>行動の価値推定と不確実性を考慮して探索と活用のバランスを取る手法</td>
+              </tr>
+              <tr>
+                <td><span class="keyword">パンディットアルゴリズム</span></td>
+                <td>Bandit Algorithm</td>
+                <td>複数の選択肢（バンディット）から最適なものを選び続ける問題に対するアルゴリズム</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- フッター -->
+      <footer>
+        <p>グラフィックレコーディング - 強化学習</p>
+        <p>作成日: 2024年4月</p>
+        <p><small>コンテンツ: Claude 3.7 Sonnet, デザイン: Claude 3.7 Sonnet</small></p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <script>
+    // スクロール位置に基づいてサイドメニューをアクティブにする
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('.section');
+      const navItems = document.querySelectorAll('.nav-item');
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      
+      // スクロールイベントリスナー
+      window.addEventListener('scroll', function() {
+        let current = '';
+        
+        // 現在のスクロール位置を取得
+        const scrollPosition = window.scrollY;
+        
+        // スクロールトップボタンの表示/非表示
+        if (scrollPosition > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+        
+        // 現在見えているセクションを特定
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionHeight = section.offsetHeight;
+          
+          if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+            current = section.getAttribute('id');
+          }
+        });
+        
+        // 対応するナビゲーションアイテムをアクティブにする
+        navItems.forEach(item => {
+          item.classList.remove('active');
+          if (item.getAttribute('href').substring(1) === current) {
+            item.classList.add('active');
+          }
+        });
+      });
+      
+      // スムーズスクロール
+      navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          const targetSection = document.querySelector(targetId);
+          
+          window.scrollTo({
+            top: targetSection.offsetTop - 50,
+            behavior: 'smooth'
+          });
+        });
+      });
+      
+      // スクロールトップボタン
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-5-1 全結合層 | G検定学習ノート</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  <!-- MathJax for LaTeX support -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    /* CMYK Color Palette */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 280px;
+      background-color: var(--key);
+      color: var(--white);
+      height: 100vh;
+      position: fixed;
+      padding: 2rem 1rem;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--cyan);
+    }
+    
+    .sidebar-header h2 {
+      margin-bottom: 0.5rem;
+      color: var(--cyan);
+      font-size: 1.2rem;
+    }
+    
+    .sidebar-header p {
+      font-size: 0.9rem;
+      color: var(--white);
+      opacity: 0.8;
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+    }
+    
+    .sidebar-menu li {
+      margin-bottom: 0.8rem;
+    }
+    
+    .sidebar-menu a {
+      display: block;
+      color: var(--white);
+      text-decoration: none;
+      padding: 0.5rem;
+      border-radius: 5px;
+      transition: background-color 0.2s, color 0.2s;
+      font-size: 0.95rem;
+    }
+    
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background-color: var(--cyan);
+      color: var(--key);
+    }
+    
+    .sidebar-menu i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      max-width: calc(100% - 280px);
+    }
+    
+    /* セクション共通スタイル */
+    section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      border-radius: 10px;
+      background-color: var(--white);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    
+    /* タイトルスタイル */
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--cyan);
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .section-title i {
+      color: var(--magenta);
+    }
+    
+    h3 {
+      font-size: 1.3rem;
+      margin: 1.5rem 0 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    h3 i {
+      color: var(--yellow);
+    }
+    
+    h4 {
+      font-size: 1.1rem;
+      margin: 1.2rem 0 0.8rem;
+      color: var(--key);
+    }
+    
+    /* テキストスタイル */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+    
+    /* リストスタイル */
+    ul, ol {
+      margin: 1rem 0 1.5rem 1.5rem;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    
+    /* キーワード強調 */
+    .keyword {
+      font-weight: 700;
+      color: var(--key);
+      background: linear-gradient(transparent 60%, var(--yellow) 40%);
+      padding: 0 2px;
+    }
+    
+    /* ボックススタイル */
+    .note-box {
+      background-color: var(--light-gray);
+      border-left: 4px solid var(--cyan);
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      border-radius: 0 5px 5px 0;
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -0.5rem;
+      left: -0.5rem;
+      font-size: 1.2rem;
+    }
+    
+    .handwritten-box {
+      border: 2px dashed var(--magenta);
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      background-color: var(--white);
+      font-family: 'Klee One', cursive;
+      transform: rotate(-0.5deg);
+      position: relative;
+    }
+    
+    .handwritten-box::after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      right: 20px;
+      width: 100px;
+      height: 30px;
+      background-color: rgba(255, 64, 160, 0.1);
+      border-radius: 50%;
+      transform: rotate(-5deg);
+      z-index: -1;
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* テーブルスタイル */
+    table {
+      width: 100%;
+      margin: 1.5rem 0;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    
+    thead {
+      background-color: var(--cyan);
+      color: var(--key);
+    }
+    
+    th, td {
+      padding: 0.8rem;
+      text-align: left;
+      border: 1px solid var(--dark-gray);
+    }
+    
+    tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+    
+    /* キーインサイトスタイル */
+    .key-insights {
+      background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .key-insights h3 {
+      color: var(--key);
+      border-bottom: 2px solid var(--yellow);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .key-insights ol {
+      counter-reset: insight-counter;
+      list-style-type: none;
+      margin-left: 0;
+    }
+    
+    .key-insights li {
+      counter-increment: insight-counter;
+      margin-bottom: 1rem;
+      padding-left: 2rem;
+      position: relative;
+    }
+    
+    .key-insights li::before {
+      content: counter(insight-counter);
+      background-color: var(--magenta);
+      color: var(--white);
+      font-weight: bold;
+      font-size: 0.8rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      left: 0;
+      top: 0.2rem;
+    }
+    
+    /* テイクホームメッセージスタイル */
+    .take-home-message {
+      background-color: var(--key);
+      color: var(--white);
+      padding: 2rem;
+      border-radius: 10px;
+      margin: 2rem 0;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .take-home-message h3 {
+      color: var(--cyan);
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+    
+    .take-home-message p {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      font-weight: 500;
+    }
+    
+    /* フッタースタイル */
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 3rem;
+      color: var(--dark-gray);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--light-gray);
+    }
+    
+    /* スムーススクロール */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--cyan);
+      color: var(--key);
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s;
+      z-index: 100;
+    }
+    
+    .scroll-top:hover {
+      background-color: var(--magenta);
+      color: var(--white);
+    }
+    
+    /* モバイルレスポンシブ */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        max-width: 100%;
+      }
+      
+      section {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fas fa-brain"></i> ディープラーニングの要素技術</h2>
+      <p>G検定 学習ノート</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#intro" class="active"><i class="fas fa-star"></i> はじめに</a></li>
+      <li><a href="#what-is"><i class="fas fa-question-circle"></i> 全結合層とは</a></li>
+      <li><a href="#mechanism"><i class="fas fa-cogs"></i> 全結合層の仕組み</a></li>
+      <li><a href="#parameters"><i class="fas fa-calculator"></i> パラメータ数</a></li>
+      <li><a href="#role"><i class="fas fa-tasks"></i> 全結合層の役割</a></li>
+      <li><a href="#keywords"><i class="fas fa-key"></i> 重要キーワード</a></li>
+      <li><a href="#key-insights"><i class="fas fa-lightbulb"></i> Key Insights</a></li>
+      <li><a href="#take-home"><i class="fas fa-home"></i> Take Home Message</a></li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
+    <!-- はじめに -->
+    <section id="intro">
+      <h2 class="section-title"><i class="fas fa-network-wired"></i> 1-5-1 全結合層</h2>
+      <p>ディープラーニングの構成要素として最も基本的な層である<span class="keyword">全結合層</span>（Fully Connected Layer）について学びます。全結合層はニューラルネットワークの基本構造を形成し、入力データから特徴を抽出・変換するために重要な役割を果たします。</p>
+      
+      <div class="note-box">
+        <p><strong>学習目標</strong></p>
+        <ul>
+          <li>全結合層の概要を理解する</li>
+          <li>全結合層のパラメータ数について理解する</li>
+          <li>ディープラーニングにおける全結合層の役割を説明できる</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <p>全結合層はディープラーニングの「古典的な」構成要素！最新のモデルでも使われる重要な基礎部分だよ。これが分かればディープラーニングの根本がわかるよ。</p>
+      </div>
+    </section>
+    
+    <!-- 全結合層とは -->
+    <section id="what-is">
+      <h3><i class="fas fa-question-circle"></i> 全結合層とは</h3>
+      <p><span class="keyword">全結合層</span>（Fully Connected Layer）とは、ニューラルネットワークを構成する層の一種で、前の層のすべてのニューロンが次の層のすべてのニューロンと接続されている構造を持ちます。この「すべてのニューロンが次の層のすべてのニューロンに接続する」という特徴から「全結合層」と呼ばれています。</p>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-5-1_01.png" alt="全結合層の構造図">
+        <figcaption>全結合層では、一つの層のすべてのニューロンが次の層のすべてのニューロンと接続されています。各接続には学習可能な重みが設定されています。【注意：画像ファイル「Gimage_1-5-1_01.png」を作成してimgフォルダに配置してください】</figcaption>
+      </div>
+      
+      <p>全結合層は以下の特徴を持っています：</p>
+      <ul>
+        <li>層間のすべてのニューロンが互いに接続されている</li>
+        <li>各接続には学習可能な<span class="keyword">重み</span>（weight）が設定されている</li>
+        <li>各ニューロンには<span class="keyword">バイアス</span>と呼ばれる追加のパラメータが設定されている場合もある</li>
+        <li>入力データに対して<span class="keyword">線形変換</span>（linear transformation）を行う</li>
+      </ul>
+      
+      <p>全結合層は、単純パーセプトロンや多層パーセプトロンといった初期のニューラルネットワークのモデルでも使用されており、ディープラーニングの基本的な構成要素となっています。</p>
+    </section>
+    
+    <!-- 全結合層の仕組み -->
+    <section id="mechanism">
+      <h3><i class="fas fa-cogs"></i> 全結合層の仕組み</h3>
+      <p>全結合層の数学的な仕組みを理解しましょう。全結合層は基本的に<span class="keyword">線形関数</span>（linear function）として表現できます。</p>
+      
+      <h4>全結合層の数学的表現</h4>
+      <p>全結合層の演算は以下の式で表すことができます：</p>
+      <div class="note-box">
+        <p>出力 = 入力 × 重み + バイアス</p>
+        <p>数式で表すと：\(y = Wx + b\)</p>
+        <p>ここで：</p>
+        <ul>
+          <li>\(y\)：出力ベクトル</li>
+          <li>\(W\)：重み行列</li>
+          <li>\(x\)：入力ベクトル</li>
+          <li>\(b\)：バイアスベクトル</li>
+        </ul>
+      </div>
+      
+      <h4>全結合層の処理フロー</h4>
+      <p>全結合層の処理の流れを具体的に見てみましょう：</p>
+      <ol>
+        <li>前の層からの入力ベクトル \(x\) を受け取ります</li>
+        <li>入力ベクトルに重み行列 \(W\) を掛けます</li>
+        <li>バイアスベクトル \(b\) を加えます</li>
+        <li>得られた結果が全結合層の出力となります</li>
+        <li>通常、この出力に<span class="keyword">活性化関数</span>が適用されます（ReLU、シグモイド関数など）</li>
+      </ol>
+      
+      <div class="handwritten-box">
+        <p>全結合層だけでは「線形変換」しかできないよ！実際のニューラルネットワークでは、全結合層の後に非線形の活性化関数を置くことで、複雑な関数を表現できるようになるんだ。</p>
+      </div>
+      
+      <h4>具体例</h4>
+      <p>3次元の入力ベクトルから2次元の出力ベクトルを得る全結合層を考えてみましょう：</p>
+      <ul>
+        <li>入力ベクトル: \(x = [x_1, x_2, x_3]\)</li>
+        <li>重み行列: \(W = \begin{bmatrix} w_{11} & w_{12} & w_{13} \\ w_{21} & w_{22} & w_{23} \end{bmatrix}\)</li>
+        <li>バイアスベクトル: \(b = [b_1, b_2]\)</li>
+        <li>出力ベクトル: \(y = [y_1, y_2] = Wx + b\)</li>
+      </ul>
+      
+      <p>計算すると：</p>
+      <div class="note-box">
+        <p>\(y_1 = w_{11}x_1 + w_{12}x_2 + w_{13}x_3 + b_1\)</p>
+        <p>\(y_2 = w_{21}x_1 + w_{22}x_2 + w_{23}x_3 + b_2\)</p>
+      </div>
+      
+      <p>この例では、2つの出力ニューロンそれぞれが、3つの入力ニューロンすべてからの情報を受け取っていることがわかります。これが「全結合」の意味です。</p>
+    </section>
+    
+    <!-- パラメータ数 -->
+    <section id="parameters">
+      <h3><i class="fas fa-calculator"></i> パラメータ数</h3>
+      <p>全結合層の大きな特徴として、<span class="keyword">パラメータ数</span>が非常に多くなる点が挙げられます。全結合層のパラメータ数を正確に把握することは、モデルの複雑さやメモリ使用量を理解する上で重要です。</p>
+      
+      <h4>全結合層のパラメータ数の計算方法</h4>
+      <p>n個の入力ニューロンとm個の出力ニューロンを持つ全結合層のパラメータ数は以下のように計算できます：</p>
+      
+      <div class="note-box">
+        <p>パラメータ数 = 重みの数 + バイアスの数</p>
+        <p>= (入力ニューロン数 × 出力ニューロン数) + 出力ニューロン数</p>
+        <p>= n × m + m</p>
+        <p>= m × (n + 1)</p>
+      </div>
+      
+      <h4>具体例でのパラメータ数</h4>
+      <p>例えば、1000個のニューロンを持つ層から500個のニューロンを持つ層への全結合層のパラメータ数は：</p>
+      <p>パラメータ数 = 1000 × 500 + 500 = 500,500</p>
+      
+      <p>さらに、一般的な画像認識タスクでは、28×28ピクセルの画像（MNIST手書き数字データセット）を入力とし、10個の出力（数字の0〜9の分類）を持つ全結合層のパラメータ数は：</p>
+      <p>パラメータ数 = (28 × 28) × 10 + 10 = 7,850</p>
+      
+      <div class="handwritten-box">
+        <p>全結合層はパラメータ数が膨大になりがち！例えば224×224×3のRGB画像を直接1000ノードの全結合層に入れると、150,528,000個ものパラメータが必要になる。これはメモリを大量に消費するし、過学習のリスクも高まるよ。だから画像処理では前段に畳み込み層を使うんだ！</p>
+      </div>
+      
+      <h4>パラメータ数が多いことの影響</h4>
+      <p>全結合層のパラメータ数が多いことには、以下のような影響があります：</p>
+      <ul>
+        <li><strong>メモリ使用量の増加</strong>：大量のパラメータを保存するために多くのメモリが必要になります</li>
+        <li><strong>計算量の増加</strong>：前向き計算と誤差逆伝播の両方で計算量が増加します</li>
+        <li><strong>過学習のリスク</strong>：パラメータが多すぎると、訓練データに過剰に適合してしまう過学習が起きやすくなります</li>
+        <li><strong>学習の難しさ</strong>：パラメータが多いと、最適な値を見つけるのに時間がかかり、局所解に陥りやすくなります</li>
+      </ul>
+      
+      <p>これらの理由から、近年のディープラーニングモデルでは、全結合層の数を減らしたり、他の効率的な層（畳み込み層など）と組み合わせたりする工夫がなされています。</p>
+    </section>
+    
+    <!-- 全結合層の役割 -->
+    <section id="role">
+      <h3><i class="fas fa-tasks"></i> 全結合層の役割</h3>
+      <p>全結合層はディープラーニングの様々なアーキテクチャで重要な役割を果たしています。その主な役割を見ていきましょう。</p>
+      
+      <h4>特徴の統合と変換</h4>
+      <p>全結合層の最も基本的な役割は、前の層から得られた特徴を統合し、新たな表現に変換することです。特に：</p>
+      <ul>
+        <li>前の層で抽出された様々な特徴を組み合わせて、より高次の特徴を形成する</li>
+        <li>空間的な位置情報などを失うことで、位置に依存しない特徴表現を獲得する</li>
+        <li>様々な入力パターンを特定の出力パターンに対応付ける変換を学習する</li>
+      </ul>
+      
+      <h4>分類器としての役割</h4>
+      <p>多くのディープラーニングモデル、特に分類タスクを行うモデルでは、最終層に全結合層が使われることが多くあります：</p>
+      <ul>
+        <li>畳み込みニューラルネットワーク（CNN）の最終段階で、抽出された特徴を用いてクラス分類を行う</li>
+        <li>入力の次元数からクラス数への次元削減を行う</li>
+        <li>ソフトマックス関数と組み合わせて、各クラスへの所属確率を出力する</li>
+      </ul>
+      
+      <div class="note-box">
+        <p><strong>例：画像分類のCNNアーキテクチャ</strong></p>
+        <ol>
+          <li>畳み込み層：特徴マップを抽出</li>
+          <li>プーリング層：特徴の位置不変性を獲得</li>
+          <li>複数の畳み込み層とプーリング層</li>
+          <li>全結合層：抽出された特徴をクラスラベルに変換</li>
+        </ol>
+      </div>
+      
+      <h4>様々なネットワークでの使用例</h4>
+      <p>全結合層は以下のようなディープラーニングのアーキテクチャで重要な役割を果たしています：</p>
+      <ul>
+        <li><strong>多層パーセプトロン（MLP）</strong>：全結合層のみで構成されるネットワーク</li>
+        <li><strong>畳み込みニューラルネットワーク（CNN）</strong>：特徴抽出後の分類器部分に使用</li>
+        <li><strong>オートエンコーダ</strong>：エンコーダとデコーダ部分で使用</li>
+        <li><strong>リカレントニューラルネットワーク（RNN）</strong>：入力変換や出力層として使用</li>
+      </ul>
+      
+      <div class="handwritten-box">
+        <p>近年のモデルでは全結合層の使用を最小限にする傾向があるよ！CNNでは全結合層をグローバルアベレージプーリングに置き換えたり、Transformerでは自己注意機構を使ったりして、パラメータ効率を高めているんだ。でも基本的な要素として全結合層の理解は必須だね！</p>
+      </div>
+      
+      <h4>全結合層と他の層との比較</h4>
+      <p>全結合層と他の層（特に畳み込み層）の違いを理解することで、それぞれの役割がより明確になります：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>特性</th>
+            <th>全結合層</th>
+            <th>畳み込み層</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>接続パターン</td>
+            <td>すべてのニューロンが接続</td>
+            <td>局所的な接続のみ</td>
+          </tr>
+          <tr>
+            <td>パラメータ共有</td>
+            <td>各接続に独立したパラメータ</td>
+            <td>フィルタのパラメータを共有</td>
+          </tr>
+          <tr>
+            <td>パラメータ数</td>
+            <td>非常に多い</td>
+            <td>比較的少ない</td>
+          </tr>
+          <tr>
+            <td>空間情報</td>
+            <td>保持しない</td>
+            <td>保持する</td>
+          </tr>
+          <tr>
+            <td>主な用途</td>
+            <td>特徴統合、分類</td>
+            <td>特徴抽出</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <!-- 重要キーワード -->
+    <section id="keywords">
+      <h3><i class="fas fa-key"></i> 重要キーワード</h3>
+      <p>全結合層に関連する重要なキーワードをまとめます。G検定では、これらの用語の定義や意味を理解しておくことが重要です。</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>キーワード</th>
+            <th>説明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>全結合層<br>(Fully Connected Layer)</td>
+            <td>前の層のすべてのニューロンが次の層のすべてのニューロンと接続されている層構造。線形変換を行う基本的なニューラルネットワークの構成要素。</td>
+          </tr>
+          <tr>
+            <td>重み<br>(Weight)</td>
+            <td>ニューロン間の接続の強さを表すパラメータ。学習によって最適化される。全結合層では、入力と出力の次元に応じた行列として表現される。</td>
+          </tr>
+          <tr>
+            <td>バイアス<br>(Bias)</td>
+            <td>各ニューロンに加えられる定数項。入力に依存せず常に一定の値を持つパラメータで、活性化関数の閾値を調整する役割を持つ。</td>
+          </tr>
+          <tr>
+            <td>線形関数<br>(Linear Function)</td>
+            <td>全結合層で行われる基本的な数学的操作。入力ベクトルと重み行列の積にバイアスを加えた形で表される。</td>
+          </tr>
+          <tr>
+            <td>パラメータ数<br>(Number of Parameters)</td>
+            <td>モデルが持つ学習可能な変数の総数。全結合層では、入力次元×出力次元+出力次元（バイアス用）で計算される。</td>
+          </tr>
+          <tr>
+            <td>多層パーセプトロン<br>(Multi-Layer Perceptron, MLP)</td>
+            <td>複数の全結合層と非線形活性化関数で構成される基本的なニューラルネットワーク。全結合層を積み重ねた構造を持つ。</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="note-box">
+        <p><strong>G検定ポイント</strong>：シラバスには「全結合層」「重み」「線形関数」がキーワードとして明記されています。これらの用語の定義と全結合層の基本的な仕組みは必ず理解しておきましょう。</p>
+      </div>
+    </section>
+    
+    <!-- Key Insights -->
+    <section id="key-insights">
+      <div class="key-insights">
+        <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
+        <ol>
+          <li>
+            <strong>全結合層の本質は線形変換</strong>
+            <p>全結合層は本質的には線形変換（\(y = Wx + b\)）を行う層です。ディープラーニングの文脈では、この線形変換の後に非線形の活性化関数を適用することで、複雑な関数を表現します。</p>
+          </li>
+          <li>
+            <strong>パラメータ数の多さが特徴</strong>
+            <p>全結合層のパラメータ数は入力ニューロン数×出力ニューロン数＋出力ニューロン数（バイアス用）で計算されます。高次元データの処理では非常に多くのパラメータが必要となり、これがメモリ使用量や過学習のリスクを高める要因となります。</p>
+          </li>
+          <li>
+            <strong>多様なアーキテクチャでの役割</strong>
+            <p>全結合層は最終的な分類器として、あるいは特徴の統合や変換のために様々なニューラルネットワークアーキテクチャで使用されています。CNNでは特徴抽出後の分類部分、MLPではネットワーク全体を構成する基本要素として使われます。</p>
+          </li>
+          <li>
+            <strong>モダンなアーキテクチャでの位置づけ</strong>
+            <p>近年のディープラーニングモデルでは、全結合層の使用を最小限に抑える傾向があります。しかし、その基本的な概念と特性の理解は、より複雑なアーキテクチャを理解するための基礎となります。</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+    
+    <!-- Take Home Message -->
+    <section id="take-home">
+      <div class="take-home-message">
+        <h3><i class="fas fa-home"></i> Take Home Message</h3>
+        <p>全結合層はディープラーニングの基本的な構成要素であり、すべてのニューロンが次の層のすべてのニューロンと接続する特徴を持ちます。線形変換（重み×入力＋バイアス）を行う層であり、パラメータ数が多いことが特徴です。様々なニューラルネットワークで特徴の統合や分類器として重要な役割を果たしています。</p>
+      </div>
+    </section>
+    
+    <!-- フッター -->
+    <footer>
+      <p>G検定学習ノート | 1-5-1 全結合層</p>
+      <p>作成：2024年4月 | 原稿・コード: Claude 3.7 Sonnet | 画像: ChatGPT</p>
+    </footer>
+    
+    <!-- スクロールトップボタン -->
+    <div class="scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+  </main>
+
+  <script>
+    // アクティブメニュー項目の制御
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('section');
+      const menuItems = document.querySelectorAll('.sidebar-menu a');
+      
+      window.addEventListener('scroll', function() {
+        let current = '';
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (pageYOffset >= (sectionTop - 300)) {
+            current = section.getAttribute('id');
+          }
+        });
+        
+        menuItems.forEach(item => {
+          item.classList.remove('active');
+          if (item.getAttribute('href') === `#${current}`) {
+            item.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

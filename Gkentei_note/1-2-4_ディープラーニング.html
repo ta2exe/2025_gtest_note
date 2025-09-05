@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-2-4 - ディープラーニング</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CMYK カラーパレット */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      background-color: var(--key);
+      color: var(--white);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    
+    .sidebar-title {
+      font-family: 'Klee One', cursive;
+      font-size: 1.3rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--cyan);
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+    }
+    
+    .sidebar-menu li {
+      margin-bottom: 1rem;
+    }
+    
+    .sidebar-menu a {
+      display: block;
+      color: var(--white);
+      text-decoration: none;
+      padding: 0.5rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background-color: rgba(255,255,255,0.1);
+      transform: translateX(5px);
+    }
+    
+    .sidebar-menu i {
+      margin-right: 8px;
+      color: var(--cyan);
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+    
+    .section {
+      margin-bottom: 4rem;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      position: relative;
+    }
+    
+    /* タイトルセクション */
+    .title-section {
+      text-align: center;
+      padding: 3rem 2rem;
+      margin-bottom: 4rem;
+      background: linear-gradient(135deg, rgba(0,216,232,0.1) 0%, rgba(255,64,160,0.1) 100%);
+      border-radius: 15px;
+      position: relative;
+    }
+    
+    .main-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2.5rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .main-title::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 8px;
+      bottom: -5px;
+      left: 0;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      border-radius: 4px;
+    }
+    
+    .sub-title {
+      font-family: 'Klee One', cursive;
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 2rem;
+    }
+    
+    .overview {
+      background-color: rgba(255,255,255,0.8);
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 800px;
+      margin: 0 auto;
+      border: 2px dashed var(--cyan);
+    }
+    
+    .overview-list {
+      text-align: left;
+      list-style-position: inside;
+      margin-top: 1rem;
+    }
+    
+    .overview-list li {
+      margin-bottom: 0.5rem;
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .overview-list li::before {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 5px;
+      color: var(--magenta);
+    }
+    
+    /* セクションスタイル */
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      border-bottom: 2px solid var(--yellow);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title i {
+      margin-right: 10px;
+      color: var(--magenta);
+    }
+    
+    /* キーワードスタイル */
+    .keyword {
+      font-weight: bold;
+      color: var(--key);
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      padding: 0 2px;
+    }
+    
+    .english-term {
+      font-style: italic;
+      color: var(--dark-gray);
+    }
+    
+    /* ノートスタイル */
+    .note-box {
+      background-color: rgba(255,230,0,0.1);
+      border-left: 5px solid var(--yellow);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: '📌';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      font-size: 1.5rem;
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      border: 2px dotted var(--magenta);
+      padding: 1.5rem;
+      border-radius: 10px;
+      background-color: rgba(255,255,255,0.9);
+      transform: rotate(-0.5deg);
+      margin: 2rem 0;
+      position: relative;
+    }
+    
+    /* キーインサイト */
+    .key-insights {
+      background: linear-gradient(135deg, rgba(255,64,160,0.1) 0%, rgba(0,216,232,0.1) 100%);
+      padding: 2rem;
+      border-radius: 10px;
+      margin: 2rem 0;
+    }
+    
+    .insight-item {
+      display: flex;
+      margin-bottom: 1.5rem;
+      align-items: flex-start;
+    }
+    
+    .insight-number {
+      background-color: var(--cyan);
+      color: var(--white);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    
+    .insight-content {
+      flex: 1;
+    }
+    
+    .insight-title {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+    }
+    
+    /* テイクホームメッセージ */
+    .take-home {
+      text-align: center;
+      padding: 2rem;
+      background-color: rgba(0,216,232,0.1);
+      border-radius: 10px;
+      margin: 3rem 0;
+      border: 2px solid var(--cyan);
+      position: relative;
+    }
+    
+    .take-home-title {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--white);
+      padding: 0 15px;
+      color: var(--key);
+    }
+    
+    .take-home-message {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      color: var(--key);
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 2rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      border-top: 1px solid #eee;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 99;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+    }
+    
+    /* レスポンシブ */
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+    
+    /* 箇条書きの調整 */
+    .note-box ol, .note-box ul, .handwritten-box ol, .handwritten-box ul {
+      padding-left: 2rem;
+      margin: 0.8rem 0;
+    }
+    
+    /* 見出しをカラフルに */
+    .handwritten-box h3 {
+      color: var(--magenta);
+      margin-bottom: 1rem;
+      font-family: 'Klee One', cursive;
+      font-size: 1.3rem;
+    }
+    
+    .handwritten-box h4 {
+      color: var(--cyan);
+      margin: 1.2rem 0 0.5rem;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.1rem;
+    }
+    
+    .note-box h4 {
+      color: var(--magenta);
+      margin-bottom: 0.5rem;
+      font-family: 'Klee One', cursive;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <h2 class="sidebar-title">ディープラーニング</h2>
+      <ul class="sidebar-menu">
+        <li><a href="#overview" class="active"><i class="fas fa-brain"></i>概要</a></li>
+        <li><a href="#history"><i class="fas fa-history"></i>発展の歴史</a></li>
+        <li><a href="#difference"><i class="fas fa-code-branch"></i>古典的機械学習との違い</a></li>
+        <li><a href="#applications"><i class="fas fa-laptop-code"></i>応用例</a></li>
+        <li><a href="#key-insights"><i class="fas fa-lightbulb"></i>Key Insights</a></li>
+        <li><a href="#take-home"><i class="fas fa-key"></i>Take Home Message</a></li>
+      </ul>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- タイトルセクション -->
+      <section id="overview" class="section title-section">
+        <h1 class="main-title">ディープラーニング</h1>
+        <p class="sub-title">人工知能をめぐる動向 - 1-2-4</p>
+        
+        <div class="overview">
+          <p>ディープラーニング（深層学習）は人工知能の中核技術であり、多層のニューラルネットワークを用いた機械学習の一種です。</p>
+          <ul class="overview-list">
+            <li>ディープラーニングの発展の歴史</li>
+            <li>古典的な機械学習との違い</li>
+            <li>代表的な応用例</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- 発展の歴史 -->
+      <section id="history" class="section">
+        <h2 class="section-title"><i class="fas fa-history"></i>ディープラーニングの発展の歴史</h2>
+        
+        <p>ディープラーニングは長い歴史を持ち、人間の脳の神経回路を模倣したコンピュータモデルとして発展してきました。</p>
+        
+        <div class="handwritten-box">
+          <h3><i class="fas fa-lightbulb"></i> ディープラーニングの歴史的展開</h3>
+          <ul style="padding-left: 1.5rem;">
+            <li>
+              <strong>1950〜60年代:</strong> <span class="keyword">単純パーセプトロン</span>の研究から始まる。単層のニューラルネットワークが研究されるが、XORなどの非線形問題は解決できないという限界が示された。
+            </li>
+            <li>
+              <strong>1980年代:</strong> <span class="keyword">ネオコグニトロン</span>（Neocognitron）が福島邦彦博士によって提案される。現在の畳み込みニューラルネットワークの原型となる。
+            </li>
+            <li>
+              <strong>1989年:</strong> Yann LeCunによって<span class="keyword">LeNet</span>が開発される。手書き数字認識に成功し、畳み込みニューラルネットワークの基礎となる。
+            </li>
+            <li>
+              <strong>2000年代前半:</strong> 計算リソースの制約と訓練手法の問題から、ディープラーニングの研究はやや停滞。
+            </li>
+            <li>
+              <strong>2012年:</strong> トロント大学のチームが<span class="keyword">ImageNet</span>の画像認識コンペティション<span class="keyword">ILSVRC</span>（ImageNet Large Scale Visual Recognition Challenge）で深層学習を使用し圧倒的な勝利を収める。
+            </li>
+            <li>
+              <strong>2016年:</strong> Googleの<span class="keyword">アルファ碁</span> (AlphaGo)が世界トップクラスの囲碁棋士に勝利。強化学習とディープラーニングの組み合わせが注目される。
+            </li>
+            <li>
+              <strong>2017年以降:</strong> Transformerアーキテクチャの登場により自然言語処理が飛躍的に進化。<span class="keyword">LLM</span> (Large Language Model、大規模言語モデル)の時代へ。
+            </li>
+          </ul>
+        </div>
+
+        <!-- 「AI ＞ ML ＞ DL」の関係図 --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-2-4_01.png" alt="「AI ＞ ML ＞ DL」の関係図">
+          <figcaption>「AI ＞ ML ＞ DL」の関係図。LLMやNNもこの中に入ってるよ！</figcaption>
+
+        </div>
+
+        
+        <div class="note-box">
+          <h4>重要ポイント</h4>
+          <p>ディープラーニングがブレイクスルーした要因:</p>
+          <ol style="padding-left: 2.5rem;">
+            <li>GPU等のハードウェアの進化による計算能力の向上</li>
+            <li>大規模データセット（ImageNetなど）の整備</li>
+            <li>効果的な学習アルゴリズムの開発（勾配降下法の改良など）</li>
+            <li>活性化関数の改良（ReLUの普及など）</li>
+          </ol>
+        </div>
+      </section>
+      
+      <!-- 古典的機械学習との違い -->
+      <section id="difference" class="section">
+        <h2 class="section-title"><i class="fas fa-code-branch"></i>古典的な機械学習との違い</h2>
+        
+        <p>ディープラーニングと従来の機械学習手法には根本的な違いがあり、これがディープラーニングの強みとなっています。</p>
+        
+        <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin: 2rem 0;">
+          <div style="width: 45%; min-width: 300px; padding: 1.5rem; background: rgba(0,216,232,0.1); border-radius: 10px; margin-bottom: 1rem;">
+            <h3 style="text-align: center; color: var(--key); margin-bottom: 1rem;">
+              <i class="fas fa-cogs" style="color: var(--cyan);"></i> 古典的機械学習
+            </h3>
+            <ul>
+              <li>特徴量の手動設計が必要</li>
+              <li>データの前処理に専門知識が必要</li>
+              <li>比較的少ないデータでも学習可能</li>
+              <li>計算コストが低い</li>
+              <li>モデルの解釈が比較的容易</li>
+              <li>単純なパターン認識に効果的</li>
+            </ul>
+          </div>
+          
+          <div style="width: 45%; min-width: 300px; padding: 1.5rem; background: rgba(255,64,160,0.1); border-radius: 10px; margin-bottom: 1rem;">
+            <h3 style="text-align: center; color: var(--key); margin-bottom: 1rem;">
+              <i class="fas fa-brain" style="color: var(--magenta);"></i> ディープラーニング
+            </h3>
+            <ul>
+              <li>特徴量を自動的に学習</li>
+              <li>生のデータから直接学習可能</li>
+              <li>大量のデータが必要</li>
+              <li>計算コストが高い</li>
+              <li>モデルがブラックボックス化しやすい</li>
+              <li>複雑なパターン認識に優れる</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3><i class="fas fa-star"></i> ディープラーニングの主な特徴</h3>
+          <p><span class="keyword">特徴量の自動抽出</span>：従来の機械学習では、特徴量の設計が人間の専門家によって行われていましたが、ディープラーニングでは多層のニューラルネットワークがデータから直接特徴を抽出します。</p>
+          <p><span class="keyword">表現学習</span>：複数の層を通じて、徐々に抽象度の高い特徴表現を学習していきます。浅い層では単純な特徴（エッジ、色など）を、深い層では複雑な概念（顔、物体など）を捉えます。</p>
+          <p><span class="keyword">エンド・ツー・エンド学習</span>：前処理からパターン認識、判断までを一貫して学習できるため、人間の設計バイアスが入りにくくなります。</p>
+        </div>
+        
+        <div class="note-box">
+          <h4>試験ポイント</h4>
+          <p>ディープラーニングが古典的機械学習よりも優れている点と劣っている点の両方を理解しておくことが重要です。全ての機械学習タスクでディープラーニングが最適解とは限りません。</p>
+        </div>
+      </section>
+      
+      <!-- 応用例 -->
+      <section id="applications" class="section">
+        <h2 class="section-title"><i class="fas fa-laptop-code"></i>ディープラーニングの応用例</h2>
+        
+        <p>ディープラーニングは様々な分野で革命的な進化をもたらしています。シラバスで挙げられているキーワードを中心に、代表的な応用例を見ていきましょう。</p>
+        
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-around; margin: 2rem 0;">
+          <!-- 画像認識 -->
+          <div style="width: 30%; min-width: 250px; margin-bottom: 2rem; text-align: center;">
+            <div style="background-color: var(--white); border-radius: 50%; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+              <i class="fas fa-camera" style="font-size: 2.5rem; color: var(--cyan);"></i>
+            </div>
+            <h3 style="margin: 1rem 0;">画像認識</h3>
+            <p>物体検出、顔認識、医療画像診断など</p>
+          </div>
+          
+          <!-- 自然言語処理 -->
+          <div style="width: 30%; min-width: 250px; margin-bottom: 2rem; text-align: center;">
+            <div style="background-color: var(--white); border-radius: 50%; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+              <i class="fas fa-language" style="font-size: 2.5rem; color: var(--magenta);"></i>
+            </div>
+            <h3 style="margin: 1rem 0;">自然言語処理</h3>
+            <p>翻訳、要約、質問応答、文章生成など</p>
+          </div>
+          
+          <!-- ゲーム AI -->
+          <div style="width: 30%; min-width: 250px; margin-bottom: 2rem; text-align: center;">
+            <div style="background-color: var(--white); border-radius: 50%; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+              <i class="fas fa-gamepad" style="font-size: 2.5rem; color: var(--yellow);"></i>
+            </div>
+            <h3 style="margin: 1rem 0;">ゲーム AI</h3>
+            <p>囲碁、チェス、ビデオゲームなど</p>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3><i class="fas fa-clipboard-list"></i> 注目すべき応用例</h3>
+          
+          <h4><span class="keyword">ImageNet</span>と<span class="keyword">ILSVRC</span></h4>
+          <p>ImageNetは1400万以上の画像に対してラベル付けされた大規模画像データセットです。ILSVRCはこのデータセットを使用した画像認識コンペティションで、2012年にディープラーニングが圧倒的な成績を収めたことで、AI研究の方向性が大きく変わりました。</p>
+          
+          <h4><span class="keyword">LeNet</span></h4>
+          <p>LeNetは1989年にYann LeCunによって開発された初期の畳み込みニューラルネットワークで、手書き数字認識に高い精度を示しました。現代のCNNの原型となるアーキテクチャです。</p>
+          
+          <h4><span class="keyword">アルファ碁</span></h4>
+          <p>GoogleのDeepMind社が開発した囲碁AI。2016年に世界トップクラスの棋士であるイ・セドル九段に勝利し、世界中の注目を集めました。ディープラーニングと強化学習を組み合わせることで、人間が数千年かけて蓄積してきた知識を短期間で学習しました。</p>
+          
+          <h4><span class="keyword">LLM</span></h4>
+          <p>大量のテキストデータで学習した大規模な言語モデルで、GPT（Generative Pre-trained Transformer）シリーズなどが有名です。自然言語処理タスクで高い性能を示し、翻訳、要約、文章生成など多くの応用があります。特にTransformerアーキテクチャの登場により急速に発展しました。</p>
+        </div>
+        
+        <div class="note-box">
+          <h4>G検定での重要ポイント</h4>
+          <p>キーワードとして挙げられている<span class="keyword">ImageNet</span>、<span class="keyword">ILSVRC</span>、<span class="keyword">LeNet</span>、<span class="keyword">アルファ碁</span>、<span class="keyword">LLM</span>について、それぞれの概要と意義を理解しておきましょう。これらは単なる応用例ではなく、ディープラーニングの歴史の中で重要なマイルストーンとなっています。</p>
+        </div>
+      </section>
+      
+      <!-- Key Insights -->
+      <section id="key-insights" class="section">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i>Key Insights</h2>
+        <div class="key-insights">
+          <div class="insight-item">
+            <div class="insight-number">1</div>
+            <div class="insight-content">
+              <h3 class="insight-title">歴史的な発展</h3>
+              <p>ディープラーニングは<span class="keyword">ネオコグニトロン</span>や<span class="keyword">LeNet</span>などの初期研究から始まり、2012年の<span class="keyword">ImageNet</span>コンペティション（<span class="keyword">ILSVRC</span>）での成功を経て、現在の<span class="keyword">LLM</span>などの大規模モデルへと発展しました。</p>
+            </div>
+          </div>
+          
+          <div class="insight-item">
+            <div class="insight-number">2</div>
+            <div class="insight-content">
+              <h3 class="insight-title">古典的機械学習との本質的な違い</h3>
+              <p>最大の違いは「特徴量の自動抽出」能力です。従来の機械学習では人間が特徴量設計を行う必要がありましたが、ディープラーニングでは多層構造により、データから自動的に特徴を学習できます。</p>
+            </div>
+          </div>
+          
+          <div class="insight-item">
+            <div class="insight-number">3</div>
+            <div class="insight-content">
+              <h3 class="insight-title">応用分野の広がり</h3>
+              <p>画像認識、自然言語処理、ゲームAIなど様々な分野で革命的な成果を上げています。特に<span class="keyword">アルファ碁</span>の囲碁での勝利は社会的なインパクトが大きく、AIの可能性を世界に示しました。</p>
+            </div>
+          </div>
+          
+          <div class="insight-item">
+            <div class="insight-number">4</div>
+            <div class="insight-content">
+              <h3 class="insight-title">技術の進化要因</h3>
+              <p>ディープラーニングの爆発的な発展は、①大規模データセットの整備、②計算能力の向上（GPU等）、③効果的な学習手法の発見、という3つの要因が重なったことで実現しました。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Take Home Message -->
+      <section id="take-home" class="section">
+        <div class="take-home">
+          <h3 class="take-home-title"><i class="fas fa-key"></i> Take Home Message</h3>
+          <p class="take-home-message">
+            ディープラーニングは特徴量の自動抽出能力を持つ革命的技術であり、<br>
+            <span class="keyword">ImageNet</span>・<span class="keyword">ILSVRC</span>、<span class="keyword">LeNet</span>、<span class="keyword">アルファ碁</span> (AlphaGo)、<span class="keyword">LLM</span> (大規模言語モデル)などの<br>
+            重要な歴史的マイルストーンを経て発展してきました。
+          </p>
+        </div>
+        
+        <!-- キーワードリスト -->
+        <div style="margin-top: 3rem;">
+          <h3 style="border-bottom: 2px solid var(--yellow); padding-bottom: 0.5rem; margin-bottom: 1rem; color: var(--magenta);">
+            <i class="fas fa-tag" style="color: var(--magenta);"></i> 重要キーワード
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <tr style="background-color: rgba(0,216,232,0.1);">
+              <th style="padding: 0.8rem; text-align: left; border-bottom: 1px solid #ddd;">キーワード</th>
+              <th style="padding: 0.8rem; text-align: left; border-bottom: 1px solid #ddd;">説明</th>
+            </tr>
+            <tr>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">ImageNet</span></td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">1400万以上の画像にラベル付けされた大規模画像データセット。ディープラーニング革命の基盤となった。</td>
+            </tr>
+            <tr style="background-color: rgba(255,255,255,0.5);">
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">ILSVRC</span> (ImageNet Large Scale Visual Recognition Challenge)</td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">ImageNetを使用した画像認識コンペティション。2012年のコンペでディープラーニングが圧倒的な性能を示し、AI研究の転換点となった。</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">LeNet</span></td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">Yann LeCunによって開発された初期の畳み込みニューラルネットワーク。手書き数字認識に使用された。</td>
+            </tr>
+            <tr style="background-color: rgba(255,255,255,0.5);">
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">アルファ碁</span> (AlphaGo)</td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">GoogleのDeepMind社が開発した囲碁AI。ディープラーニングと強化学習を組み合わせ、世界トップクラスの棋士に勝利した。</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">LLM</span> (Large Language Model、大規模言語モデル)</td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">大量のテキストデータで学習した大規模な言語モデル。自然言語処理タスクで高い性能を示す。</td>
+            </tr>
+            <tr style="background-color: rgba(255,255,255,0.5);">
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">ネオコグニトロン</span> (Neocognitron)</td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">福島邦彦博士によって提案された階層型ニューラルネットワーク。現代の畳み込みニューラルネットワークの原型となった。</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">人間の神経回路</span> (Human Neural Circuits)</td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">ニューラルネットワークの着想源となった生物学的な神経システム。ディープラーニングはこれを模倣している。</td>
+            </tr>
+            <tr style="background-color: rgba(255,255,255,0.5);">
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;"><span class="keyword">単純パーセプトロン</span> (Simple Perceptron)</td>
+              <td style="padding: 0.8rem; border-bottom: 1px solid #eee;">初期のニューラルネットワークモデル。単一層のニューロンで構成され、単純な分類問題を解くために開発された。</td>
+            </tr>
+          </table>
+        </div>
+      </section>
+      
+      <!-- フッター -->
+      <div class="footer">
+        <p>ディープラーニング | 2024年G検定対策ノート</p>
+        <p>Content by Claude | Design by Claude | Created on April 2024</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // サイドバーのアクティブ状態
+      const sections = document.querySelectorAll('.section');
+      const menuItems = document.querySelectorAll('.sidebar-menu a');
+      
+      // スクロールトップボタン
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      
+      window.addEventListener('scroll', function() {
+        // スクロールトップボタンの表示/非表示
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+        
+        // 現在のセクションに基づいてメニューをアクティブに
+        let current = '';
+        
+        sections.forEach(function(section) {
+          const sectionTop = section.offsetTop;
+          if (scrollY >= sectionTop - 200) {
+            current = section.getAttribute('id');
+          }
+        });
+        
+        menuItems.forEach(function(item) {
+          item.classList.remove('active');
+          if (item.getAttribute('href').substring(1) === current) {
+            item.classList.add('active');
+          }
+        });
+      });
+      
+      // スムーススクロール
+      menuItems.forEach(function(item) {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const target = document.querySelector(this.getAttribute('href'));
+          window.scrollTo({
+            top: target.offsetTop,
+            behavior: 'smooth'
+          });
+        });
+      });
+      
+      // スクロールトップボタンのクリックイベント
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

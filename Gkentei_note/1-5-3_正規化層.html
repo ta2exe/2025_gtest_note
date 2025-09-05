@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-5-3 正規化層 - G検定学習ノート</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      
+      /* フォント設定 */
+      --font-main: 'Zen Maru Gothic', sans-serif;
+      --font-accent: 'Klee One', cursive;
+      --font-heading: 'M PLUS Rounded 1c', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--font-main);
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* レイアウト構造 */
+    .container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      position: fixed;
+      height: 100vh;
+      background-color: var(--key);
+      color: var(--white);
+      padding: 2rem 1rem;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    
+    .sidebar-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--cyan);
+    }
+    
+    .nav-menu {
+      list-style-type: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.8rem;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      color: var(--white);
+      text-decoration: none;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+    
+    .nav-link i {
+      margin-right: 0.8rem;
+      color: var(--cyan);
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+    
+    /* セクション共通スタイル */
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      border-radius: 8px;
+      background-color: var(--white);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* ヘッダーセクション */
+    .header-section {
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(0, 216, 232, 0.1) 0%, rgba(255, 64, 160, 0.1) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="white" fill-opacity="0.8"/></svg>');
+      z-index: -1;
+    }
+    
+    .main-title {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .main-title i {
+      margin-right: 1rem;
+      color: var(--magenta);
+    }
+    
+    .subtitle {
+      font-family: var(--font-accent);
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      margin-bottom: 2rem;
+    }
+    
+    .overview {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .summary-list {
+      list-style-position: inside;
+      margin-left: 1rem;
+    }
+    
+    .summary-list li {
+      margin-bottom: 0.8rem;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    
+    .summary-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.6rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: var(--cyan);
+      border-radius: 50%;
+    }
+    
+    /* タイトルスタイル */
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px dashed var(--cyan);
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title i {
+      margin-right: 1rem;
+      color: var(--magenta);
+    }
+    
+    .concept-title {
+      font-family: var(--font-accent);
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 1.5rem 0 1rem;
+      color: var(--key);
+      border-left: 4px solid var(--magenta);
+      padding-left: 1rem;
+    }
+    
+    /* コンテンツボックス */
+    .content-box {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 216, 232, 0.3);
+    }
+    
+    /* ハンドライティングボックス */
+    .handwritten-box {
+      background-color: var(--white);
+      border: 2px dashed var(--magenta);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      font-family: var(--font-accent);
+      position: relative;
+      transform: rotate(-0.5deg);
+    }
+    
+    .handwritten-box::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      width: 20px;
+      height: 30px;
+      background-color: var(--white);
+      border: 2px solid var(--cyan);
+      border-radius: 50% 50% 0 0;
+      transform: rotate(30deg);
+      z-index: -1;
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      border-left: 4px solid var(--yellow);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      background-color: rgba(255, 230, 0, 0.05);
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -0.8rem;
+      left: -0.8rem;
+      font-size: 1.5rem;
+    }
+    
+    /* テーブルスタイル */
+    .table-container {
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    
+    th, td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    th {
+      background-color: rgba(0, 216, 232, 0.1);
+      font-weight: 600;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    tr:hover {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+    
+    /* リストスタイル */
+    ul, ol {
+      margin: 1rem 0;
+      padding-left: 2rem;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* ハイライト */
+    .highlight {
+      background-color: rgba(255, 230, 0, 0.3);
+      padding: 0 0.3rem;
+      border-radius: 3px;
+    }
+    
+    .keyword {
+      font-weight: 600;
+      color: var(--magenta);
+      position: relative;
+      display: inline-block;
+    }
+    
+    .keyword::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--magenta);
+      transform: scaleX(0);
+      transform-origin: bottom right;
+      transition: transform 0.3s ease;
+    }
+    
+    .keyword:hover::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* フッター */
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 50px;
+      height: 50px;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .scroll-top:hover {
+      transform: translateY(-5px);
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 1200px) {
+      .sidebar {
+        width: 25%;
+      }
+      
+      .main-content {
+        width: 75%;
+        margin-left: 25%;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 30%;
+      }
+      
+      .main-content {
+        width: 70%;
+        margin-left: 30%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 1rem;
+      }
+      
+      .main-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title">ディープラーニングの要素技術</h2>
+      <ul class="nav-menu" id="nav-menu">
+        <!-- サイドメニュー項目を手動で追加 -->
+        <li class="nav-item">
+          <a href="#header" class="nav-link">
+            <i class="fas fa-layer-group"></i>
+            正規化層の概要
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#intro" class="nav-link">
+            <i class="fas fa-info-circle"></i>
+            正規化層とは
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#batch-norm" class="nav-link">
+            <i class="fas fa-chart-bar"></i>
+            バッチ正規化
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#layer-norm" class="nav-link">
+            <i class="fas fa-align-justify"></i>
+            レイヤー正規化
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#instance-norm" class="nav-link">
+            <i class="fas fa-image"></i>
+            インスタンス正規化
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#group-norm" class="nav-link">
+            <i class="fas fa-object-group"></i>
+            グループ正規化
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#comparison" class="nav-link">
+            <i class="fas fa-balance-scale"></i>
+            正規化手法の比較
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#key-insights" class="nav-link">
+            <i class="fas fa-lightbulb"></i>
+            重要ポイント
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#take-home" class="nav-link">
+            <i class="fas fa-key"></i>
+            覚えるべきこと
+          </a>
+        </li>
+      </ul>
+    </aside>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- ヘッダーセクション -->
+      <section id="header" class="header-section">
+        <h1 class="main-title"><i class="fas fa-layer-group"></i>1-5-3 正規化層</h1>
+        <p class="subtitle">ディープラーニングにおける正規化層の役割と代表的な手法</p>
+        <p class="overview">
+          正規化層はディープラーニングモデルの学習を安定化し、性能を向上させるための重要な要素技術です。この章では、代表的な正規化手法とその特性について学びます。
+        </p>
+        <ul class="summary-list">
+          <li>正規化層の基礎的な知識を理解する</li>
+          <li>代表的な正規化手法について理解する</li>
+          <li>正規化層がディープラーニングモデルの学習において、どのような役割を果たすのか説明できる</li>
+        </ul>
+      </section>
+      
+      <!-- 正規化層とは -->
+      <section id="intro" class="section">
+        <h2 class="section-title"><i class="fas fa-info-circle"></i>正規化層とは</h2>
+        <p>
+          <span class="keyword">正規化層（Normalization Layer）</span>は、ディープラーニングモデルの学習において、ニューラルネットワークの各層の入力を正規化（標準化）するための層です。これにより、学習の安定性や収束速度が向上し、より良いモデルを効率的に学習することができます。
+        </p>
+        
+        <div class="content-box">
+          <h3 class="concept-title">正規化層の必要性</h3>
+          <p>ディープラーニングモデルの学習において、以下のような問題が発生することがあります：</p>
+          <ul>
+            <li><strong>内部共変量シフト（Internal Covariate Shift）</strong>：ネットワークの深い層に進むにつれて、前の層のパラメータ更新により入力分布が変化する現象</li>
+            <li><strong>勾配消失・爆発問題</strong>：深いネットワークで勾配が消失または爆発し、学習が困難になる問題</li>
+            <li><strong>学習速度の低下</strong>：入力値の分布が偏ることによる学習効率の低下</li>
+          </ul>
+          <p>正規化層はこれらの問題を軽減し、より効率的な学習を可能にします。</p>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>正規化層の基本的な機能</h3>
+          <p>正規化層は基本的に以下の処理を行います：</p>
+          <ol>
+            <li>入力データの分布を変換（通常は平均0、分散1に近づける）</li>
+            <li>学習可能なパラメータ（スケール γ とシフト β）を用いて変換後の表現力を保持</li>
+          </ol>
+          <p>数式で表すと：</p>
+          <p>\[ y = \gamma \cdot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta \]</p>
+          <p>ここで、μは平均、σは標準偏差、εは数値的安定性のための小さな定数、γとβは学習するパラメータです。</p>
+        </div>
+        
+        <div class="note-box">
+          <p><strong>正規化の効果：</strong></p>
+          <ul>
+            <li>学習の安定化</li>
+            <li>学習速度の向上</li>
+            <li>より大きな学習率の使用が可能に</li>
+            <li>過学習の抑制（正則化効果）</li>
+            <li>初期値への依存度の低減</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- バッチ正規化 -->
+      <section id="batch-norm" class="section">
+        <h2 class="section-title"><i class="fas fa-chart-bar"></i>バッチ正規化（Batch Normalization）</h2>
+        <p>
+          <span class="keyword">バッチ正規化（Batch Normalization）</span>は、2015年にIoffe氏とSzegedy氏によって提案された、最も広く使われている正規化手法です。ミニバッチごとに統計量を計算し、入力を正規化します。
+        </p>
+        
+        <div class="content-box">
+          <h3 class="concept-title">バッチ正規化の処理</h3>
+          <ol>
+            <li>ミニバッチ内の各特徴量（チャネル）について平均と分散を計算</li>
+            <li>計算した統計量を用いて入力を正規化（平均0、分散1に変換）</li>
+            <li>学習可能なスケールパラメータγとシフトパラメータβを適用</li>
+          </ol>
+          <p>学習時とテスト時で動作が異なります：</p>
+          <ul>
+            <li><strong>学習時</strong>：現在のミニバッチの統計量を使用</li>
+            <li><strong>テスト時</strong>：学習時に計算した移動平均を使用</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>バッチ正規化の計算式</h3>
+          <p>1. ミニバッチの平均を計算：</p>
+          <p>\[ \mu_B = \frac{1}{m} \sum_{i=1}^{m} x_i \]</p>
+          
+          <p>2. ミニバッチの分散を計算：</p>
+          <p>\[ \sigma_B^2 = \frac{1}{m} \sum_{i=1}^{m} (x_i - \mu_B)^2 \]</p>
+          
+          <p>3. 正規化の適用：</p>
+          <p>\[ \hat{x}_i = \frac{x_i - \mu_B}{\sqrt{\sigma_B^2 + \epsilon}} \]</p>
+          
+          <p>4. スケーリングとシフト：</p>
+          <p>\[ y_i = \gamma \cdot \hat{x}_i + \beta \]</p>
+          
+          <p>ここで、mはミニバッチサイズ、εは数値的安定性のための小さな定数、γとβは学習するパラメータです。</p>
+        </div>
+        
+        <div class="note-box">
+          <p><strong>バッチ正規化の利点：</strong></p>
+          <ul>
+            <li>内部共変量シフトの軽減</li>
+            <li>学習の安定化と高速化</li>
+            <li>より大きな学習率の使用が可能</li>
+            <li>初期値への依存度の低減</li>
+            <li>正則化効果によるモデルの汎化性能向上</li>
+          </ul>
+          
+          <p><strong>バッチ正規化の欠点：</strong></p>
+          <ul>
+            <li>小さなバッチサイズでは統計量の推定が不安定</li>
+            <li>RNNなどの可変長シーケンスモデルには適用が難しい</li>
+            <li>バッチ間の依存関係が生じるため並列処理が複雑化</li>
+            <li>テスト時と学習時で動作が異なる</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- レイヤー正規化 -->
+      <section id="layer-norm" class="section">
+        <h2 class="section-title"><i class="fas fa-align-justify"></i>レイヤー正規化（Layer Normalization）</h2>
+        <p>
+          <span class="keyword">レイヤー正規化（Layer Normalization）</span>は、2016年にBa氏らによって提案された正規化手法で、RNNやTransformerなどのシーケンスモデルで特に有効です。バッチ正規化とは異なり、各サンプル内で正規化を行うため、バッチサイズに依存しません。
+        </p>
+        
+        <div class="content-box">
+          <h3 class="concept-title">レイヤー正規化の処理</h3>
+          <ol>
+            <li>各サンプルについて、そのサンプルの全ての特徴量（全チャネル）にわたって平均と分散を計算</li>
+            <li>計算した統計量を用いて特徴量を正規化</li>
+            <li>学習可能なスケールパラメータγとシフトパラメータβを適用</li>
+          </ol>
+          <p>重要な特徴：</p>
+          <ul>
+            <li>バッチサイズによらず動作するため、小さなバッチサイズやオンライン学習でも安定</li>
+            <li>学習時とテスト時で同じ操作を行う（移動平均を保持する必要がない）</li>
+            <li>RNNなどのシーケンスモデルに特に適している</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>レイヤー正規化の計算式</h3>
+          <p>1. 各サンプルの平均を計算（Cは特徴量の次元数）：</p>
+          <p>\[ \mu_i = \frac{1}{C} \sum_{c=1}^{C} x_{i,c} \]</p>
+          
+          <p>2. 各サンプルの分散を計算：</p>
+          <p>\[ \sigma_i^2 = \frac{1}{C} \sum_{c=1}^{C} (x_{i,c} - \mu_i)^2 \]</p>
+          
+          <p>3. 正規化の適用：</p>
+          <p>\[ \hat{x}_{i,c} = \frac{x_{i,c} - \mu_i}{\sqrt{\sigma_i^2 + \epsilon}} \]</p>
+          
+          <p>4. スケーリングとシフト：</p>
+          <p>\[ y_{i,c} = \gamma_c \cdot \hat{x}_{i,c} + \beta_c \]</p>
+        </div>
+        
+        <div class="note-box">
+          <p><strong>レイヤー正規化の利点：</strong></p>
+          <ul>
+            <li>バッチサイズに依存しない</li>
+            <li>オンライン学習や小さなバッチサイズでも安定</li>
+            <li>RNNなどのシーケンスモデルに適している</li>
+            <li>テスト時に移動平均を使用する必要がない</li>
+            <li>Transformerなどの自然言語処理モデルで広く使用されている</li>
+          </ul>
+          
+          <p><strong>レイヤー正規化の欠点：</strong></p>
+          <ul>
+            <li>CNNでは必ずしもバッチ正規化と同等のパフォーマンスが得られない</li>
+            <li>各サンプル内での正規化のため、バッチ全体の情報を活用できない</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- インスタンス正規化 -->
+      <section id="instance-norm" class="section">
+        <h2 class="section-title"><i class="fas fa-image"></i>インスタンス正規化（Instance Normalization）</h2>
+        <p>
+          <span class="keyword">インスタンス正規化（Instance Normalization）</span>は、2016年にUlyanov氏らによって提案された正規化手法で、主に画像生成タスク（スタイル変換など）で使用されます。各サンプルの各チャネルごとに独立して正規化を行います。
+        </p>
+        
+        <div class="content-box">
+          <h3 class="concept-title">インスタンス正規化の処理</h3>
+          <ol>
+            <li>各サンプルの各チャネルについて、空間的な次元（高さと幅）にわたって平均と分散を計算</li>
+            <li>計算した統計量を用いて特徴量を正規化</li>
+            <li>学習可能なスケールパラメータγとシフトパラメータβを適用</li>
+          </ol>
+          <p>特徴：</p>
+          <ul>
+            <li>コンテンツは保持しながら、スタイルの情報を除去するのに効果的</li>
+            <li>画像のスタイル変換タスクで特に効果を発揮</li>
+            <li>バッチ正規化やレイヤー正規化よりも細かい粒度で正規化を行う</li>
+          </ul>
+        </div>
+        
+        <!-- 正規化手法の視覚的比較 -->
+        <div class="image-container">
+          <img src="img/Gimage_1-5-3_01.png" alt="異なる正規化手法の比較図">
+          <figcaption>各正規化手法の正規化範囲の違い。バッチ正規化はバッチとチャネルにわたって、レイヤー正規化は各サンプルの全チャネルにわたって、インスタンス正規化は各サンプルの各チャネルごとに、グループ正規化は各サンプルのチャネルグループごとに正規化を行う。</figcaption>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>インスタンス正規化の計算式</h3>
+          <p>1. 各サンプルの各チャネルの平均を計算（HとWは特徴マップの高さと幅）：</p>
+          <p>\[ \mu_{i,c} = \frac{1}{H \times W} \sum_{h=1}^{H} \sum_{w=1}^{W} x_{i,c,h,w} \]</p>
+          
+          <p>2. 各サンプルの各チャネルの分散を計算：</p>
+          <p>\[ \sigma_{i,c}^2 = \frac{1}{H \times W} \sum_{h=1}^{H} \sum_{w=1}^{W} (x_{i,c,h,w} - \mu_{i,c})^2 \]</p>
+          
+          <p>3. 正規化の適用：</p>
+          <p>\[ \hat{x}_{i,c,h,w} = \frac{x_{i,c,h,w} - \mu_{i,c}}{\sqrt{\sigma_{i,c}^2 + \epsilon}} \]</p>
+          
+          <p>4. スケーリングとシフト：</p>
+          <p>\[ y_{i,c,h,w} = \gamma_c \cdot \hat{x}_{i,c,h,w} + \beta_c \]</p>
+        </div>
+        
+        <div class="note-box">
+          <p><strong>インスタンス正規化の利点：</strong></p>
+          <ul>
+            <li>画像のスタイル変換タスクで高い効果</li>
+            <li>コンテンツを保持しながらスタイル情報を除去</li>
+            <li>バッチサイズに依存しない</li>
+            <li>GAN（敵対的生成ネットワーク）などの生成モデルで広く使用されている</li>
+          </ul>
+          
+          <p><strong>インスタンス正規化の欠点：</strong></p>
+          <ul>
+            <li>チャネル間の情報を活用できない</li>
+            <li>分類タスクなどでは必ずしも最適ではない</li>
+            <li>バッチ全体の情報を活用できない</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- グループ正規化 -->
+      <section id="group-norm" class="section">
+        <h2 class="section-title"><i class="fas fa-object-group"></i>グループ正規化（Group Normalization）</h2>
+        <p>
+          <span class="keyword">グループ正規化（Group Normalization）</span>は、2018年にWu氏とHe氏によって提案された正規化手法で、チャネルをグループに分割し、各グループ内で正規化を行います。レイヤー正規化とインスタンス正規化の中間的なアプローチです。
+        </p>
+        
+        <div class="content-box">
+          <h3 class="concept-title">グループ正規化の処理</h3>
+          <ol>
+            <li>チャネルをG個のグループに分割（例：32チャネルを8グループに分割し、各グループ4チャネル）</li>
+            <li>各サンプルの各グループについて、グループ内の全チャネルと空間的な次元（高さと幅）にわたって平均と分散を計算</li>
+            <li>計算した統計量を用いて特徴量を正規化</li>
+            <li>学習可能なスケールパラメータγとシフトパラメータβを適用</li>
+          </ol>
+          <p>特徴：</p>
+          <ul>
+            <li>バッチサイズに依存しない</li>
+            <li>チャネル間の相関を考慮できる（インスタンス正規化より柔軟）</li>
+            <li>レイヤー正規化とインスタンス正規化の中間的な手法</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>グループ正規化の計算式</h3>
+          <p>チャネルをG個のグループに分割し、各グループに対して以下の計算を行います：</p>
+          
+          <p>1. 各サンプルの各グループの平均を計算：</p>
+          <p>\[ \mu_{i,g} = \frac{1}{C/G \times H \times W} \sum_{c \in \mathcal{G}_g} \sum_{h=1}^{H} \sum_{w=1}^{W} x_{i,c,h,w} \]</p>
+          
+          <p>2. 各サンプルの各グループの分散を計算：</p>
+          <p>\[ \sigma_{i,g}^2 = \frac{1}{C/G \times H \times W} \sum_{c \in \mathcal{G}_g} \sum_{h=1}^{H} \sum_{w=1}^{W} (x_{i,c,h,w} - \mu_{i,g})^2 \]</p>
+          
+          <p>3. 正規化の適用：</p>
+          <p>\[ \hat{x}_{i,c,h,w} = \frac{x_{i,c,h,w} - \mu_{i,g(c)}}{\sqrt{\sigma_{i,g(c)}^2 + \epsilon}} \]</p>
+          
+          <p>4. スケーリングとシフト：</p>
+          <p>\[ y_{i,c,h,w} = \gamma_c \cdot \hat{x}_{i,c,h,w} + \beta_c \]</p>
+          
+          <p>ここで、g(c)はチャネルcが属するグループを表します。</p>
+        </div>
+        
+        <div class="note-box">
+          <p><strong>グループ正規化の利点：</strong></p>
+          <ul>
+            <li>バッチサイズに依存しない</li>
+            <li>小さなバッチサイズでもバッチ正規化に近いパフォーマンス</li>
+            <li>チャネル間の相関を考慮できる</li>
+            <li>オブジェクト検出、セグメンテーションなど計算資源の制約が厳しいタスクに適している</li>
+          </ul>
+          
+          <p><strong>グループ正規化の欠点：</strong></p>
+          <ul>
+            <li>グループ数の選択にチューニングが必要</li>
+            <li>バッチ全体の情報を活用できない</li>
+            <li>特定のタスクではバッチ正規化より劣る場合がある</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- 正規化手法の比較 -->
+      <section id="comparison" class="section">
+        <h2 class="section-title"><i class="fas fa-balance-scale"></i>正規化手法の比較</h2>
+        <p>
+          各正規化手法は計算方法や適用範囲が異なり、タスクやモデル構造に応じて適切な手法を選択することが重要です。ここでは代表的な正規化手法の特性を比較します。
+        </p>
+        
+        <!-- 正規化手法の詳細な比較図 -->
+        <div class="image-container">
+          <img src="img/Gimage_1-5-3_02.png" alt="各正規化手法の詳細な比較図">
+          <figcaption>各正規化手法の計算方法と特性の詳細な比較。バッチ正規化、レイヤー正規化、インスタンス正規化、グループ正規化の主な違いと適用場面。</figcaption>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>正規化手法</th>
+                <th>正規化の範囲</th>
+                <th>バッチ依存性</th>
+                <th>主な用途</th>
+                <th>特徴</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>バッチ正規化</strong><br>(Batch Normalization)</td>
+                <td>ミニバッチ内の各チャネルごと</td>
+                <td>あり</td>
+                <td>CNNなどの一般的なネットワーク</td>
+                <td>最も広く使われている、学習・推論時で動作が異なる</td>
+              </tr>
+              <tr>
+                <td><strong>レイヤー正規化</strong><br>(Layer Normalization)</td>
+                <td>各サンプルの全チャネル</td>
+                <td>なし</td>
+                <td>RNN、Transformer</td>
+                <td>シーケンスモデルに適している、学習・推論時で同じ動作</td>
+              </tr>
+              <tr>
+                <td><strong>インスタンス正規化</strong><br>(Instance Normalization)</td>
+                <td>各サンプルの各チャネルごと</td>
+                <td>なし</td>
+                <td>画像生成、スタイル変換</td>
+                <td>スタイル情報を除去するのに効果的</td>
+              </tr>
+              <tr>
+                <td><strong>グループ正規化</strong><br>(Group Normalization)</td>
+                <td>各サンプルのチャネルグループごと</td>
+                <td>なし</td>
+                <td>小バッチサイズのCNN</td>
+                <td>レイヤー正規化とインスタンス正規化の中間</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>正規化手法の選択基準</h3>
+          <ul>
+            <li><strong>CNNベースのモデル + 十分な計算リソース</strong> → バッチ正規化</li>
+            <li><strong>RNN/Transformerベースのモデル</strong> → レイヤー正規化</li>
+            <li><strong>画像生成/スタイル変換</strong> → インスタンス正規化</li>
+            <li><strong>小さなバッチサイズのCNN</strong> → グループ正規化</li>
+          </ul>
+          <p>適切な正規化手法の選択はモデルのパフォーマンスに大きく影響するため、タスクや計算環境に応じて慎重に選ぶことが重要です。</p>
+        </div>
+      </section>
+      
+      <!-- Key Insights セクション -->
+      <section id="key-insights" class="section">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i>Key Insights</h2>
+        
+        <div class="content-box">
+          <h3 class="concept-title">1. 正規化層の本質的な役割</h3>
+          <p>正規化層は以下の重要な役割を果たしています：</p>
+          <ul>
+            <li><strong>内部共変量シフトの軽減</strong>：ネットワークの深い層での入力分布の変化を抑制</li>
+            <li><strong>勾配消失/爆発の防止</strong>：勾配の流れを改善し、安定した学習を実現</li>
+            <li><strong>最適化の効率化</strong>：より速い収束と高い学習率の使用を可能に</li>
+            <li><strong>正則化効果</strong>：過学習を抑制し汎化性能を向上</li>
+          </ul>
+        </div>
+        
+        <div class="content-box">
+          <h3 class="concept-title">2. 正規化手法の使い分け</h3>
+          <p>各正規化手法はそれぞれに適した用途があります：</p>
+          <ul>
+            <li><strong>バッチ正規化</strong>：一般的なCNNの標準的な選択肢、大きなバッチサイズで効果的</li>
+            <li><strong>レイヤー正規化</strong>：RNNやTransformerなどのシーケンスモデルに最適</li>
+            <li><strong>インスタンス正規化</strong>：画像のスタイル変換など生成タスクで優れた性能</li>
+            <li><strong>グループ正規化</strong>：小さなバッチサイズでバッチ正規化の代替として有効</li>
+          </ul>
+        </div>
+        
+        <div class="content-box">
+          <h3 class="concept-title">3. 実装上の考慮点</h3>
+          <p>正規化層を実装する際には、以下の点に注意が必要です：</p>
+          <ul>
+            <li><strong>順伝播と逆伝播の両方</strong>での正しい実装</li>
+            <li><strong>学習可能パラメータ</strong>（γとβ）の適切な初期化</li>
+            <li><strong>推論時</strong>の動作（特にバッチ正規化では移動平均の使用）</li>
+            <li>数値的安定性のための<strong>εパラメータ</strong>の設定</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- Take Home Message セクション -->
+      <section id="take-home" class="section">
+        <h2 class="section-title"><i class="fas fa-key"></i>Take Home Message</h2>
+        
+        <div class="handwritten-box" style="text-align: center; transform: rotate(0deg); font-size: 1.2rem;">
+          <p>正規化層はディープラーニングの性能向上に不可欠な要素技術です。</p>
+          <p>タスクに応じた適切な正規化手法の選択がモデルの性能を大きく左右します。</p>
+          <p>
+            <span class="keyword">バッチ正規化（Batch Normalization）</span>、
+            <span class="keyword">レイヤー正規化（Layer Normalization）</span>、
+            <span class="keyword">インスタンス正規化（Instance Normalization）</span>、
+            <span class="keyword">グループ正規化（Group Normalization）</span>
+            の特性と使い分けを理解しましょう。
+          </p>
+        </div>
+        
+        <!-- 用語集 -->
+        <div class="content-box">
+          <h3 class="concept-title">用語集</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>用語</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>バッチ正規化</strong><br>(Batch Normalization)</td>
+                <td>ミニバッチ単位で統計量を計算し、各特徴量の分布を正規化する手法。2015年にIoffe氏とSzegedy氏によって提案。</td>
+              </tr>
+              <tr>
+                <td><strong>レイヤー正規化</strong><br>(Layer Normalization)</td>
+                <td>各サンプル内の全特徴量にわたって統計量を計算する正規化手法。RNNなどのシーケンスモデルに適している。</td>
+              </tr>
+              <tr>
+                <td><strong>インスタンス正規化</strong><br>(Instance Normalization)</td>
+                <td>各サンプルの各チャネルごとに統計量を計算する正規化手法。画像のスタイル変換タスクで効果的。</td>
+              </tr>
+              <tr>
+                <td><strong>グループ正規化</strong><br>(Group Normalization)</td>
+                <td>チャネルをグループに分割し、各グループ内で統計量を計算する正規化手法。小さなバッチサイズでの学習に適している。</td>
+              </tr>
+              <tr>
+                <td><strong>内部共変量シフト</strong><br>(Internal Covariate Shift)</td>
+                <td>ネットワークの層が深くなるにつれて、前の層のパラメータ更新により入力分布が変化する現象。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      
+      <!-- フッター -->
+      <footer class="footer">
+        <p>G検定学習ノート - 1-5-3 正規化層 | 作成: <span id="current-date"></span></p>
+        <p>原稿とコード: Claude | 画像: ChatGPT</p>
+      </footer>
+    </main>
+  </div>
+  
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top" id="scroll-top">
+    <i class="fas fa-chevron-up"></i>
+  </div>
+  
+  <script>
+    // 現在の日付を設定
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('ja-JP');
+    
+    // スクロールトップボタンの表示制御
+    window.addEventListener('scroll', function() {
+      const scrollTopBtn = document.getElementById('scroll-top');
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+    
+    // スクロールトップボタンのクリックイベント
+    document.getElementById('scroll-top').addEventListener('click', function() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // ナビゲーションメニューを設定するための関数
+    function setupNavigation() {
+      const sections = document.querySelectorAll('section');
+      const navMenu = document.getElementById('nav-menu');
+      
+      // ナビゲーションメニューをクリア
+      navMenu.innerHTML = '';
+      
+      // 各セクションに対応するナビゲーション項目を作成
+      sections.forEach((section, index) => {
+        const id = section.id;
+        const title = section.querySelector('h1, h2').textContent.replace(/^\S+\s+/, ''); // アイコンを除いたテキスト
+        
+        // アイコンクラスを取得
+        let iconClass = 'fa-circle';
+        const iconElement = section.querySelector('h1 i, h2 i');
+        if (iconElement) {
+          iconClass = Array.from(iconElement.classList).find(cls => cls.startsWith('fa-') && cls !== 'fas' && cls !== 'far');
+        }
+        
+        // ナビゲーション項目を作成
+        const navItem = document.createElement('li');
+        navItem.className = 'nav-item';
+        navItem.innerHTML = `
+          <a href="#${id}" class="nav-link">
+            <i class="fas ${iconClass}"></i>
+            ${title}
+          </a>
+        `;
+        
+        navMenu.appendChild(navItem);
+      });
+      
+      // ナビゲーションリンクにクリックイベントを追加
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href').substring(1);
+          const targetElement = document.getElementById(targetId);
+          
+          window.scrollTo({
+            top: targetElement.offsetTop - 20,
+            behavior: 'smooth'
+          });
+        });
+      });
+    }
+    
+    // スクロール位置に基づいてアクティブなナビゲーション項目を更新する関数
+    function updateActiveNavItem() {
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      // 現在のスクロール位置を取得
+      const scrollPosition = window.scrollY;
+      
+      // 各セクションのオフセット位置を確認し、アクティブなセクションを判定
+      sections.forEach((section, index) => {
+        const sectionTop = section.offsetTop - 100;
+        const sectionBottom = sectionTop + section.offsetHeight;
+        
+        if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+          // すべてのナビゲーション項目から 'active' クラスを削除
+          navLinks.forEach(link => link.classList.remove('active'));
+          
+          // 現在のセクションに対応するナビゲーション項目に 'active' クラスを追加
+          navLinks[index].classList.add('active');
+        }
+      });
+    }
+    
+    // DOMContentLoaded イベントでナビゲーションを設定
+    document.addEventListener('DOMContentLoaded', function() {
+      setupNavigation();
+      updateActiveNavItem(); // 初期状態のアクティブなナビゲーション項目を設定
+    });
+    
+    // スクロールイベントでアクティブなナビゲーション項目を更新
+    window.addEventListener('scroll', function() {
+      updateActiveNavItem();
+    });
+  </script>
+</body>
+</html> 

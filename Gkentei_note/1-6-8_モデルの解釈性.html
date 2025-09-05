@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-6-8 モデルの解釈性 - G検定学習ノート</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap');
+    
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      line-height: 1.6;
+      color: var(--key);
+      background-color: var(--white);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* サイドバースタイル */
+    .sidebar {
+      width: 20%;
+      background-color: var(--key);
+      color: var(--white);
+      padding: 2rem 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+    
+    .sidebar-header {
+      text-align: center;
+      padding: 0 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 1rem;
+    }
+    
+    .sidebar-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--cyan);
+    }
+    
+    .sidebar-subtitle {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--white);
+      opacity: 0.8;
+    }
+    
+    .sidebar-nav {
+      list-style: none;
+      padding: 0 1rem;
+    }
+    
+    .sidebar-nav li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      padding: 0.7rem 1rem;
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    .sidebar-nav a:hover, .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--yellow);
+    }
+    
+    .sidebar-nav i {
+      margin-right: 0.7rem;
+      width: 1.2rem;
+      text-align: center;
+    }
+    
+    /* スクロールバーのカスタマイズ */
+    .sidebar::-webkit-scrollbar {
+      width: 5px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: var(--key);
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--cyan);
+      border-radius: 10px;
+    }
+    
+    /* メインコンテンツスタイル */
+    .main-content {
+      flex: 1;
+      margin-left: 20%;
+      padding: 2rem;
+      max-width: 80%;
+    }
+    
+    section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* タイトルセクションスタイル */
+    .title-section {
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, var(--white) 0%, #f8f8f8 100%);
+      text-align: center;
+      position: relative;
+    }
+    
+    .main-title {
+      font-family: 'Klee One', cursive;
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--key);
+      position: relative;
+      display: inline-block;
+    }
+    
+    .main-title::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 10%;
+      width: 80%;
+      height: 3px;
+      background-color: var(--magenta);
+      border-radius: 2px;
+    }
+    
+    .subtitle {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      color: var(--dark-gray);
+    }
+    
+    .overview-list {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: left;
+      padding: 1rem 2rem;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      border-left: 4px solid var(--cyan);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .overview-list h3 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.7rem;
+      color: var(--key);
+    }
+    
+    .overview-list ul {
+      list-style-position: inside;
+      padding-left: 0.5rem;
+    }
+    
+    .overview-list li {
+      margin-bottom: 0.5rem;
+      position: relative;
+      padding-left: 0.5rem;
+    }
+    
+    /* セクションタイトルスタイル */
+    .section-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 2px dashed var(--cyan);
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title i {
+      margin-right: 0.7rem;
+      color: var(--magenta);
+    }
+    
+    /* テキストスタイル */
+    p {
+      margin-bottom: 1.2rem;
+      line-height: 1.8;
+    }
+    
+    /* リストスタイル */
+    ul, ol {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.7;
+    }
+    
+    /* ノートボックススタイル */
+    .note-box {
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background-color: rgba(255, 230, 0, 0.08);
+      border-left: 4px solid var(--yellow);
+      border-radius: 6px;
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -0.5rem;
+      left: -0.5rem;
+      font-size: 1.3rem;
+    }
+    
+    .note-title {
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: var(--key);
+    }
+    
+    /* 手書き風ボックススタイル */
+    .handwritten-box {
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background-color: var(--white);
+      border: 2px dashed var(--magenta);
+      border-radius: 12px;
+      position: relative;
+      transform: rotate(-0.5deg);
+      box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .handwritten-title {
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--magenta);
+    }
+    
+    /* キーワードスタイル */
+    .keyword {
+      font-weight: 700;
+      color: var(--magenta);
+      position: relative;
+      display: inline-block;
+    }
+    
+    .keyword::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: rgba(255, 64, 160, 0.3);
+    }
+    
+    /* 画像コンテナスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* テーブルスタイル */
+    table {
+      width: 100%;
+      margin: 1.5rem 0;
+      border-collapse: collapse;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    thead {
+      background-color: var(--cyan);
+      color: var(--white);
+    }
+    
+    th {
+      padding: 1rem;
+      text-align: left;
+    }
+    
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+    
+    /* Key Insightsスタイル */
+    .key-insights {
+      padding: 1.5rem;
+      background-color: rgba(255, 64, 160, 0.05);
+      border-radius: 10px;
+      margin: 2rem 0;
+    }
+    
+    .insight-item {
+      display: flex;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(24, 24, 24, 0.1);
+    }
+    
+    .insight-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    
+    .insight-number {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+    
+    .insight-content {
+      flex: 1;
+    }
+    
+    .insight-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--magenta);
+    }
+    
+    /* Take Home Messageスタイル */
+    .take-home-message {
+      padding: 2rem;
+      margin: 2rem 0;
+      background-color: var(--white);
+      border: 2px solid var(--yellow);
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .take-home-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .take-home-title i {
+      margin-right: 0.7rem;
+      color: var(--yellow);
+    }
+    
+    .take-home-content {
+      font-family: 'Klee One', cursive;
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.8;
+      color: var(--key);
+    }
+    
+    /* 用語集スタイル */
+    .glossary {
+      margin: 2rem 0;
+    }
+    
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .glossary-table th {
+      background-color: var(--cyan);
+      color: var(--white);
+      padding: 1rem;
+      text-align: left;
+    }
+    
+    .glossary-table td {
+      padding: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .glossary-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .glossary-table tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+    
+    .term-jp {
+      font-weight: 600;
+      color: var(--key);
+    }
+    
+    .term-en {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+    }
+    
+    /* レスポンシブスタイル */
+    @media screen and (max-width: 1024px) {
+      body {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        position: relative;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        max-width: 100%;
+      }
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 3rem;
+      height: 3rem;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .scroll-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1 class="sidebar-title">ディープラーニングの応用例</h1>
+      <p class="sidebar-subtitle">モデルの解釈性</p>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="#intro" class="active"><i class="fas fa-book-open"></i>はじめに</a></li>
+      <li><a href="#background"><i class="fas fa-history"></i>解釈性が必要な背景</a></li>
+      <li><a href="#usecase"><i class="fas fa-briefcase"></i>ユースケース</a></li>
+      <li><a href="#methods"><i class="fas fa-tools"></i>代表的な解釈手法</a></li>
+      <li><a href="#glossary"><i class="fas fa-clipboard-list"></i>用語集</a></li>
+      <li><a href="#key-insights"><i class="fas fa-lightbulb"></i>Key Insights</a></li>
+      <li><a href="#take-home"><i class="fas fa-key"></i>Take Home Message</a></li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
+    <!-- タイトルセクション -->
+    <section id="intro" class="title-section">
+      <h1 class="main-title">モデルの解釈性</h1>
+      <p class="subtitle">AIモデルの判断理由を理解するための技術と背景</p>
+      
+      <div class="overview-list">
+        <h3><i class="fas fa-check-circle" style="color: var(--cyan);"></i> 学習目標</h3>
+        <ul>
+          <li>モデルの解釈性が必要な背景について理解する</li>
+          <li>解釈性が必要なユースケースについて理解する</li>
+          <li>解釈性の向上に寄与する代表的な手法について理解する</li>
+        </ul>
+      </div>
+    </section>
+    
+    <!-- 解釈性が必要な背景セクション -->
+    <section id="background">
+      <h2 class="section-title"><i class="fas fa-history"></i>モデルの解釈性が必要な背景</h2>
+      
+      <p>
+        ディープラーニングモデルは優れた性能を発揮する一方で、その複雑さゆえに「ブラックボックス問題」を抱えています。特に重要な意思決定に関わる場面では、AIがなぜその判断に至ったのかを説明できることが重要です。
+      </p>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-title">なぜ解釈性が求められるのか？</h3>
+        <p>
+          <i class="fas fa-balance-scale" style="color: var(--yellow);"></i> <strong>法的要請：</strong>EUのGDPRなど、一部の法規制では自動的な意思決定の説明を要求しています。<br>
+          <i class="fas fa-shield-alt" style="color: var(--cyan);"></i> <strong>信頼性の確保：</strong>AIの判断が理解できると、ユーザーや利害関係者からの信頼を得やすくなります。<br>
+          <i class="fas fa-bug" style="color: var(--magenta);"></i> <strong>モデル改善：</strong>モデルの挙動を理解することで、バイアスや弱点を特定し、改善することができます。<br>
+          <i class="fas fa-lightbulb" style="color: var(--yellow);"></i> <strong>知識獲得：</strong>モデルの判断から新たな知見を得られる可能性があります。
+        </p>
+      </div>
+      
+      <p>
+        近年、様々な分野でAIが活用されるようになるにつれ、<span class="keyword">説明可能AI (XAI: eXplainable AI)</span>の重要性が高まっています。特に医療診断や与信判断、自動運転など、人命や重要な権利に関わる領域では、単に精度が高いだけでなく、その判断過程が理解できることが不可欠となっています。
+      </p>
+      
+      <div class="note-box">
+        <h4 class="note-title">解釈性と透明性の関係</h4>
+        <p>
+          解釈性（Interpretability）とは、モデルの判断理由を人間が理解できる程度を表します。一方、透明性（Transparency）は、モデルの内部構造や処理過程が観察可能であることを意味します。両者は関連していますが、必ずしも同一ではありません。解釈可能でも透明でないモデル、あるいはその逆も存在します。
+        </p>
+      </div>
+    </section>
+    
+    <!-- ユースケースセクション -->
+    <section id="usecase">
+      <h2 class="section-title"><i class="fas fa-briefcase"></i>解釈性が必要なユースケース</h2>
+      
+      <p>
+        AIモデルの解釈性が特に重要となる代表的なユースケースについて見ていきましょう。これらの分野では、単に高い精度を持つモデルを構築するだけでなく、その判断理由を説明できることが求められます。
+      </p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>分野</th>
+            <th>ユースケース</th>
+            <th>解釈性が重要な理由</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><i class="fas fa-heartbeat"></i> 医療</td>
+            <td>疾病診断、予後予測、治療計画</td>
+            <td>医師の意思決定支援、患者への説明責任、安全性確保</td>
+          </tr>
+          <tr>
+            <td><i class="fas fa-balance-scale"></i> 金融</td>
+            <td>与信審査、詐欺検出、投資判断</td>
+            <td>規制遵守、公平性確保、リスク管理</td>
+          </tr>
+          <tr>
+            <td><i class="fas fa-car"></i> 自動運転</td>
+            <td>物体認識、経路計画、意思決定</td>
+            <td>安全性保証、責任の所在明確化、ユーザー信頼</td>
+          </tr>
+          <tr>
+            <td><i class="fas fa-gavel"></i> 法務・司法</td>
+            <td>再犯予測、判例分析</td>
+            <td>公正な判断、説明責任、偏見防止</td>
+          </tr>
+          <tr>
+            <td><i class="fas fa-user-shield"></i> セキュリティ</td>
+            <td>不正アクセス検出、異常検知</td>
+            <td>誤検出の最小化、対策立案、脅威理解</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-title">医療分野での具体例</h3>
+        <p>
+          糖尿病網膜症の診断を行うAIシステムを考えてみましょう。このシステムが単に「この患者は糖尿病網膜症です」と判断するだけでなく、「網膜画像の右上部分に見られる微小出血と、中心付近の硬性白斑が特徴的なため」と説明できれば、医師はその判断を検証し、患者に説明しやすくなります。
+        </p>
+      </div>
+      
+      <p>
+        これらの分野に共通するのは、<strong>高い社会的影響力</strong>と<strong>誤判断時のリスクの大きさ</strong>です。また、<span class="keyword">フェアネス（公平性）</span>の観点からも、AIの判断に偏りがないことを確認するために解釈性が重要となります。
+      </p>
+    </section>
+    
+    <!-- 解釈手法セクション -->
+    <section id="methods">
+      <h2 class="section-title"><i class="fas fa-tools"></i>代表的な解釈手法</h2>
+      
+      <p>
+        ディープラーニングモデルの解釈性を向上させるための手法は、大きく「<strong>本質的に解釈可能なモデル</strong>」と「<strong>事後的な解釈手法</strong>」に分けることができます。ここでは、シラバスに記載されている代表的な手法について解説します。
+      </p>
+      
+      <h3 style="margin-top: 2rem; font-size: 1.3rem; color: var(--key);"><i class="fas fa-eye" style="color: var(--cyan);"></i> 可視化に基づく手法</h3>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-title">CAM (Class Activation Mapping)</h3>
+        <p>
+          <span class="keyword">CAM (Class Activation Mapping)</span>は、CNNの最終的な畳み込み層の特徴マップを利用して、モデルがどの領域に注目して分類を行ったかを可視化する手法です。画像分類タスクにおいて、「この部分を見て判断した」という情報を提供します。
+        </p>
+      </div>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-title">Grad-CAM (Gradient-weighted Class Activation Mapping)</h3>
+        <p>
+          <span class="keyword">Grad-CAM</span>は、CAMを拡張した手法で、勾配情報を用いて特徴マップの重要度を重み付けします。元のCAMよりも適用範囲が広く、様々なCNNアーキテクチャに対応できます。「モデルがこの部分に強く反応した」という情報を可視化します。
+        </p>
+      </div>
+      
+      <h3 style="margin-top: 2rem; font-size: 1.3rem; color: var(--key);"><i class="fas fa-puzzle-piece" style="color: var(--magenta);"></i> モデル不可知（Model-Agnostic）手法</h3>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-title">LIME (Local Interpretable Model-agnostic Explanations)</h3>
+        <p>
+          <span class="keyword">LIME</span>は、任意のブラックボックスモデルの個別予測を解釈するための手法です。元のモデルの予測を局所的に近似する解釈可能なモデル（線形モデルなど）を構築し、その近似モデルから説明を得ます。「このような入力があったから、このような判断になった」という関係を示します。
+        </p>
+      </div>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-title">SHAP (SHapley Additive exPlanations)</h3>
+        <p>
+          <span class="keyword">SHAP</span>は、ゲーム理論におけるシャープレイ値の概念を用いて、各特徴量の予測への寄与度を計算する手法です。様々な特徴の組み合わせにおける予測結果から、個々の特徴の重要度を統計的に算出します。数学的に厳密な基礎を持ち、一貫性のある説明が可能です。
+        </p>
+      </div>
+      
+      <h3 style="margin-top: 2rem; font-size: 1.3rem; color: var(--key);"><i class="fas fa-chart-bar" style="color: var(--yellow);"></i> 特徴量重要度の測定</h3>
+      
+      <div class="handwritten-box">
+        <h3 class="handwritten-title">Permutation Importance</h3>
+        <p>
+          <span class="keyword">Permutation Importance</span>（置換重要度）は、特定の特徴量の値をランダムに置換（シャッフル）して、モデルの予測性能がどれだけ低下するかを測定することで、その特徴量の重要度を評価する手法です。性能低下が大きいほど、その特徴量はモデルにとって重要であることを示します。
+        </p>
+      </div>
+      
+      <div class="note-box">
+        <h4 class="note-title">解釈手法の選択基準</h4>
+        <p>
+          解釈手法を選択する際には、以下の点を考慮することが重要です：
+          <ul>
+            <li>タスクとデータの種類（画像、テキスト、時系列など）</li>
+            <li>モデルの種類（CNNか、RNNか、Transformerかなど）</li>
+            <li>必要な説明の粒度（全体的か局所的か）</li>
+            <li>説明の対象者（技術者、ドメイン専門家、一般ユーザーなど）</li>
+            <li>計算コストと実行時間の制約</li>
+          </ul>
+        </p>
+      </div>
+      
+      <p>
+        これらの手法は相互に補完的であり、多角的な解釈を提供するために複数の手法を組み合わせて使用することも一般的です。また、モデルの解釈性と性能はしばしばトレードオフの関係にあり、ユースケースに応じた適切なバランスを見つけることが重要です。
+      </p>
+    </section>
+    
+    <!-- 用語集セクション -->
+    <section id="glossary">
+      <h2 class="section-title"><i class="fas fa-clipboard-list"></i>用語集</h2>
+      
+      <div class="glossary">
+        <table class="glossary-table">
+          <thead>
+            <tr>
+              <th width="30%">用語</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="term-jp">CAM</div>
+                <div class="term-en">Class Activation Mapping</div>
+              </td>
+              <td>CNNの特徴マップを利用して、分類判断に寄与した画像領域を可視化する技術。画像分類において「モデルがどこを見たか」を示す。</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="term-jp">Grad-CAM</div>
+                <div class="term-en">Gradient-weighted Class Activation Mapping</div>
+              </td>
+              <td>CAMを拡張した手法で、勾配情報を用いて特徴マップの重要度を重み付けする。より幅広いCNNアーキテクチャに適用可能。</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="term-jp">LIME</div>
+                <div class="term-en">Local Interpretable Model-agnostic Explanations</div>
+              </td>
+              <td>任意のモデルの個別予測を局所的に近似する解釈可能なモデルを構築し、その近似モデルから説明を得る手法。</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="term-jp">SHAP</div>
+                <div class="term-en">SHapley Additive exPlanations</div>
+              </td>
+              <td>ゲーム理論のシャープレイ値に基づいて特徴量の予測への寄与度を計算する手法。数学的に厳密な基礎を持ち、一貫性のある説明を提供。</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="term-jp">Permutation Importance</div>
+                <div class="term-en">置換重要度</div>
+              </td>
+              <td>特徴量の値をランダムに置換して予測性能の変化を測定することで、特徴量の重要度を評価する手法。</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="term-jp">説明可能AI</div>
+                <div class="term-en">eXplainable AI, XAI</div>
+              </td>
+              <td>AIシステムの判断過程や結果を人間が理解できるようにする技術や手法の総称。</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="term-jp">ブラックボックス</div>
+                <div class="term-en">Black box</div>
+              </td>
+              <td>内部処理が不透明で、入力と出力の関係が人間には理解しづらいシステムを指す用語。ディープラーニングモデルはしばしばこのように表現される。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- Key Insightsセクション -->
+    <section id="key-insights">
+      <h2 class="section-title"><i class="fas fa-lightbulb"></i>Key Insights</h2>
+      
+      <div class="key-insights">
+        <div class="insight-item">
+          <div class="insight-number">1</div>
+          <div class="insight-content">
+            <h3 class="insight-title">解釈性は信頼性と透明性の鍵</h3>
+            <p>解釈性は、AIが社会的に受け入れられるために不可欠です。医療や金融など高リスク領域では特に重要であり、法規制（GDPRなど）でも求められるようになっています。解釈可能なAIは、ユーザーからの信頼を獲得し、社会実装を加速します。</p>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-number">2</div>
+          <div class="insight-content">
+            <h3 class="insight-title">多様な解釈手法の理解</h3>
+            <p>G検定では、CAM、Grad-CAM、LIME、SHAP、Permutation Importanceといった代表的な解釈手法の概要と特徴について理解することが求められます。これらの手法は適用場面やアプローチが異なるため、それぞれの特性を把握することが重要です。</p>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-number">3</div>
+          <div class="insight-content">
+            <h3 class="insight-title">解釈性と性能のトレードオフ</h3>
+            <p>一般に、モデルの解釈性と性能（精度）はトレードオフの関係にあります。解釈が容易な単純なモデルは高い精度を得にくく、高精度を示す複雑なモデルは解釈が難しい傾向があります。ユースケースに応じた適切なバランスを見つけることが実務では重要です。</p>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-number">4</div>
+          <div class="insight-content">
+            <h3 class="insight-title">XAIは進化するフィールド</h3>
+            <p>説明可能AI（XAI）は急速に発展している研究分野です。新しい手法が次々と提案され、各ドメインに特化した解釈技術も開発されています。G検定ではシラバスに記載された手法を中心に理解することが求められますが、関連分野の動向にも目を向けておくことが理想的です。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Take Home Messageセクション -->
+    <section id="take-home">
+      <h2 class="section-title"><i class="fas fa-key"></i>Take Home Message</h2>
+      
+      <div class="take-home-message">
+        <h3 class="take-home-title"><i class="fas fa-quote-left"></i>まとめ</h3>
+        <p class="take-home-content">
+          モデルの解釈性は現代のAI開発において不可欠な要素です。CAM、Grad-CAM、LIME、SHAP、Permutation Importanceなどの手法を理解し、適切に活用することで、AIの判断過程を説明し、社会的信頼と受容を高めることができます。特に重要な意思決定を行うAIシステムでは、「なぜそのような結果になったのか」を説明できる能力が、技術的・社会的・法的観点から求められています。
+        </p>
+      </div>
+    </section>
+    
+    <!-- スクロールトップボタン -->
+    <div class="scroll-top">
+      <i class="fas fa-chevron-up"></i>
+    </div>
+  </main>
+  
+  <!-- JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // スクロールトップボタンの処理
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+      });
+      
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+      
+      // スムーススクロール処理
+      const navLinks = document.querySelectorAll('.sidebar-nav a');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop,
+              behavior: 'smooth'
+            });
+            
+            // アクティブクラスの切り替え
+            navLinks.forEach(link => link.classList.remove('active'));
+            this.classList.add('active');
+          }
+        });
+      });
+      
+      // スクロール位置に応じたサイドメニューのアクティブ状態の更新
+      const sections = document.querySelectorAll('section');
+      
+      window.addEventListener('scroll', function() {
+        let current = '';
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          
+          if (pageYOffset >= sectionTop - 200) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+        
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

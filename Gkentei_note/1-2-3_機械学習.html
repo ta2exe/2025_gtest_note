@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-2-3 - 機械学習</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* 基本設定 */
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+
+    /* レイアウト構造 */
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      background-color: var(--yellow);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      /* スクロールバーのデザイン */
+      scrollbar-width: thin;
+      scrollbar-color: var(--magenta) var(--yellow);
+    }
+
+    /* Webkit（Chrome, Safari）のスクロールバーデザイン */
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 230, 0, 0.5);
+      border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: var(--magenta);
+      border-radius: 10px;
+      border: 2px solid var(--yellow);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: #e033a0;
+    }
+
+    .sidebar-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+      color: var(--key);
+      font-size: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--key);
+    }
+
+    .nav-menu {
+      list-style-type: none;
+    }
+
+    .nav-item {
+      margin-bottom: 1rem;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: var(--key);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(5px);
+    }
+
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--cyan);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    .scroll-top.visible {
+      opacity: 1;
+    }
+
+    /* セクション共通 */
+    section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid var(--cyan);
+      padding-bottom: 0.5rem;
+    }
+
+    h2 i {
+      margin-right: 0.5rem;
+      color: var(--cyan);
+    }
+
+    h3 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      color: var(--key);
+      margin: 1.5rem 0 1rem;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+    }
+
+    h3 i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    .highlight {
+      background-color: rgba(255, 230, 0, 0.3);
+      padding: 0 0.3rem;
+      font-weight: 500;
+    }
+
+    .keyword {
+      color: var(--magenta);
+      font-weight: bold;
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* レスポンシブデザインのためのメディアクエリ */
+    @media screen and (max-width: 1024px) {
+      .sidebar {
+        width: 25%;
+      }
+      
+      .main-content {
+        width: 75%;
+        margin-left: 25%;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+        max-height: 300px;
+      }
+      
+      .sidebar-title {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+      }
+      
+      .nav-item {
+        margin-bottom: 0.5rem;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+
+      section {
+        padding: 1.5rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      h3 {
+        font-size: 1.2rem;
+      }
+      
+      .image-container img {
+        max-width: 95%;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .sidebar {
+        max-height: 250px;
+        padding: 0.8rem;
+      }
+      
+      .sidebar-title {
+        font-size: 1.2rem;
+      }
+      
+      .nav-link {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .main-content {
+        padding: 1rem;
+      }
+      
+      section {
+        padding: 1rem;
+        margin-bottom: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
+      
+      h3 {
+        font-size: 1.1rem;
+      }
+      
+      p, li {
+        font-size: 0.9rem;
+      }
+      
+      .scroll-top {
+        width: 40px;
+        height: 40px;
+        bottom: 1rem;
+        right: 1rem;
+      }
+      
+      /* 表示内容の調整 */
+      .intro-content div {
+        display: block !important;
+      }
+      
+      /* フレックスコンテナを縦表示にする */
+      [style*="display: flex"] {
+        flex-wrap: wrap;
+      }
+      
+      /* 幅指定されたコンテンツを調整 */
+      [style*="width: 48%"], [style*="width: 31%"] {
+        width: 100% !important;
+        margin-bottom: 1rem !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <h1 class="sidebar-title">機械学習</h1>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#intro" class="nav-link"><i class="fas fa-star"></i>はじめに</a>
+        </li>
+        <li class="nav-item">
+          <a href="#what-is-ml" class="nav-link"><i class="fas fa-question-circle"></i>機械学習とは</a>
+        </li>
+        <li class="nav-item">
+          <a href="#ml-vs-rule" class="nav-link"><i class="fas fa-balance-scale"></i>ルールベースとの比較</a>
+        </li>
+        <li class="nav-item">
+          <a href="#ml-background" class="nav-link"><i class="fas fa-history"></i>注目された背景</a>
+        </li>
+        <li class="nav-item">
+          <a href="#ml-effective" class="nav-link"><i class="fas fa-lightbulb"></i>効果を発揮する場面</a>
+        </li>
+        <li class="nav-item">
+          <a href="#ml-applications" class="nav-link"><i class="fas fa-cogs"></i>代表的な応用例</a>
+        </li>
+        <li class="nav-item">
+          <a href="#key-insights" class="nav-link"><i class="fas fa-key"></i>Key Insights</a>
+        </li>
+        <li class="nav-item">
+          <a href="#take-home" class="nav-link"><i class="fas fa-home"></i>Take Home Message</a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- はじめに -->
+      <section id="intro">
+        <h2><i class="fas fa-star"></i>はじめに</h2>
+        <div class="intro-content">
+          <p>本ノートでは人工知能の代表的なアプローチの一つである<span class="keyword">機械学習（Machine Learning, ML）</span>について説明します。機械学習は人工知能の実現手法の一つとして注目されており、AIの発展とともに急速に進化してきました。</p>
+          
+          <div style="background-color: rgba(0, 216, 232, 0.1); padding: 1rem; border-radius: 10px; margin: 1.5rem 0; border-left: 4px solid var(--cyan);">
+            <h3 style="margin-top: 0;"><i class="fas fa-bullseye"></i>学習目標</h3>
+            <ul style="list-style-type: none; padding-left: 1.5rem;">
+              <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>機械学習とは何か説明できる</li>
+              <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>機械学習とルールベース手法の差異、およびメリットデメリットについて説明できる</li>
+              <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>機械学習が注目されるようになった背景を説明できる</li>
+              <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>機械学習がどのような場面において、効果を発揮するのか理解する</li>
+              <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>機械学習の代表的な応用例について理解する</li>
+            </ul>
+          </div>
+
+          <div style="display: flex; justify-content: center; margin: 2rem 0;">
+            <div style="text-align: center; background-color: var(--white); border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); padding: 1.5rem; max-width: 500px;">
+              <p style="font-weight: bold; font-size: 1.1rem; margin-bottom: 1rem;">シラバス上の位置づけ</p>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="text-align: center; padding: 0.5rem; width: 30%;">
+                  <div style="font-size: 0.9rem;">1-1 人工知能とは</div>
+                </div>
+                <i class="fas fa-arrow-right" style="color: var(--dark-gray);"></i>
+                <div style="text-align: center; padding: 0.5rem; width: 30%; background-color: var(--yellow); border-radius: 8px;">
+                  <div style="font-size: 0.9rem; font-weight: bold;">1-2 人工知能をめぐる動向</div>
+                </div>
+                <i class="fas fa-arrow-right" style="color: var(--dark-gray);"></i>
+                <div style="text-align: center; padding: 0.5rem; width: 30%;">
+                  <div style="font-size: 0.9rem;">1-3 機械学習の概要</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 機械学習とは -->
+      <section id="what-is-ml">
+        <h2><i class="fas fa-question-circle"></i>機械学習とは</h2>
+        
+        <p><span class="keyword">機械学習（Machine Learning）</span>とは、人間が明示的にルールを定義することなく、データからパターンや規則性を学習し、タスクを実行するアルゴリズムやシステムの総称です。</p>
+        
+        <div style="background-color: rgba(255, 64, 160, 0.1); padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0; position: relative;">
+          <div style="position: absolute; top: -15px; left: 20px; background-color: var(--white); padding: 0.3rem 1rem; border-radius: 20px; border: 2px solid var(--magenta);">
+            <span style="font-weight: bold; color: var(--magenta);">定義</span>
+          </div>
+          <p style="margin-top: 0.5rem;">
+            <span class="keyword">機械学習</span>は、「経験」から自動的に「学習」するコンピュータシステムの能力です。この「経験」はデータとして与えられ、システムはそのデータから「学習」して性能を向上させます。
+          </p>
+          <p>
+            トム・ミッチェルによる定義：「明示的にプログラムすることなく、経験から学習するコンピュータプログラム」
+          </p>
+        </div>
+
+        <h3><i class="fas fa-sitemap"></i>人工知能における機械学習の位置づけ</h3>
+        
+        <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
+          <div style="width: 90%; max-width: 600px;">
+            <div style="background-color: var(--white); border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); padding: 1.5rem; text-align: center;">
+              <div style="border: 2px solid var(--key); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; background-color: rgba(24, 24, 24, 0.05);">
+                <p style="font-weight: bold; margin: 0;">人工知能 (AI)</p>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <div style="width: 30%; padding: 0.8rem; border: 2px solid var(--dark-gray); border-radius: 10px;">
+                  <p style="font-size: 0.9rem; margin: 0;">1. 単純な制御プログラム</p>
+                </div>
+                <div style="width: 30%; padding: 0.8rem; border: 2px solid var(--dark-gray); border-radius: 10px;">
+                  <p style="font-size: 0.9rem; margin: 0;">2. 古典的な人工知能</p>
+                </div>
+                <div style="width: 30%; padding: 0.8rem; border: 2px solid var(--magenta); border-radius: 10px; background-color: rgba(255, 64, 160, 0.1);">
+                  <p style="font-size: 0.9rem; margin: 0; font-weight: bold; color: var(--magenta);">3. 機械学習</p>
+                </div>
+              </div>
+              <div style="border: 2px dashed var(--cyan); border-radius: 10px; padding: 0.8rem; width: 50%; margin: 0 auto;">
+                <p style="font-size: 0.9rem; margin: 0; color: var(--cyan);">4. ディープラーニング</p>
+              </div>
+              <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--dark-gray);">※ディープラーニングは機械学習の一種</p>
+            </div>
+          </div>
+        </div>
+        
+        <h3><i class="fas fa-cogs"></i>機械学習の基本的な流れ</h3>
+        
+        <div style="display: flex; justify-content: center; margin: 1.5rem 0 2rem;">
+          <div style="width: 90%; max-width: 700px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; text-align: center;">
+              <div style="width: 22%; background-color: var(--white); border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+                <i class="fas fa-database" style="font-size: 2rem; color: var(--cyan); margin-bottom: 0.5rem;"></i>
+                <p style="font-weight: bold; margin: 0;">データ収集</p>
+              </div>
+              <i class="fas fa-arrow-right" style="color: var(--dark-gray);"></i>
+              <div style="width: 22%; background-color: var(--white); border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+                <i class="fas fa-broom" style="font-size: 2rem; color: var(--cyan); margin-bottom: 0.5rem;"></i>
+                <p style="font-weight: bold; margin: 0;">前処理</p>
+              </div>
+              <i class="fas fa-arrow-right" style="color: var(--dark-gray);"></i>
+              <div style="width: 22%; background-color: var(--white); border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+                <i class="fas fa-brain" style="font-size: 2rem; color: var(--magenta); margin-bottom: 0.5rem;"></i>
+                <p style="font-weight: bold; margin: 0;">学習</p>
+              </div>
+              <i class="fas fa-arrow-right" style="color: var(--dark-gray);"></i>
+              <div style="width: 22%; background-color: var(--white); border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+                <i class="fas fa-chart-line" style="font-size: 2rem; color: var(--cyan); margin-bottom: 0.5rem;"></i>
+                <p style="font-weight: bold; margin: 0;">評価・予測</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <h3><i class="fas fa-graduation-cap"></i>機械学習の主なタイプ</h3>
+        
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin: 1.5rem 0;">
+          <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1rem;">
+            <h4 style="color: var(--cyan); margin-top: 0; border-bottom: 1px solid var(--cyan); padding-bottom: 0.5rem;">教師あり学習</h4>
+            <p style="font-size: 0.9rem;">入力データと正解ラベルのペアを使用して学習する方法。</p>
+            <p style="font-size: 0.9rem; color: var(--dark-gray);"><i class="fas fa-tag" style="margin-right: 0.3rem;"></i>分類、回帰など</p>
+          </div>
+          <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1rem;">
+            <h4 style="color: var(--cyan); margin-top: 0; border-bottom: 1px solid var(--cyan); padding-bottom: 0.5rem;">教師なし学習</h4>
+            <p style="font-size: 0.9rem;">ラベルなしのデータからパターンを発見する方法。</p>
+            <p style="font-size: 0.9rem; color: var(--dark-gray);"><i class="fas fa-tag" style="margin-right: 0.3rem;"></i>クラスタリング、次元削減など</p>
+          </div>
+          <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1rem;">
+            <h4 style="color: var(--cyan); margin-top: 0; border-bottom: 1px solid var(--cyan); padding-bottom: 0.5rem;">強化学習</h4>
+            <p style="font-size: 0.9rem;">エージェントが環境と対話して報酬を最大化する方法を学習する。</p>
+            <p style="font-size: 0.9rem; color: var(--dark-gray);"><i class="fas fa-tag" style="margin-right: 0.3rem;"></i>ゲームAI、ロボット制御など</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ルールベースとの比較 -->
+      <section id="ml-vs-rule">
+        <h2><i class="fas fa-balance-scale"></i>ルールベースとの比較</h2>
+        
+        <p>機械学習の特徴を理解するために、従来の<span class="keyword">ルールベース手法</span>と比較してみましょう。</p>
+        
+        <div style="margin: 2rem 0; display: flex; justify-content: center;">
+          <table style="width: 90%; border-collapse: collapse; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); border-radius: 10px; overflow: hidden;">
+            <thead>
+              <tr style="background-color: var(--cyan); color: var(--white);">
+                <th style="padding: 1rem; text-align: center; border: 1px solid #eee;">比較項目</th>
+                <th style="padding: 1rem; text-align: center; border: 1px solid #eee;">ルールベース手法</th>
+                <th style="padding: 1rem; text-align: center; border: 1px solid #eee;">機械学習</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background-color: var(--white);">
+                <td style="padding: 1rem; text-align: center; border: 1px solid #eee; font-weight: bold;">アプローチ</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">人間が明示的にルールを設計</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">データから自動的にパターンを学習</td>
+              </tr>
+              <tr style="background-color: rgba(0, 216, 232, 0.05);">
+                <td style="padding: 1rem; text-align: center; border: 1px solid #eee; font-weight: bold;">適応性</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">変化に対応するには手動でルール更新が必要</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">新しいデータから継続的に学習可能</td>
+              </tr>
+              <tr style="background-color: var(--white);">
+                <td style="padding: 1rem; text-align: center; border: 1px solid #eee; font-weight: bold;">複雑さへの対応</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">複雑な問題ではルールの設計が困難</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">複雑なパターンも学習可能</td>
+              </tr>
+              <tr style="background-color: rgba(0, 216, 232, 0.05);">
+                <td style="padding: 1rem; text-align: center; border: 1px solid #eee; font-weight: bold;">データ要件</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">少ないデータでも動作可能</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">大量のデータが必要な場合が多い</td>
+              </tr>
+              <tr style="background-color: var(--white);">
+                <td style="padding: 1rem; text-align: center; border: 1px solid #eee; font-weight: bold;">説明可能性</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">ルールが明示的なため説明しやすい</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">「ブラックボックス」となる場合があり説明が難しい</td>
+              </tr>
+              <tr style="background-color: rgba(0, 216, 232, 0.05);">
+                <td style="padding: 1rem; text-align: center; border: 1px solid #eee; font-weight: bold;">実装時間</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">ルール設計に時間がかかる</td>
+                <td style="padding: 1rem; text-align: left; border: 1px solid #eee;">学習に計算リソースが必要だが、一度学習すれば迅速に予測可能</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h3><i class="fas fa-plus-circle"></i>メリットとデメリット</h3>
+        
+        <div style="display: flex; justify-content: space-between; margin: 1.5rem 0;">
+          <div style="width: 48%; background-color: rgba(0, 216, 232, 0.05); border-radius: 10px; padding: 1.5rem; position: relative;">
+            <div style="position: absolute; top: -15px; left: 20px; background-color: var(--white); padding: 0.3rem 1rem; border-radius: 20px; border: 2px solid var(--cyan);">
+              <span style="font-weight: bold; color: var(--cyan);">機械学習のメリット</span>
+            </div>
+            <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+              <li style="margin-bottom: 0.5rem;">明示的にプログラミングすることなく複雑なタスクを処理できる</li>
+              <li style="margin-bottom: 0.5rem;">新しいデータや環境変化に適応できる</li>
+              <li style="margin-bottom: 0.5rem;">人間が気づきにくいパターンや関係性を発見できる</li>
+              <li style="margin-bottom: 0.5rem;">データ量が増えるほど精度が向上する可能性がある</li>
+              <li>自動化によって人的コストを削減できる</li>
+            </ul>
+          </div>
+          <div style="width: 48%; background-color: rgba(255, 64, 160, 0.05); border-radius: 10px; padding: 1.5rem; position: relative;">
+            <div style="position: absolute; top: -15px; left: 20px; background-color: var(--white); padding: 0.3rem 1rem; border-radius: 20px; border: 2px solid var(--magenta);">
+              <span style="font-weight: bold; color: var(--magenta);">機械学習のデメリット</span>
+            </div>
+            <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+              <li style="margin-bottom: 0.5rem;">大量の質の高いデータが必要</li>
+              <li style="margin-bottom: 0.5rem;"><span class="highlight">次元の呪い</span>：高次元データでは学習効率が低下する</li>
+              <li style="margin-bottom: 0.5rem;">結果の解釈が難しい（特に複雑なモデルの場合）</li>
+              <li style="margin-bottom: 0.5rem;">バイアスや公平性の問題が発生する可能性がある</li>
+              <li>学習データの偏りがモデルの一般化能力に影響する</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div style="background-color: rgba(255, 230, 0, 0.1); padding: 1.5rem; border-radius: 10px; margin: 2rem 0; border-left: 4px solid var(--yellow);">
+          <h4 style="margin-top: 0; color: var(--key);">
+            <i class="fas fa-exclamation-triangle" style="color: var(--yellow); margin-right: 0.5rem;"></i>試験ポイント
+          </h4>
+          <p>
+            <span class="keyword">次元の呪い（Curse of Dimensionality）</span>は、機械学習における重要な概念です。データの次元（特徴量の数）が増えるほど、必要なデータ量が指数関数的に増加し、学習が難しくなる現象を指します。高次元空間では、データ点間の距離の差が相対的に小さくなり、類似性の判断が困難になります。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 注目された背景 -->
+      <section id="ml-background">
+        <h2><i class="fas fa-history"></i>注目された背景</h2>
+        
+        <p>機械学習が注目されるようになった背景には、以下のような要因があります。</p>
+        
+        <div style="margin: 2rem 0;">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-microchip" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem;">計算能力の向上</h3>
+              </div>
+              <p style="font-size: 0.9rem;">CPUやGPUなどの計算能力が飛躍的に向上し、複雑なアルゴリズムの実行が現実的になりました。特にGPUの発展がディープラーニングの実用化を加速させました。</p>
+            </div>
+            <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-database" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem;"><span class="keyword">ビッグデータ</span>の出現</h3>
+              </div>
+              <p style="font-size: 0.9rem;">インターネットの普及とデジタル化により、膨大な量のデータが生成・蓄積されるようになりました。ソーシャルメディア、センサーデータ、取引記録など、多様なデータが機械学習のトレーニング材料となっています。</p>
+            </div>
+            <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-code" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem;">アルゴリズムの進化</h3>
+              </div>
+              <p style="font-size: 0.9rem;">機械学習アルゴリズムやディープラーニングの手法が進化し、複雑な問題を解決できるようになりました。ニューラルネットワークの設計や学習手法の改良により、精度が向上しています。</p>
+            </div>
+            <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-cloud" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem;">クラウドコンピューティング</h3>
+              </div>
+              <p style="font-size: 0.9rem;">クラウドサービスの普及により、高価な計算リソースがアクセスしやすくなりました。大規模なデータ処理と機械学習モデルのトレーニングが容易になっています。</p>
+            </div>
+            <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-tools" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem;">オープンソースツール</h3>
+              </div>
+              <p style="font-size: 0.9rem;">TensorFlow、PyTorch、scikit-learnなどのオープンソースライブラリが充実し、機械学習モデルの構築や実装が容易になりました。開発者コミュニティの活性化が技術の普及を促進しています。</p>
+            </div>
+            <div style="width: 31%; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-industry" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem;">産業界の需要</h3>
+              </div>
+              <p style="font-size: 0.9rem;">多くの産業で自動化やデータ分析の需要が高まり、機械学習技術への投資が増加しました。競争力向上のため、企業は機械学習を活用したソリューションを求めています。</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); margin: 2rem 0;">
+          <h3 style="border-bottom: 2px solid var(--cyan); padding-bottom: 0.5rem; margin-top: 0;">
+            <i class="fas fa-chart-line" style="color: var(--cyan); margin-right: 0.5rem;"></i>機械学習発展の主な変遷
+          </h3>
+          <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; position: relative;">
+            <div style="position: absolute; top: 25px; left: 0; right: 0; height: 2px; background-color: var(--dark-gray); z-index: 1;"></div>
+            
+            <div style="width: 18%; text-align: center; position: relative; z-index: 2;">
+              <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--white); border: 2px solid var(--cyan); display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                <span style="font-weight: bold;">1950s</span>
+              </div>
+              <p style="font-size: 0.8rem; margin-top: 0.5rem;">パーセプトロン<br>初期のニューラルネットワーク</p>
+            </div>
+            
+            <div style="width: 18%; text-align: center; position: relative; z-index: 2;">
+              <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--white); border: 2px solid var(--cyan); display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                <span style="font-weight: bold;">1980s</span>
+              </div>
+              <p style="font-size: 0.8rem; margin-top: 0.5rem;">バックプロパゲーション<br>決定木アルゴリズム</p>
+            </div>
+            
+            <div style="width: 18%; text-align: center; position: relative; z-index: 2;">
+              <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--white); border: 2px solid var(--cyan); display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                <span style="font-weight: bold;">1990s</span>
+              </div>
+              <p style="font-size: 0.8rem; margin-top: 0.5rem;">サポートベクターマシン<br>ランダムフォレスト</p>
+            </div>
+            
+            <div style="width: 18%; text-align: center; position: relative; z-index: 2;">
+              <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--white); border: 2px solid var(--magenta); display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                <span style="font-weight: bold;">2010s</span>
+              </div>
+              <p style="font-size: 0.8rem; margin-top: 0.5rem; font-weight: bold;">ディープラーニングの台頭<br>ビッグデータの活用</p>
+            </div>
+            
+            <div style="width: 18%; text-align: center; position: relative; z-index: 2;">
+              <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--white); border: 2px solid var(--cyan); display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                <span style="font-weight: bold;">現在</span>
+              </div>
+              <p style="font-size: 0.8rem; margin-top: 0.5rem;">自己学習型AI<br>生成AI技術</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 効果を発揮する場面 -->
+      <section id="ml-effective">
+        <h2><i class="fas fa-lightbulb"></i>効果を発揮する場面</h2>
+        
+        <p>機械学習は、以下のような特徴を持つ問題に対して特に効果を発揮します。</p>
+        
+        <div style="margin: 2rem 0; display: flex; flex-wrap: wrap; justify-content: space-between;">
+          <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-cubes" style="color: var(--cyan);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.1rem;">複雑なパターン認識が必要な問題</h3>
+            </div>
+            <p>画像認識、音声認識、自然言語処理など、人間が直感的に行えるが、明示的なルールで記述することが難しい問題に適しています。</p>
+          </div>
+          
+          <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-arrows-alt" style="color: var(--cyan);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.1rem;">多次元データの分析</h3>
+            </div>
+            <p>多くの変数や特徴量を持つデータセットから、重要なパターンや関係性を抽出するのに適しています。人間が直接理解するには複雑すぎる多次元空間の関係性を見つけられます。</p>
+          </div>
+          
+          <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-sync-alt" style="color: var(--cyan);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.1rem;">変化する環境への適応</h3>
+            </div>
+            <p>時間とともに変化するパターンや、ユーザーの行動の変化に適応する必要がある問題に適しています。新しいデータを取り込んで継続的に学習できます。</p>
+          </div>
+          
+          <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-chart-pie" style="color: var(--cyan);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.1rem;">予測分析</h3>
+            </div>
+            <p>過去のデータからパターンを学習し、将来の傾向や結果を予測するタスクに適しています。販売予測、需要予測、リスク評価などに活用されます。</p>
+          </div>
+          
+          <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-user-friends" style="color: var(--cyan);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.1rem;">ユーザー行動のモデリング</h3>
+            </div>
+            <p>個々のユーザーの好みや行動パターンを理解し、パーソナライズされた推奨や体験を提供するのに適しています。<span class="keyword">レコメンデーションエンジン</span>はその代表例です。</p>
+          </div>
+          
+          <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-filter" style="color: var(--cyan);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.1rem;">異常検出</h3>
+            </div>
+            <p>正常なパターンから逸脱する異常や外れ値を検出するタスクに適しています。不正検出、システム障害の早期発見、セキュリティ監視などに活用されます。</p>
+          </div>
+        </div>
+        
+        <div style="background-color: rgba(255, 64, 160, 0.05); padding: 1.5rem; border-radius: 10px; margin: 2rem 0; position: relative;">
+          <h3 style="margin-top: 0;">
+            <i class="fas fa-exclamation-circle" style="color: var(--magenta); margin-right: 0.5rem;"></i>機械学習を適用する前に検討すべきポイント
+          </h3>
+          <ul style="padding-left: 2rem;">
+            <li style="margin-bottom: 0.5rem;"><strong>データの質と量：</strong> 十分な量の質の高いデータが利用可能か</li>
+            <li style="margin-bottom: 0.5rem;"><strong>問題の複雑さ：</strong> 問題の性質が機械学習に適しているか</li>
+            <li style="margin-bottom: 0.5rem;"><strong>説明可能性の要件：</strong> モデルの判断に説明が必要か</li>
+            <li style="margin-bottom: 0.5rem;"><strong>計算リソース：</strong> 必要な計算リソースが確保できるか</li>
+            <li><strong>実装コスト：</strong> 機械学習の導入コストと期待される利益のバランス</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- 代表的な応用例 -->
+      <section id="ml-applications">
+        <h2><i class="fas fa-cogs"></i>代表的な応用例</h2>
+        
+        <p>機械学習は様々な分野で応用されています。シラバスに記載されているキーワードを中心に代表的な応用例を見ていきましょう。</p>
+        
+        <div style="margin: 2rem 0;">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            <!-- スパムフィルター -->
+            <div style="width: 48%; margin-bottom: 2rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem; border-bottom: 2px dashed var(--cyan); padding-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-envelope" style="color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.2rem;"><span class="keyword">スパムフィルター</span></h3>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <p><strong>概要：</strong>メールの内容や特徴から、スパム（迷惑メール）を自動的に検出・分類するシステム</p>
+                <p><strong>使用技術：</strong>ナイーブベイズ分類器、SVM、深層学習など</p>
+                <p><strong>学習内容：</strong>過去のスパムメールとそうでないメールのパターン、単語の出現頻度、送信元情報など</p>
+              </div>
+              <div style="background-color: rgba(255, 230, 0, 0.1); padding: 0.8rem; border-radius: 8px;">
+                <p style="margin: 0; font-size: 0.9rem;"><i class="fas fa-lightbulb" style="color: var(--yellow); margin-right: 0.5rem;"></i>ユーザーがスパムと判定したメールを学習データに追加することで、精度が向上していく適応的なシステム</p>
+              </div>
+            </div>
+            
+            <!-- レコメンデーションエンジン -->
+            <div style="width: 48%; margin-bottom: 2rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem; border-bottom: 2px dashed var(--magenta); padding-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(255, 64, 160, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-thumbs-up" style="color: var(--magenta);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.2rem;"><span class="keyword">レコメンデーションエンジン</span></h3>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <p><strong>概要：</strong>ユーザーの好みや行動履歴に基づいて、商品やコンテンツを推薦するシステム</p>
+                <p><strong>使用技術：</strong>協調フィルタリング、コンテンツベースフィルタリング、ハイブリッドアプローチなど</p>
+                <p><strong>学習内容：</strong>ユーザーの過去の行動、評価、購入履歴、閲覧パターン、類似ユーザーの傾向など</p>
+              </div>
+              <div style="background-color: rgba(255, 230, 0, 0.1); padding: 0.8rem; border-radius: 8px;">
+                <p style="margin: 0; font-size: 0.9rem;"><i class="fas fa-lightbulb" style="color: var(--yellow); margin-right: 0.5rem;"></i>Amazonの商品推薦、Netflixの映画推薦、Spotifyのプレイリスト推薦など、様々なサービスで活用されている</p>
+              </div>
+            </div>
+            
+            <!-- 画像認識 -->
+            <div style="width: 48%; margin-bottom: 2rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem; border-bottom: 2px dashed var(--cyan); padding-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-camera" style="color: var(--cyan);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.2rem;">画像認識</h3>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <p><strong>概要：</strong>画像の中の物体や特徴を識別・分類するシステム</p>
+                <p><strong>使用技術：</strong>畳み込みニューラルネットワーク (CNN)、転移学習など</p>
+                <p><strong>学習内容：</strong>画像の特徴（エッジ、テクスチャ、形状など）と対応するラベルのパターン</p>
+              </div>
+              <div style="background-color: rgba(255, 230, 0, 0.1); padding: 0.8rem; border-radius: 8px;">
+                <p style="margin: 0; font-size: 0.9rem;"><i class="fas fa-lightbulb" style="color: var(--yellow); margin-right: 0.5rem;"></i>顔認識、自動運転車の物体検出、医療画像診断、工業製品の品質検査など幅広く応用されている</p>
+              </div>
+            </div>
+            
+            <!-- 自然言語処理 -->
+            <div style="width: 48%; margin-bottom: 2rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+              <div style="display: flex; align-items: center; margin-bottom: 1rem; border-bottom: 2px dashed var(--magenta); padding-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(255, 64, 160, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                  <i class="fas fa-language" style="color: var(--magenta);"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.2rem;">自然言語処理</h3>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <p><strong>概要：</strong>人間の言語を理解・生成・変換するシステム</p>
+                <p><strong>使用技術：</strong>リカレントニューラルネットワーク (RNN)、LSTM、Transformerなど</p>
+                <p><strong>学習内容：</strong>単語の意味、文法構造、文脈の関係性、言語のパターンなど</p>
+              </div>
+              <div style="background-color: rgba(255, 230, 0, 0.1); padding: 0.8rem; border-radius: 8px;">
+                <p style="margin: 0; font-size: 0.9rem;"><i class="fas fa-lightbulb" style="color: var(--yellow); margin-right: 0.5rem;"></i>機械翻訳、感情分析、チャットボット、文書要約、音声認識など、言語に関わる様々なタスクに応用</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin: 1rem 0;">
+          <!-- 異常検知 -->
+          <div style="width: 48%; margin-bottom: 2rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem; border-bottom: 2px dashed var(--cyan); padding-bottom: 0.5rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(0, 216, 232, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-exclamation-triangle" style="color: var(--cyan);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.2rem;">異常検知</h3>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <p><strong>概要：</strong>通常のパターンから外れた異常や不正を検出するシステム</p>
+              <p><strong>使用技術：</strong>One-class SVM、Isolation Forest、オートエンコーダなど</p>
+              <p><strong>学習内容：</strong>正常なデータのパターンや特徴分布、標準からの逸脱度合いなど</p>
+            </div>
+            <div style="background-color: rgba(255, 230, 0, 0.1); padding: 0.8rem; border-radius: 8px;">
+              <p style="margin: 0; font-size: 0.9rem;"><i class="fas fa-lightbulb" style="color: var(--yellow); margin-right: 0.5rem;"></i>クレジットカード不正利用の検出、ネットワーク侵入検知、工場設備の故障予知、医療データでの疾患検出など</p>
+            </div>
+          </div>
+          
+          <!-- 予測分析 -->
+          <div style="width: 48%; margin-bottom: 2rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem; border-bottom: 2px dashed var(--magenta); padding-bottom: 0.5rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background-color: rgba(255, 64, 160, 0.1); display: flex; justify-content: center; align-items: center; margin-right: 1rem;">
+                <i class="fas fa-chart-line" style="color: var(--magenta);"></i>
+              </div>
+              <h3 style="margin: 0; font-size: 1.2rem;">予測分析</h3>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <p><strong>概要：</strong>過去のデータから将来の傾向や結果を予測するシステム</p>
+              <p><strong>使用技術：</strong>回帰分析、時系列分析、勾配ブースティングなど</p>
+              <p><strong>学習内容：</strong>時間的パターン、変数間の関係性、季節変動、トレンドなど</p>
+            </div>
+            <div style="background-color: rgba(255, 230, 0, 0.1); padding: 0.8rem; border-radius: 8px;">
+              <p style="margin: 0; font-size: 0.9rem;"><i class="fas fa-lightbulb" style="color: var(--yellow); margin-right: 0.5rem;"></i>売上予測、需要予測、株価予測、天気予報、顧客離反予測など、様々な予測タスクに活用</p>
+            </div>
+          </div>
+        </div>
+        
+        <h3><i class="fas fa-robot"></i><span class="keyword">ビッグデータ</span>と機械学習の相乗効果</h3>
+        
+        <div style="background-color: rgba(0, 216, 232, 0.05); padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0;">
+          <p>
+            <span class="keyword">ビッグデータ</span>と機械学習は相互に補完し合う関係にあります。大量のデータが機械学習モデルの精度を向上させ、機械学習アルゴリズムがビッグデータから価値ある洞察を引き出します。
+          </p>
+          <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+            <div style="width: 48%; padding: 1rem; background-color: var(--white); border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+              <h4 style="color: var(--cyan); margin-top: 0; font-size: 1rem;">
+                <i class="fas fa-arrow-right" style="margin-right: 0.5rem;"></i>ビッグデータが機械学習に与える影響
+              </h4>
+              <ul style="padding-left: 1.5rem; font-size: 0.9rem;">
+                <li>より豊富なトレーニングデータによる精度向上</li>
+                <li>より複雑なパターンの発見が可能に</li>
+                <li>様々なデータソースを統合した分析の実現</li>
+                <li>長期的なパターンやトレンドの捕捉</li>
+              </ul>
+            </div>
+            <div style="width: 48%; padding: 1rem; background-color: var(--white); border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+              <h4 style="color: var(--magenta); margin-top: 0; font-size: 1rem;">
+                <i class="fas fa-arrow-right" style="margin-right: 0.5rem;"></i>機械学習がビッグデータに与える影響
+              </h4>
+              <ul style="padding-left: 1.5rem; font-size: 0.9rem;">
+                <li>大量データからの自動的な知見抽出</li>
+                <li>ノイズや異常値の効果的な処理</li>
+                <li>複雑なデータ間の関係性の発見</li>
+                <li>予測や推奨による意思決定支援</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Key Insights -->
+      <section id="key-insights">
+        <h2><i class="fas fa-key"></i>Key Insights</h2>
+        
+        <div style="margin: 2rem 0;">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); border-top: 5px solid var(--cyan);">
+              <h3 style="color: var(--cyan); margin-top: 0;">
+                <span style="background-color: var(--cyan); color: var(--white); width: 28px; height: 28px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-right: 0.8rem;">1</span>
+                機械学習の基本
+              </h3>
+              <p>
+                機械学習は、明示的なプログラミングなしでデータから学習するアルゴリズムです。AIの実現手法として重要な位置を占め、教師あり学習、教師なし学習、強化学習の主要な3つのタイプがあります。シラバスのキーワードである<span class="keyword">次元の呪い</span>は学習の難しさを示す概念です。
+              </p>
+            </div>
+            
+            <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); border-top: 5px solid var(--magenta);">
+              <h3 style="color: var(--magenta); margin-top: 0;">
+                <span style="background-color: var(--magenta); color: var(--white); width: 28px; height: 28px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-right: 0.8rem;">2</span>
+                ルールベースとの比較
+              </h3>
+              <p>
+                機械学習とルールベース手法は異なるアプローチを持ちます。機械学習は適応性や複雑なパターン認識に優れていますが、大量のデータが必要で説明が難しい場合があります。ルールベースは少ないデータでも動作し説明が容易ですが、複雑な問題への対応が困難です。
+              </p>
+            </div>
+            
+            <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); border-top: 5px solid var(--yellow);">
+              <h3 style="color: var(--key); margin-top: 0;">
+                <span style="background-color: var(--yellow); color: var(--key); width: 28px; height: 28px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-right: 0.8rem;">3</span>
+                注目の背景と効果を発揮する場面
+              </h3>
+              <p>
+                計算能力の向上と<span class="keyword">ビッグデータ</span>の出現が機械学習の発展を加速させました。複雑なパターン認識、多次元データ分析、変化する環境への適応、予測分析、ユーザー行動のモデリングなどの場面で特に効果を発揮します。
+              </p>
+            </div>
+            
+            <div style="width: 48%; margin-bottom: 1.5rem; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); border-top: 5px solid var(--cyan);">
+              <h3 style="color: var(--cyan); margin-top: 0;">
+                <span style="background-color: var(--cyan); color: var(--white); width: 28px; height: 28px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-right: 0.8rem;">4</span>
+                代表的な応用例
+              </h3>
+              <p>
+                <span class="keyword">スパムフィルター</span>、<span class="keyword">レコメンデーションエンジン</span>、画像認識、自然言語処理、異常検知、予測分析など、多様な分野で応用されています。特にシラバスで強調されているスパムフィルターとレコメンデーションエンジンは、実用的な機械学習の代表例として重要です。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Take Home Message -->
+      <section id="take-home">
+        <h2><i class="fas fa-home"></i>Take Home Message</h2>
+        
+        <div style="margin: 2rem auto; max-width: 90%; background: linear-gradient(135deg, rgba(0, 216, 232, 0.1) 0%, rgba(255, 64, 160, 0.1) 100%); border-radius: 15px; padding: 2rem; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); text-align: center; position: relative;">
+          <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background-color: var(--white); padding: 0.5rem 2rem; border-radius: 30px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);">
+            <span style="font-weight: bold; font-family: 'Klee One', cursive; font-size: 1.2rem;">試験で押さえておくべきポイント</span>
+          </div>
+          
+          <p style="font-size: 1.1rem; font-weight: 500; margin: 1.5rem 0;">
+            機械学習は、データから自動的にパターンを学習し、人間が明示的にルールを設計することなく、複雑なタスクを実行できるAIの手法です。
+          </p>
+          
+          <div style="background-color: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; text-align: left;">
+            <ul style="list-style-type: none; padding-left: 0;">
+              <li style="margin-bottom: 0.8rem; display: flex; align-items: center;">
+                <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+                <span class="keyword">次元の呪い</span>、<span class="keyword">スパムフィルター</span>、<span class="keyword">ビッグデータ</span>、<span class="keyword">レコメンデーションエンジン</span>はシラバスの重要キーワード
+              </li>
+              <li style="margin-bottom: 0.8rem; display: flex; align-items: center;">
+                <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+                機械学習とルールベース手法の比較・メリット・デメリットを説明できること
+              </li>
+              <li style="margin-bottom: 0.8rem; display: flex; align-items: center;">
+                <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+                機械学習が注目された背景（計算能力の向上、ビッグデータの出現、アルゴリズムの進化など）
+              </li>
+              <li style="display: flex; align-items: center;">
+                <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.8rem; font-size: 1.2rem;"></i>
+                機械学習が効果を発揮する場面と代表的な応用例を具体的に挙げられること
+              </li>
+            </ul>
+          </div>
+          
+          <p style="font-size: 1rem; color: var(--dark-gray); font-style: italic; margin-top: 1.5rem;">
+            この1-2-3では機械学習の概要を理解し、1-3で詳細に学ぶための基礎を固めましょう。
+          </p>
+        </div>
+                <!-- 画像の説明をいれる --> 
+                <div class="image-container">
+                  <img src="img/Gimage_1-2-3_01.png" alt="機械学習の基本">
+                  <figcaption>機械学習の基本</figcaption>
+                </div>
+      </section>
+
+
+
+
+    </main>
+  </div>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <script>
+    // スクロール関連の簡単なJavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      // スクロールトップボタンの表示/非表示
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+      });
+      
+      // スクロールトップボタンのクリックイベント
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+      
+      // ナビゲーションリンクのクリックイベント
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 20,
+              behavior: 'smooth'
+            });
+            
+            // アクティブクラスの切り替え
+            navLinks.forEach(navLink => navLink.classList.remove('active'));
+            this.classList.add('active');
+          }
+        });
+      });
+      
+      // スクロール位置に基づいてナビゲーションをアクティブに
+      window.addEventListener('scroll', function() {
+        const scrollPosition = window.pageYOffset;
+        
+        document.querySelectorAll('section').forEach(section => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionBottom = sectionTop + section.offsetHeight;
+          const sectionId = '#' + section.getAttribute('id');
+          
+          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            navLinks.forEach(navLink => {
+              navLink.classList.remove('active');
+              if (navLink.getAttribute('href') === sectionId) {
+                navLink.classList.add('active');
+              }
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

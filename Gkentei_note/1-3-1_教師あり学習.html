@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-3-1 教師あり学習</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* CMYK カラースキーム */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    #sidebar {
+      width: 20%;
+      background-color: var(--magenta);
+      color: var(--white);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar-title {
+      font-family: 'Klee One', cursive;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      text-align: center;
+      color: var(--cyan);
+      border-bottom: 2px dotted var(--cyan);
+      padding-bottom: 0.5rem;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-menu li {
+      margin-bottom: 0.8rem;
+    }
+
+    .nav-menu a {
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .nav-menu a.active {
+      background-color: var(--cyan);
+      color: var(--key);
+    }
+
+    .nav-menu i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツ */
+    #main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .title-section {
+      text-align: center;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg, rgba(0, 216, 232, 0.1), rgba(255, 64, 160, 0.1));
+      border-radius: 15px;
+      position: relative;
+    }
+
+    .title-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+      border-radius: 15px;
+      opacity: 0.5;
+      z-index: -1;
+    }
+
+    h1 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2.5rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2rem;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta));
+      border-radius: 5px;
+    }
+
+    h3 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.5rem;
+      color: var(--magenta);
+      margin: 1.5rem 0 1rem 0;
+      display: flex;
+      align-items: center;
+    }
+
+    h3 i {
+      margin-right: 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    .overview {
+      background-color: rgba(255, 230, 0, 0.1);
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      border-left: 5px solid var(--yellow);
+    }
+
+    .overview li {
+      margin-left: 1.5rem;
+      margin-bottom: 0.5rem;
+      list-style-position: inside;
+    }
+
+    .keyword {
+      font-weight: 700;
+      color: var(--key);
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      padding: 0 0.2rem;
+    }
+
+    .note-box {
+      background-color: rgba(0, 216, 232, 0.1);
+      border: 2px dashed var(--cyan);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .note-box::before {
+      content: '📌';
+      position: absolute;
+      top: -0.8rem;
+      left: 1rem;
+      background-color: var(--white);
+      padding: 0 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .concept-box {
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-top: 5px solid var(--magenta);
+    }
+
+    .concept-title {
+      font-weight: 700;
+      color: var(--magenta);
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .concept-title i {
+      margin-right: 0.5rem;
+    }
+
+    .concept-box ul li {
+      margin-bottom: 0.5rem;
+      list-style-position: inside;
+    }
+
+    .key-insights {
+      background: linear-gradient(135deg, rgba(255, 64, 160, 0.1), rgba(255, 230, 0, 0.1));
+      padding: 2rem;
+      border-radius: 15px;
+      margin: 2rem 0;
+    }
+
+    .key-insights h3 {
+      color: var(--key);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .insight-item {
+      margin-bottom: 1.5rem;
+      padding-left: 2.5rem;
+      position: relative;
+    }
+
+    .insight-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.3rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      background-color: var(--cyan);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .insight-item:nth-child(1)::before {
+      content: '1';
+    }
+
+    .insight-item:nth-child(2)::before {
+      content: '2';
+    }
+
+    .insight-item:nth-child(3)::before {
+      content: '3';
+    }
+
+    .insight-item:nth-child(4)::before {
+      content: '4';
+    }
+
+    .insight-title {
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: var(--key);
+    }
+
+    .take-home {
+      text-align: center;
+      padding: 2rem;
+      margin: 2rem 0;
+      background-color: rgba(0, 216, 232, 0.1);
+      border-radius: 15px;
+      position: relative;
+    }
+
+    .take-home h3 {
+      color: var(--key);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .take-home-message {
+      font-size: 1.2rem;
+      font-weight: 500;
+      line-height: 1.8;
+      color: var(--key);
+      position: relative;
+      display: inline-block;
+    }
+
+    .take-home-message::before,
+    .take-home-message::after {
+      content: '"';
+      font-size: 2rem;
+      color: var(--cyan);
+      position: absolute;
+    }
+
+    .take-home-message::before {
+      top: -1rem;
+      left: -1rem;
+    }
+
+    .take-home-message::after {
+      bottom: -1.5rem;
+      right: -1rem;
+    }
+
+    .glossary {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .glossary-table th {
+      background-color: var(--key);
+      color: var(--white);
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    .glossary-table td {
+      padding: 0.8rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .glossary-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .glossary-term {
+      font-weight: 700;
+      color: var(--magenta);
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    #scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--key);
+      color: var(--white);
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    #scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .highlight {
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      font-weight: 500;
+    }
+
+    ol li {
+      list-style-position: inside;
+      margin-bottom: 0.5rem;
+    }
+
+    .concept-box ul li, .note-box ul li {
+      margin-bottom: 0.5rem;
+      list-style-position: inside;
+    }
+
+    /* レスポンシブデザイン */
+    @media (max-width: 1024px) {
+      body {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+
+      #main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <aside id="sidebar">
+    <div id="sidebar-title">G検定ノート</div>
+    <ul class="nav-menu">
+      <li><a href="#section-title" class="active"><i class="fas fa-book-open"></i>概要</a></li>
+      <li><a href="#section-overview"><i class="fas fa-map"></i>機械学習とは</a></li>
+      <li><a href="#section-supervised"><i class="fas fa-chalkboard-teacher"></i>教師あり学習</a></li>
+      <li><a href="#section-characteristics"><i class="fas fa-fingerprint"></i>特徴と用途</a></li>
+      <li><a href="#section-models"><i class="fas fa-cogs"></i>代表的モデル</a></li>
+      <li><a href="#section-workflow"><i class="fas fa-project-diagram"></i>基本的な流れ</a></li>
+      <li><a href="#section-keywords"><i class="fas fa-key"></i>キーワード解説</a></li>
+      <li><a href="#section-insights"><i class="fas fa-lightbulb"></i>Key Insights</a></li>
+      <li><a href="#section-take-home"><i class="fas fa-home"></i>Take Home Message</a></li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main id="main-content">
+    <!-- タイトルセクション -->
+    <section id="section-title" class="section title-section">
+      <h1>1-3 機械学習の概要</h1>
+      <h2>1-3-1 教師あり学習</h2>
+      <div class="overview">
+        <p>人工知能の中核技術である機械学習、その中でも最も基本的な学習方法「教師あり学習」について学びます。</p>
+        <ul>
+          <li>教師あり学習の基本的な仕組みと特徴</li>
+          <li>特徴量と教師データの役割</li>
+          <li>分類問題と回帰問題の違い</li>
+          <li>代表的な教師あり学習モデルとその応用例</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 機械学習とは -->
+    <section id="section-overview" class="section">
+      <h3><i class="fas fa-map"></i> 機械学習とは</h3>
+      <p><span class="keyword">機械学習（Machine Learning）</span>は、データから規則性やパターンを学習し、未知のデータに対して予測や判断を行うための技術です。従来のプログラミングでは、人間がルールを明示的に記述する必要がありましたが、機械学習では大量のデータを与えることで、コンピュータ自身がそのルールを学習します。</p>
+      
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-lightbulb"></i>従来のプログラミングと機械学習の違い</div>
+        <p>従来のプログラミング: <strong>ルール + データ → 答え</strong><br>
+        機械学習: <strong>データ + 答え → ルール</strong></p>
+      </div>
+
+      <p>機械学習の手法は大きく3つに分類されます：</p>
+      <ol>
+        <li><strong>教師あり学習（Supervised Learning）</strong>: 入力と正解（ラベル）のペアを使って学習</li>
+        <li><strong>教師なし学習（Unsupervised Learning）</strong>: 正解ラベルなしでデータの構造やパターンを発見</li>
+        <li><strong>強化学習（Reinforcement Learning）</strong>: 環境との相互作用から報酬を最大化するように学習</li>
+      </ol>
+
+      <div class="note-box">
+        <p>機械学習がビジネスで注目される理由として、<span class="keyword">ビッグデータ（Big Data）</span>の活用可能性、計算機の性能向上、そして従来手法では解決が難しかった複雑な問題（画像認識、自然言語処理など）への適用が挙げられます。</p>
+      </div>
+    </section>
+
+    <!-- 教師あり学習 -->
+    <section id="section-supervised" class="section">
+      <h3><i class="fas fa-chalkboard-teacher"></i> 教師あり学習</h3>
+      <p><span class="keyword">教師あり学習（Supervised Learning）</span>は、入力データと、それに対応する正解（教師データ）のペアを使ってモデルを学習させる手法です。学習したモデルは、新しい未知のデータに対しても適切な出力を予測できるようになります。</p>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-puzzle-piece"></i>教師あり学習の仕組み</div>
+        <p>教師あり学習では、<span class="keyword">特徴量（Features）</span>と<span class="keyword">教師データ（Labels/Targets）</span>のペアが必要です。</p>
+        <ul>
+          <li><strong>特徴量</strong>: モデルへの入力となるデータの属性や特性（例: 身長、体重、年齢など）</li>
+          <li><strong>教師データ</strong>: 各入力に対する正解や期待される出力（例: クラスラベルや数値）</li>
+        </ul>
+      </div>
+
+      <p>教師あり学習の一般的な流れ：</p>
+      <ol>
+        <li>特徴量と教師データのペアを含むトレーニングデータセットを準備</li>
+        <li>モデルの初期パラメータを設定</li>
+        <li>モデルにトレーニングデータを入力し、予測値を生成</li>
+        <li>予測値と教師データの差（誤差）を計算</li>
+        <li>誤差を最小化するようにモデルのパラメータを調整</li>
+        <li>新しいデータに対して予測を行う</li>
+      </ol>
+    </section>
+
+    <!-- 特徴と用途 -->
+    <section id="section-characteristics" class="section">
+      <h3><i class="fas fa-fingerprint"></i> 特徴と用途</h3>
+      <p>教師あり学習は、分析対象の特性に応じて主に2つの問題に分類されます：</p>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-tags"></i>分類問題（Classification）</div>
+        <p><span class="keyword">分類問題（Classification）</span>は、入力データをあらかじめ定義されたカテゴリ（クラス）に分類するタスクです。</p>
+        <ul>
+          <li><strong>二項分類（Binary Classification）</strong>: 2つのクラスに分類（例: メールがスパムか否か）</li>
+          <li><strong>多クラス分類（Multi-class Classification）</strong>: 3つ以上のクラスに分類（例: 手書き数字の認識）</li>
+        </ul>
+        <p><strong>用途例</strong>: スパムフィルタリング（Spam Filtering）、顧客離反予測（Churn Prediction）、画像認識（Image Recognition）、医療診断（Medical Diagnosis）</p>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-chart-line"></i>回帰問題（Regression）</div>
+        <p><span class="keyword">回帰問題（Regression）</span>は、入力データから連続的な数値を予測するタスクです。</p>
+        <ul>
+          <li><strong>単回帰（Simple Regression）</strong>: 1つの変数から予測（例: 部屋の広さから家賃を予測）</li>
+          <li><strong>重回帰（Multiple Regression）</strong>: 複数の変数から予測（例: 広さ、立地、築年数から家賃を予測）</li>
+        </ul>
+        <p><strong>用途例</strong>: 株価予測（Stock Price Prediction）、売上予測（Sales Forecasting）、気象予測（Weather Forecasting）、需要予測（Demand Prediction）</p>
+      </div>
+
+      <div class="note-box">
+        <p>教師あり学習は、明確な正解があり、それを基に予測モデルを構築したい場合に適しています。特に過去のデータと結果の関係性から将来を予測するようなビジネス課題に効果的です。</p>
+      </div>
+
+        <!-- 画像の説明をいれる --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-3-1_01.png" alt="教師あり学習の流れ">
+          <figcaption>教師あり学習の流れ</figcaption>
+        </div>
+
+    </section>
+
+    <!-- 代表的モデル -->
+    <section id="section-models" class="section">
+      <h3><i class="fas fa-cogs"></i> 代表的モデル</h3>
+      <p>教師あり学習には様々なアルゴリズムが存在し、データの特性や解決したい問題に応じて適切なモデルを選択することが重要です。</p>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-tree"></i>決定木（Decision Tree）</div>
+        <p><span class="keyword">決定木（Decision Tree）</span>は、「If-Then」ルールの組み合わせによって、データを徐々に分岐させていくモデルです。</p>
+        <ul>
+          <li>直感的で解釈しやすい</li>
+          <li>数値データだけでなく、カテゴリデータも扱える</li>
+          <li>過学習しやすいという欠点がある</li>
+        </ul>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-random"></i>ランダムフォレスト（Random Forest）</div>
+        <p><span class="keyword">ランダムフォレスト（Random Forest）</span>は、複数の決定木の予測結果を集約して最終的な予測を行う<span class="keyword">アンサンブル学習（Ensemble Learning）</span>手法です。</p>
+        <ul>
+          <li>決定木単体よりも高い精度が得られる</li>
+          <li>過学習に強い</li>
+          <li>特徴量の重要度を評価できる</li>
+        </ul>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-wave-square"></i>サポートベクターマシン（SVM）</div>
+        <p><span class="keyword">サポートベクターマシン（Support Vector Machine, SVM）</span>は、データ点を高次元空間にマッピングし、クラスを分離する最適な境界（超平面）を見つけるモデルです。</p>
+        <ul>
+          <li>高次元データに対して効果的</li>
+          <li><span class="keyword">カーネルトリック（Kernel Trick）</span>により非線形分離も可能</li>
+          <li>計算コストが高い場合がある</li>
+        </ul>
+
+        <!-- 画像の説明をいれる --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-3-1_02.png" alt="サポートベクターマシン（SVM）">
+          <figcaption>サポートベクターマシン（SVM）</figcaption>
+        </div>
+
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-network-wired"></i>ロジスティック回帰（Logistic Regression）</div>
+        <p><span class="keyword">ロジスティック回帰（Logistic Regression）</span>は、入力値から確率（0〜1の値）を予測する回帰モデルで、主に分類問題に使用されます。</p>
+        <ul>
+          <li>シンプルで解釈しやすい</li>
+          <li>学習が高速</li>
+          <li>確率として出力されるため、分類の信頼度がわかる</li>
+        </ul>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-title"><i class="fas fa-chart-bar"></i>勾配ブースティング（Gradient Boosting）</div>
+        <p><span class="keyword">勾配ブースティング（Gradient Boosting）</span>は、弱学習器（主に決定木）を逐次的に追加して、前の学習器の誤差を修正していくアンサンブル手法です。</p>
+        <ul>
+          <li>高い予測精度を持つ</li>
+          <li>特徴量の重要度を評価できる</li>
+          <li>代表的なアルゴリズムとして<span class="keyword">AdaBoost（Adaptive Boosting）</span>がある</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 基本的な流れ -->
+    <section id="section-workflow" class="section">
+      <h3><i class="fas fa-project-diagram"></i> 基本的な流れ</h3>
+      <p>教師あり学習を実際に適用するプロセスは以下のようになります：</p>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin: 2rem 0;">
+        <div style="width: 30%; text-align: center; padding: 1rem; border: 2px dashed var(--cyan); border-radius: 10px; position: relative;">
+          <div style="background-color: var(--cyan); color: var(--white); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-weight: 700;">1</div>
+          <h4 style="margin-bottom: 0.5rem;">データ収集と前処理</h4>
+          <p style="font-size: 0.9rem; text-align: left;">特徴量と教師データのペアを収集し、欠損値処理、正規化、特徴選択などの前処理を行う</p>
+        </div>
+
+        <div style="margin-top: 3rem; width: 5%; text-align: center;">
+          <i class="fas fa-arrow-right" style="color: var(--dark-gray);"></i>
+        </div>
+
+        <div style="width: 30%; text-align: center; padding: 1rem; border: 2px dashed var(--cyan); border-radius: 10px; position: relative;">
+          <div style="background-color: var(--cyan); color: var(--white); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-weight: 700;">2</div>
+          <h4 style="margin-bottom: 0.5rem;">学習データとテストデータの分割</h4>
+          <p style="font-size: 0.9rem; text-align: left;">データを学習用とテスト用に分割（一般的には7:3や8:2の比率）</p>
+        </div>
+
+        <div style="margin-top: 3rem; width: 5%; text-align: center;">
+          <i class="fas fa-arrow-right" style="color: var(--dark-gray);"></i>
+        </div>
+
+        <div style="width: 30%; text-align: center; padding: 1rem; border: 2px dashed var(--cyan); border-radius: 10px; position: relative;">
+          <div style="background-color: var(--cyan); color: var(--white); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-weight: 700;">3</div>
+          <h4 style="margin-bottom: 0.5rem;">モデル選択</h4>
+          <p style="font-size: 0.9rem; text-align: left;">問題の種類や特性に合わせて適切なアルゴリズムを選択</p>
+        </div>
+
+        <div style="width: 30%; text-align: center; padding: 1rem; border: 2px dashed var(--cyan); border-radius: 10px; position: relative; margin-top: 2rem;">
+          <div style="background-color: var(--cyan); color: var(--white); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-weight: 700;">6</div>
+          <h4 style="margin-bottom: 0.5rem;">モデルの運用</h4>
+          <p style="font-size: 0.9rem; text-align: left;">学習したモデルを実際のデータに適用し、定期的に性能を監視・更新</p>
+        </div>
+
+        <div style="margin-top: 3rem; width: 5%; text-align: center;">
+          <i class="fas fa-arrow-left" style="color: var(--dark-gray);"></i>
+        </div>
+
+        <div style="width: 30%; text-align: center; padding: 1rem; border: 2px dashed var(--cyan); border-radius: 10px; position: relative; margin-top: 2rem;">
+          <div style="background-color: var(--cyan); color: var(--white); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-weight: 700;">5</div>
+          <h4 style="margin-bottom: 0.5rem;">モデルの評価</h4>
+          <p style="font-size: 0.9rem; text-align: left;">テストデータを使って性能を評価し、必要に応じてモデルを改善</p>
+        </div>
+
+        <div style="margin-top: 3rem; width: 5%; text-align: center;">
+          <i class="fas fa-arrow-left" style="color: var(--dark-gray);"></i>
+        </div>
+
+        <div style="width: 30%; text-align: center; padding: 1rem; border: 2px dashed var(--cyan); border-radius: 10px; position: relative; margin-top: 2rem;">
+          <div style="background-color: var(--cyan); color: var(--white); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-weight: 700;">4</div>
+          <h4 style="margin-bottom: 0.5rem;">モデルの学習</h4>
+          <p style="font-size: 0.9rem; text-align: left;">学習データを使ってモデルのパラメータを最適化</p>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <p>モデルの評価には様々な指標があります：</p>
+        <ul>
+          <li><strong>分類問題</strong>: 正解率（Accuracy）、適合率（Precision）、再現率（Recall）、F値（F-measure）、ROC曲線（ROC Curve）、AUC（Area Under the Curve）など</li>
+          <li><strong>回帰問題</strong>: 平均二乗誤差（Mean Squared Error, MSE）、平均絶対誤差（Mean Absolute Error, MAE）、決定係数（Coefficient of Determination, R²）など</li>
+        </ul>
+        <p>また、<span class="keyword">交差検証（Cross Validation）</span>を用いることで、より信頼性の高いモデル評価が可能になります。</p>
+      </div>
+    </section>
+
+    <!-- キーワード解説 -->
+    <section id="section-keywords" class="section">
+      <h3><i class="fas fa-key"></i> キーワード解説</h3>
+      <p>G検定で重要な教師あり学習関連のキーワードをまとめました。</p>
+
+      <div class="glossary">
+        <table class="glossary-table">
+          <thead>
+            <tr>
+              <th>キーワード</th>
+              <th>解説</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="glossary-term">AdaBoost（Adaptive Boosting）</td>
+              <td>弱学習器（通常は決定木）を組み合わせる代表的なブースティング手法。誤分類されたデータに重みを付けて、逐次的に学習器を追加していく。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">アンサンブル学習（Ensemble Learning）</td>
+              <td>複数の学習器を組み合わせることで、単一の学習器よりも高い性能を得る手法。代表的なものにバギング（ランダムフォレストなど）とブースティング（AdaBoostなど）がある。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">カーネル（Kernel）</td>
+              <td>低次元の特徴量を高次元空間に写像する関数。SVMなどで非線形の問題を解くために使用される。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">カーネルトリック（Kernel Trick）</td>
+              <td>高次元空間での内積計算を、元の低次元空間での計算で置き換えることができる手法。計算効率を大幅に向上させる。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">回帰問題（Regression Problem）</td>
+              <td>連続値を予測するタスク。例：住宅価格予測、気温予測など。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">決定木（Decision Tree）</td>
+              <td>データを特徴量の条件分岐によって分類していく木構造のモデル。可視化しやすく解釈性が高いが、過学習しやすい。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">勾配ブースティング（Gradient Boosting）</td>
+              <td>前の学習器の残差（誤差）を次の学習器が予測するよう学習させるブースティング手法。XGBoost、LightGBMなどの実装が人気。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">サポートベクターマシン（Support Vector Machine, SVM）</td>
+              <td>データを分類する最適な超平面を見つけるアルゴリズム。マージン（データ点と決定境界の距離）を最大化する。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">線形回帰（Linear Regression）</td>
+              <td>入力変数と出力変数の間に線形関係を仮定した回帰モデル。単回帰（説明変数が1つ）と重回帰（説明変数が複数）がある。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">自己回帰モデル（Autoregressive Model, AR）</td>
+              <td>時系列データを過去の自身の値から予測するモデル。例：株価の予測、気温の予測など。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">重回帰分析（Multiple Regression Analysis）</td>
+              <td>複数の説明変数を用いて目的変数を予測する線形回帰分析。Y = β₀ + β₁X₁ + β₂X₂ + ... + βₙXₙ + ε の形で表される。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">多クラス分類（Multi-class Classification）</td>
+              <td>3つ以上のクラスに分類する問題。例：画像の物体認識、文書のカテゴリ分類など。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">バギング（Bagging, Bootstrap Aggregating）</td>
+              <td>データのサブセットをランダムにサンプリングし、複数の学習器を並列に学習させる手法。代表的な手法はランダムフォレスト。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">ブースティング（Boosting）</td>
+              <td>弱学習器を逐次的に組み合わせ、前の学習器の弱点を補う形で新しい学習器を追加していく手法。AdaBoost、勾配ブースティングなど。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">分類問題（Classification Problem）</td>
+              <td>データを予め定義されたクラス・カテゴリに分類するタスク。例：スパム検出、画像認識など。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">ブートストラップサンプリング（Bootstrap Sampling）</td>
+              <td>データセットから復元抽出によりランダムにサンプルを取り出す手法。バギングなどで使用される。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">ランダムフォレスト（Random Forest）</td>
+              <td>複数の決定木の予測結果を多数決などで統合するアンサンブル手法。過学習に強く、高い予測精度を持つ。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">ロジスティック回帰（Logistic Regression）</td>
+              <td>入力変数の線形結合をシグモイド関数に通すことで、0〜1の確率値を出力する分類モデル。主に二項分類に使用。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">ベクトル自己回帰モデル（Vector Autoregressive Model, VAR）</td>
+              <td>複数の時系列変数間の相互関係を考慮した自己回帰モデル。複数の経済指標の予測などに使用される。</td>
+            </tr>
+            <tr>
+              <td class="glossary-term">マーケティング最大化（Marketing Optimization）</td>
+              <td>顧客データからパーソナライズされたマーケティング施策を最適化し、コンバージョン率やLTVを最大化する取り組み。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Key Insights -->
+    <section id="section-insights" class="section key-insights">
+      <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
+      
+      <div class="insight-item">
+        <div class="insight-title">教師あり学習は特徴量と教師データのペアが必要</div>
+        <p>教師あり学習では、入力データ（特徴量）とそれに対応する正解ラベル（教師データ）のペアを使って学習します。これは他の機械学習手法（教師なし学習や強化学習）との大きな違いです。</p>
+      </div>
+
+      <div class="insight-item">
+        <div class="insight-title">教師あり学習は分類問題と回帰問題に分けられる</div>
+        <p>分類問題はデータをカテゴリやクラスに分ける問題（例：スパムかどうか、どの動物か）、回帰問題は連続値を予測する問題（例：価格、気温）です。問題の種類によって適切なモデルや評価指標が異なります。</p>
+      </div>
+
+      <div class="insight-item">
+        <div class="insight-title">モデル選択はデータと問題に合わせて行う</div>
+        <p>データの特性（サイズ、次元数、ノイズの量など）や問題の性質（精度重視か解釈性重視かなど）に応じて、適切なモデルを選択することが重要です。単純なモデル（線形回帰など）と複雑なモデル（ランダムフォレストなど）の使い分けが必要です。</p>
+      </div>
+
+      <div class="insight-item">
+        <div class="insight-title">過学習と汎化性能のバランスが鍵</div>
+        <p>学習データに過度に適合すると、新しいデータでの性能が低下する「過学習」が起こります。正則化や交差検証などを用いてモデルの「汎化性能」を高めることが重要です。</p>
+      </div>
+    </section>
+
+    <!-- Take Home Message -->
+    <section id="section-take-home" class="section take-home">
+      <h3><i class="fas fa-home"></i> Take Home Message</h3>
+      
+      <p class="take-home-message">
+        教師あり学習は、特徴量と教師データのペアを使って予測モデルを構築する機械学習の基本手法です。問題の種類（分類・回帰）に応じて適切なモデルを選び、過学習を防ぎながら汎化性能を高めることが成功の鍵となります。
+      </p>
+    </section>
+
+    <!-- フッター -->
+    <footer>
+      <p>© 2024 G検定ノート - 作成: AI支援（原稿とコード: Claude、画像: ChatGPT）</p>
+    </footer>
+
+    <!-- スクロールトップボタン -->
+    <a href="#" id="scroll-top"><i class="fas fa-arrow-up"></i></a>
+  </main>
+
+  <script>
+    // スクロール時のナビゲーション制御
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('.section');
+      const navLinks = document.querySelectorAll('.nav-menu a');
+      const scrollTopBtn = document.getElementById('scroll-top');
+
+      // スクロール時のイベント
+      window.addEventListener('scroll', function() {
+        // 現在のスクロール位置
+        const currentPos = window.scrollY;
+
+        // スクロールトップボタンの表示・非表示
+        if (currentPos > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+
+        // 現在表示されているセクションを特定
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionBottom = sectionTop + section.offsetHeight;
+          const sectionId = section.getAttribute('id');
+
+          if (currentPos >= sectionTop && currentPos < sectionBottom) {
+            // 対応するナビリンクをアクティブに
+            navLinks.forEach(link => {
+              link.classList.remove('active');
+              if (link.getAttribute('href') === `#${sectionId}`) {
+                link.classList.add('active');
+              }
+            });
+          }
+        });
+      });
+
+      // ナビリンクのスムーススクロール
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetSection = document.querySelector(targetId);
+          
+          window.scrollTo({
+            top: targetSection.offsetTop,
+            behavior: 'smooth'
+          });
+        });
+      });
+
+      // スクロールトップボタンのイベント
+      scrollTopBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-5-4 プーリング層 | ディープラーニングの要素技術</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    /* CMYK カラーパレット変数 */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+      --medium-gray: #E0E0E0;
+    }
+
+    /* 基本スタイル */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: var(--magenta);
+    }
+
+    /* レイアウト */
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      background-color: var(--cyan);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      color: var(--white);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .sidebar-title {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--white);
+    }
+
+    .sidebar-nav {
+      list-style-type: none;
+    }
+
+    .sidebar-nav-item {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar-nav-item:hover {
+      background-color: rgba(255,255,255,0.2);
+    }
+
+    .sidebar-nav-item.active {
+      background-color: var(--white);
+      color: var(--cyan);
+    }
+
+    .sidebar-nav-item a {
+      color: inherit;
+      display: block;
+      text-decoration: none;
+    }
+
+    .sidebar-nav-icon {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    .section {
+      padding: 2rem;
+      margin-bottom: 2rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--cyan);
+      color: var(--key);
+    }
+
+    .section-title-icon {
+      margin-right: 1rem;
+      font-size: 1.5rem;
+      color: var(--cyan);
+    }
+
+    /* タイトルセクション */
+    .title-section {
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      background: linear-gradient(to right, rgba(0,216,232,0.1), rgba(255,64,160,0.1));
+      border-radius: 8px;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: var(--dark-gray);
+    }
+
+    .summary-list {
+      text-align: left;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .summary-list-title {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: var(--magenta);
+    }
+
+    .summary-list ul {
+      list-style-position: inside;
+      padding-left: 1rem;
+    }
+
+    .summary-list li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* コンテンツコンポーネント */
+    .content-box {
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .handwritten-box {
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background-color: var(--white);
+      border: 2px dashed var(--magenta);
+      border-radius: 8px;
+      position: relative;
+      transform: rotate(-0.5deg);
+      font-family: 'Klee One', cursive;
+    }
+
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 1.2rem;
+    }
+
+    .note-box {
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background-color: var(--light-gray);
+      border-left: 4px solid var(--yellow);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .highlight {
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      font-weight: 500;
+    }
+
+    .keyword {
+      color: var(--magenta);
+      font-weight: bold;
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* キーインサイトのスタイル */
+    .key-insights {
+      padding: 2rem;
+      margin: 2rem 0;
+      background-color: var(--light-gray);
+      border-radius: 8px;
+    }
+
+    .key-insights-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+    }
+
+    .key-insights-icon {
+      margin-right: 1rem;
+      font-size: 1.5rem;
+      color: var(--yellow);
+    }
+
+    .insight-item {
+      margin-bottom: 1.5rem;
+      padding-left: 2rem;
+      position: relative;
+    }
+
+    .insight-item:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      background-color: var(--magenta);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    .insight-item:nth-child(1):before { content: "1"; }
+    .insight-item:nth-child(2):before { content: "2"; }
+    .insight-item:nth-child(3):before { content: "3"; }
+    .insight-item:nth-child(4):before { content: "4"; }
+
+    .insight-title {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: var(--magenta);
+    }
+
+    /* テイクホームメッセージのスタイル */
+    .take-home {
+      padding: 2rem;
+      margin: 2rem 0;
+      background-color: var(--white);
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .take-home-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      color: var(--cyan);
+    }
+
+    .take-home-icon {
+      margin-right: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .take-home-message {
+      font-size: 1.2rem;
+      font-weight: 500;
+      line-height: 1.6;
+      color: var(--key);
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    /* 用語集のスタイル */
+    .glossary {
+      padding: 2rem;
+      margin: 2rem 0;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .glossary-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--yellow);
+      color: var(--key);
+    }
+
+    .glossary-icon {
+      margin-right: 1rem;
+      font-size: 1.5rem;
+      color: var(--yellow);
+    }
+
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .glossary-table th, .glossary-table td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .glossary-table th {
+      background-color: var(--light-gray);
+      color: var(--key);
+    }
+
+    .glossary-term {
+      font-weight: bold;
+      color: var(--magenta);
+    }
+
+    .glossary-en {
+      font-style: italic;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+
+    /* フッターのスタイル */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      margin-top: 2rem;
+      border-top: 1px solid var(--medium-gray);
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 3rem;
+      height: 3rem;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 99;
+    }
+
+    .scroll-top.visible {
+      opacity: 1;
+    }
+
+    /* リストスタイル */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+      list-style-position: inside;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* 二列表示 */
+    .two-column {
+      display: flex;
+      gap: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .column {
+      flex: 1;
+    }
+
+    /* レスポンシブデザイン */
+    @media (max-width: 1024px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        padding: 1rem;
+      }
+
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .two-column {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">ディープラーニングの要素技術</h2>
+      </div>
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-item">
+          <a href="#title-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-home"></i></span>
+            <span>はじめに</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#overview-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-info-circle"></i></span>
+            <span>プーリング層の概要</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#types-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-list"></i></span>
+            <span>主なプーリング操作</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#role-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-cogs"></i></span>
+            <span>プーリング層の役割</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#application-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-laptop-code"></i></span>
+            <span>実際の応用例</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#key-insights-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-lightbulb"></i></span>
+            <span>Key Insights</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#take-home-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-key"></i></span>
+            <span>Take Home Message</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#glossary-section">
+            <span class="sidebar-nav-icon"><i class="fas fa-book"></i></span>
+            <span>用語集</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- タイトルセクション -->
+      <section id="title-section" class="title-section">
+        <h1 class="main-title">1-5-4 プーリング層</h1>
+        <p class="subtitle">ディープラーニングの重要な構成要素であるプーリング層の基礎知識と役割</p>
+        
+        <div class="summary-list">
+          <h3 class="summary-list-title">このセクションの目標</h3>
+          <ul>
+            <li>プーリング層の基礎的な知識を理解する</li>
+            <li>代表的なプーリング操作について理解する</li>
+            <li>プーリング層がディープラーニングモデルの学習において、どのような役割を果たすのか説明できる</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- プーリング層の概要セクション -->
+      <section id="overview-section" class="section">
+        <h2 class="section-title">
+          <span class="section-title-icon"><i class="fas fa-info-circle"></i></span>
+          プーリング層の概要
+        </h2>
+        
+        <div class="content-box">
+          <p><span class="keyword">プーリング層</span>は、畳み込みニューラルネットワーク（CNN）において重要な役割を果たす層の一つです。主に畳み込み層の後に配置され、特徴マップのサイズを縮小（ダウンサンプリング）する役割を担っています。</p>
+          
+          <p>プーリング層の基本的な動作は、入力データの局所的な領域（通常は2×2や3×3のウィンドウ）から特定の値を選択または計算し、出力として1つの値を生成することです。これにより、データの空間的なサイズが縮小され、パラメータ数と計算量を削減すると同時に、位置変化に対する不変性（robustness）を獲得します。</p>
+          
+          <div class="handwritten-box">
+            <p>プーリング層のポイント：</p>
+            <ul>
+              <li>畳み込み層の後に配置されることが多い</li>
+              <li>特徴マップのサイズを縮小する（ダウンサンプリング）</li>
+              <li>学習すべきパラメータを持たない（固定された操作）</li>
+              <li>ストライド（移動幅）とカーネルサイズ（ウィンドウサイズ）を指定</li>
+              <li>パディングは通常行わない（特徴マップのサイズ縮小が目的）</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="content-box">
+          <h3>プーリング操作の基本的な流れ</h3>
+          <ol>
+            <li>特徴マップ上で指定したサイズのウィンドウ（例：2×2）を定義</li>
+            <li>そのウィンドウ内の値に対して特定の演算（最大値の抽出や平均値の計算など）を適用</li>
+            <li>得られた値を出力特徴マップの該当位置に配置</li>
+            <li>ウィンドウをストライド分だけスライドさせ、同じ操作を繰り返す</li>
+          </ol>
+          
+          <p>例えば、2×2のウィンドウと2のストライドを使用した場合、出力特徴マップのサイズは入力特徴マップの半分になります。</p>
+          
+          <div class="note-box">
+            <p><strong>注意点：</strong>プーリング層は学習パラメータを持ちません。これは畳み込み層や全結合層とは異なり、事前に定義された固定の操作（最大値や平均値の計算など）を適用するだけだからです。</p>
+          </div>
+        </div>
+        
+        <div class="content-box">
+          <h3>プーリング層と畳み込み層の違い</h3>
+          <div class="two-column">
+            <div class="column">
+              <h4>プーリング層</h4>
+              <ul>
+                <li>学習パラメータを持たない</li>
+                <li>主に特徴マップのサイズ縮小が目的</li>
+                <li>位置変化に対する不変性を獲得</li>
+                <li>計算量の削減</li>
+              </ul>
+            </div>
+            <div class="column">
+              <h4>畳み込み層</h4>
+              <ul>
+                <li>学習パラメータ（カーネル）を持つ</li>
+                <li>特徴抽出が主な目的</li>
+                <li>局所的なパターンを検出</li>
+                <li>より高度な特徴表現の学習</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 主なプーリング操作セクション -->
+      <section id="types-section" class="section">
+        <h2 class="section-title">
+          <span class="section-title-icon"><i class="fas fa-list"></i></span>
+          主なプーリング操作
+        </h2>
+        
+        <div class="content-box">
+          <p>プーリング操作には複数の種類があり、それぞれが異なる特性を持っています。ここでは代表的なプーリング操作について説明します。</p>
+          
+          <h3>1. <span class="keyword">最大値プーリング</span> (Max Pooling)</h3>
+          <p>最大値プーリングは、指定された局所領域（ウィンドウ）内の最大値のみを選択する操作です。これは現在、最も広く使われているプーリング手法です。</p>
+          
+          <div class="handwritten-box">
+            <p>最大値プーリングの特徴：</p>
+            <ul>
+              <li>ウィンドウ内の最も強い特徴（最大の活性値）を保持する</li>
+              <li>エッジや特徴的なパターンを強調する傾向がある</li>
+              <li>ノイズに対して比較的堅牢</li>
+              <li>小さな位置変化に対する不変性を獲得しやすい</li>
+            </ul>
+          </div>
+          
+          <p>例えば、以下のような2×2の入力に対して2×2の最大値プーリングを適用すると：</p>
+          <pre style="background-color: var(--light-gray); padding: 1rem; border-radius: 4px; overflow-x: auto;">
+入力：     出力：
+[1 3]      [9]
+[4 9]
+          </pre>
+          <p>出力は入力の最大値である9になります。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3>2. <span class="keyword">平均値プーリング</span> (Average Pooling)</h3>
+          <p>平均値プーリングは、指定された局所領域内の値の平均を計算する操作です。</p>
+          
+          <div class="handwritten-box">
+            <p>平均値プーリングの特徴：</p>
+            <ul>
+              <li>ウィンドウ内のすべての情報を均等に考慮する</li>
+              <li>背景情報をより多く保持する傾向がある</li>
+              <li>特徴の強さを平均化することで全体的な特徴を捉える</li>
+              <li>最大値プーリングよりも滑らかな特徴表現になりやすい</li>
+            </ul>
+          </div>
+          
+          <p>同じ2×2の入力に対して平均値プーリングを適用すると：</p>
+          <pre style="background-color: var(--light-gray); padding: 1rem; border-radius: 4px; overflow-x: auto;">
+入力：     出力：
+[1 3]      [4.25]
+[4 9]
+          </pre>
+          <p>出力は (1 + 3 + 4 + 9) / 4 = 4.25 になります。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3>3. <span class="keyword">グローバルアベレージプーリング</span> (Global Average Pooling, GAP)</h3>
+          <p>グローバルアベレージプーリングは、各特徴マップ全体の平均値を計算して、各特徴マップを1つの値に変換する操作です。</p>
+          
+          <div class="handwritten-box">
+            <p>グローバルアベレージプーリングの特徴：</p>
+            <ul>
+              <li>特徴マップの空間情報を完全に失うが、チャネル情報は保持する</li>
+              <li>全結合層の代わりに使われることが多い（パラメータ数を大幅に削減）</li>
+              <li>空間的な過学習を軽減する効果がある</li>
+              <li>入力サイズに依存しない固定サイズの出力を生成できる</li>
+            </ul>
+          </div>
+          
+          <p>例えば、8×8サイズの特徴マップがあり、チャネル数が256の場合、グローバルアベレージプーリングを適用すると、256次元のベクトルが得られます（各チャネルが1つの値になる）。</p>
+          
+          <div class="note-box">
+            <p><strong>GAP の活用：</strong> GAP は ResNet や NIN (Network In Network) などの現代的なアーキテクチャで広く使われています。特に ResNet ではネットワークの最後で特徴マップをベクトルに変換するために使用されています。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- プーリング層の役割セクション -->
+      <section id="role-section" class="section">
+        <h2 class="section-title">
+          <span class="section-title-icon"><i class="fas fa-cogs"></i></span>
+          プーリング層の役割
+        </h2>
+        
+        <div class="content-box">
+          <p>プーリング層は、CNNアーキテクチャにおいて複数の重要な役割を果たしています。これらの役割を理解することは、モデル設計において適切なプーリング戦略を選択するのに役立ちます。</p>
+          
+          <h3>1. <span class="keyword">不変性の獲得</span></h3>
+          <p>プーリング層の最も重要な役割の一つは、入力データの小さな位置変化に対する<span class="highlight">不変性（invariance）</span>を獲得することです。</p>
+          
+          <div class="handwritten-box">
+            <p>不変性とは：</p>
+            <p>入力画像が少し移動したり、回転したり、拡大縮小されたりしても、同じ特徴として認識できる性質のことです。例えば、猫の画像が少し移動しても、依然として「猫」として認識できるようになります。</p>
+          </div>
+          
+          <p>例えば、最大値プーリングを考えると、局所領域内の最大値だけを取り出すため、その最大値を生成した特徴が局所領域内のどこに位置していても、同じ出力が得られます。これにより、特徴の正確な位置よりも、特徴の存在自体が重要であるという性質を獲得します。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3>2. 特徴マップのサイズ削減</h3>
+          <p>プーリング層は特徴マップの空間的な次元を縮小し、後続の層で処理するデータ量を削減します。これには以下のようなメリットがあります：</p>
+          
+          <ul>
+            <li><strong>計算効率の向上</strong>：処理するデータ量が少なくなるため、計算リソースを節約できます</li>
+            <li><strong>パラメータ数の削減</strong>：後続の全結合層などでの接続数が減るため、モデル全体のパラメータ数が削減されます</li>
+            <li><strong>メモリ使用量の削減</strong>：特徴マップのサイズが小さくなるため、必要なメモリ量も少なくなります</li>
+          </ul>
+          
+          <p>例えば、32×32サイズの特徴マップに2×2の最大値プーリングを適用すると、結果として16×16サイズの特徴マップが得られ、データ量は75%削減されます。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3>3. <span class="keyword">過学習の抑制</span></h3>
+          <p>プーリング層は、モデルの過学習を抑制する効果もあります。特徴マップのサイズを縮小することで、モデルが学習データの細かな特徴や位置情報に過度に適応するのを防ぎます。</p>
+          
+          <div class="note-box">
+            <p><strong>過学習とプーリング層：</strong> 特に画像認識タスクでは、物体の正確な位置よりもその存在や大まかな位置関係の方が重要なことが多いです。プーリング層は細かい位置情報を捨てることで、より一般化能力の高いモデルの構築に貢献します。</p>
+          </div>
+          
+          <p>また、プーリング層（特に最大値プーリング）は、最も顕著な特徴だけを選択することで、ノイズに対する頑健性も向上させます。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3>4. 受容野の拡大</h3>
+          <p>プーリング層は、ネットワークの深い層における受容野（receptive field）を効果的に拡大します。受容野とは、出力の一点に影響を与える入力領域のサイズを指します。</p>
+          
+          <div class="handwritten-box">
+            <p>受容野拡大のメカニズム：</p>
+            <p>プーリング層によって特徴マップのサイズが縮小されると、後続の畳み込み層では、元の入力空間においてより広い領域からの情報を捉えることができるようになります。これにより、よりグローバルな特徴を認識できるようになります。</p>
+          </div>
+          
+          <p>例えば、3×3の畳み込みカーネルを持つ層の後に2×2のプーリング層を配置すると、次の畳み込み層の各ニューロンは、元の入力空間においてより広い範囲の情報を処理できるようになります。</p>
+        </div>
+      </section>
+
+      <!-- 実際の応用例セクション -->
+      <section id="application-section" class="section">
+        <h2 class="section-title">
+          <span class="section-title-icon"><i class="fas fa-laptop-code"></i></span>
+          実際の応用例
+        </h2>
+        
+        <div class="content-box">
+          <p>ここでは、プーリング層が実際のディープラーニングアーキテクチャでどのように使用されているかを見ていきます。</p>
+          
+          <h3>1. 代表的なCNNアーキテクチャにおけるプーリング層</h3>
+          <div class="two-column">
+            <div class="column">
+              <h4>LeNet-5</h4>
+              <ul>
+                <li>畳み込み層の後に平均値プーリングを使用</li>
+                <li>2×2のウィンドウサイズでダウンサンプリング</li>
+                <li>初期のCNNモデルでプーリングの重要性を示した</li>
+              </ul>
+            </div>
+            <div class="column">
+              <h4>AlexNet</h4>
+              <ul>
+                <li>最大値プーリングを採用</li>
+                <li>3×3のウィンドウサイズ、ストライド2</li>
+                <li>畳み込み層の後に配置して特徴マップのサイズを縮小</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="two-column">
+            <div class="column">
+              <h4>VGG</h4>
+              <ul>
+                <li>2×2の最大値プーリング</li>
+                <li>ストライド2で一貫して使用</li>
+                <li>各ブロックの後で特徴マップのサイズを半分に</li>
+              </ul>
+            </div>
+            <div class="column">
+              <h4>ResNet</h4>
+              <ul>
+                <li>最大値プーリング + グローバルアベレージプーリング</li>
+                <li>初期層で1回の最大値プーリング</li>
+                <li>ネットワーク最後でグローバルアベレージプーリングを使用</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="content-box">
+          <h3>2. プーリング層の最新トレンド</h3>
+          
+          <div class="handwritten-box">
+            <p>プーリング代替手法の登場：</p>
+            <p>近年のCNNアーキテクチャでは、従来のプーリング層の代わりにストライド付き畳み込みが使われることも増えています。これは、プーリングのような特徴マップサイズの縮小をパラメータ学習可能な方法で実現するアプローチです。</p>
+          </div>
+          
+          <p>最新の研究と実践では、プーリング層に関して以下のようなトレンドが見られます：</p>
+          
+          <ul>
+            <li><strong>ストライド付き畳み込み</strong>：プーリングの代わりにストライド2以上の畳み込みを使ってダウンサンプリングを行う</li>
+            <li><strong>学習可能なプーリング</strong>：最大値や平均値のような固定操作ではなく、プーリング操作自体をデータから学習する手法</li>
+            <li><strong>空間ピラミッドプーリング</strong>：様々なスケールでプーリングを適用し、マルチスケール情報を捉える手法</li>
+            <li><strong>混合プーリング戦略</strong>：最大値プーリングと平均値プーリングを組み合わせて使用する</li>
+          </ul>
+        </div>
+        
+        <div class="content-box">
+          <h3>3. プーリング層の実践的な使用方法</h3>
+          
+          <p>実際にCNNモデルを設計する際のプーリング層の使い方について、いくつかのベストプラクティスを紹介します：</p>
+          
+          <div class="note-box">
+            <h4>プーリング層の使用に関するヒント：</h4>
+            <ul>
+              <li><strong>初期層では控えめに</strong>：入力に近い層では、重要な空間情報が失われるのを避けるため、プーリングの使用を控えめにする</li>
+              <li><strong>目的に合わせた選択</strong>：エッジや重要な特徴を保持したい場合は最大値プーリング、全体の特徴を捉えたい場合は平均値プーリングを検討</li>
+              <li><strong>ハイパーパラメータの調整</strong>：ウィンドウサイズやストライドは、保持したい情報の粒度に応じて調整する</li>
+              <li><strong>適切な回数</strong>：プーリング層を使いすぎると詳細な情報が失われすぎるため、適切な回数（通常3〜5回程度）に抑える</li>
+            </ul>
+          </div>
+          
+          <p>一般的なCNNアーキテクチャでは、「畳み込み層 → 活性化関数 → プーリング層」というパターンが繰り返し使用されることが多いですが、最新のモデルでは様々なバリエーションが存在します。</p>
+        </div>
+      </section>
+
+      <!-- Key Insightsセクション -->
+      <section id="key-insights-section" class="key-insights">
+        <h2 class="key-insights-title">
+          <span class="key-insights-icon"><i class="fas fa-lightbulb"></i></span>
+          Key Insights
+        </h2>
+        
+        <div class="insight-item">
+          <h3 class="insight-title">プーリング層は空間データの圧縮装置</h3>
+          <p>プーリング層は特徴マップの空間サイズを縮小することで、パラメータ数と計算量を削減しながら、重要な情報を保持します。これにより、より深いネットワークの構築とより効率的な学習が可能になります。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h3 class="insight-title">位置変化に対する不変性の獲得が最大の利点</h3>
+          <p>プーリング層の核心的な利点は、入力の小さな位置変化に対する不変性を獲得できることです。これにより、物体の正確な位置よりも特徴の存在自体に注目したモデルを構築でき、より堅牢な認識が可能になります。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h3 class="insight-title">用途に応じた操作の選択が重要</h3>
+          <p>最大値プーリング、平均値プーリング、グローバルアベレージプーリングなど、様々なプーリング操作があり、それぞれ異なる特性を持ちます。タスクの性質や保持したい情報の種類に応じて、適切なプーリング操作を選択することが重要です。</p>
+        </div>
+        
+        <div class="insight-item">
+          <h3 class="insight-title">モダンアーキテクチャでの役割の変化</h3>
+          <p>最近のCNNアーキテクチャでは、従来のプーリング層の役割が変化しており、ストライド付き畳み込みなどの代替手法も増えています。しかし、グローバルアベレージプーリングのような特定のプーリング操作は、依然として重要な役割を果たしています。</p>
+        </div>
+      </section>
+      
+      <!-- Take Home Messageセクション -->
+      <section id="take-home-section" class="take-home">
+        <h2 class="take-home-title">
+          <span class="take-home-icon"><i class="fas fa-key"></i></span>
+          Take Home Message
+        </h2>
+        
+        <p class="take-home-message">
+          プーリング層は、特徴マップのサイズ縮小と位置不変性の獲得を通じて、CNNの効率性と頑健性を高める重要な構成要素です。最大値プーリング、平均値プーリング、グローバルアベレージプーリングなどの操作を理解し、適切に活用することで、画像認識をはじめとする様々なタスクにおいて効果的なモデルを構築できます。
+        </p>
+      </section>
+      
+      <!-- 用語集セクション -->
+      <section id="glossary-section" class="glossary">
+        <h2 class="glossary-title">
+          <span class="glossary-icon"><i class="fas fa-book"></i></span>
+          用語集
+        </h2>
+        
+        <table class="glossary-table">
+          <thead>
+            <tr>
+              <th>用語</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="glossary-term">最大値プーリング</span><br>
+                <span class="glossary-en">Max Pooling</span>
+              </td>
+              <td>局所領域内の最大値を選択するプーリング操作。エッジや顕著な特徴を強調する効果がある。</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="glossary-term">平均値プーリング</span><br>
+                <span class="glossary-en">Average Pooling</span>
+              </td>
+              <td>局所領域内の値の平均を計算するプーリング操作。背景情報など全体的な特徴を保持する効果がある。</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="glossary-term">グローバルアベレージプーリング</span><br>
+                <span class="glossary-en">Global Average Pooling (GAP)</span>
+              </td>
+              <td>特徴マップ全体の平均値を計算し、各チャネルを1つの値に変換する操作。全結合層の代わりに使用されることが多い。</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="glossary-term">不変性の獲得</span><br>
+                <span class="glossary-en">Invariance</span>
+              </td>
+              <td>入力データの小さな変化（位置移動など）に対して同じ出力を得る性質。プーリング層の重要な役割の一つ。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- スクロールトップボタン -->
+      <div class="scroll-top">
+        <i class="fas fa-arrow-up"></i>
+      </div>
+
+      <!-- フッター -->
+      <footer class="footer">
+        <p>G検定学習ノート | 1-5-4 プーリング層 | 2024年 G検定対策</p>
+        <p>Text: Generated by Claude | Design: Based on CMYK Template</p>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // スクロールトップボタンの表示・非表示
+    window.addEventListener('scroll', function() {
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+
+    // スクロールトップボタンのクリックイベント
+    document.querySelector('.scroll-top').addEventListener('click', function() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // スムーズスクロール
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          window.scrollTo({
+            top: target.offsetTop,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    // スクロール位置に応じたメニューのアクティブ化
+    window.addEventListener('scroll', function() {
+      const sections = document.querySelectorAll('section');
+      const navItems = document.querySelectorAll('.sidebar-nav-item');
+      
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.querySelector('a').getAttribute('href') === `#${current}`) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

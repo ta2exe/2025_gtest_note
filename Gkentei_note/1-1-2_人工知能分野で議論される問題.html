@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-1-2 - 人工知能分野で議論される問題</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* CMYKカラースキーム */
+      --cyan: #00D8E8; /* 明るいシアン */
+      --magenta: #FF40A0; /* 明るいマゼンタ */
+      --yellow: #FFE600; /* レモンイエロー */
+      --key: #181818; /* テキスト用ブラック */
+      --dark-gray: #404040; /* 補助テキスト */
+      --white: #FFFFFF; /* 背景用ホワイト */
+      
+      /* アクセントカラー */
+      --rose-red: rgba(212, 104, 104, 0.8);
+      --pale-gold: rgba(255, 223, 160, 0.8);
+      --seafoam-green: rgba(126, 169, 170, 0.8);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      background-color: var(--cyan);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      /* スクロールバーを非表示にする */
+      scrollbar-width: none;  /* Firefox */
+      -ms-overflow-style: none;  /* IE and Edge */
+    }
+    
+    /* Chrome, Safari, Operaのスクロールバーを非表示 */
+    .sidebar::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .sidebar-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--key);
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      border-bottom: 2px dashed var(--dark-gray);
+      padding-bottom: 0.5rem;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 1rem;
+    }
+    
+    .nav-link {
+      display: block;
+      padding: 0.5rem;
+      color: var(--key);
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--magenta);
+      color: var(--white);
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+    
+    .section {
+      margin-bottom: 3rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--magenta);
+      padding-bottom: 0.5rem;
+      font-family: 'Klee One', cursive;
+      font-weight: 600;
+    }
+    
+    .section-title i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+    
+    .concept-title {
+      font-weight: 700;
+      color: var(--key);
+      margin: 1rem 0 0.5rem;
+      font-size: 1.2rem;
+    }
+    
+    p {
+      margin-bottom: 1rem;
+    }
+    
+    .highlight {
+      background-color: var(--yellow);
+      padding: 0 3px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    
+    .note-box {
+      background-color: var(--white);
+      border-left: 4px solid var(--magenta);
+      padding: 1rem;
+      margin: 1rem 0;
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -0.5rem;
+      left: -0.5rem;
+      font-size: 1.2rem;
+    }
+    
+    .handwritten-box {
+      background-color: var(--white);
+      border: 2px dashed var(--cyan);
+      padding: 1.5rem;
+      margin: 1rem 0;
+      transform: rotate(-0.5deg);
+      font-family: 'Klee One', cursive;
+    }
+    
+    .keyword-list {
+      margin: 1rem 0;
+      list-style-type: none;
+    }
+    
+    .keyword-list li {
+      margin-bottom: 0.5rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    
+    .keyword-list li::before {
+      content: "\f02b";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      left: 0;
+      color: var(--cyan);
+    }
+    
+    .key-insights {
+      background-color: var(--cyan);
+      background-image: linear-gradient(to right, var(--cyan), rgba(0, 216, 232, 0.6));
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin: 2rem 0;
+    }
+    
+    .key-insights-title {
+      font-size: 1.3rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      text-align: center;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+    
+    .key-insights-list {
+      list-style-type: none;
+    }
+    
+    .key-insights-list li {
+      margin-bottom: 1rem;
+      padding-left: 2rem;
+      position: relative;
+    }
+    
+    .key-insights-list li::before {
+      content: "\f0eb";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      left: 0;
+      color: var(--magenta);
+    }
+    
+    .take-home {
+      background-color: var(--yellow);
+      background-image: linear-gradient(to right, var(--yellow), rgba(255, 230, 0, 0.6));
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    
+    .take-home-title {
+      font-size: 1.3rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+    
+    .take-home-message {
+      font-weight: 700;
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--dark-gray);
+      font-size: 0.8rem;
+    }
+    
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 50px;
+      height: 50px;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+    }
+    
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    
+    .glossary-table th, .glossary-table td {
+      padding: 0.75rem;
+      border: 1px solid var(--dark-gray);
+    }
+    
+    .glossary-table th {
+      background-color: var(--cyan);
+      color: var(--key);
+      text-align: left;
+    }
+    
+    .glossary-table tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.1);
+    }
+    
+    /* 箇条書きのパディング修正 */
+    .handwritten-box ul, .handwritten-box ol,
+    .note-box ul, .note-box ol,
+    .section ul, .section ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* キーワードマーカー */
+    .keyword-marker {
+      background-color: var(--yellow);
+      padding: 0 3px;
+      border-radius: 3px;
+      font-weight: 700;
+      color: var(--key);
+    }
+    
+    /* アイコン付きキーワード */
+    .icon-keyword {
+      display: inline-flex;
+      align-items: center;
+      background-color: rgba(255, 64, 160, 0.15);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin: 0 0.2rem;
+    }
+    
+    .icon-keyword i {
+      margin-right: 0.3rem;
+      color: var(--magenta);
+    }
+    
+    /* 図解風ボックス */
+    .diagram-box {
+      background-color: var(--white);
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .diagram-title {
+      position: absolute;
+      top: -0.8rem;
+      left: 1rem;
+      background-color: var(--white);
+      padding: 0 0.5rem;
+      color: var(--magenta);
+      font-weight: 700;
+    }
+    
+    /* 関連概念リンク */
+    .related-concepts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    
+    .related-concept {
+      background-color: rgba(0, 216, 232, 0.2);
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .related-concept:hover {
+      background-color: var(--cyan);
+      color: var(--white);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title">人工知能分野で議論される問題</h2>
+      <ul class="nav-menu" id="navMenu">
+        <li class="nav-item">
+          <a href="#title-section" class="nav-link active">
+            <i class="fas fa-home"></i> はじめに
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#ai-issues-overview" class="nav-link">
+            <i class="fas fa-question-circle"></i> AIの代表的な問題
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#turing-test" class="nav-link">
+            <i class="fas fa-clipboard-check"></i> チューリングテスト
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chinese-room" class="nav-link">
+            <i class="fas fa-door-open"></i> 中国語の部屋
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#symbol-grounding" class="nav-link">
+            <i class="fas fa-anchor"></i> シンボルグラウンディング問題
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#frame-problem" class="nav-link">
+            <i class="fas fa-border-all"></i> フレーム問題
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#singularity" class="nav-link">
+            <i class="fas fa-rocket"></i> シンギュラリティ
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#strong-weak-ai" class="nav-link">
+            <i class="fas fa-balance-scale"></i> 強いAIと弱いAI
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#embodiment" class="nav-link">
+            <i class="fas fa-walking"></i> エンボディメント
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#knowledge-bottleneck" class="nav-link">
+            <i class="fas fa-hourglass-half"></i> 知識獲得のボトルネック
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#dartmouth" class="nav-link">
+            <i class="fas fa-university"></i> ダートマス会議
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#toy-problems" class="nav-link">
+            <i class="fas fa-puzzle-piece"></i> トイ・プロブレム
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#machine-translation" class="nav-link">
+            <i class="fas fa-language"></i> 機械翻訳の課題
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#loebner-prize" class="nav-link">
+            <i class="fas fa-trophy"></i> ローブナーコンテスト
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#glossary" class="nav-link">
+            <i class="fas fa-book"></i> 用語集
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#key-insights-section" class="nav-link">
+            <i class="fas fa-lightbulb"></i> 重要ポイント
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#take-home-section" class="nav-link">
+            <i class="fas fa-key"></i> 覚えておくべきこと
+          </a>
+        </li>
+      </ul>
+    </aside>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- タイトルセクション -->
+      <section class="section" id="title-section">
+        <h1 class="section-title"><i class="fas fa-robot"></i> 人工知能分野で議論される問題</h1>
+        <p class="subtitle">人工知能分野では、技術的・哲学的に様々な課題が議論されています</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">AIの根本的な問いかけ</span>
+          <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 1rem;">
+            <div style="text-align: center; margin: 0.5rem;">
+              <i class="fas fa-brain" style="font-size: 2rem; color: var(--magenta); margin-bottom: 0.5rem;"></i>
+              <p><span class="keyword-marker">知能とは何か？</span></p>
+            </div>
+            <div style="text-align: center; margin: 0.5rem;">
+              <i class="fas fa-cogs" style="font-size: 2rem; color: var(--cyan); margin-bottom: 0.5rem;"></i>
+              <p><span class="keyword-marker">機械は考えられるか？</span></p>
+            </div>
+            <div style="text-align: center; margin: 0.5rem;">
+        <div class="handwritten-box">
+          <h3>このノートで学べること：</h3>
+          <ul>
+            <li>人工知能分野で議論されている代表的な問題について</li>
+            <li>汎用的な人工知能の実現可能性について</li>
+            <li>AIの知能と人間の知能の違いに関する考え方</li>
+            <li>人工知能の限界と課題</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- AIの代表的な問題の概要 -->
+      <section class="section" id="ai-issues-overview">
+        <h2 class="section-title"><i class="fas fa-question-circle"></i> AIの代表的な問題</h2>
+        <p>人工知能（<span class="icon-keyword"><i class="fas fa-microchip"></i>AI</span>）分野では、その可能性と限界について多くの問題が議論されています。これらの問題は、技術的な課題から哲学的な問いまで多岐にわたります。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">AI研究の主要問題カテゴリ</span>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+            <div style="flex: 1; min-width: 200px; margin: 0.5rem; text-align: center; padding: 1rem; background-color: rgba(0, 216, 232, 0.1); border-radius: 8px;">
+              <i class="fas fa-hat-wizard" style="font-size: 1.5rem; color: var(--cyan); margin-bottom: 0.5rem;"></i>
+              <h4>哲学的問題</h4>
+              <p style="font-size: 0.9rem;">意識・理解・知能の本質</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; margin: 0.5rem; text-align: center; padding: 1rem; background-color: rgba(255, 64, 160, 0.1); border-radius: 8px;">
+              <i class="fas fa-tools" style="font-size: 1.5rem; color: var(--magenta); margin-bottom: 0.5rem;"></i>
+              <h4>技術的課題</h4>
+              <p style="font-size: 0.9rem;">知識表現・学習・推論</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; margin: 0.5rem; text-align: center; padding: 1rem; background-color: rgba(255, 230, 0, 0.1); border-radius: 8px;">
+              <i class="fas fa-globe" style="font-size: 1.5rem; color: var(--yellow); margin-bottom: 0.5rem;"></i>
+              <h4>社会的影響</h4>
+              <p style="font-size: 0.9rem;">倫理・経済・社会構造</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>人工知能分野で議論される問題は、大きく分けて以下のカテゴリに分類できます：</h3>
+          <ol>
+            <li><strong>哲学的問題</strong>：AIが本当に「<span class="keyword-marker">知能</span>」や「<span class="keyword-marker">意識</span>」を持つことができるのか</li>
+            <li><strong>技術的課題</strong>：AIが人間のような柔軟な知能を実現するための障害</li>
+            <li><strong>実用的問題</strong>：AIを実世界の課題に適用する際の制限</li>
+            <li><strong>将来的問題</strong>：AIの急速な発展がもたらす可能性のある影響</li>
+          </ol>
+        </div>
+        
+        <p>G検定で問われる代表的な問題を以下に紹介します。これらの問題は、人工知能の基本的な理解を深めるために重要なトピックです。</p>
+        
+        <div class="note-box">
+          <p>これらの問題には「正解」があるわけではなく、現在も活発に議論が続いています。G検定では、各問題の概要と、なぜそれが重要なのかを理解していることが求められます。</p>
+        </div>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> AI効果</span>
+          <span class="related-concept"><i class="fas fa-link"></i> エージェント</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 人工知能</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 機械学習</span>
+          <span class="related-concept"><i class="fas fa-link"></i> ディープラーニング</span>
+        </div>
+      </section>
+      
+      <!-- チューリングテスト -->
+      <section class="section" id="turing-test">
+        <h2 class="section-title"><i class="fas fa-clipboard-check"></i> チューリングテスト (Turing Test)</h2>
+        <p><span class="keyword-marker">チューリングテスト</span>は、1950年に<span class="icon-keyword"><i class="fas fa-user-tie"></i>アラン・チューリング</span>（Alan Turing）が提案した、機械が人間と同等の知能を持つかどうかを判定するための思考実験です。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">チューリングテストの仕組み</span>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-around; margin: 1rem 0;">
+            <div style="text-align: center; margin: 0.5rem;">
+              <i class="fas fa-user" style="font-size: 2rem; color: var(--magenta);"></i>
+              <p>審査員</p>
+            </div>
+            <div style="text-align: center; margin: 0.5rem;">
+              <i class="fas fa-arrows-alt-h" style="font-size: 1.5rem; color: var(--cyan);"></i>
+            </div>
+            <div style="text-align: center; margin: 0.5rem; position: relative;">
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <i class="fas fa-user-alt" style="font-size: 2rem; color: var(--yellow);"></i>
+                <p>人間</p>
+              </div>
+              <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.6); display: flex; justify-content: center; align-items: center; border-radius: 5px;">
+                <span style="font-weight: bold; color: var(--key);">OR</span>
+              </div>
+            </div>
+            <div style="text-align: center; margin: 0.5rem;">
+              <i class="fas fa-robot" style="font-size: 2rem; color: var(--cyan);"></i>
+              <p>AI</p>
+            </div>
+          </div>
+          <p style="text-align: center; margin-top: 1rem;">
+            <span class="keyword-marker">審査員が区別できなければAIは合格</span>
+          </p>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>チューリングテストの概要</h3>
+          <p>チューリングテストの基本的な設定は以下の通りです：</p>
+          <ul>
+            <li>審査員（人間）がコンピュータと人間の両方とテキストを介して対話する</li>
+            <li>審査員はどちらが人間でどちらがコンピュータか判断する</li>
+            <li>もし審査員がコンピュータと人間を区別できなければ、そのコンピュータはテストに合格したと見なされる</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">チューリングテストの意義</h3>
+        <p>チューリングテストは、「<span class="keyword-marker">機械が考えることができるか</span>」という抽象的な問いを「<span class="keyword-marker">機械が人間のように振る舞うことができるか</span>」という実験可能な問いに置き換えました。これにより、AIの目標を具体化し、進捗を測る基準を提供しました。</p>
+        
+        <div class="note-box">
+          <p>チューリングは元々「<span class="icon-keyword"><i class="fas fa-gamepad"></i>模倣ゲーム</span>（Imitation Game）」と呼び、コンピュータが「考える」かどうかという哲学的な問いを回避するために設計しました。</p>
+        </div>
+
+        <!-- チューリングテストの画像追加 --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-1-2_02.png" alt="チューリングテストの画像">
+          <figcaption>チューリングテスト：審査員（ネコ）が区別できなければAIは合格</figcaption>
+        </div>
+
+
+        <h3 class="concept-title">チューリングテストへの批判</h3>
+        <p>チューリングテストには様々な批判があります：</p>
+        <ul>
+          <li>表面的な模倣能力を測るだけで、本当の「<span class="keyword-marker">理解</span>」を測れないという批判</li>
+          <li>人間らしく見せかけるテクニック（会話のミスや遅延の挿入など）で騙せる可能性</li>
+          <li>言語だけに焦点を当て、他の知能の側面を無視している点</li>
+        </ul>
+        
+        <h3 class="concept-title">現代のAIとチューリングテスト</h3>
+        <p>現代の<span class="icon-keyword"><i class="fas fa-comment-dots"></i>大規模言語モデル</span>（<span class="keyword-marker">LLM: Large Language Model</span>）は、限定的な状況ではチューリングテストに合格する可能性があります。しかし、これらのモデルが本当に「理解」しているのかという疑問は残ります。これは「中国語の部屋」の問題とも関連しています。</p>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> 模倣ゲーム</span>
+          <span class="related-concept"><i class="fas fa-link"></i> アラン・チューリング</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 人工知能テスト</span>
+          <span class="related-concept"><i class="fas fa-link"></i> ローブナーコンテスト</span>
+        </div>
+      </section>
+      
+      <!-- 中国語の部屋 -->
+      <section class="section" id="chinese-room">
+        <h2 class="section-title"><i class="fas fa-door-open"></i> 中国語の部屋 (Chinese Room)</h2>
+        <p><span class="keyword-marker">中国語の部屋</span>は、1980年に哲学者の<span class="icon-keyword"><i class="fas fa-user-graduate"></i>ジョン・サール</span>（John Searle）が提案した思考実験で、コンピュータプログラムが本当に「<span class="keyword-marker">理解</span>」しているかどうかに疑問を投げかけるものです。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">中国語の部屋の思考実験</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="width: 80%; border: 2px solid var(--magenta); border-radius: 10px; padding: 1rem; position: relative; margin-bottom: 2rem;">
+              <div style="position: absolute; top: -15px; left: 20px; background-color: white; padding: 0 10px; color: var(--magenta); font-weight: bold;">部屋（プログラム）</div>
+              
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="text-align: center; flex: 1;">
+                  <i class="fas fa-envelope" style="font-size: 1.5rem; color: var(--yellow);"></i>
+                  <p>中国語の<br>質問</p>
+                  <i class="fas fa-arrow-right" style="font-size: 1.5rem; color: var(--key);"></i>
+                </div>
+                
+                <div style="text-align: center; flex: 2; position: relative;">
+                  <div style="border: 1px solid var(--cyan); border-radius: 8px; padding: 1rem;">
+                    <i class="fas fa-user" style="font-size: 2rem; color: var(--cyan);"></i>
+                    <p>中国語を理解しない<br>人間（サール）</p>
+                    <div style="margin-top: 0.5rem; border: 1px dashed var(--key); padding: 0.5rem; border-radius: 5px;">
+                      <i class="fas fa-book" style="color: var(--magenta);"></i>
+                      <p>マニュアル<br>（プログラム）</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style="text-align: center; flex: 1;">
+                  <i class="fas fa-arrow-right" style="font-size: 1.5rem; color: var(--key);"></i>
+                  <i class="fas fa-envelope-open" style="font-size: 1.5rem; color: var(--yellow);"></i>
+                  <p>中国語の<br>回答</p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; border: 2px dashed var(--key); padding: 0.5rem; border-radius: 8px; margin-top: 1rem;">
+              <p><span class="keyword-marker">外部から見ると理解しているように見えるが、実際には理解していない</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>中国語の部屋の論点</h3>
+          <p>サールの主張のポイント：</p>
+          <ul>
+            <li>プログラムは純粋に構文的（記号の操作）であり、意味的理解はない</li>
+            <li>人間が記号操作のルールに従うだけでは、言語を理解したことにならない</li>
+            <li>正しい出力を生成できても、本質的な「理解」があるとは言えない</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">サールの主張</h3>
+        <p>サールは、この思考実験を通じて<span class="keyword-marker">強いAI</span>（コンピュータが実際に心や理解を持つという考え）に反論しました。彼は、コンピュータプログラムが適切な応答を生成できたとしても、それは単なる<span class="keyword-marker">記号操作</span>であり、本当の<span class="keyword-marker">意味理解</span>（セマンティクス）は伴わないと主張しました。</p>
+        
+        <h3 class="concept-title">反論と議論</h3>
+        <p>中国語の部屋に対しては様々な反論があります：</p>
+        <ul>
+          <li><span class="keyword-marker">システム回答</span>：部屋の中の人間ではなく、部屋全体としてのシステムが理解している</li>
+          <li><span class="keyword-marker">ロボット返答</span>：実世界と相互作用するロボットであれば、記号と意味を結びつけられる</li>
+          <li><span class="keyword-marker">生物脳シミュレーション回答</span>：十分に詳細な脳のシミュレーションは意識を生み出す可能性がある</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>中国語の部屋の思考実験は、<span class="icon-keyword"><i class="fas fa-brain"></i>意識</span>や<span class="icon-keyword"><i class="fas fa-lightbulb"></i>理解の本質</span>に関する哲学的な問いを提起し、AIが本当に「考える」ことができるのかという根本的な疑問を投げかけています。これは現代の<span class="keyword-marker">LLM</span>の時代においても重要な問いです。</p>
+        </div>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> 強いAI vs 弱いAI</span>
+          <span class="related-concept"><i class="fas fa-link"></i> シンボルグラウンディング問題</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 意識と理解</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 計算理論と心の哲学</span>
+        </div>
+      </section>
+      
+      <!-- シンボルグラウンディング問題 -->
+      <section class="section" id="symbol-grounding">
+        <h2 class="section-title"><i class="fas fa-anchor"></i> シンボルグラウンディング問題 (Symbol Grounding Problem)</h2>
+        <p><span class="keyword-marker">シンボルグラウンディング問題</span>は、コンピュータの扱う記号（シンボル）が実世界の対象物や概念とどのように結びつくのかという問題です。1990年に<span class="icon-keyword"><i class="fas fa-user-tie"></i>スティーブン・ハーナッド</span>（Stevan Harnad）によって提唱されました。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">シンボルグラウンディングの概念</span>
+          <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; margin: 1rem 0;">
+            <div style="text-align: center; margin: 0.5rem; position: relative;">
+              <div style="border: 2px solid var(--cyan); border-radius: 8px; padding: 1rem; width: 140px;">
+                <p style="font-weight: bold; margin-bottom: 0.5rem;">コンピュータの世界</p>
+                <div style="border: 1px dashed var(--magenta); padding: 0.5rem; border-radius: 5px; margin-bottom: 0.5rem;">
+                  <p>"リンゴ"</p>
+                  <p style="font-size: 0.8rem; color: var(--gray);">（記号/シンボル）</p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 0.5rem;">
+              <i class="fas fa-question" style="font-size: 2rem; color: var(--magenta);"></i>
+              <p style="font-weight: bold; color: var(--magenta);">どう結びつく？</p>
+              <i class="fas fa-arrows-alt-h" style="font-size: 1.5rem; color: var(--yellow);"></i>
+            </div>
+            
+            <div style="text-align: center; margin: 0.5rem;">
+              <div style="border: 2px solid var(--yellow); border-radius: 8px; padding: 1rem; width: 140px;">
+                <p style="font-weight: bold; margin-bottom: 0.5rem;">実世界</p>
+                <div style="width: 80px; height: 80px; margin: 0 auto; background-color: rgba(255, 0, 0, 0.2); border-radius: 50%;">
+                  <i class="fas fa-apple-alt" style="font-size: 3rem; color: rgba(255, 0, 0, 0.8); margin-top: 15px;"></i>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--gray);">（実物/意味）</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>シンボルグラウンディング問題の本質</h3>
+          <p>この問題は<span class="keyword-marker">中国語の部屋</span>の思考実験と密接に関連しています：</p>
+          <ul>
+            <li>記号操作だけでは、真の理解や意味は生まれない</li>
+            <li>記号（言葉）と実世界の対象物を結びつける方法が必要</li>
+            <li>人間は感覚経験を通じて記号を「接地（グラウンド）」させる</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">シンボルグラウンディング問題の重要性</h3>
+        <p>この問題は、AIが真に「<span class="keyword-marker">理解</span>」することの本質に関わっています：</p>
+        <ul>
+          <li>辞書の定義は循環的で、外部参照なしでは意味を生み出せない（<span class="keyword-marker">辞書の循環問題</span>）</li>
+          <li>記号同士の関係だけでは、真の意味理解は不可能</li>
+          <li>AIが実世界と直接相互作用する能力が重要</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>例えば、「リンゴ」という言葉の意味は、辞書の定義（「リンゴの木になる果実」など）からだけでは本当の意味は理解できません。実際のリンゴを見たり、触ったり、味わったりする直接経験が必要です。</p>
+        </div>
+        
+        <h3 class="concept-title">現代AIにおける取り組み</h3>
+        <p>シンボルグラウンディング問題への対応アプローチ：</p>
+        <ul>
+          <li><span class="keyword-marker">マルチモーダルAI</span>：テキスト、画像、音声など複数の感覚情報を統合</li>
+          <li><span class="keyword-marker">エンボディメント</span>：ロボティクスによる物理世界との相互作用</li>
+          <li><span class="keyword-marker">自己教師あり学習</span>：実世界データからの表現学習</li>
+        </ul>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> 中国語の部屋</span>
+          <span class="related-concept"><i class="fas fa-link"></i> エンボディメント</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 意味論的ギャップ</span>
+          <span class="related-concept"><i class="fas fa-link"></i> マルチモーダル学習</span>
+        </div>
+      </section>
+      
+      <!-- フレーム問題 -->
+      <section class="section" id="frame-problem">
+        <h2 class="section-title"><i class="fas fa-border-all"></i> フレーム問題 (Frame Problem)</h2>
+        <p><span class="keyword-marker">フレーム問題</span>は、AIが環境の変化に対応する際、「何が変化し、何が変化しないか」を効率的に判断する難しさに関する問題です。1969年に<span class="icon-keyword"><i class="fas fa-user-tie"></i>ジョン・マッカーシー</span>と<span class="icon-keyword"><i class="fas fa-user-tie"></i>パトリック・ヘイズ</span>によって提起されました。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">フレーム問題の概念図</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="display: flex; justify-content: space-around; width: 90%; margin-bottom: 1rem;">
+              <div style="text-align: center; border: 2px solid var(--cyan); border-radius: 8px; padding: 0.5rem; width: 45%;">
+                <p style="font-weight: bold; margin-bottom: 0.5rem;">時点 t</p>
+                <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-box" style="font-size: 1.5rem; color: var(--yellow);"></i>
+                    <p style="font-size: 0.8rem;">箱A:閉</p>
+                  </div>
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-box-open" style="font-size: 1.5rem; color: var(--magenta);"></i>
+                    <p style="font-size: 0.8rem;">箱B:開</p>
+                  </div>
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-lightbulb" style="font-size: 1.5rem; color: var(--yellow);"></i>
+                    <p style="font-size: 0.8rem;">電球:点灯</p>
+                  </div>
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-thermometer-half" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                    <p style="font-size: 0.8rem;">温度:20℃</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <p><span class="keyword-marker">行動</span></p>
+                <i class="fas fa-arrow-right" style="font-size: 1.5rem; color: var(--key);"></i>
+                <p style="font-size: 0.8rem;">箱Aを開ける</p>
+              </div>
+              
+              <div style="text-align: center; border: 2px solid var(--cyan); border-radius: 8px; padding: 0.5rem; width: 45%;">
+                <p style="font-weight: bold; margin-bottom: 0.5rem;">時点 t+1</p>
+                <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-box-open" style="font-size: 1.5rem; color: var(--yellow);"></i>
+                    <p style="font-size: 0.8rem;">箱A:<span style="color: var(--magenta); font-weight: bold;">開</span></p>
+                  </div>
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-box-open" style="font-size: 1.5rem; color: var(--magenta);"></i>
+                    <p style="font-size: 0.8rem;">箱B:開</p>
+                  </div>
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-lightbulb" style="font-size: 1.5rem; color: var(--yellow);"></i>
+                    <p style="font-size: 0.8rem;">電球:点灯</p>
+                  </div>
+                  <div style="margin: 0.3rem; text-align: center;">
+                    <i class="fas fa-thermometer-half" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                    <p style="font-size: 0.8rem;">温度:20℃</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; border: 2px dashed var(--magenta); padding: 0.5rem; border-radius: 8px; margin-top: 1rem; width: 80%;">
+              <p><span class="keyword-marker">変化する要素と変化しない要素をどう効率よく判断するか？</span></p>
+              <p style="font-size: 0.9rem;">箱Aの状態は変わるが、箱B、電球、温度は変化しない</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>フレーム問題の本質</h3>
+          <p>フレーム問題の難しさ：</p>
+          <ul>
+            <li>環境のすべての状態を毎回再計算するのは非効率</li>
+            <li>何が変化し、何が変化しないかを事前に定義するのは困難</li>
+            <li>変化の可能性がある要素を全て考慮すると組合せ爆発が起きる</li>
+            <li>人間は直感的にこの問題を解決しているが、AIにとっては難しい</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">哲学的側面</h3>
+        <p>フレーム問題は単なる技術的な問題を超えて、哲学的な問題も提起します：</p>
+        <ul>
+          <li>人間の<span class="keyword-marker">常識的推論</span>を形式化することの難しさ</li>
+          <li>無関係な情報を効率的に除外する能力の重要性</li>
+          <li>人間の知能の本質的な特性（無意識的に関連性を判断する能力）</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>例えば、「部屋から出るとき、何が変化するか」を考えると、人間は「ドアの状態が変わる」「自分の位置が変わる」といった関連事項のみを考慮し、「壁の色」「天井の高さ」などの無関係な属性は自動的に除外します。この直感的な判断をAIに実装するのが課題です。</p>
+        </div>
+        
+        <h3 class="concept-title">現代AIでの対応</h3>
+        <p>フレーム問題への現代的なアプローチ：</p>
+        <ul>
+          <li><span class="keyword-marker">非単調論理</span>：新しい情報に基づいて推論を修正できる論理体系</li>
+          <li><span class="keyword-marker">デフォルト推論</span>：特に指定がなければ、状態は変化しないと仮定</li>
+        </ul>
+        
+        <h3 class="concept-title">批判と限界</h3>
+        <p>ローブナーコンテストは多くの批判も受けてきました：</p>
+        <ul>
+          <li><strong>表面的な会話への偏り</strong>：システムが人間らしく見せかけるテクニックに注力する傾向</li>
+          <li><strong>真の理解の欠如</strong>：チャットボットは実際には会話を「理解」しておらず、パターンマッチングや事前にプログラムされた応答を使用</li>
+          <li><strong>技術的進歩との乖離</strong>：近年のAI研究の主流とはやや離れた位置づけになっていた</li>
+        </ul>
+        
+        <p>AIの研究者マービン・ミンスキーやジョセフ・ワイゼンバウムらは、コンテストが真のAI研究から注意をそらし、表面的なトリックに焦点を当てていると批判していました。</p>
+        
+        <h3 class="concept-title">現代の対話AIとの関係</h3>
+        <p>現代の大規模言語モデル（LLM）は、ローブナーコンテストの基準を簡単に超えることができると考えられています。ChatGPTなどの最新のAIシステムは、限定された時間と話題であれば、多くの人間を欺くことができるレベルの対話能力を持っています。</p>
+        
+        <p>しかし、こうしたシステムが「真の理解」を持っているかという本質的な問題は、中国語の部屋の思考実験が提起した問題と同様に、未解決のままです。</p>
+        
+        <p>G検定では、ローブナーコンテストの概要とその人工知能研究における位置づけを理解することが求められます。</p>
+      </section>
+      
+      <!-- シンギュラリティ -->
+      <section class="section" id="singularity">
+        <h2 class="section-title"><i class="fas fa-rocket"></i> シンギュラリティ (Technological Singularity)</h2>
+        <p><span class="keyword-marker">シンギュラリティ</span>（技術的特異点）とは、人工知能が人間の知能を超える時点とその後に訪れる、予測不可能な技術的進歩の加速を指します。この概念は<span class="icon-keyword"><i class="fas fa-user-tie"></i>レイ・カーツワイル</span>や<span class="icon-keyword"><i class="fas fa-user-tie"></i>ヴァーナー・ヴィンジ</span>によって広く知られるようになりました。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">シンギュラリティのコンセプト</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="width: 90%; height: 200px; position: relative; margin-bottom: 2rem;">
+              <!-- 座標系 -->
+              <div style="position: absolute; left: 0; bottom: 0; width: 100%; height: 1px; background-color: var(--key);"></div>
+              <div style="position: absolute; left: 0; bottom: 0; width: 1px; height: 100%; background-color: var(--key);"></div>
+              
+              <!-- X軸ラベル -->
+              <div style="position: absolute; right: 0; bottom: -20px; text-align: right;">
+                <p>時間</p>
+              </div>
+              
+              <!-- Y軸ラベル -->
+              <div style="position: absolute; left: -70px; top: 0; text-align: right;">
+                <p>技術の進歩</p>
+              </div>
+              
+              <!-- 人間の知能レベル線 -->
+              <div style="position: absolute; left: 0; bottom: 100px; width: 100%; height: 1px; background-color: var(--yellow); border-style: dashed;"></div>
+              <div style="position: absolute; left: 5px; bottom: 105px; font-size: 0.8rem; color: var(--yellow);">
+                <p>人間の知能レベル</p>
+              </div>
+              
+              <!-- 技術進歩の曲線 -->
+              <svg width="100%" height="100%" style="position: absolute; left: 0; bottom: 0;">
+                <path d="M 0,180 Q 100,170 200,140 T 300,50 T 350,0" stroke="var(--magenta)" stroke-width="3" fill="none" />
+              </svg>
+              
+              <!-- シンギュラリティポイント -->
+              <div style="position: absolute; left: 300px; bottom: 50px; width: 10px; height: 10px; background-color: var(--cyan); border-radius: 50%;"></div>
+              <div style="position: absolute; left: 310px; bottom: 55px; font-size: 0.8rem; color: var(--cyan);">
+                <p>シンギュラリティ</p>
+              </div>
+              
+              <!-- 予測不能領域 -->
+              <div style="position: absolute; right: 0; top: 0; width: 70px; height: 70px; border: 2px dashed var(--magenta); border-radius: 5px; display: flex; justify-content: center; align-items: center;">
+                <p style="font-size: 0.8rem; text-align: center;">予測不能領域</p>
+              </div>
+            </div>
+            
+            <div style="text-align: center; border: 2px solid var(--cyan); padding: 0.5rem; border-radius: 8px; margin-top: 1rem; width: 80%;">
+              <p><span class="keyword-marker">AIが自己改良能力を獲得し、指数関数的に知能が向上</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>シンギュラリティの主要な前提</h3>
+          <p>この概念が成立するための条件：</p>
+          <ul>
+            <li>人工知能が<span class="keyword-marker">自己改良</span>能力を獲得すること</li>
+            <li>知能の向上が<span class="keyword-marker">再帰的</span>に加速すること</li>
+            <li>技術進歩の速度が人間の理解能力を超えること</li>
+            <li><span class="keyword-marker">超知能</span>（superintelligence）の出現</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">シンギュラリティに関する予測</h3>
+        <p>シンギュラリティの到来時期に関する予測は様々です：</p>
+        <ul>
+          <li><span class="icon-keyword"><i class="fas fa-user-tie"></i>レイ・カーツワイル</span>：2045年頃に訪れると予測</li>
+          <li><span class="icon-keyword"><i class="fas fa-user-tie"></i>ヴァーナー・ヴィンジ</span>：2030年までに可能性があると提唱</li>
+          <li>多くのAI研究者は、さらに先または実現しない可能性も指摘</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>シンギュラリティの到来は、AIの急速な発展がもたらす可能性のある技術的特異点を指します。この時点では、AIは人間の知能を大幅に超え、技術的進歩が予測不可能に加速すると考えられています。</p>
+        </div>
+      </section>
+      
+      <!-- 強いAIと弱いAI -->
+      <section class="section" id="strong-weak-ai">
+        <h2 class="section-title"><i class="fas fa-balance-scale"></i> 強いAIと弱いAI (Strong AI and Weak AI)</h2>
+        <p><span class="keyword-marker">強いAI</span>と<span class="keyword-marker">弱いAI</span>の区別は、人工知能が真に意識や理解を持つことができるかどうかについての哲学的立場の違いを表します。この概念は<span class="icon-keyword"><i class="fas fa-user-graduate"></i>ジョン・サール</span>によって提唱されました。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">強いAIと弱いAIの比較</span>
+          <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin: 1rem 0;">
+            <div style="flex: 1; min-width: 200px; margin: 0.5rem; border: 2px solid var(--magenta); border-radius: 8px; padding: 1rem;">
+              <h3 style="text-align: center; color: var(--magenta); margin-bottom: 0.5rem;">強いAI</h3>
+              <div style="margin-bottom: 0.5rem; text-align: center;">
+                <i class="fas fa-brain" style="font-size: 2rem; color: var(--magenta);"></i>
+              </div>
+              <ul style="list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--magenta);"></i>
+                  実際に<span class="keyword-marker">意識</span>を持つ
+                </li>
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--magenta);"></i>
+                  本当の<span class="keyword-marker">理解</span>と<span class="keyword-marker">思考</span>が可能
+                </li>
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--magenta);"></i>
+                  <span class="keyword-marker">心の状態</span>を持つ
+                </li>
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--magenta);"></i>
+                  人間のような<span class="keyword-marker">一般知能</span>を持つ
+                </li>
+              </ul>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px; margin: 0.5rem; border: 2px solid var(--cyan); border-radius: 8px; padding: 1rem;">
+              <h3 style="text-align: center; color: var(--cyan); margin-bottom: 0.5rem;">弱いAI</h3>
+              <div style="margin-bottom: 0.5rem; text-align: center;">
+                <i class="fas fa-laptop-code" style="font-size: 2rem; color: var(--cyan);"></i>
+              </div>
+              <ul style="list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--cyan);"></i>
+                  <span class="keyword-marker">シミュレーション</span>するだけ
+                </li>
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--cyan);"></i>
+                  特定の<span class="keyword-marker">タスク</span>に特化
+                </li>
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--cyan);"></i>
+                  真の<span class="keyword-marker">理解</span>はない
+                </li>
+                <li style="margin-bottom: 0.3rem; padding-left: 1.5rem; position: relative;">
+                  <i class="fas fa-check" style="position: absolute; left: 0; color: var(--cyan);"></i>
+                  <span class="keyword-marker">道具</span>としてのAI
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>強いAIと弱いAIの根本的な違い</h3>
+          <p>この区別は、AIの能力というよりも、AIの「<span class="keyword-marker">内的状態</span>」についての主張です：</p>
+          <ul>
+            <li><strong>強いAI</strong>：AIは実際に意識的な思考や心の状態を持つことができる</li>
+            <li><strong>弱いAI</strong>：AIは知的な行動をシミュレーションするだけで、真の意識や理解はない</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">強いAIの立場</h3>
+        <p>強いAIの支持者は以下のように主張します：</p>
+        <ul>
+          <li>適切にプログラムされたコンピュータは実際に<span class="keyword-marker">心</span>を持つことができる</li>
+          <li>十分に複雑なシステムは<span class="keyword-marker">意識</span>や<span class="keyword-marker">主観的経験</span>を発現させる可能性がある</li>
+          <li>知能と意識は計算プロセスから創発し得る</li>
+          <li>脳の活動も一種の計算であり、それを再現すれば意識も再現できる</li>
+        </ul>
+        
+        <h3 class="concept-title">弱いAIの立場</h3>
+        <p>弱いAIの支持者（ジョン・サールなど）は以下のように主張します：</p>
+        <ul>
+          <li>コンピュータは記号操作の<span class="keyword-marker">シンタックス</span>（構文）しか持たず、<span class="keyword-marker">セマンティクス</span>（意味）を持たない</li>
+          <li>「中国語の部屋」の思考実験が示すように、規則に従って記号を操作するだけでは真の理解は生まれない</li>
+          <li>現在のAI技術は、特定のタスクを実行する<span class="keyword-marker">道具</span>であり、意識や主観的経験は持たない</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>現在実用化されているAIシステム（チャットボット、画像認識、自動運転など）はすべて「弱いAI」に分類されます。「強いAI」は現時点では実現していませんが、理論的に可能かどうかは哲学的・科学的な論争の対象となっています。</p>
+        </div>
+        
+        <h3 class="concept-title">AGI（汎用人工知能）との関係</h3>
+        <p><span class="keyword-marker">AGI（Artificial General Intelligence）</span>は、人間のように様々なタスクを柔軟にこなせる汎用的な知能を持つAIを指します。AGIは必ずしも「強いAI」である必要はなく、意識を持たなくても人間レベルの知的能力を持つ「弱いAI」としてのAGIも理論的には可能です。</p>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> 中国語の部屋</span>
+          <span class="related-concept"><i class="fas fa-link"></i> AGI</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 意識</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 心の哲学</span>
+        </div>
+      </section>
+      
+      <!-- エンボディメント -->
+      <section class="section" id="embodiment">
+        <h2 class="section-title"><i class="fas fa-walking"></i> エンボディメント (Embodiment)</h2>
+        <p><span class="keyword-marker">エンボディメント</span>（身体性）は、知能が物理的な身体と環境との相互作用から生まれるという考え方です。1990年代に<span class="icon-keyword"><i class="fas fa-user-tie"></i>ロドニー・ブルックス</span>や<span class="icon-keyword"><i class="fas fa-user-tie"></i>アンディ・クラーク</span>らによって発展しました。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">エンボディメントの概念</span>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-around; margin: 1rem 0;">
+            <div style="text-align: center; margin: 0.5rem; flex: 1; min-width: 200px;">
+              <div style="border: 2px solid var(--magenta); border-radius: 10px; padding: 1rem; height: 100%;">
+                <h4 style="color: var(--magenta); margin-bottom: 0.5rem;">従来の AI アプローチ</h4>
+                <i class="fas fa-brain" style="font-size: 2rem; color: var(--magenta); margin: 1rem 0;"></i>
+                <div style="margin-top: 1rem; text-align: center;">
+                  <p><span class="keyword-marker">抽象的な記号処理</span></p>
+                  <p><span class="keyword-marker">身体から独立した知能</span></p>
+                  <p><span class="keyword-marker">トップダウン設計</span></p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; margin: 0 1rem;">
+              <i class="fas fa-exchange-alt" style="font-size: 1.5rem; color: var(--cyan);"></i>
+            </div>
+            
+            <div style="text-align: center; margin: 0.5rem; flex: 1; min-width: 200px;">
+              <div style="border: 2px solid var(--cyan); border-radius: 10px; padding: 1rem; height: 100%;">
+                <h4 style="color: var(--cyan); margin-bottom: 0.5rem;">エンボディド アプローチ</h4>
+                <div style="position: relative; margin: 1rem 0;">
+                  <i class="fas fa-robot" style="font-size: 2rem; color: var(--cyan);"></i>
+                  <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+                    <circle cx="50%" cy="50%" r="35" stroke="var(--yellow)" stroke-width="2" stroke-dasharray="5,3" fill="none" />
+                  </svg>
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                  <p><span class="keyword-marker">身体を通じた学習</span></p>
+                  <p><span class="keyword-marker">環境との相互作用</span></p>
+                  <p><span class="keyword-marker">ボトムアップ発達</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>エンボディメントの基本的な考え方</h3>
+          <p>エンボディメント理論の主要な主張：</p>
+          <ul>
+            <li>知能は<span class="keyword-marker">身体</span>と<span class="keyword-marker">環境</span>との相互作用から生まれる</li>
+            <li>抽象的な思考も身体的経験に根ざしている（<span class="keyword-marker">状況認知</span>）</li>
+            <li>記号の意味は身体的経験を通じて獲得される（<span class="keyword-marker">シンボルグラウンディング問題</span>への対応）</li>
+            <li>知能は脳だけでなく、身体全体に分散している（<span class="keyword-marker">拡張認知</span>）</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">エンボディメントとAI研究</h3>
+        <p>エンボディメントの考え方は、従来の記号処理型AIアプローチへの批判から生まれました：</p>
+        <ul>
+          <li><span class="keyword-marker">新しいロボティクス</span>：身体と環境の相互作用を重視した単純なルールからの複雑な行動の創発</li>
+          <li><span class="keyword-marker">発達ロボティクス</span>：人間の赤ちゃんのように段階的に学習・発達するロボットの研究</li>
+          <li><span class="keyword-marker">状況的認知</span>：抽象的な知識よりも状況に応じた適応的行動を重視</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>ロドニー・ブルックスの「<span class="icon-keyword"><i class="fas fa-bug"></i>虫型ロボット</span>」は、複雑な内部表現なしに単純な行動ルールの組み合わせで知的に見える行動を示し、エンボディメント理論を実証しました。</p>
+        </div>
+        
+        <h3 class="concept-title">シンボルグラウンディング問題との関連</h3>
+        <p>エンボディメントは、<span class="keyword-marker">シンボルグラウンディング問題</span>（コンピュータの扱う記号が実世界の意味とどう結びつくか）への一つの解決策を提供します：</p>
+        <ul>
+          <li>記号は身体的経験を通じて意味を獲得する</li>
+          <li>センサーとアクチュエーターを通じた環境とのやり取りが記号と意味を結びつける</li>
+          <li>物理的な相互作用を通じて、抽象的な記号に具体的な意味が付与される</li>
+        </ul>
+        
+        <h3 class="concept-title">現代のAI研究への影響</h3>
+        <p>エンボディメント理論は現代のAI研究に様々な影響を与えています：</p>
+        <ul>
+          <li><span class="keyword-marker">マルチモーダル学習</span>：視覚、聴覚、触覚などの複数の感覚情報を統合する学習手法</li>
+          <li><span class="keyword-marker">強化学習</span>：環境との相互作用を通じた試行錯誤による学習</li>
+          <li><span class="keyword-marker">自己教師あり学習</span>：身体的・感覚的経験からの表現学習</li>
+          <li><span class="keyword-marker">Human-Robot Interaction（HRI）</span>：人間とロボットの身体的相互作用の研究</li>
+        </ul>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> シンボルグラウンディング問題</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 状況的認知</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 発達ロボティクス</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 拡張認知</span>
+        </div>
+      </section>
+      
+      <!-- 知識獲得のボトルネック -->
+      <section class="section" id="knowledge-bottleneck">
+        <h2 class="section-title"><i class="fas fa-hourglass-half"></i> 知識獲得のボトルネック (Knowledge Acquisition Bottleneck)</h2>
+        <p><span class="keyword-marker">知識獲得のボトルネック</span>とは、AIシステムに必要な知識を効率的に獲得・表現することの難しさを指す問題です。特に<span class="keyword-marker">エキスパートシステム</span>や知識ベースAIの開発において顕著な課題となりました。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">知識獲得のボトルネックの概念</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="width: 90%; position: relative; margin-bottom: 1rem;">
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+                <div style="flex: 1; min-width: 150px; margin: 0.5rem; text-align: center; padding: 1rem; border: 2px solid var(--magenta); border-radius: 10px;">
+                  <i class="fas fa-user-tie" style="font-size: 2rem; color: var(--magenta); margin-bottom: 0.5rem;"></i>
+                  <h4>専門家（人間）</h4>
+                  <p style="font-size: 0.9rem;">豊富な知識と経験</p>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 0.5rem;">
+                  <i class="fas fa-long-arrow-alt-right" style="font-size: 1.5rem; color: var(--key); margin: 0.5rem;"></i>
+                  <div style="width: 100px; text-align: center; padding: 0.5rem; background-color: var(--yellow); border-radius: 5px; transform: rotate(-5deg);">
+                    <p style="font-size: 0.8rem; font-weight: bold;">ボトルネック</p>
+                  </div>
+                </div>
+                
+                <div style="flex: 1; min-width: 150px; margin: 0.5rem; text-align: center; padding: 1rem; border: 2px solid var(--cyan); border-radius: 10px;">
+                  <i class="fas fa-robot" style="font-size: 2rem; color: var(--cyan); margin-bottom: 0.5rem;"></i>
+                  <h4>AIシステム</h4>
+                  <p style="font-size: 0.9rem;">形式化された知識</p>
+                </div>
+              </div>
+            </div>
+            
+            <div style="width: 90%; margin-top: 1rem;">
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+                <div style="flex: 1; min-width: 120px; margin: 0.3rem; text-align: center; padding: 0.5rem; background-color: rgba(255, 64, 160, 0.1); border-radius: 8px;">
+                  <p><span class="keyword-marker">暗黙知の形式化</span></p>
+                </div>
+                <div style="flex: 1; min-width: 120px; margin: 0.3rem; text-align: center; padding: 0.5rem; background-color: rgba(0, 216, 232, 0.1); border-radius: 8px;">
+                  <p><span class="keyword-marker">知識の膨大さ</span></p>
+                </div>
+                <div style="flex: 1; min-width: 120px; margin: 0.3rem; text-align: center; padding: 0.5rem; background-color: rgba(255, 230, 0, 0.1); border-radius: 8px;">
+                  <p><span class="keyword-marker">時間と労力</span></p>
+                </div>
+                <div style="flex: 1; min-width: 120px; margin: 0.3rem; text-align: center; padding: 0.5rem; background-color: rgba(255, 64, 160, 0.1); border-radius: 8px;">
+                  <p><span class="keyword-marker">形式の適切さ</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>知識獲得のボトルネックの本質</h3>
+          <p>この問題の核心は以下のような点にあります：</p>
+          <ul>
+            <li>専門家の持つ<span class="keyword-marker">暗黙知</span>（言語化しにくい知識）を明示的な形式に変換する難しさ</li>
+            <li>人間の知識は膨大で複雑なため、すべてを手作業でコード化するのは非効率</li>
+            <li>知識エンジニアと専門家の間の<span class="keyword-marker">コミュニケーションギャップ</span></li>
+            <li>知識の<span class="keyword-marker">更新や保守</span>に継続的なリソースが必要</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">歴史的背景</h3>
+        <p>知識獲得のボトルネックは、1970〜80年代の<span class="keyword-marker">エキスパートシステム</span>ブームの中で顕在化しました：</p>
+        <ul>
+          <li>初期のエキスパートシステム（MYCIN、DENDRAL、XCONなど）は特定領域の知識を手作業でエンコード</li>
+          <li>知識ベースの構築と保守に多大な時間とコストがかかった</li>
+          <li>この問題が<span class="keyword-marker">AIの冬</span>（1980年代後半〜90年代）の一因となった</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>例えば、医療診断システムMYCINには約600のルールがありましたが、それでも特定の感染症診断に限定された知識しか持ちませんでした。これを人間の医師の持つ総合的な知識レベルまで拡張するには、何万、何十万ものルールが必要になると考えられていました。</p>
+        </div>
+        
+        <h3 class="concept-title">対応アプローチ</h3>
+        <p>知識獲得のボトルネックに対する様々なアプローチが開発されました：</p>
+        <ul>
+          <li><span class="keyword-marker">機械学習</span>：データから知識を自動的に獲得</li>
+          <li><span class="keyword-marker">オントロジー工学</span>：知識の体系的な分類と関係付け</li>
+          <li><span class="keyword-marker">自然言語処理</span>：テキストから知識を抽出</li>
+          <li><span class="keyword-marker">知識獲得ツール</span>：専門家が直接知識を入力できる使いやすいインターフェース</li>
+          <li><span class="keyword-marker">集合知</span>：多数の人々からの知識収集（例：Wikipedia）</li>
+        </ul>
+        
+        <h3 class="concept-title">現代のAIにおける意義</h3>
+        <p>知識獲得のボトルネックは、現代のAI研究においても別の形で重要な課題です：</p>
+        <ul>
+          <li>深層学習モデルには<span class="keyword-marker">大量のラベル付きデータ</span>が必要（データのボトルネック）</li>
+          <li>LLMの学習には<span class="keyword-marker">膨大なコンピューティングリソース</span>が必要</li>
+          <li>モデルに<span class="keyword-marker">常識的推論</span>能力を持たせることは依然として困難</li>
+          <li>特定ドメインの<span class="keyword-marker">専門知識</span>をAIに効率的に教え込む課題</li>
+        </ul>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> エキスパートシステム</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 知識表現</span>
+          <span class="related-concept"><i class="fas fa-link"></i> オントロジー</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 機械学習</span>
+        </div>
+      </section>
+      
+      <!-- ダートマス会議 -->
+      <section class="section" id="dartmouth">
+        <h2 class="section-title"><i class="fas fa-university"></i> ダートマス会議 (Dartmouth Conference)</h2>
+        <p><span class="keyword-marker">ダートマス会議</span>は、1956年夏にアメリカのダートマス大学で開催された人工知能に関する研究会議で、「<span class="keyword-marker">人工知能（Artificial Intelligence）</span>」という用語が正式に定義された歴史的な会議です。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">ダートマス会議の意義</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="text-align: center; border: 2px solid var(--magenta); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; width: 80%;">
+              <h4 style="color: var(--magenta); margin-bottom: 0.5rem;">1956年夏：ダートマス会議</h4>
+              <div style="display: flex; flex-wrap: wrap; justify-content: center; margin: 1rem 0;">
+                <div style="text-align: center; margin: 0.5rem;">
+                  <i class="fas fa-user" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                  <p style="font-size: 0.8rem;">ジョン・マッカーシー</p>
+                </div>
+                <div style="text-align: center; margin: 0.5rem;">
+                  <i class="fas fa-user" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                  <p style="font-size: 0.8rem;">マービン・ミンスキー</p>
+                </div>
+                <div style="text-align: center; margin: 0.5rem;">
+                  <i class="fas fa-user" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                  <p style="font-size: 0.8rem;">クロード・シャノン</p>
+                </div>
+                <div style="text-align: center; margin: 0.5rem;">
+                  <i class="fas fa-user" style="font-size: 1.5rem; color: var(--cyan);"></i>
+                  <p style="font-size: 0.8rem;">ナサニエル・ロチェスター</p>
+                </div>
+              </div>
+              <p><span class="keyword-marker">「人工知能」という言葉の誕生</span></p>
+            </div>
+            
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-around; width: 90%; margin-top: 1rem;">
+              <div style="flex: 1; min-width: 150px; margin: 0.5rem; text-align: center; padding: 1rem; background-color: rgba(0, 216, 232, 0.1); border-radius: 8px;">
+                <i class="fas fa-lightbulb" style="font-size: 1.5rem; color: var(--cyan); margin-bottom: 0.5rem;"></i>
+                <p style="font-size: 0.9rem;">AI研究の<br>学術分野としての確立</p>
+              </div>
+              <div style="flex: 1; min-width: 150px; margin: 0.5rem; text-align: center; padding: 1rem; background-color: rgba(255, 64, 160, 0.1); border-radius: 8px;">
+                <i class="fas fa-users" style="font-size: 1.5rem; color: var(--magenta); margin-bottom: 0.5rem;"></i>
+                <p style="font-size: 0.9rem;">分野横断的な<br>研究者の集結</p>
+              </div>
+              <div style="flex: 1; min-width: 150px; margin: 0.5rem; text-align: center; padding: 1rem; background-color: rgba(255, 230, 0, 0.1); border-radius: 8px;">
+                <i class="fas fa-chart-line" style="font-size: 1.5rem; color: var(--yellow); margin-bottom: 0.5rem;"></i>
+                <p style="font-size: 0.9rem;">楽観的な<br>未来ビジョンの提示</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>ダートマス会議の概要</h3>
+          <p>この会議の特徴：</p>
+          <ul>
+            <li>ジョン・マッカーシーが中心となって組織（「人工知能」という用語を提案）</li>
+            <li>約8週間にわたる研究ワークショップ形式</li>
+            <li>コンピュータ科学、言語学、心理学、数学などの専門家が参加</li>
+            <li>「機械による知能の実現」について議論</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">ダートマス提案の内容</h3>
+        <p>ダートマス会議の提案書には、以下のような野心的な内容が含まれていました：</p>
+        <blockquote style="margin: 1rem 0; padding-left: 1rem; border-left: 3px solid var(--cyan); font-style: italic;">
+          <p>「我々は、学習及び知能のあらゆる側面を、原則的に非常に正確に記述できるという前提に基づき研究を進める。それにより機械にこれらを模倣させることが可能になると考える」</p>
+        </blockquote>
+        <p>この楽観的な見方は、初期のAI研究における「物理記号システム仮説」につながりました。</p>
+        
+        <div class="note-box">
+          <p>ダートマス会議では実際には大きなブレークスルーは生まれませんでしたが、その後のAI研究の土台を築き、「人工知能」という分野を定義した点で歴史的に重要です。</p>
+        </div>
+        
+        <h3 class="concept-title">歴史的意義</h3>
+        <p>ダートマス会議は現代AI研究の出発点として重要な意義を持ちます：</p>
+        <ul>
+          <li>AIという研究分野の<span class="keyword-marker">正式な誕生</span>の場</li>
+          <li>初期のAI研究の方向性（記号処理、論理、推論）の確立</li>
+          <li>後に「<span class="keyword-marker">AIの父</span>」と呼ばれる研究者たちの集結</li>
+          <li>学際的なアプローチの基礎づけ</li>
+        </ul>
+        <div class="image-container">
+          <img src="img/Gimage_1-1-2_01.png" alt="Dartmouth Conference Key Figures">
+          <figcaption>ダートマス会議の主要人物：マッカーシー、ミンスキー、シャノン、ロチェスター</figcaption>
+        </div>
+
+        
+
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> ジョン・マッカーシー</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 記号処理</span>
+          <span class="related-concept"><i class="fas fa-link"></i> AIの歴史</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 物理記号システム仮説</span>
+        </div>
+      </section>
+      
+      <!-- ローブナーコンテスト -->
+      <section class="section" id="loebner-prize">
+        <h2 class="section-title"><i class="fas fa-trophy"></i> ローブナーコンテスト (Loebner Prize)</h2>
+        <p><span class="keyword-marker">ローブナーコンテスト</span>は、チューリングテストの実践的な実装として1990年に起業家のヒュー・ローブナーによって設立された、人工知能の対話能力を競う年次コンテストです。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">ローブナーコンテストの仕組み</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="width: 90%; display: flex; flex-wrap: wrap; justify-content: space-around; margin-bottom: 1.5rem;">
+              <div style="text-align: center; border: 2px solid var(--cyan); border-radius: 10px; padding: 1rem; margin: 0.5rem; flex: 1; min-width: 200px;">
+                <h4 style="color: var(--cyan); margin-bottom: 0.5rem;">参加者</h4>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                  <div style="margin: 0.5rem; text-align: center;">
+                    <i class="fas fa-robot" style="font-size: 2rem; color: var(--cyan);"></i>
+                    <p style="font-size: 0.8rem;">AI プログラム</p>
+                  </div>
+                  <div style="margin: 0.5rem; text-align: center;">
+                    <i class="fas fa-user" style="font-size: 2rem; color: var(--magenta);"></i>
+                    <p style="font-size: 0.8rem;">コンフェデレート<br>（人間）</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="text-align: center; border: 2px solid var(--magenta); border-radius: 10px; padding: 1rem; margin: 0.5rem; flex: 1; min-width: 200px;">
+                <h4 style="color: var(--magenta); margin-bottom: 0.5rem;">判定者</h4>
+                <div style="margin: 0.5rem; text-align: center;">
+                  <i class="fas fa-user-friends" style="font-size: 2rem; color: var(--yellow);"></i>
+                  <p style="font-size: 0.8rem;">複数の審査員</p>
+                </div>
+                <p style="font-size: 0.9rem;">どちらが人間か判断</p>
+              </div>
+            </div>
+            
+            <div style="width: 80%; text-align: center; border: 2px dashed var(--yellow); padding: 0.5rem; border-radius: 8px;">
+              <p><span class="keyword-marker">対話を通じて、AIと人間を区別できるか競う</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>ローブナーコンテストの概要</h3>
+          <p>コンテストの基本的な設定：</p>
+          <ul>
+            <li>複数の審査員がAIプログラムと人間の「コンフェデレート」と対話</li>
+            <li>審査員はどちらが人間でどちらがAIかを判断</li>
+            <li>最も「人間らしい」と判断されたAIプログラムが優勝</li>
+            <li>当初は無制限のテーマでの対話だったが、後に特定のテーマに限定</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">賞の種類と歴史</h3>
+        <p>ローブナーコンテストには複数のレベルの賞がありました：</p>
+        <ul>
+          <li><span class="keyword-marker">ブロンズメダル</span>：その年の最も人間らしいAIに授与（年間賞）</li>
+          <li><span class="keyword-marker">シルバーメダル</span>：審査員の30%を欺けるAIに授与（未達成）</li>
+          <li><span class="keyword-marker">ゴールドメダル</span>：視覚・聴覚情報を含む無制限のチューリングテストに合格するAIに授与（未達成）</li>
+        </ul>
+        <p>コンテストは1991年から2020年まで毎年開催され、多くのチャットボット開発者が参加しました。</p>
+        
+        <div class="note-box">
+          <p>過去の主な優勝プログラムには、ALICE（A.L.I.C.E.）、Mitsuku（現Kuki）、Rose、Suzette、Ultra Halなどがあります。これらはチャットボット技術の発展に貢献しましたが、真の「理解」というよりはパターンマッチングと巧妙な応答生成技術に基づいていました。</p>
+        </div>
+        
+        <h3 class="concept-title">批判と限界</h3>
+        <p>ローブナーコンテストは多くの批判も受けてきました：</p>
+        <ul>
+          <li><strong>表面的な会話への偏り</strong>：システムが人間らしく見せかけるテクニックに注力する傾向</li>
+          <li><strong>真の理解の欠如</strong>：チャットボットは実際には会話を「理解」しておらず、パターンマッチングや事前にプログラムされた応答を使用</li>
+          <li><strong>技術的進歩との乖離</strong>：近年のAI研究の主流とはやや離れた位置づけになっていた</li>
+        </ul>
+        
+        <p>AIの研究者マービン・ミンスキーやジョセフ・ワイゼンバウムらは、コンテストが真のAI研究から注意をそらし、表面的なトリックに焦点を当てていると批判していました。</p>
+        
+        <h3 class="concept-title">現代の対話AIとの関係</h3>
+        <p>現代の大規模言語モデル（LLM）は、ローブナーコンテストの基準を簡単に超えることができると考えられています。ChatGPTなどの最新のAIシステムは、限定された時間と話題であれば、多くの人間を欺くことができるレベルの対話能力を持っています。</p>
+        
+        <p>しかし、こうしたシステムが「真の理解」を持っているかという本質的な問題は、中国語の部屋の思考実験が提起した問題と同様に、未解決のままです。</p>
+        
+        <p>G検定では、ローブナーコンテストの概要とその人工知能研究における位置づけを理解することが求められます。</p>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> チューリングテスト</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 対話システム</span>
+          <span class="related-concept"><i class="fas fa-link"></i> チャットボット</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 自然言語処理</span>
+        </div>
+      </section>
+      
+      <!-- トイ・プロブレム -->
+      <section class="section" id="toy-problems">
+        <h2 class="section-title"><i class="fas fa-puzzle-piece"></i> トイ・プロブレム (Toy Problems)</h2>
+        <p><span class="keyword-marker">トイ・プロブレム</span>とは、AI研究において、複雑な現実世界の問題を簡略化した小規模な問題設定のことです。これらは研究を進める上での実験や理論検証に利用されますが、現実世界の複雑さを十分に反映していないという批判もあります。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">トイ・プロブレムの特徴</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="width: 90%; display: flex; flex-wrap: wrap; justify-content: space-around; margin-bottom: 1.5rem;">
+              <div style="text-align: center; border: 2px solid var(--cyan); border-radius: 10px; padding: 1rem; margin: 0.5rem; flex: 1; min-width: 200px;">
+                <h4 style="color: var(--cyan); margin-bottom: 0.5rem;">長所</h4>
+                <ul style="text-align: left; list-style-type: none; padding: 0;">
+                  <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>計算コストが低い</li>
+                  <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>理論の検証が容易</li>
+                  <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>アルゴリズム比較に適している</li>
+                  <li><i class="fas fa-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>研究の初期段階で有用</li>
+                </ul>
+              </div>
+              
+              <div style="text-align: center; border: 2px solid var(--magenta); border-radius: 10px; padding: 1rem; margin: 0.5rem; flex: 1; min-width: 200px;">
+                <h4 style="color: var(--magenta); margin-bottom: 0.5rem;">短所</h4>
+                <ul style="text-align: left; list-style-type: none; padding: 0;">
+                  <li><i class="fas fa-times" style="color: var(--magenta); margin-right: 0.5rem;"></i>現実世界の複雑さを欠く</li>
+                  <li><i class="fas fa-times" style="color: var(--magenta); margin-right: 0.5rem;"></i>実用的な応用に直接つながらない</li>
+                  <li><i class="fas fa-times" style="color: var(--magenta); margin-right: 0.5rem;"></i>成功が過大評価されやすい</li>
+                  <li><i class="fas fa-times" style="color: var(--magenta); margin-right: 0.5rem;"></i>現実問題へのスケーラビリティに課題</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>代表的なトイ・プロブレム例</h3>
+          <ul>
+            <li><strong>8クイーン問題</strong>：8×8のチェス盤上に8個のクイーンを、互いに取り合えない位置に配置する問題</li>
+            <li><strong>ハノイの塔</strong>：大きさが異なる円盤を、一定のルールに従って移動させる問題</li>
+            <li><strong>巡回セールスマン問題</strong>：複数の都市を1度ずつ訪問し出発地に戻る最短経路を求める問題</li>
+            <li><strong>水差しパズル</strong>：容量の異なる水差しを使って特定の量の水を測る問題</li>
+            <li><strong>8パズル</strong>：3×3のグリッドで数字タイルを並べ替える問題</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">トイ・プロブレムの役割</h3>
+        <p>トイ・プロブレムは以下のような役割を果たしてきました：</p>
+        <ul>
+          <li><span class="keyword-marker">学術的研究のベンチマーク</span>として、異なるアルゴリズムの性能比較に利用</li>
+          <li><span class="keyword-marker">教育ツール</span>として、AIやアルゴリズム設計の基本概念を学ぶために活用</li>
+          <li>理論的に興味深い<span class="keyword-marker">計算複雑性</span>や探索空間の特性を研究するための題材</li>
+          <li>新しいアプローチの<span class="keyword-marker">プルーフ・オブ・コンセプト</span>（概念実証）として使用</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>現代のAI研究では、より複雑で現実的な問題設定（自動運転、画像認識、自然言語処理など）に焦点が移っていますが、基礎的なアルゴリズム開発や教育においてトイ・プロブレムは今でも重要な役割を果たしています。</p>
+        </div>
+        
+        <h3 class="concept-title">批判と議論</h3>
+        <p>トイ・プロブレムに関する主な批判として以下が挙げられます：</p>
+        <ul>
+          <li><strong>現実世界の複雑さの欠如</strong>：実際の問題は不確実性、ノイズ、動的環境などの要素を含むが、トイ・プロブレムではこれらが単純化されている</li>
+          <li><strong>過度な最適化</strong>：特定のトイ・プロブレムに最適化されたアルゴリズムが開発されがちだが、これは汎用性を欠く場合がある</li>
+          <li><strong>進捗の錯覚</strong>：トイ・プロブレムでの成功が、AIの一般的な進歩として誤って解釈される危険性</li>
+        </ul>
+        
+        <p>これらの批判から、現代のAI研究では、より複雑な環境やデータセットを使用したり、実世界のアプリケーションに直結する問題設定を重視する傾向が強まっています。例えば、自動運転シミュレーター、大規模言語モデル向けのベンチマーク、実際の医療データなどが活用されています。</p>
+        
+        <p>G検定では、トイ・プロブレムの概念と、AIの歴史における役割、さらにその限界についての理解が求められます。</p>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> 探索アルゴリズム</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 計算複雑性</span>
+          <span class="related-concept"><i class="fas fa-link"></i> ヒューリスティック</span>
+          <span class="related-concept"><i class="fas fa-link"></i> ベンチマーク</span>
+        </div>
+      </section>
+      
+      <!-- 機械翻訳の課題 -->
+      <section class="section" id="machine-translation">
+        <h2 class="section-title"><i class="fas fa-language"></i> 機械翻訳の課題 (Machine Translation Challenges)</h2>
+        <p><span class="keyword-marker">機械翻訳</span>は、コンピュータによる自然言語の自動翻訳技術です。初期の単純なルールベースのシステムから、現代の複雑なニューラルネットワークまで進化してきましたが、依然として多くの課題に直面しています。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">機械翻訳の発展</span>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
+            <div style="width: 90%; display: flex; flex-wrap: wrap; justify-content: space-between; margin-bottom: 1rem;">
+              <div style="flex: 1; min-width: 200px; text-align: center; border: 2px solid var(--cyan); border-radius: 10px; padding: 0.8rem; margin: 0.5rem;">
+                <h4 style="color: var(--cyan); margin-bottom: 0.5rem;">1950-1990年代</h4>
+                <p><span class="keyword-marker">ルールベース機械翻訳</span></p>
+                <div style="text-align: left; font-size: 0.9rem; margin-top: 0.5rem;">
+                  <p><i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.3rem;"></i>文法規則と辞書に基づく</p>
+                  <p><i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.3rem;"></i>手動でルールを記述</p>
+                  <p><i class="fas fa-arrow-right" style="color: var(--cyan); margin-right: 0.3rem;"></i>柔軟性に欠ける</p>
+                </div>
+              </div>
+              
+              <div style="flex: 1; min-width: 200px; text-align: center; border: 2px solid var(--magenta); border-radius: 10px; padding: 0.8rem; margin: 0.5rem;">
+                <h4 style="color: var(--magenta); margin-bottom: 0.5rem;">1990-2015年頃</h4>
+                <p><span class="keyword-marker">統計的機械翻訳</span></p>
+                <div style="text-align: left; font-size: 0.9rem; margin-top: 0.5rem;">
+                  <p><i class="fas fa-arrow-right" style="color: var(--magenta); margin-right: 0.3rem;"></i>対訳コーパスから学習</p>
+                  <p><i class="fas fa-arrow-right" style="color: var(--magenta); margin-right: 0.3rem;"></i>統計モデルによる翻訳</p>
+                  <p><i class="fas fa-arrow-right" style="color: var(--magenta); margin-right: 0.3rem;"></i>より柔軟だが文脈理解に限界</p>
+                </div>
+              </div>
+              
+              <div style="flex: 1; min-width: 200px; text-align: center; border: 2px solid var(--yellow); border-radius: 10px; padding: 0.8rem; margin: 0.5rem;">
+                <h4 style="color: var(--key); margin-bottom: 0.5rem;">2015年以降</h4>
+                <p><span class="keyword-marker">ニューラル機械翻訳</span></p>
+                <div style="text-align: left; font-size: 0.9rem; margin-top: 0.5rem;">
+                  <p><i class="fas fa-arrow-right" style="color: var(--key); margin-right: 0.3rem;"></i>ディープラーニングによる</p>
+                  <p><i class="fas fa-arrow-right" style="color: var(--key); margin-right: 0.3rem;"></i>エンコーダ・デコーダモデル</p>
+                  <p><i class="fas fa-arrow-right" style="color: var(--key); margin-right: 0.3rem;"></i>大幅な精度向上を実現</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>機械翻訳の主な課題</h3>
+          <ul>
+            <li><strong>言語の多様性</strong>：世界には数千の言語があり、それぞれに固有の文法、語彙、表現がある</li>
+            <li><strong>文脈依存性</strong>：単語や文の意味が文脈によって大きく変わる（特に多義語や慣用表現）</li>
+            <li><strong>文化的ニュアンス</strong>：文化特有の表現や参照を適切に翻訳することが難しい</li>
+            <li><strong>低リソース言語</strong>：データが少ない言語への対応が困難</li>
+            <li><strong>評価方法</strong>：翻訳の「正確さ」や「自然さ」を自動的に評価することが難しい</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">ルールベース機械翻訳の特徴</h3>
+        <p>初期の機械翻訳アプローチであるルールベース機械翻訳（RBMT）の特徴：</p>
+        <ul>
+          <li>文法規則と辞書に基づいて翻訳を行う</li>
+          <li>通常、<span class="keyword-marker">直接翻訳</span>、<span class="keyword-marker">トランスファー方式</span>、<span class="keyword-marker">インターリングア方式</span>などの異なるアプローチがある</li>
+          <li>人間の言語学者によって手動で作成されたルールに依存</li>
+          <li>新しい言語や表現に対応するためには、新しいルールを手動で追加する必要がある</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>ルールベース機械翻訳の代表例として、1970年代に開発されたMETEO（カナダの気象予報翻訳システム）や、SYSTRANなどが挙げられます。これらのシステムは特定の限られたドメインでは高い精度を達成できましたが、一般的な文章の翻訳には限界がありました。</p>
+        </div>
+        
+        <h3 class="concept-title">統計的機械翻訳の仕組み</h3>
+        <p>統計的機械翻訳（SMT）は、大量の対訳コーパス（翻訳済みテキストのペア）から翻訳パターンを学習します：</p>
+        <ul>
+          <li><span class="keyword-marker">翻訳モデル</span>：ソース言語の単語/フレーズが目標言語でどう表現されるかの確率を学習</li>
+          <li><span class="keyword-marker">言語モデル</span>：翻訳結果が目標言語として自然かを評価</li>
+          <li>これらのモデルを組み合わせて、最も確率の高い翻訳を選択</li>
+        </ul>
+        <p>IBM Watsonの翻訳システムや、初期のGoogle翻訳は統計的機械翻訳に基づいていました。</p>
+        
+        <h3 class="concept-title">ニューラル機械翻訳の革新</h3>
+        <p>2015年頃から主流となったニューラル機械翻訳（NMT）の特徴：</p>
+        <ul>
+          <li><span class="keyword-marker">エンコーダ-デコーダ構造</span>：入力文を固定長ベクトルにエンコードし、目標言語にデコード</li>
+          <li><span class="keyword-marker">アテンションメカニズム</span>：翻訳時に入力文の関連部分に「注意」を向ける機能を追加</li>
+          <li><span class="keyword-marker">Transformer</span>アーキテクチャ（2017年~）：自己注意機構を用いた並列処理が可能な革新的モデル</li>
+          <li>エンドツーエンドの学習：中間表現やルールを手動設計せずにデータから直接学習</li>
+        </ul>
+        <p>現代のGoogle翻訳、DeepL、Microsoft Translatorなどは、ニューラル機械翻訳に基づいています。</p>
+        
+        <h3 class="concept-title">未解決の課題</h3>
+        <p>現代の機械翻訳にも、以下のような課題が残されています：</p>
+        <ul>
+          <li><strong>常識や世界知識の欠如</strong>：文章の真の意味を理解するために必要な背景知識の統合</li>
+          <li><strong>一貫性</strong>：長文や複数文書にわたる一貫した翻訳の維持</li>
+          <li><strong>多言語同時翻訳</strong>：単一のモデルで多数の言語ペアを高品質に処理</li>
+          <li><strong>専門分野への適応</strong>：医療、法律、技術文書など専門分野の正確な翻訳</li>
+          <li><strong>リアルタイム音声翻訳</strong>：異なる言語間でのリアルタイムコミュニケーションの実現</li>
+        </ul>
+        
+        <p>G検定では、機械翻訳技術の歴史的発展、各アプローチの特徴と限界、そして翻訳における言語処理の課題について理解することが求められます。</p>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> 自然言語処理</span>
+          <span class="related-concept"><i class="fas fa-link"></i> シーケンス・ツー・シーケンスモデル</span>
+          <span class="related-concept"><i class="fas fa-link"></i> BLEU スコア</span>
+          <span class="related-concept"><i class="fas fa-link"></i> トランスフォーマー</span>
+        </div>
+      </section>
+      
+      <!-- 用語集セクション -->
+      <section class="section" id="glossary">
+        <h2 class="section-title"><i class="fas fa-book"></i> 用語集</h2>
+        <p>人工知能分野で議論される問題に関連する重要な用語を解説します。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">主要概念の分類</span>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-around; margin: 1.5rem 0;">
+            <div style="flex: 1; min-width: 250px; padding: 1rem; margin: 0.5rem; background-color: rgba(0, 216, 232, 0.1); border-radius: 8px; text-align: center;">
+              <h4 style="color: var(--cyan); margin-bottom: 0.5rem;"><i class="fas fa-brain"></i> 哲学的問題</h4>
+              <div style="font-size: 0.9rem;">チューリングテスト、中国語の部屋、シンボルグラウンディング問題</div>
+            </div>
+            <div style="flex: 1; min-width: 250px; padding: 1rem; margin: 0.5rem; background-color: rgba(255, 64, 160, 0.1); border-radius: 8px; text-align: center;">
+              <h4 style="color: var(--magenta); margin-bottom: 0.5rem;"><i class="fas fa-cogs"></i> 技術的問題</h4>
+              <div style="font-size: 0.9rem;">フレーム問題、知識獲得のボトルネック、トイ・プロブレム</div>
+            </div>
+            <div style="flex: 1; min-width: 250px; padding: 1rem; margin: 0.5rem; background-color: rgba(255, 230, 0, 0.1); border-radius: 8px; text-align: center;">
+              <h4 style="color: var(--yellow); margin-bottom: 0.5rem;"><i class="fas fa-lightbulb"></i> 将来と影響</h4>
+              <div style="font-size: 0.9rem;">シンギュラリティ、強いAI・弱いAI、AGI</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="glossary-card-container" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem;">
+          <!-- チューリングテスト -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--cyan);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-clipboard-check" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">チューリングテスト</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">人間の審査員が、見えない相手（人間またはAI）とのテキスト対話を通じて、相手が人間かAIか区別できるかどうかをテストする方法。AIが人間と区別がつかなければ「知的」とみなす考え方。</p>
+          </div>
+          
+          <!-- 中国語の部屋 -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--magenta);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-door-open" style="color: var(--magenta); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">中国語の部屋</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">ジョン・サールによる思考実験で、言語の形式的操作（シンボル処理）だけで本当の「理解」は生じないという主張。構文処理と意味理解の違いを示す。</p>
+          </div>
+          
+          <!-- シンボルグラウンディング問題 -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--yellow);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-anchor" style="color: var(--yellow); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">シンボルグラウンディング問題</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">言語記号（シンボル）の意味をどのように実世界の経験や知覚と関連付けるかという問題。単なる記号の操作だけでは、真の意味理解は不可能という考え方。</p>
+          </div>
+          
+          <!-- フレーム問題 -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--cyan);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-border-all" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">フレーム問題</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">AIが環境の変化に対して、どの情報が関連するか判断し、無関係な情報を効率的に無視する能力の問題。日常的な常識判断の難しさを示す。</p>
+          </div>
+          
+          <!-- シンギュラリティ -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--magenta);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-chart-line" style="color: var(--magenta); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">シンギュラリティ</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">人工知能が人間の知能を超え、技術進歩が急激に加速する理論上の転換点。AIが自己改良を始め、人間の理解を超えた変化が起きる可能性を示す概念。</p>
+          </div>
+          
+          <!-- 強いAI -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--yellow);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-brain" style="color: var(--yellow); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">強いAI</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">人間と同様の意識や理解力を持ち、あらゆる知的作業を人間同様に実行できる理論上のAI。真の意味での「思考」と「理解」を持つという概念。</p>
+          </div>
+          
+          <!-- 弱いAI -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--cyan);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-calculator" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">弱いAI</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">特定の限定されたタスクのみをこなすAI。現在存在するAIはすべてこのカテゴリに含まれ、意識や真の理解はなく、特定の機能を実行するよう設計されている。</p>
+          </div>
+          
+          <!-- エンボディメント -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--magenta);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-walking" style="color: var(--magenta); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">エンボディメント</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">知能が物理的な身体を通じた環境との相互作用から生まれるという考え方。身体性が認知や学習に不可欠であるという理論。</p>
+          </div>
+          
+          <!-- 知識獲得のボトルネック -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--yellow);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-hourglass-half" style="color: var(--yellow); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">知識獲得のボトルネック</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">AIシステムに必要な膨大な知識や常識を効率的に獲得・更新することの難しさを指す問題。特に暗黙知や経験的知識の獲得が課題。</p>
+          </div>
+          
+          <!-- トイ・プロブレム -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--cyan);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-puzzle-piece" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">トイ・プロブレム</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">実世界の複雑な問題を単純化した人工的な問題設定。AI研究で理論やアルゴリズムの検証に使われるが、実世界への適用には限界がある。</p>
+          </div>
+          
+          <!-- 機械翻訳 -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--magenta);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-language" style="color: var(--magenta); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">機械翻訳</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">異なる言語間の自動翻訳技術。言語構造の違い、文化的ニュアンス、曖昧性など多くの課題を含み、AI研究の重要な応用分野。</p>
+          </div>
+          
+          <!-- AGI -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--yellow);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-robot" style="color: var(--yellow); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">AGI</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">人工一般知能（Artificial General Intelligence）。人間と同様に多様なタスクを学習・実行できる汎用AI。特定のタスクだけでなく、様々な状況に適応できる柔軟な知能を持つ。</p>
+          </div>
+          
+          <!-- LLM -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--cyan);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-comment-dots" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">LLM</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">大規模言語モデル（Large Language Model）。膨大なテキストデータで学習された、高度な言語生成・理解能力を持つAIモデル。GPTやLLaMAなどが代表例。</p>
+          </div>
+          
+          <!-- 超知能 -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--magenta);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-atom" style="color: var(--magenta); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">超知能</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">人間の知能を大幅に超えた知能レベルを持つ理論上のAI（Superintelligence）。シンギュラリティ後の発展形として議論される概念。</p>
+          </div>
+          
+          <!-- エキスパートシステム -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--yellow);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-user-graduate" style="color: var(--yellow); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">エキスパートシステム</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">特定の専門分野における人間の専門家の知識とルールをモデル化したAIシステム。1980年代に注目され、初期AIの代表的な応用例。</p>
+          </div>
+          
+          <!-- オントロジー -->
+          <div class="glossary-card" style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--cyan);">
+            <h3 style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+              <i class="fas fa-project-diagram" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+              <span class="keyword-marker">オントロジー</span>
+            </h3>
+            <p style="font-size: 0.95rem; line-height: 1.5;">概念やエンティティ間の関係を体系的に定義する知識表現の枠組み。AIに世界の構造化された知識を提供するために使用される。</p>
+          </div>
+        </div>
+      </section>
+      
+
+      
+      <!-- 重要ポイントセクション -->
+      <section class="section" id="key-insights-section">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i> 重要ポイント</h2>
+        
+        <div class="key-insights">
+          <h3 class="key-insights-title">人工知能分野で議論される問題に関する重要なポイント</h3>
+          <ul class="key-insights-list">
+            <li>AIの根本的な問いは「<span class="keyword-marker">機械が考える</span>とはどういう意味か」という哲学的問題から始まる</li>
+            <li><span class="keyword-marker">チューリングテスト</span>は機械の知能を判断する基準を提供したが、表面的な模倣と本質的な理解の違いに関する議論を生んだ</li>
+            <li><span class="keyword-marker">中国語の部屋</span>の思考実験は、シンボル操作だけでは真の理解は生じないという批判を示している</li>
+            <li><span class="keyword-marker">シンボルグラウンディング問題</span>は、AIが言語記号と実世界の経験をどう結びつけるかという課題を提起している</li>
+            <li><span class="keyword-marker">フレーム問題</span>は、AIが状況の変化に柔軟に対応し、何が関連する情報かを判断する難しさを示している</li>
+            <li><span class="keyword-marker">シンギュラリティ</span>の概念は、AIが人間の知能を超えた際に生じる可能性のある急激な技術変化を指摘している</li>
+            <li><span class="keyword-marker">強いAI</span>と<span class="keyword-marker">弱いAI</span>の区別は、AIが真の意識や理解を持つかどうかという哲学的問いに関連している</li>
+            <li><span class="keyword-marker">エンボディメント</span>理論は、知能が身体的経験から切り離せないという考え方を示している</li>
+            <li><span class="keyword-marker">知識獲得のボトルネック</span>は、AIに膨大な知識や常識をどう効率的に獲得させるかという課題を示している</li>
+            <li><span class="keyword-marker">トイ・プロブレム</span>の限界は、単純化された問題から得られた解決策が実世界の複雑さに対応できない点にある</li>
+            <li><span class="keyword-marker">機械翻訳</span>の課題は、言語の文法的・文化的な複雑さをAIがどう処理するかという問題を示している</li>
+          </ul>
+        </div>
+        
+        <p>これらの問題は互いに関連しており、人工知能の可能性と限界に関する包括的な理解を提供します。G検定では、これらの問題の概要とそれらがAI研究に与える影響について理解することが求められます。</p>
+      </section>
+      <!-- Take Home Messageセクション -->
+      <section class="section" id="take-home-section">
+        <h2 class="section-title"><i class="fas fa-key"></i> Take Home Message (覚えておくべきこと)</h2>
+        
+        <div class="take-home">
+          <h3 class="take-home-title">人工知能分野で議論される問題について覚えておくべきこと</h3>
+          <p class="take-home-message">
+            人工知能分野で議論される問題は、AIの技術的な課題だけでなく、知能の本質や人間とAIの関係に関する深い哲学的問いを含んでいます。G検定では、各問題の概要と歴史的背景を理解し、それらが現代のAI研究にどのような影響を与えているかを説明できることが重要です。特に「チューリングテスト」「中国語の部屋」「シンボルグラウンディング問題」「フレーム問題」「シンギュラリティ」「強いAIと弱いAI」といった概念は、AIの基本的な理解に不可欠な要素です。
+          </p>
+        </div>
+      </section>
+            
+      <!-- フッター -->
+      <footer class="footer">
+        <p>人工知能分野で議論される問題 | 作成日: 2024年4月 | 原稿・コード: Claude | 画像: ChatGPT</p>
+      </footer>
+    </main>
+  </div>
+  
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top" id="scrollTop">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+  
+  <script>
+    // スクロールイベント
+    window.addEventListener('scroll', function() {
+      const scrollTop = document.getElementById('scrollTop');
+      if (window.scrollY > 300) {
+        scrollTop.classList.add('visible');
+      } else {
+        scrollTop.classList.remove('visible');
+      }
+      
+      // 現在のスクロール位置に基づいてナビゲーションリンクをアクティブにする
+      const sections = document.querySelectorAll('.section');
+      let currentSection = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (scrollY >= (sectionTop - 300)) {
+          currentSection = '#' + section.getAttribute('id');
+        }
+      });
+      
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentSection) {
+          link.classList.add('active');
+        }
+      });
+    });
+    
+    // トップにスクロール
+    document.getElementById('scrollTop').addEventListener('click', function() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // ナビゲーションリンクのスムーススクロール
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        window.scrollTo({
+          top: targetElement.offsetTop,
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // ページ読み込み時にアクティブなセクションを設定
+    window.addEventListener('DOMContentLoaded', function() {
+      // 最初のセクションをアクティブに
+      const firstNavLink = document.querySelector('.nav-link');
+      if (firstNavLink) {
+        firstNavLink.classList.add('active');
+      }
+      
+      // 初期スクロール位置に基づいてアクティブセクションを設定
+      const scrollEvent = new Event('scroll');
+      window.dispatchEvent(scrollEvent);
+    });
+  </script>
+</body>
+</html> 

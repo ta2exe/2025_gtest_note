@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-6-3 音声処理 | G検定学習ノート</title>
+  <!-- 絵文字ファビコン（内容に合わせて変更可能） -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔊</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Google Fonts - Zen Maru Gothic, Klee One, M PLUS Rounded 1c -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax for mathematical formulas -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    /* CMYK Color Palette */
+    :root {
+      --cyan: #00D8E8;        /* 明るいシアン */
+      --magenta: #FF40A0;     /* 明るいマゼンタ */
+      --yellow: #FFE600;      /* レモンイエロー */
+      --key: #181818;         /* テキスト用ブラック */
+      --dark-gray: #404040;   /* 補助テキスト */
+      --white: #FFFFFF;       /* 背景用ホワイト */
+      --light-gray: #F5F5F5;  /* ライトグレー */
+    }
+
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+
+    /* Container Layout */
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 20%;
+      min-width: 250px;
+      background-color: var(--magenta);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+      color: var(--white);
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+    }
+
+    /* カスタムスクロールバー - Webkit (Chrome, Safari, Edge など) */
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Firefox用スクロールバー */
+    .sidebar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--white);
+    }
+
+    .sidebar-menu {
+      list-style-position: inside;
+      list-style-type: none;
+      padding-right: 0.5rem; /* スクロールバー用の余白 */
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.8rem;
+    }
+
+    .sidebar-menu a {
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-menu i {
+      margin-right: 8px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    /* Section Styles */
+    section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      border-radius: 10px;
+      background: var(--white);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Typography */
+    h1 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2.2rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      position: relative;
+      padding-bottom: 1rem;
+    }
+
+    h1:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 25%;
+      width: 50%;
+      height: 3px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta), var(--yellow));
+      border-radius: 3px;
+    }
+
+    h2 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.8rem;
+      color: var(--key);
+      margin: 1.5rem 0 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    h2 i {
+      margin-right: 10px;
+      color: var(--magenta);
+    }
+
+    h3 {
+      font-family: 'Klee One', cursive;
+      font-size: 1.5rem;
+      color: var(--magenta);
+      margin: 1.5rem 0 1rem;
+      border-bottom: 2px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    /* Component Styles */
+    .title-section {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem;
+      border-radius: 10px;
+      background: linear-gradient(145deg, var(--white), var(--light-gray));
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .subtitle {
+      font-family: 'Klee One', cursive;
+      font-size: 1.3rem;
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .summary {
+      background-color: rgba(0, 216, 232, 0.1);
+      border-left: 4px solid var(--cyan);
+      padding: 1rem;
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .summary-title i {
+      margin-right: 8px;
+      color: var(--cyan);
+    }
+
+    .summary ul {
+      list-style-position: inside;
+      margin-left: 1rem;
+    }
+
+    .summary li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Concept Box */
+    .concept-box {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid var(--magenta);
+    }
+
+    .concept-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--magenta);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .concept-title i {
+      margin-right: 8px;
+    }
+
+    /* Handwritten Box */
+    .handwritten-box {
+      font-family: 'Klee One', cursive;
+      background-color: var(--white);
+      border: 2px dashed var(--magenta);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      transform: rotate(-0.5deg);
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+    }
+
+    /* Note Box */
+    .note-box {
+      background-color: var(--white);
+      border-left: 5px solid var(--yellow);
+      border-radius: 4px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .note-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .note-title i {
+      margin-right: 8px;
+      color: var(--yellow);
+    }
+
+    /* Example Box */
+    .example-box {
+      background-color: rgba(255, 230, 0, 0.1);
+      border: 1px solid var(--yellow);
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+    }
+
+    .example-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .example-title i {
+      margin-right: 8px;
+      color: var(--yellow);
+    }
+
+    /* Definition Box */
+    .definition-box {
+      background-color: rgba(0, 216, 232, 0.1);
+      border: 1px solid var(--cyan);
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+    }
+
+    .definition-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .definition-title i {
+      margin-right: 8px;
+      color: var(--cyan);
+    }
+
+    /* Keyword Styles */
+    .keyword {
+      font-weight: 700;
+      border-bottom: 2px solid var(--yellow);
+      padding-bottom: 2px;
+      color: var(--key);
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    th {
+      background-color: var(--magenta);
+      color: var(--white);
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    td {
+      padding: 0.8rem;
+      border-bottom: 1px solid #ececec;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* List Styles */
+    ul, ol {
+      padding-left: 2rem;
+      margin: 1rem 0;
+      list-style-position: inside;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Key Insights Section */
+    .key-insights {
+      background-color: rgba(255, 64, 160, 0.05);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .key-insights-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--magenta);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid var(--magenta);
+      padding-bottom: 0.8rem;
+    }
+
+    .key-insights-title i {
+      margin-right: 10px;
+    }
+
+    .insight-item {
+      margin-bottom: 1.2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px dashed var(--light-gray);
+    }
+
+    .insight-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .insight-number {
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      font-weight: 700;
+    }
+
+    .insight-text {
+      display: inline;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--key);
+    }
+
+    .insight-description {
+      margin-top: 0.5rem;
+      margin-left: 40px;
+    }
+
+    /* Take Home Message */
+    .take-home {
+      background: linear-gradient(145deg, var(--white), var(--light-gray));
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 2.5rem 0;
+      text-align: center;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .take-home-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .take-home-title i {
+      margin-right: 10px;
+      color: var(--cyan);
+    }
+
+    .take-home-message {
+      font-family: 'Klee One', cursive;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--key);
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      border: 2px solid var(--cyan);
+      position: relative;
+      margin: 0 auto;
+      max-width: 80%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Glossary Section */
+    .glossary {
+      background-color: var(--light-gray);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .glossary-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid var(--cyan);
+      padding-bottom: 0.8rem;
+    }
+
+    .glossary-title i {
+      margin-right: 10px;
+      color: var(--cyan);
+    }
+
+    /* Image Container Styles */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* Scroll to Top Button */
+    #scroll-top-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      font-size: 1.5rem;
+      border: none;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #scroll-top-btn:hover {
+      background-color: var(--cyan);
+      transform: translateY(-3px);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      background-color: var(--light-gray);
+      margin-top: 3rem;
+      border-radius: 10px;
+    }
+
+    .footer p {
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .sidebar {
+        width: 25%;
+        min-width: 200px;
+      }
+      
+      .main-content {
+        width: 75%;
+        margin-left: 25%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+        min-height: 0;
+        overflow-y: visible;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+      
+      .take-home-message {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar navigation -->
+    <div class="sidebar">
+      <div class="sidebar-title">
+        <i class="fas fa-brain"></i> ディープラーニングの応用例
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="#intro" class="active"><i class="fas fa-music"></i> はじめに</a></li>
+        <li><a href="#types"><i class="fas fa-list"></i> 音声処理タスクの種類</a></li>
+        <li><a href="#features"><i class="fas fa-wave-square"></i> 音声の特徴表現</a></li>
+        <li><a href="#models"><i class="fas fa-robot"></i> 代表的な音声処理モデル</a></li>
+        <li><a href="#applications"><i class="fas fa-cogs"></i> 実世界での活用例</a></li>
+        <li><a href="#keywords"><i class="fas fa-key"></i> キーワード解説</a></li>
+        <li><a href="#key-insights"><i class="fas fa-lightbulb"></i> 重要なポイント</a></li>
+        <li><a href="#take-home"><i class="fas fa-home"></i> 覚えておくべきこと</a></li>
+        <li><a href="#glossary"><i class="fas fa-book"></i> 用語集</a></li>
+      </ul>
+    </div>
+    
+    <!-- Main content -->
+    <div class="main-content">
+      <!-- タイトルセクション -->
+      <section id="intro" class="title-section">
+        <h1><i class="fas fa-microphone-alt"></i> 1-6-3 音声処理</h1>
+        <p class="subtitle">ディープラーニングを活用した音声処理技術とその応用</p>
+        
+        <div class="summary">
+          <div class="summary-title">
+            <i class="fas fa-clipboard-list"></i> 学習の目標
+          </div>
+          <ul>
+            <li>音声処理タスクの種類とその概要について理解する</li>
+            <li>音声処理タスクにおける特徴表現とその手法について理解する</li>
+            <li>代表的な音声処理モデルについて理解する</li>
+            <li>音声処理が実世界において、どのように活用されているか理解する</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <p>音声処理は、ディープラーニングの応用分野の中でも特に人間の日常生活に密接した技術です。スマートスピーカーでの音声認識から、音声合成、話者識別まで、私たちの生活のさまざまな場面で活用されています。この分野では音の波形データをどのように表現し、どう処理するかが重要なポイントになります。</p>
+        </div>
+      </section>
+
+      <!-- 音声処理タスクの種類 -->
+      <section id="types">
+        <h2><i class="fas fa-list-ul"></i> 音声処理タスクの種類</h2>
+        
+        <p>音声処理には様々なタスクがあります。ディープラーニングの発展により、これらのタスクの精度が飛躍的に向上しています。</p>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-microphone"></i> 音声認識
+          </div>
+          <p><span class="keyword">音声認識</span>（Speech Recognition）は、人間の発話を自動的にテキストに変換するタスクです。従来は隠れマルコフモデル（<span class="keyword">隠れマルコフモデル</span>）と統計的言語モデルの組み合わせが主流でしたが、現在はエンドツーエンドのディープラーニングモデルが高い精度を実現しています。</p>
+          <p>音声認識では、音声の可変長シーケンスをテキストの可変長シーケンスに変換する必要があり、CTC（Connectionist Temporal Classification）やアテンションベースのSequence-to-Sequenceモデルが用いられます。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-volume-up"></i> 音声合成
+          </div>
+          <p><span class="keyword">音声合成</span>（Speech Synthesis）は、テキストから自然な人間の声を生成するタスクです。テキスト音声合成（Text-to-Speech, TTS）とも呼ばれます。従来は録音した音声の断片を組み合わせる連結型合成が使われていましたが、現在は<span class="keyword">WaveNet</span>などのディープラーニングモデルにより、より自然で滑らかな音声が生成可能になっています。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-user"></i> 話者識別・認証
+          </div>
+          <p><span class="keyword">話者識別</span>は、音声サンプルから話している人物を特定するタスクです。「この音声は誰のものか」を判定します。一方、話者認証（話者確認）は、音声が特定の話者のものかどうかを確認します。両方とも音声からその人物特有の音響的特徴を抽出し、モデル化することが重要です。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-heart"></i> 感情分析
+          </div>
+          <p>音声からの<span class="keyword">感情分析</span>は、話者の感情状態（喜び、悲しみ、怒り、恐れなど）を音声信号から識別するタスクです。声のトーン、ピッチ、音量、発話速度などから感情を推測します。</p>
+        </div>
+
+        <div class="example-box">
+          <div class="example-title">
+            <i class="fas fa-lightbulb"></i> 音声処理タスクの例
+          </div>
+          <ul>
+            <li><strong>音声認識</strong>：スマートスピーカー、音声アシスタント、音声入力、会議の自動文字起こし</li>
+            <li><strong>音声合成</strong>：ナビゲーションシステム、読み上げソフト、バーチャルアシスタント、AI音声アナウンサー</li>
+            <li><strong>話者識別</strong>：セキュリティシステム、音声認証による本人確認、犯罪捜査での音声分析</li>
+            <li><strong>感情分析</strong>：カスタマーサービスの品質評価、心理健康モニタリング、対話システムの感情応答</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 音声の特徴表現 -->
+      <section id="features">
+        <h2><i class="fas fa-wave-square"></i> 音声の特徴表現</h2>
+        
+        <p>音声データをディープラーニングモデルに入力するためには、生の波形データを適切な特徴量に変換する必要があります。音声の特徴表現は処理効率と認識精度を左右する重要な要素です。</p>
+
+        <div class="definition-box">
+          <div class="definition-title">
+            <i class="fas fa-info-circle"></i> 音声信号の性質
+          </div>
+          <p>音声信号は時間領域での波形（振幅の時間変化）として観測されますが、人間の聴覚システムは周波数領域での特性に敏感です。そのため、時間領域の信号を周波数領域に変換して特徴を抽出することが一般的です。</p>
+        </div>
+
+        <h3>代表的な特徴表現</h3>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-chart-line"></i> A-D変換とパルス符号変調器（PCM）
+          </div>
+          <p><span class="keyword">A-D変換</span>（アナログ-デジタル変換）は連続的なアナログ音声信号をデジタル信号に変換する処理です。<span class="keyword">パルス符号変調器（PCM）</span>はこの変換を行う方式の一つで、音声信号を一定の時間間隔でサンプリングし量子化します。通常、音声データは44.1kHzや16kHzなどのサンプリングレートで収集されます。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-signal"></i> 高速フーリエ変換（FFT）
+          </div>
+          <p><span class="keyword">高速フーリエ変換 (FFT)</span>は、時間領域の信号を周波数領域に変換するアルゴリズムです。音声信号から周波数成分を抽出するために広く使用されており、スペクトログラムを生成する基盤となります。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-sliders-h"></i> メル周波数ケプストラム係数（MFCC）
+          </div>
+          <p><span class="keyword">メル周波数ケプストラム係数（MFCC）</span>は音声認識で最も広く使われている特徴量です。人間の聴覚特性を模した<span class="keyword">メル尺度</span>に基づいており、以下のステップで計算されます：</p>
+          <ol>
+            <li>短時間フーリエ変換でパワースペクトルを計算</li>
+            <li>メルフィルタバンクを適用（人間の聴覚特性を反映）</li>
+            <li>対数変換を適用</li>
+            <li>離散コサイン変換（DCT）を適用</li>
+          </ol>
+          <p>MFCCは音声の音色や発話内容を効率的に表現できますが、環境ノイズに弱いという欠点があります。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-wave-square"></i> スペクトル包絡とフォルマント
+          </div>
+          <p><span class="keyword">スペクトル包絡</span>は、周波数スペクトルの全体的な形状を示す滑らかな曲線です。この包絡線上のピークは<span class="keyword">フォルマント</span>と呼ばれ、特に母音の識別に重要です。フォルマントの<span class="keyword">フォルマント周波数</span>は声道の形状によって決まり、各母音には特徴的なフォルマントパターンがあります。</p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-title">
+            <i class="fas fa-exclamation-circle"></i> 特徴表現の選択
+          </div>
+          <p>音声処理タスクの性質によって、最適な特徴表現は異なります：</p>
+          <ul>
+            <li>音声認識：MFCCやフィルタバンク特徴量が一般的</li>
+            <li>話者識別：ピッチ情報やi-vectorsなどの話者特有の特徴が重要</li>
+            <li>感情分析：ピッチ変動、エネルギー、発話速度などの韻律的特徴も重要</li>
+            <li>エンドツーエンドモデル：最近は生波形やスペクトログラムを直接使用する傾向</li>
+          </ul>
+        </div>
+
+        <div class="handwritten-box">
+          <p>音声の特徴表現は、人間の聴覚システムが音をどう知覚するかを考慮して設計されることが多いです。たとえば、人間は低周波数帯の音の違いに敏感ですが、高周波数帯ではそれほど敏感ではありません。この特性を反映して、メル尺度は低周波数帯での分解能を高くし、高周波数帯では低くしています。</p>
+        </div>
+      </section>
+
+      <!-- 代表的な音声処理モデル -->
+      <section id="models">
+        <h2><i class="fas fa-cogs"></i> 代表的な音声処理モデル</h2>
+        
+        <p>音声処理の分野では、様々なアーキテクチャのディープラーニングモデルが開発されています。特に近年は、エンドツーエンドのモデルが従来の複雑なパイプラインを置き換える傾向にあります。</p>
+
+        <h3>音声認識モデル</h3>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-microphone-alt"></i> CTCベースモデル
+          </div>
+          <p><span class="keyword">CTC</span>（Connectionist Temporal Classification）は、入力シーケンスと出力シーケンスの長さが異なる場合に有効なアルゴリズムです。音声認識では、音声フレームの数（入力）と文字やワードの数（出力）が異なるため、このアライメント問題を解決するためにCTCが使われます。</p>
+          <p>CTCは、各時間ステップで「ブランク」を含むすべての可能なラベルに対する確率分布を生成し、同じ文字が連続する場合や無音区間を適切に処理できます。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-language"></i> Listen, Attend and Spell (LAS)
+          </div>
+          <p>LASモデルは、Sequence-to-Sequenceアーキテクチャにアテンション機構を組み込んだエンドツーエンドの音声認識モデルです。「Listen」（エンコーダ）で音声特徴量をエンコードし、「Attend and Spell」（デコーダ）でアテンション機構を使ってテキストを生成します。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-project-diagram"></i> Transformer-Transducer
+          </div>
+          <p>Transformerのアーキテクチャを音声認識に応用したモデルで、CTCの利点とアテンションメカニズムの強みを組み合わせています。セルフアテンションを用いることで、長距離の依存関係をより効果的に捉えられます。</p>
+        </div>
+
+        <h3>音声合成モデル</h3>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-wave-square"></i> WaveNet
+          </div>
+          <p><span class="keyword">WaveNet</span>は、GoogleのDeepMindが開発した自己回帰型の生成モデルで、サンプル単位で音声波形を直接生成します。畳み込みニューラルネットワークを使用し、拡張畳み込みによって長い時間範囲の依存関係を捉えられます。</p>
+          <p>WaveNetは非常に自然な音声を生成できますが、計算コストが高いという欠点があります。その後、Parallel WaveNetやWaveGlowなど、より高速な生成が可能なモデルが開発されています。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-music"></i> Tacotron 2
+          </div>
+          <p>Tacotron 2は、テキストから音響特徴量（メルスペクトログラム）を生成するシーケンスツーシーケンスモデルで、その後WaveNetなどの波形生成モデルを使って実際の音声に変換します。アテンション機構を活用してテキストと音響特徴量のアライメントを学習します。</p>
+        </div>
+
+        <h3>話者識別・音声合成融合モデル</h3>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-user-circle"></i> 話者適応モデル
+          </div>
+          <p>少量の音声サンプルから新しい話者の声を模倣する技術です。基本モデルを事前学習し、新しい話者のデータで微調整（ファインチューニング）します。最近は、話者埋め込み（Speaker Embedding）を使って、話者の特徴を低次元ベクトルで表現し、様々な話者の声を合成できるモデルが開発されています。</p>
+        </div>
+
+        <div class="handwritten-box">
+          <p>音声処理モデルの進化は非常に速く、特に最近はTransformerアーキテクチャがこの分野でも大きな成功を収めています。これらのモデルにより、音声認識の精度が向上し、より自然な音声合成が可能になりました。音声認識と音声合成の両方で、エンドツーエンドアプローチが主流になりつつあります。</p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-title">
+            <i class="fas fa-exclamation-triangle"></i> モデル選択の考慮点
+          </div>
+          <ul>
+            <li><strong>計算リソース</strong>：WaveNetのような高品質モデルは計算コストが高い</li>
+            <li><strong>レイテンシ</strong>：リアルタイム応用では低レイテンシが重要</li>
+            <li><strong>言語依存性</strong>：一部のモデルは特定の言語に最適化されている</li>
+            <li><strong>データ要件</strong>：高品質なモデルには大量の学習データが必要</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 実世界での活用例 -->
+      <section id="applications">
+        <h2><i class="fas fa-laptop"></i> 実世界での活用例</h2>
+        
+        <p>音声処理技術は現在、様々な分野で実用化され、私たちの生活に大きな影響を与えています。以下では、代表的な活用例を見ていきます。</p>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-home"></i> スマートスピーカーと音声アシスタント
+          </div>
+          <p>Amazon AlexaやGoogle Assistant、Apple Siriなどの音声アシスタントは、音声認識と音声合成技術を組み合わせたAIサービスです。これらは自然言語処理と組み合わせて、ユーザーの質問に答えたり、タスクを実行したりします。</p>
+          <p>スマートスピーカーは、常に「ウェイクワード」（「Hey Siri」など）を聞き取るために、省電力の音声検出を行います。ウェイクワードを検出すると、クラウドサーバーに音声データを送信して詳細な処理を行います。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-comments"></i> 会議の文字起こしと翻訳
+          </div>
+          <p>音声認識技術は、会議やインタビューの自動文字起こしサービスに活用されています。Microsoft TeamsやZoomなどのビデオ会議ツールには、リアルタイムで字幕を生成する機能が実装されています。さらに、リアルタイム翻訳システムと組み合わせることで、異なる言語を話す人々のコミュニケーションを支援します。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-hospital"></i> ヘルスケアと医療
+          </div>
+          <p>医療分野では、音声処理技術が診断補助や患者ケアに活用されています。医師が話した内容を自動的に電子カルテに記録するシステムや、言語障害や認知症の早期発見のための音声分析ツールなどがあります。また、声帯疾患の診断にも音声分析が活用されています。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-lock"></i> 生体認証セキュリティ
+          </div>
+          <p>話者識別技術は、セキュリティシステムにおける生体認証の一形態として使用されています。声紋認証は、パスワードやPINコードの代わりに、ユーザーの声を使って本人確認を行います。銀行やコールセンターなどで活用されています。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-car"></i> 車載システム
+          </div>
+          <p>自動車のナビゲーションシステムやインフォテインメントシステムには、音声認識と音声合成技術が搭載されています。ドライバーはハンズフリーで操作でき、安全性が向上します。</p>
+        </div>
+
+        <div class="example-box">
+          <div class="example-title">
+            <i class="fas fa-lightbulb"></i> 最新のトレンド
+          </div>
+          <ul>
+            <li><strong>マルチモーダル統合</strong>：音声と視覚情報を組み合わせた応用（例：リップリーディング支援音声認識）</li>
+            <li><strong>自己教師あり学習</strong>：ラベルなしの大量の音声データから特徴を学習（例：Wav2vec 2.0）</li>
+            <li><strong>エッジコンピューティング</strong>：プライバシー保護とレイテンシ低減のためのデバイス上処理</li>
+            <li><strong>感情理解</strong>：音声から話者の感情を検出し、より自然なヒューマン・マシン対話を実現</li>
+          </ul>
+        </div>
+
+        <div class="handwritten-box">
+          <p>音声処理技術の将来性はとても高く、特に音声インターフェースは人間とコンピュータのより自然なインタラクションを可能にします。スマートフォンやスマートホームデバイスから始まり、あらゆる機器に音声インターフェースが搭載される「音声ファースト」の世界に向かっています。</p>
+        </div>
+      </section>
+
+      <!-- キーワード解説 -->
+      <section id="keywords">
+        <h2><i class="fas fa-key"></i> キーワード解説</h2>
+        
+        <p>G検定シラバスに記載されている音声処理に関する重要なキーワードについて解説します。</p>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-exchange-alt"></i> A-D変換
+          </div>
+          <p><span class="keyword">A-D変換</span>（Analog-to-Digital Conversion）は、連続的なアナログ信号をデジタル形式に変換するプロセスです。サンプリングと量子化の2段階からなる。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-wave-square"></i> WaveNet
+          </div>
+          <p><span class="keyword">WaveNet</span>は、GoogleのDeepMindが開発した、自己回帰型の音声生成モデル。高品質な音声合成を実現する。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-audio-description"></i> 音韻と音素
+          </div>
+          <p><span class="keyword">音韻</span>（Phonology）は言語学における音声の体系的な研究であり、言語における音の構造とパターンを扱います。一方、<span class="keyword">音素</span>（Phoneme）は言語の最小の音声単位で、ある言語において意味を区別する役割を持つ音のことです。</p>
+          <p>例えば、日本語の「か」と「が」は音素レベルで異なります（/ka/ と /ga/）。音声認識では、音声信号を音素のシーケンスに変換し、それを単語や文章に対応付けることがあります。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-volume-up"></i> 音声合成
+          </div>
+          <p><span class="keyword">音声合成</span>（Speech Synthesis）は、テキストから人工的に音声を生成する技術。Text-to-Speech (TTS)とも呼ばれる。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-microphone"></i> 音声認識
+          </div>
+          <p><span class="keyword">音声認識</span>（Speech Recognition）は、人間の発話を文字列に変換する技術。Automatic Speech Recognition (ASR)とも呼ばれる。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-chart-area"></i> メル周波数ケプストラム係数（MFCC）
+          </div>
+          <p><span class="keyword">メル周波数ケプストラム係数（MFCC）</span>は、音声処理における最も一般的な特徴量の一つです。人間の聴覚特性を模した<span class="keyword">メル尺度</span>を基にしており、音声信号の短時間スペクトル包絡を表現します。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-user-check"></i> 話者識別
+          </div>
+          <p><span class="keyword">話者識別</span>は、音声サンプルから話者の身元を特定する技術。声の特徴（声紋）を使って、「誰が話しているか」を判定する。一方、<span class="keyword">話者認証</span>は、音声が特定の話者からのものかどうかを確認します。</p>
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-title">
+            <i class="fas fa-mask"></i> 隠れマルコフモデル
+          </div>
+          <p><span class="keyword">隠れマルコフモデル</span>（Hidden Markov Model）は、音声認識の従来手法における中心的なモデルです。音声のような時系列データをモデル化するために広く用いられてきました。</p>
+        </div>
+      </section>
+
+      <!-- 重要なポイント -->
+      <section id="key-insights" class="key-insights">
+        <div class="key-insights-title">
+          <i class="fas fa-lightbulb"></i> 重要なポイント
+        </div>
+        
+        <div class="insight-item">
+          <span class="insight-number">1</span>
+          <span class="insight-text">音声処理の4つの主要タスク</span>
+          <p class="insight-description">音声処理の主要なタスクは、「音声認識」「音声合成」「話者識別」「感情分析」です。これらは異なる技術・モデルを用いますが、基本的な特徴抽出手法は共通点があります。</p>
+        </div>
+        
+        <div class="insight-item">
+          <span class="insight-number">2</span>
+          <span class="insight-text">特徴表現の重要性</span>
+          <p class="insight-description">音声データの効果的な特徴表現は音声処理の成功に不可欠です。特にメル周波数ケプストラム係数（MFCC）は人間の聴覚特性を反映した重要な特徴量です。近年はスペクトログラムや生波形を直接使用するエンドツーエンドモデルも増えています。</p>
+        </div>
+        
+        <div class="insight-item">
+          <span class="insight-number">3</span>
+          <span class="insight-text">音声処理のアーキテクチャ進化</span>
+          <p class="insight-description">音声処理の分野は、隠れマルコフモデルを中心とした伝統的なパイプラインから、CTC、アテンション機構、Transformerを用いたエンドツーエンドモデルへと進化しています。特にWaveNetのような生成モデルは音声合成における大きなブレイクスルーでした。</p>
+        </div>
+        
+        <div class="insight-item">
+          <span class="insight-number">4</span>
+          <span class="insight-text">実世界での広範な応用</span>
+          <p class="insight-description">音声処理技術は、スマートスピーカー、会議の文字起こし、車載システム、ヘルスケア、セキュリティなど幅広い分野で実用化されています。今後も音声インターフェースの重要性はさらに高まると予想されます。</p>
+        </div>
+      </section>
+
+      <!-- 覚えておくべきこと -->
+      <section id="take-home" class="take-home">
+        <div class="take-home-title">
+          <i class="fas fa-graduation-cap"></i> 覚えておくべきこと
+        </div>
+        
+        <div class="take-home-message">
+          音声処理は、音声という時系列データの特性を理解し、適切に特徴表現することが鍵となります。シラバスのキーワードである「隠れマルコフモデル」「WaveNet」「メル周波数ケプストラム係数」「A-D変換」などの意味と役割を理解し、音声認識・合成・話者識別などの主要タスクでの応用例を把握しておきましょう。
+        </div>
+      </section>
+
+      <!-- 用語集 -->
+      <section id="glossary" class="glossary">
+        <div class="glossary-title">
+          <i class="fas fa-book"></i> 用語集
+        </div>
+        
+        <table>
+          <tr>
+            <th>用語</th>
+            <th>説明</th>
+          </tr>
+          <tr>
+            <td>A-D変換<br>(Analog-to-Digital Conversion)</td>
+            <td>アナログ音声信号をデジタル形式に変換するプロセス。サンプリングと量子化の2段階からなる。</td>
+          </tr>
+          <tr>
+            <td>WaveNet</td>
+            <td>GoogleのDeepMindが開発した、自己回帰型の音声生成モデル。高品質な音声合成を実現する。</td>
+          </tr>
+          <tr>
+            <td>音韻<br>(Phonology)</td>
+            <td>言語学において音声の体系的な研究分野。言語における音の構造とパターンを扱う。</td>
+          </tr>
+          <tr>
+            <td>音声合成<br>(Speech Synthesis)</td>
+            <td>テキストから人工的に音声を生成する技術。Text-to-Speech (TTS)とも呼ばれる。</td>
+          </tr>
+          <tr>
+            <td>音声認識<br>(Speech Recognition)</td>
+            <td>人間の発話を自動的にテキストに変換する技術。Automatic Speech Recognition (ASR)とも呼ばれる。</td>
+          </tr>
+          <tr>
+            <td>音素<br>(Phoneme)</td>
+            <td>言語の最小の音声単位。意味を区別する役割を持つ音のこと。</td>
+          </tr>
+          <tr>
+            <td>隠れマルコフモデル<br>(Hidden Markov Model)</td>
+            <td>状態遷移確率と出力確率に基づく確率モデル。従来の音声認識システムの中核を担った。</td>
+          </tr>
+          <tr>
+            <td>高速フーリエ変換<br>(Fast Fourier Transform)</td>
+            <td>時間領域の信号を周波数領域に効率的に変換するアルゴリズム。音声信号の周波数分析に使用。</td>
+          </tr>
+          <tr>
+            <td>スペクトル包絡<br>(Spectral Envelope)</td>
+            <td>周波数スペクトルの全体的な形状を表す滑らかな曲線。音声の音色特性を表す。</td>
+          </tr>
+          <tr>
+            <td>パルス符号変調器<br>(Pulse Code Modulation)</td>
+            <td>アナログ信号をデジタル形式に変換する標準的な方式。音声のデジタル表現に広く使用。</td>
+          </tr>
+          <tr>
+            <td>フォルマント<br>(Formant)</td>
+            <td>音声の周波数スペクトルにおけるピーク。特に母音の識別に重要な音響特徴。</td>
+          </tr>
+          <tr>
+            <td>フォルマント周波数<br>(Formant Frequency)</td>
+            <td>フォルマントに対応する周波数。声道の形状によって決まり、各母音には特徴的なパターンがある。</td>
+          </tr>
+          <tr>
+            <td>メル周波数ケプストラム係数<br>(Mel-Frequency Cepstral Coefficients)</td>
+            <td>人間の聴覚特性を反映した音声特徴量。音声認識で最も広く使われる特徴表現の一つ。</td>
+          </tr>
+          <tr>
+            <td>メル尺度<br>(Mel Scale)</td>
+            <td>人間の聴覚の周波数認識特性に基づいた音程尺度。低周波数帯での分解能が高く、高周波数帯では低い。</td>
+          </tr>
+          <tr>
+            <td>話者識別<br>(Speaker Identification)</td>
+            <td>音声サンプルから話者の身元を特定する技術。「この音声は誰のものか」を判定する。</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- フッター -->
+      <footer class="footer">
+        <p>1-6-3 音声処理 | G検定学習ノート | 作成日: 2024年4月</p>
+        <p>Content: Claude, Design: Claude, Icons: Font Awesome</p>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript functions for smooth scrolling and other interactive features
+    document.addEventListener('DOMContentLoaded', function() {
+      // Smooth scrolling for sidebar navigation links
+      document.querySelectorAll('.sidebar-menu a').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 20,
+              behavior: 'smooth'
+            });
+            
+            // Update active link in sidebar
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+          }
+        });
+      });
+      
+      // Scroll to top button functionality
+      const scrollTopBtn = document.getElementById('scroll-top-btn');
+      if (scrollTopBtn) {
+        window.addEventListener('scroll', function() {
+          if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            scrollTopBtn.style.display = "flex";
+          } else {
+            scrollTopBtn.style.display = "none";
+          }
+        });
+        
+        scrollTopBtn.addEventListener('click', function() {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+      }
+      
+      // Highlight active section in sidebar when scrolling
+      window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('section');
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          
+          if (pageYOffset >= (sectionTop - 50) && pageYOffset < (sectionTop + sectionHeight - 50)) {
+            const id = section.getAttribute('id');
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            document.querySelector(`.sidebar-menu a[href="#${id}"]`)?.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  
+  <!-- Scroll to top button -->
+  <button id="scroll-top-btn">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+</body>
+</html> 

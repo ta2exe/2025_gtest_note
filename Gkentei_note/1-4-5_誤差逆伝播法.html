@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-4-5 誤差逆伝播法</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      
+      /* フォント */
+      --heading-font: 'M PLUS Rounded 1c', sans-serif;
+      --body-font: 'Zen Maru Gothic', sans-serif;
+      --accent-font: 'Klee One', cursive;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--body-font);
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* レイアウト */
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background-color: #000000; /* サイドバーの背景色を黒に設定 */
+      color: var(--white);
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    
+    .sidebar-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .sidebar-header h1 {
+      font-family: var(--heading-font);
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: var(--cyan);
+    }
+    
+    .sidebar-menu {
+      flex-grow: 1;
+    }
+    
+    .sidebar-menu ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .sidebar-menu li {
+      margin-bottom: 0.8rem;
+    }
+    
+    .sidebar-menu a {
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar-menu a.active {
+      background-color: var(--magenta);
+      color: var(--white);
+      font-weight: 700;
+      box-shadow: 0 0 8px rgba(255, 64, 160, 0.5);
+      border-left: 3px solid var(--yellow);
+      padding-left: calc(0.5rem - 3px);
+    }
+    
+    .sidebar-menu i {
+      margin-right: 0.8rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .sidebar-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      flex-grow: 1;
+      margin-left: 280px;
+      padding: 2rem 3rem;
+    }
+    
+    /* セクションスタイル */
+    .section {
+      margin-bottom: 4rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    
+    .section-title {
+      font-family: var(--heading-font);
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid var(--cyan);
+    }
+    
+    .section-title i {
+      color: var(--magenta);
+      margin-right: 0.8rem;
+    }
+    
+    /* コンテンツボックススタイル */
+    .content-box {
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+    }
+    
+    .content-title {
+      font-family: var(--heading-font);
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .content-title i {
+      color: var(--cyan);
+      margin-right: 0.8rem;
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      padding: 1.5rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 2px dashed var(--dark-gray);
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      position: relative;
+      font-family: var(--accent-font);
+      transform: rotate(-0.5deg);
+    }
+    
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 1.5rem;
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-left: 4px solid var(--yellow);
+      border-radius: 4px;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: "📝 NOTE";
+      font-family: var(--heading-font);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 0.8rem;
+      color: var(--dark-gray);
+    }
+    
+    /* キーワード強調 */
+    .keyword {
+      font-weight: 600;
+      color: var(--key);
+      background: linear-gradient(transparent 75%, var(--yellow) 75%);
+      padding: 0 2px;
+    }
+    
+    /* 重要キーワード強調 */
+    .important-keyword {
+      font-weight: 700;
+      color: var(--key);
+      background: linear-gradient(transparent 75%, var(--magenta) 75%);
+      padding: 0 2px;
+    }
+    
+    /* リスト */
+    ul, ol {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* テーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    
+    th, td {
+      padding: 0.8rem;
+      border: 1px solid var(--dark-gray);
+      text-align: left;
+    }
+    
+    th {
+      background-color: rgba(0, 216, 232, 0.1);
+      font-weight: 600;
+    }
+    
+    /* プロセスフロー */
+    .process-flow {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+      position: relative;
+    }
+    
+    .process-step {
+      width: calc(25% - 1rem);
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .process-step-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background-color: var(--cyan);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+    }
+    
+    .process-step-title {
+      font-family: var(--heading-font);
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .process-step-desc {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+    
+    .process-flow::after {
+      content: "";
+      position: absolute;
+      top: 1.5rem;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: repeating-linear-gradient(90deg, var(--dark-gray), var(--dark-gray) 5px, transparent 5px, transparent 10px);
+      z-index: 0;
+    }
+    
+    /* キーインサイトセクション */
+    .key-insights {
+      padding: 2rem;
+      background-color: rgba(0, 216, 232, 0.05);
+      border-radius: 10px;
+      margin: 3rem 0;
+    }
+    
+    .key-insights-title {
+      font-family: var(--heading-font);
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .key-insights-title i {
+      color: var(--yellow);
+      margin-right: 0.8rem;
+    }
+    
+    .insight-item {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+    
+    .insight-number {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: var(--magenta);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .insight-content {
+      flex-grow: 1;
+    }
+    
+    .insight-title {
+      font-family: var(--heading-font);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Take Home Message セクション */
+    .take-home {
+      text-align: center;
+      padding: 2rem;
+      background-color: rgba(255, 64, 160, 0.05);
+      border-radius: 10px;
+      margin: 3rem 0;
+    }
+    
+    .take-home-title {
+      font-family: var(--heading-font);
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .take-home-title i {
+      color: var(--cyan);
+      margin-right: 0.8rem;
+    }
+    
+    .take-home-message {
+      font-family: var(--accent-font);
+      font-weight: 600;
+      font-size: 1.3rem;
+      line-height: 1.8;
+      max-width: 80%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* 用語集セクション */
+    .glossary {
+      margin-top: 3rem;
+      padding: 2rem;
+      background-color: rgba(255, 230, 0, 0.05);
+      border-radius: 10px;
+    }
+    
+    .glossary-title {
+      font-family: var(--heading-font);
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .glossary-title i {
+      color: var(--yellow);
+      margin-right: 0.8rem;
+    }
+    
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .glossary-table th,
+    .glossary-table td {
+      padding: 1rem;
+      border: 1px solid rgba(64, 64, 64, 0.2);
+    }
+    
+    .glossary-table th {
+      background-color: rgba(0, 216, 232, 0.1);
+      font-weight: 600;
+      width: 30%;
+    }
+    
+    /* フッター */
+    .footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(64, 64, 64, 0.2);
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 3rem;
+      height: 3rem;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .scroll-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        min-height: auto;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+      
+      .process-flow {
+        flex-direction: column;
+      }
+      
+      .process-step {
+        width: 100%;
+        margin-bottom: 2rem;
+      }
+      
+      .process-flow::after {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <div class="sidebar-content">
+        <div class="sidebar-header">
+          <h1>1-4 ディープラーニングの概要</h1>
+        </div>
+        <nav class="sidebar-menu">
+          <ul>
+            <li><a href="#title"><i class="fas fa-sync-alt"></i>1-4-5 誤差逆伝播法</a></li>
+            <li><a href="#introduction"><i class="fas fa-info-circle"></i>誤差逆伝播法とは</a></li>
+            <li><a href="#detail"><i class="fas fa-cogs"></i>誤差逆伝播法の仕組み</a></li>
+            <li><a href="#chain-rule"><i class="fas fa-link"></i>連鎖律と勾配計算</a></li>
+            <li><a href="#problems"><i class="fas fa-exclamation-triangle"></i>誤差逆伝播法の問題点</a></li>
+            <li><a href="#solutions"><i class="fas fa-tools"></i>問題への対策</a></li>
+            <li><a href="#key-insights"><i class="fas fa-lightbulb"></i>Key Insights</a></li>
+            <li><a href="#glossary"><i class="fas fa-book"></i>用語集</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          G検定学習ノート
+        </div>
+      </div>
+    </aside>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- タイトルセクション -->
+      <section class="section" id="title">
+        <h1 class="section-title"><i class="fas fa-sync-alt"></i>1-4-5 誤差逆伝播法</h1>
+        <p>ディープラーニングにおける学習アルゴリズムの中核となる<span class="important-keyword">誤差逆伝播法（Back Propagation）</span>について学びます。ニューラルネットワークの効率的な学習を可能にするこの手法の基本概念と、発生する問題点について理解しましょう。</p>
+        
+        <div class="handwritten-box">
+          <h3>このセクションで学ぶこと</h3>
+          <ul>
+            <li>誤差逆伝播法の基本的な仕組みと計算過程</li>
+            <li>連鎖律を用いた効率的な勾配計算の方法</li>
+            <li>誤差逆伝播法で発生する問題とその原因</li>
+            <li>勾配消失問題・勾配爆発問題への対処法</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- イントロダクションセクション -->
+      <section class="section" id="introduction">
+        <h2 class="section-title"><i class="fas fa-info-circle"></i>誤差逆伝播法とは</h2>
+        <p><span class="keyword">誤差逆伝播法（Back Propagation）</span>は、ニューラルネットワークの学習において、出力層から入力層に向かって誤差を逆向きに伝播させながら重みを更新するアルゴリズムです。この手法は、ディープラーニングを実用的なものにした重要な技術の一つです。</p>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-lightbulb"></i>誤差逆伝播法の基本的な考え方</h3>
+          <p>ニューラルネットワークの学習では、各ニューロン間の結合の強さを表す<span class="keyword">重み（Weight）</span>を調整することで、望ましい出力を得ることを目指します。誤差逆伝播法は以下のステップで進みます：</p>
+          <ol>
+            <li>入力データをネットワークに与えて順伝播（フォワードパス）で出力を計算</li>
+            <li>出力と教師データの誤差を計算</li>
+            <li>誤差を出力層から入力層へ<span class="keyword">逆伝播（バックワードパス）</span>させながら、各重みに対する誤差の勾配を計算</li>
+            <li>計算された勾配を使って重みを更新</li>
+          </ol>
+          
+          <div class="note-box">
+            <p>重要なポイントは、誤差逆伝播法では<span class="keyword">連鎖律（Chain Rule）</span>を使って効率的に勾配を計算できることです。これにより、複雑なネットワークでも効率的に学習が可能になります。</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 誤差逆伝播法の詳細セクション -->
+      <section class="section" id="detail">
+        <h2 class="section-title"><i class="fas fa-cogs"></i>誤差逆伝播法の仕組み</h2>
+        <p>誤差逆伝播法の具体的な仕組みをみていきましょう。この方法では、ニューラルネットワークの出力層で計算された誤差を、各層を逆向きにたどりながら勾配を計算していきます。</p>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-code-branch"></i>誤差逆伝播法の計算手順</h3>
+          <p>基本的な計算手順は以下の通りです：</p>
+          
+          <div class="process-flow">
+            <div class="process-step">
+              <div class="process-step-icon">1</div>
+              <div class="process-step-title">順伝播</div>
+              <div class="process-step-desc">入力から出力まで順方向に計算</div>
+            </div>
+            <div class="process-step">
+              <div class="process-step-icon">2</div>
+              <div class="process-step-title">誤差計算</div>
+              <div class="process-step-desc">出力と正解の誤差を計算</div>
+            </div>
+            <div class="process-step">
+              <div class="process-step-icon">3</div>
+              <div class="process-step-title">逆伝播</div>
+              <div class="process-step-desc">誤差を逆方向に伝播</div>
+            </div>
+            <div class="process-step">
+              <div class="process-step-icon">4</div>
+              <div class="process-step-title">重み更新</div>
+              <div class="process-step-desc">勾配を使って重みを更新</div>
+            </div>
+          </div>
+          
+          <p>この方法の効率性は、すべての重みパラメータに対する勾配を一度の逆伝播で計算できる点にあります。それにより、大規模なニューラルネットワークの学習が実用的な時間内で可能になりました。</p>
+        </div>
+        
+        <div class="image-container">
+          <img src="img/Gimage_1-4-5_01.png" alt="誤差逆伝播法の概念図">
+          <figcaption>誤差逆伝播法では、出力層で計算された誤差を、ネットワークを逆方向にたどりながら伝播させていきます。</figcaption>
+        </div>
+      </section>
+      
+      <!-- 連鎖律セクション -->
+      <section class="section" id="chain-rule">
+        <h2 class="section-title"><i class="fas fa-link"></i>連鎖律と勾配計算</h2>
+        <p>誤差逆伝播法の中核となるのが<span class="important-keyword">連鎖律（Chain Rule）</span>です。これは複合関数の微分を計算するための微積分学の基本法則です。</p>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-calculator"></i>連鎖律の基本</h3>
+          <p>連鎖律とは、関数の合成 \(f(g(x))\) に対する微分を、\(f'(g(x)) \cdot g'(x)\) として計算できるという法則です。これをニューラルネットワークの学習に応用することで、各重みパラメータに対する誤差関数の勾配を効率的に計算できます。</p>
+          
+          <div class="handwritten-box">
+            <h3>連鎖律の例</h3>
+            <p>例えば、3層ニューラルネットワークの場合、出力層での誤差から入力層の重みに対する勾配は、</p>
+            <p>\[\frac{\partial E}{\partial w_{ij}^{(1)}} = \frac{\partial E}{\partial y_k} \cdot \frac{\partial y_k}{\partial h_j} \cdot \frac{\partial h_j}{\partial w_{ij}^{(1)}}\]</p>
+            <p>このように、複数の微分の積として計算されます。</p>
+          </div>
+          
+          <p>ニューラルネットワークは多くの層と多数のパラメータを持ちますが、連鎖律を使うことで、各パラメータに対する勾配を効率的に計算することができます。これにより、複雑なネットワークでも現実的な計算時間で学習が可能になります。</p>
+        </div>
+        
+        <div class="note-box">
+          <p>連鎖律を用いた勾配計算では、各層の出力や中間値を計算過程で保存しておく必要があります。これらの値は順伝播時に計算して保存し、逆伝播時に再利用します。</p>
+        </div>
+      </section>
+      
+      <!-- 問題点と課題セクション -->
+      <section class="section" id="problems">
+        <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i>誤差逆伝播法の問題点</h2>
+        <p>誤差逆伝播法はニューラルネットワークの学習において強力な手法ですが、深層ネットワークで使用する際にいくつかの重要な問題が発生します。</p>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-minus-circle"></i>勾配消失問題</h3>
+          <p><span class="important-keyword">勾配消失問題（Vanishing Gradient Problem）</span>は、ディープラーニングにおける主要な課題の一つです。これは、ネットワークの層が深くなるにつれて、入力層に近い層への勾配が極めて小さくなり、実質的に学習が進まなくなる問題です。</p>
+          
+          <div class="note-box">
+            <p>勾配消失が起こる主な原因:</p>
+            <ul>
+              <li>シグモイド関数やtanh関数などの活性化関数の勾配が特定の領域で非常に小さくなる</li>
+              <li>連鎖律により、これらの小さな勾配が層を遡るごとに掛け合わされ、指数関数的に小さくなる</li>
+            </ul>
+          </div>
+          
+          <p>この問題により、深い層を持つニューラルネットワークでは、入力に近い層のパラメータがほとんど更新されず、ネットワーク全体の学習効率が大幅に低下します。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-plus-circle"></i>勾配爆発問題</h3>
+          <p><span class="important-keyword">勾配爆発問題（Exploding Gradient Problem）</span>は、勾配消失問題とは逆に、勾配が非常に大きな値になり、重みの更新が不安定になる問題です。</p>
+          
+          <div class="note-box">
+            <p>勾配爆発が起こる主な原因:</p>
+            <ul>
+              <li>重みの初期値が大きすぎる場合</li>
+              <li>活性化関数の出力値が大きい領域での計算</li>
+              <li>連鎖律により、大きな勾配が層を遡るごとに掛け合わされ、指数関数的に増大する</li>
+            </ul>
+          </div>
+          
+          <p>勾配爆発問題が発生すると、学習が不安定になり、場合によっては発散してしまうことがあります。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-question-circle"></i>信用割当問題</h3>
+          <p><span class="keyword">信用割当問題（Credit Assignment Problem）</span>は、ネットワークの出力に対してどの重みがどれだけ貢献しているかを適切に評価することが難しい問題です。特に深いネットワークでは、各層のパラメータの相対的な重要性を決定することが困難になります。</p>
+          
+          <p>この問題は勾配消失問題と関連しており、深い層ではパラメータ更新のための信号（勾配）が非常に弱くなるため、出力への貢献度が適切に評価されません。</p>
+        </div>
+      </section>
+      
+      <!-- 対策セクション -->
+      <section class="section" id="solutions">
+        <h2 class="section-title"><i class="fas fa-tools"></i>問題への対策</h2>
+        <p>誤差逆伝播法の問題点に対して、さまざまな対策が提案され、実装されています。</p>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-bolt"></i>活性化関数の改良</h3>
+          <p>勾配消失問題に対する最も効果的な対策の一つは、勾配が消失しにくい活性化関数を使用することです。</p>
+          <ul>
+            <li><span class="keyword">ReLU（Rectified Linear Unit）</span>: 正の入力に対して勾配が常に1となるため、勾配消失が起きにくい</li>
+            <li><span class="keyword">Leaky ReLU</span>: 負の入力に対しても小さな勾配を持たせることで、ニューロンの「死滅」を防ぐ</li>
+            <li>その他の改良版: ELU、SELU、Swishなど</li>
+          </ul>
+        </div>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-random"></i>重み初期化手法</h3>
+          <p>適切な重み初期化は勾配問題の軽減に重要です。</p>
+          <ul>
+            <li><span class="keyword">Xavierの初期化</span>: シグモイドやtanhなどの活性化関数に適した初期化手法</li>
+            <li><span class="keyword">He の初期化</span>: ReLUなどの活性化関数に適した初期化手法</li>
+          </ul>
+          <p>これらの初期化手法は、各層での信号の大きさが適切に保たれるように設計されています。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-cut"></i>勾配クリッピング</h3>
+          <p><span class="keyword">勾配クリッピング</span>は、勾配爆発問題に対する直接的な対策です。勾配の大きさが一定のしきい値を超えた場合に、その大きさを制限します。</p>
+          <p>例えば、勾配ベクトルのノルムが閾値を超えた場合、同じ方向を保ちながら大きさを閾値に制限します。</p>
+        </div>
+        
+        <div class="content-box">
+          <h3 class="content-title"><i class="fas fa-code-branch"></i>アーキテクチャの工夫</h3>
+          <p>ネットワークのアーキテクチャを工夫することで、勾配問題を軽減できます。</p>
+          <ul>
+            <li><span class="keyword">残差接続（スキップ結合）</span>: ResNetなどで使用される、層を飛ばした接続により勾配の流れを改善</li>
+            <li><span class="keyword">バッチ正規化</span>: 各層の出力を正規化することで学習を安定化</li>
+            <li><span class="keyword">ゲート機構</span>: LSTMやGRUなどのRNN変種で使用される、長期依存関係の学習を改善する仕組み</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- Key Insights セクション -->
+      <section class="key-insights" id="key-insights">
+        <h2 class="key-insights-title"><i class="fas fa-lightbulb"></i>Key Insights</h2>
+        
+        <div class="insight-item">
+          <div class="insight-number">1</div>
+          <div class="insight-content">
+            <h3 class="insight-title">誤差逆伝播法は効率的な勾配計算手法</h3>
+            <p>誤差逆伝播法は、連鎖律を用いて全パラメータの勾配を効率的に計算できるため、複雑なニューラルネットワークの学習を実用的な時間内で可能にします。これがディープラーニングの実用化における重要な要素となりました。</p>
+          </div>
+        </div>
+        
+        <div class="insight-item">
+          <div class="insight-number">2</div>
+          <div class="insight-content">
+            <h3 class="insight-title">勾配消失と勾配爆発は深層学習の主要な課題</h3>
+            <p>ディープラーニングで誤差逆伝播法を使用する際の主な問題は、層が深くなるにつれて発生する勾配消失問題と勾配爆発問題です。これらは学習効率と安定性に大きく影響します。</p>
+          </div>
+        </div>
+        
+        <div class="insight-item">
+          <div class="insight-number">3</div>
+          <div class="insight-content">
+            <h3 class="insight-title">適切な活性化関数と初期化が重要</h3>
+            <p>勾配問題に対処するためには、ReLUなどの適切な活性化関数の選択、Xavierやheの初期化などの適切な重み初期化手法、バッチ正規化やスキップ接続などのアーキテクチャ上の工夫が重要です。</p>
+          </div>
+        </div>
+        
+        <div class="insight-item">
+          <div class="insight-number">4</div>
+          <div class="insight-content">
+            <h3 class="insight-title">勾配問題の解決がディープラーニングの発展を支えた</h3>
+            <p>誤差逆伝播法の勾配問題への対策が進展したことで、より深いネットワークの安定した学習が可能になり、ディープラーニングの急速な発展につながりました。</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Take Home Message セクション -->
+      <section class="take-home" id="take-home">
+        <h2 class="take-home-title"><i class="fas fa-key"></i>Take Home Message</h2>
+        <div class="take-home-message">
+          誤差逆伝播法は連鎖律を利用してディープラーニングを可能にした基盤技術だが、深層ネットワークでは勾配消失・爆発問題が発生する。これらの問題を解決するための様々な手法によって、現代のディープラーニングの成功が支えられている。
+        </div>
+      </section>
+      
+      <!-- 用語集セクション -->
+      <section class="glossary" id="glossary">
+        <h2 class="glossary-title"><i class="fas fa-book"></i>用語集</h2>
+        <table class="glossary-table">
+          <tr>
+            <th>用語</th>
+            <th>説明</th>
+          </tr>
+          <tr>
+            <td>誤差逆伝播法<br>(Back Propagation)</td>
+            <td>ニューラルネットワークの重みを更新するために、出力層から入力層へ誤差を逆向きに伝播させながら勾配を計算するアルゴリズム。</td>
+          </tr>
+          <tr>
+            <td>連鎖律<br>(Chain Rule)</td>
+            <td>複合関数の微分を計算するための微積分学の法則。誤差逆伝播法における効率的な勾配計算の基礎となる。</td>
+          </tr>
+          <tr>
+            <td>勾配消失問題<br>(Vanishing Gradient Problem)</td>
+            <td>ネットワークの層が深くなるにつれて、入力層に近い層への勾配が極めて小さくなり、学習が進まなくなる問題。</td>
+          </tr>
+          <tr>
+            <td>勾配爆発問題<br>(Exploding Gradient Problem)</td>
+            <td>勾配が非常に大きな値になり、重みの更新が不安定になる問題。</td>
+          </tr>
+          <tr>
+            <td>信用割当問題<br>(Credit Assignment Problem)</td>
+            <td>ネットワークの出力に対して、どの重みがどれだけ貢献しているかを適切に評価することが難しい問題。</td>
+          </tr>
+        </table>
+      </section>
+      
+      <!-- フッター -->
+      <footer class="footer">
+        <p>G検定学習ノート - 1-4-5 誤差逆伝播法</p>
+        <p>Content by Claude (Code & Text) | デザイン: グラレコ風G検定ノート</p>
+      </footer>
+    </main>
+  </div>
+  
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top" id="scrollTop">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+  
+  <script>
+    // スクロールトップボタンの表示/非表示
+    window.addEventListener('scroll', function() {
+      var scrollTop = document.getElementById('scrollTop');
+      if (window.scrollY > 300) {
+        scrollTop.classList.add('visible');
+      } else {
+        scrollTop.classList.remove('visible');
+      }
+    });
+    
+    // スクロールトップボタンのクリックイベント
+    document.getElementById('scrollTop').addEventListener('click', function() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // サイドバーの現在のセクションをハイライト
+    function highlightCurrentSection() {
+      // 実装予定
+    }
+  </script>
+</body>
+</html> 

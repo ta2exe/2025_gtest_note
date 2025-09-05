@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>転移学習・ファインチューニング - G検定対策ノート</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- 絵文字ファビコン（内容に合わせて変更可能） -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    /* カラーパレット CMYK */
+    :root {
+      --cyan: #00D8E8;        /* 明るいシアン */
+      --magenta: #FF40A0;     /* 明るいマゼンタ */
+      --yellow: #FFE600;      /* レモンイエロー */
+      --key: #181818;         /* テキスト用ブラック */
+      --dark-gray: #404040;   /* 補助テキスト */
+      --white: #FFFFFF;       /* 背景用ホワイト */
+      --light-gray: #F5F5F5;  /* 薄いグレー */
+      --sidebar-bg: #181818;  /* サイドバーの背景色（黒） */
+    }
+
+    /* 基本スタイル */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* コンテナのレイアウト */
+    .container {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      min-width: 250px;
+      background-color: var(--sidebar-bg);
+      color: var(--white);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    /* モバイル表示のサイドバー */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 80%;
+        max-width: 300px;
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0 !important;
+      }
+    }
+
+    /* メニュートグルボタン */
+    .menu-toggle {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      width: 40px;
+      height: 40px;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 200;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: flex;
+      }
+    }
+    
+    .menu-toggle i {
+      font-size: 1.2rem;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: #202020;
+      border-radius: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--cyan);
+      border-radius: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: var(--magenta);
+    }
+
+    .sidebar-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.2rem;
+      color: var(--yellow);
+      font-weight: 700;
+      padding-bottom: 1rem;
+      border-bottom: 2px dotted var(--cyan);
+    }
+
+    .sidebar-nav {
+      list-style: none;
+    }
+
+    .sidebar-nav li {
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav a {
+      display: block;
+      color: var(--white);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--cyan);
+    }
+
+    .sidebar-nav a i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+
+    .sidebar-nav .section-title {
+      color: var(--yellow);
+      font-weight: 700;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      padding-left: 0.5rem;
+      border-left: 3px solid var(--magenta);
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 20%;
+      padding: 2rem;
+      min-width: 0;
+    }
+
+    /* セクションのスタイル */
+    .section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* タイトルセクション */
+    .title-section {
+      margin-bottom: 3rem;
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(to bottom right, rgba(0, 216, 232, 0.1), rgba(255, 64, 160, 0.1));
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    .title-section h1 {
+      color: var(--key);
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .title-section h2 {
+      color: var(--dark-gray);
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      font-weight: 500;
+      font-family: 'Klee One', cursive;
+    }
+
+    .title-section .summary {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 8px;
+      backdrop-filter: blur(5px);
+      border: 1px dashed var(--magenta);
+    }
+
+    .title-section .summary h3 {
+      color: var(--magenta);
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .title-section .summary ul {
+      list-style-position: inside;
+      text-align: left;
+      padding-left: 1rem;
+    }
+
+    .title-section .summary li {
+      margin-bottom: 0.5rem;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .title-section .summary li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.2rem;
+      display: none;
+    }
+
+    /* 見出し */
+    h2.section-title {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      position: relative;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      display: flex;
+      align-items: center;
+    }
+
+    h2.section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      border-radius: 3px;
+    }
+
+    h2.section-title i {
+      margin-right: 0.7rem;
+      color: var(--cyan);
+      font-size: 1.4rem;
+    }
+
+    h3.concept-title {
+      font-size: 1.3rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: var(--magenta);
+      font-weight: 600;
+      font-family: 'Klee One', cursive;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    h3.concept-title::before {
+      content: "\f0eb";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      left: 0;
+      top: 0.2rem;
+      color: var(--yellow);
+    }
+
+    /* 手書き風のボックス */
+    .handwritten-box {
+      background-color: var(--white);
+      border: 2px dashed var(--cyan);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      transform: rotate(-0.5deg);
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .handwritten-box::before {
+      content: "\f304";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .handwritten-box h4 {
+      color: var(--magenta);
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      font-family: 'Klee One', cursive;
+      border-bottom: 1px dotted var(--dark-gray);
+      padding-bottom: 0.5rem;
+    }
+
+    /* ノートボックス */
+    .note-box {
+      background-color: var(--white);
+      border-left: 4px solid var(--cyan);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+      position: relative;
+    }
+
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      right: 10px;
+      font-size: 1.2rem;
+      transform: rotate(30deg);
+    }
+
+    .note-box h4 {
+      color: var(--cyan);
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    /* キーワードのハイライト */
+    .keyword {
+      color: var(--magenta);
+      font-weight: 600;
+      padding: 0 0.2rem;
+      border-bottom: 2px solid var(--yellow);
+      white-space: nowrap;
+    }
+
+    .english-term {
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+
+    /* リストのスタイル */
+    ul, ol {
+      list-style-position: inside;
+      padding-left: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* 吹き出し */
+    .speech-bubble {
+      position: relative;
+      background-color: var(--light-gray);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 30px;
+      border-width: 10px 10px 0;
+      border-style: solid;
+      border-color: var(--light-gray) transparent;
+    }
+
+    /* 図のコンテナ */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* フローチャート */
+    .flow-chart {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .flow-chart::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta));
+      z-index: 0;
+    }
+
+    .flow-step {
+      position: relative;
+      background-color: var(--white);
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      z-index: 1;
+      width: 30%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .flow-step:nth-child(2) {
+      border-color: var(--magenta);
+    }
+
+    .flow-step:nth-child(3) {
+      border-color: var(--yellow);
+    }
+
+    .flow-step h4 {
+      font-size: 1.1rem;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+    }
+
+    /* 重要ポイント */
+    .key-insights {
+      margin: 2rem 0;
+      background: linear-gradient(to bottom right, rgba(255, 230, 0, 0.1), rgba(255, 64, 160, 0.1));
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .key-insights h2 {
+      font-size: 1.4rem;
+      color: var(--magenta);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .key-insights h2 i {
+      margin-right: 0.7rem;
+      color: var(--yellow);
+    }
+
+    .key-point {
+      margin-bottom: 1.5rem;
+      padding-left: 2.5rem;
+      position: relative;
+    }
+
+    .key-point:last-child {
+      margin-bottom: 0;
+    }
+
+    .key-point-number {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .key-point h3 {
+      font-size: 1.2rem;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      font-family: 'Klee One', cursive;
+    }
+
+    /* テイクホームメッセージ */
+    .take-home {
+      margin: 3rem 0;
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      position: relative;
+      border: 2px solid var(--yellow);
+    }
+
+    .take-home h2 {
+      font-size: 1.4rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .take-home h2 i {
+      margin-right: 0.7rem;
+      color: var(--yellow);
+    }
+
+    .take-home p {
+      font-size: 1.2rem;
+      color: var(--magenta);
+      font-weight: 600;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      font-family: 'Klee One', cursive;
+    }
+
+    /* 用語集テーブル */
+    .glossary {
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+
+    .glossary h2 {
+      font-size: 1.4rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .glossary h2 i {
+      margin-right: 0.7rem;
+      color: var(--cyan);
+    }
+
+    .glossary table {
+      width: 100%;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    .glossary th, .glossary td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    .glossary th {
+      background-color: var(--cyan);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .glossary tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+
+    .glossary .keyword-column {
+      width: 30%;
+      font-weight: 600;
+      color: var(--magenta);
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 40px;
+      height: 40px;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 99;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .scroll-top.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .scroll-top:hover {
+      background-color: var(--magenta);
+      transform: translateY(-3px);
+    }
+
+    /* アイコンコンテナ */
+    .icon-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 2rem 0;
+    }
+
+    .icon-item {
+      text-align: center;
+      width: 120px;
+    }
+
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      background-color: var(--light-gray);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .icon-circle i {
+      font-size: 2rem;
+      color: var(--cyan);
+    }
+
+    .icon-circle:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-circle:nth-child(odd) i {
+      color: var(--magenta);
+    }
+
+    .icon-item p {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      line-height: 1.4;
+    }
+
+    /* マーカーのスタイル */
+    .marker-cyan {
+      background: linear-gradient(transparent 60%, rgba(0, 216, 232, 0.3) 40%);
+      padding: 0 2px;
+      font-weight: 600;
+    }
+
+    .marker-magenta {
+      background: linear-gradient(transparent 60%, rgba(255, 64, 160, 0.3) 40%);
+      padding: 0 2px;
+      font-weight: 600;
+    }
+
+    .marker-yellow {
+      background: linear-gradient(transparent 60%, rgba(255, 230, 0, 0.4) 40%);
+      padding: 0 2px;
+      font-weight: 600;
+    }
+
+    /* ハイライトボックスのスタイル */
+    .highlight-box {
+      background: linear-gradient(to right bottom, rgba(0, 216, 232, 0.05), rgba(255, 64, 160, 0.05));
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    .highlight-box::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta));
+      border-radius: 5px 5px 0 0;
+    }
+
+    .highlight-box h3 {
+      color: var(--key);
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+
+    .highlight-box h3 i {
+      margin-right: 0.7rem;
+      color: var(--cyan);
+    }
+
+    /* 試験ポイントのスタイル */
+    .exam-tips {
+      background-color: var(--white);
+      border: 1px solid var(--magenta);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .exam-tips::after {
+      content: "G検定";
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background-color: var(--magenta);
+      color: var(--white);
+      padding: 0.3rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .exam-tips h3 {
+      color: var(--magenta);
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+      font-weight: 600;
+      border-bottom: 2px dotted var(--light-gray);
+      padding-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .exam-tips h3 i {
+      margin-right: 0.7rem;
+      color: var(--yellow);
+    }
+
+    .exam-tips ol {
+      counter-reset: exam-counter;
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .exam-tips ol li {
+      counter-increment: exam-counter;
+      position: relative;
+      padding-left: 2.5rem;
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .exam-tips ol li::before {
+      content: counter(exam-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 25px;
+      height: 25px;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* 比較表のスタイル */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    .comparison-table th {
+      background-color: var(--cyan);
+      color: var(--white);
+      padding: 0.8rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+
+    .comparison-table th:first-child {
+      background-color: var(--magenta);
+    }
+
+    .comparison-table td {
+      padding: 0.8rem;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+
+    .comparison-table tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+
+    /* 複数カラムのスタイル */
+    .multi-column {
+      column-count: 2;
+      column-gap: 2rem;
+      margin: 1rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .multi-column {
+        column-count: 1;
+      }
+    }
+
+    /* 要点まとめのスタイル */
+    .summary-points {
+      background-color: rgba(255, 230, 0, 0.1);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .summary-points h3 {
+      font-size: 1.2rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .summary-points h3 i {
+      margin-right: 0.7rem;
+      color: var(--yellow);
+    }
+
+    /* フッター */
+    .footer {
+      background-color: var(--sidebar-bg);
+      color: var(--white);
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      width: 100%;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .footer p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--light-gray);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- メニュートグルボタン -->
+    <div class="menu-toggle">
+      <i class="fas fa-bars"></i>
+    </div>
+    
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <div class="sidebar-title">
+        <i class="fas fa-brain"></i> ディープラーニングの応用例
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#intro" class="toc-link"><i class="fas fa-star"></i> はじめに</a></li>
+        <li><a href="#transfer-learning-overview" class="toc-link"><i class="fas fa-exchange-alt"></i> 転移学習の概要</a></li>
+        <li><a href="#fine-tuning-overview" class="toc-link"><i class="fas fa-sliders-h"></i> ファインチューニングの概要</a></li>
+        <li><a href="#techniques" class="toc-link"><i class="fas fa-tools"></i> 主要な技術と手法</a></li>
+        <li><a href="#applications" class="toc-link"><i class="fas fa-laptop-code"></i> 実用例と成功事例</a></li>
+        <li><a href="#benefits" class="toc-link"><i class="fas fa-thumbs-up"></i> メリットと適用場面</a></li>
+        <li><a href="#challenges" class="toc-link"><i class="fas fa-exclamation-triangle"></i> 課題と注意点</a></li>
+        <li><a href="#exam-points" class="toc-link"><i class="fas fa-graduation-cap"></i> 試験ポイントと要点まとめ</a></li>
+        <li><a href="#key-insights" class="toc-link"><i class="fas fa-lightbulb"></i> Key Insights</a></li>
+        <li><a href="#keywords" class="toc-link"><i class="fas fa-key"></i> 重要キーワード</a></li>
+        <li><a href="#take-home" class="toc-link"><i class="fas fa-home"></i> Take Home Message</a></li>
+      </ul>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- タイトルセクション -->
+      <section id="intro" class="title-section">
+        <h1>1-6-6 転移学習・ファインチューニング</h1>
+        <p>事前学習済みモデルの知識を活用して新しいタスクの学習を効率化する技術</p>
+        
+        <div class="summary">
+          <h3><i class="fas fa-bullseye"></i> 学習目標</h3>
+          <ul>
+            <li>転移学習とファインチューニングの基礎的な知識を理解する</li>
+            <li>どのような場面やタスクにおいて、転移学習・ファインチューニングが効果を発揮するのか理解する</li>
+            <li>転移学習・ファインチューニングによって、様々なタスクにおいて大幅な精度向上を果たした代表的なモデルについて理解する</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 転移学習の概要 -->
+      <section id="transfer-learning-overview" class="section">
+        <h2 class="section-title"><i class="fas fa-exchange-alt"></i> 転移学習の概要</h2>
+        
+        <p><span class="keyword">転移学習</span>（Transfer Learning）とは、あるタスク（ソースタスク）で学習した知識や特徴を、別の関連するタスク（ターゲットタスク）に適用することで、学習効率を高める手法です。人間が既存の知識を活用して新しいスキルを習得するように、AIにも同様の能力を与えるアプローチです。</p>
+        
+        <div class="handwritten-box">
+          <h4>転移学習の基本的な考え方</h4>
+          <p>大量のデータで事前に学習済みのモデル（特に深層ニューラルネットワーク）は、様々な特徴抽出能力を獲得しています。この「知識」を別のタスクに転移することで：</p>
+          <ul>
+            <li>学習に必要なデータ量の削減</li>
+            <li>学習時間の短縮</li>
+            <li>最終的な性能の向上</li>
+            <li>限られたデータでも高精度なモデル構築が可能に</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">転移学習が効果的な状況</h3>
+        <p>転移学習は特に以下のような状況で効果を発揮します：</p>
+        
+        <div class="flow-chart">
+          <div class="flow-step">
+            <h4>データ不足</h4>
+            <p>学習データが少ない場合、事前学習の知識を活用して精度を向上</p>
+          </div>
+          <div class="flow-step">
+            <h4>計算リソース制約</h4>
+            <p>限られた計算リソースでも高性能なモデルを構築可能</p>
+          </div>
+          <div class="flow-step">
+            <h4>類似タスク活用</h4>
+            <p>関連する問題の知識を転用してゼロから学習する必要性を軽減</p>
+          </div>
+        </div>
+        
+        <h3 class="concept-title">転移学習の主なアプローチ</h3>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-clipboard-list"></i> 転移方法の主な分類</h4>
+          <ul>
+            <li><span class="marker-cyan">特徴抽出層の転用</span>：事前学習済みモデルの一部（主に特徴抽出部分）を固定し、新しいタスク用の出力層のみを再学習</li>
+            <li><span class="marker-magenta">ファインチューニング</span>：事前学習済みモデルのパラメータを新しいタスクで微調整（後述）</li>
+            <li><span class="marker-yellow">知識蒸留</span>：大きな事前学習済みモデル（教師モデル）の知識を小さなモデル（生徒モデル）に転移</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">転移学習の具体例</h3>
+        
+        <p>転移学習の具体的な例として、以下のようなシナリオが挙げられます：</p>
+        
+        <ul>
+          <li><span class="marker-cyan">画像認識</span>：ImageNetで事前学習されたモデル（ResNet、VGGNetなど）を特定の画像分類タスク（医療画像診断など）に転用</li>
+          <li><span class="marker-magenta">自然言語処理</span>：大規模コーパスで事前学習された言語モデル（BERT、GPTなど）を特定のテキスト分類や質問応答タスクに適用</li>
+          <li><span class="marker-yellow">音声認識</span>：一般的な音声データで学習したモデルを特定の話者や言語に適応</li>
+        </ul>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> 転移学習の重要性</h3>
+          <p>転移学習は、実世界のAI応用において極めて重要な技術です。ゼロから学習するのではなく、既存の知識を活用することで、少ないデータや計算リソースでも高性能なモデルを構築できます。特に、<span class="keyword">Few-shot</span>（少数例学習）や<span class="keyword">One-shot</span>（単一例学習）のような、極めて限られたデータでの学習においても効果を発揮します。</p>
+        </div>
+      </section>
+
+      <!-- ファインチューニングの概要 -->
+      <section id="fine-tuning-overview" class="section">
+        <h2 class="section-title"><i class="fas fa-sliders-h"></i> ファインチューニングの概要</h2>
+        
+        <p><span class="keyword">ファインチューニング</span>（Fine-tuning）は、転移学習の一種で、事前学習済みモデル（Pre-trained Model）の重みパラメータを新しいタスク用のデータセットを使って微調整する技術です。単に特徴抽出器として事前学習モデルを使うのではなく、モデル全体または一部のパラメータを新しいタスクに合わせて調整します。</p>
+        
+        <div class="handwritten-box">
+          <h4>ファインチューニングの基本プロセス</h4>
+          <ol>
+            <li>大規模データセットで事前学習されたモデルを取得（例：ImageNetで訓練されたCNNやWikipediaで訓練されたBERT）</li>
+            <li>モデルアーキテクチャを目標タスクに適応（例：出力層の変更）</li>
+            <li>通常より小さい学習率で新しいデータセットを使って再学習（微調整）</li>
+            <li>必要に応じて特定の層を凍結（学習から除外）</li>
+          </ol>
+        </div>
+        
+        <h3 class="concept-title">ファインチューニングのバリエーション</h3>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-layer-group"></i> 主なファインチューニング手法</h4>
+          <ul>
+            <li><span class="marker-cyan">全層ファインチューニング</span>：モデル全体のパラメータを更新</li>
+            <li><span class="marker-magenta">部分的ファインチューニング</span>：一部の層（通常は後半部分）のみを更新し、残りは凍結</li>
+            <li><span class="marker-yellow">段階的ファインチューニング</span>：学習率を層ごとに変えて、浅い層は小さく、深い層は大きな学習率で更新</li>
+            <li><span class="marker-cyan">アダプター方式</span>：元のモデルは固定し、小さなアダプター層を挿入して学習</li>
+          </ul>
+        </div>
+        
+        <div class="image-container">
+          <img src="img/Gimage_1-6-6_01.png" alt="ファインチューニングの概念図（事前学習済みモデルに特定タスク用のファインチューニングを行う様子）">
+          <figcaption>ファインチューニングの典型的な流れ：事前学習済みモデルを取得し、特定のタスク向けに再学習する</figcaption>
+        </div>
+        
+        <h3 class="concept-title">事前学習とファインチューニングの関係</h3>
+        
+        <div class="flow-chart">
+          <div class="flow-step">
+            <h4>事前学習<br>(Pre-training)</h4>
+            <p>大規模データで汎用的表現を学習</p>
+          </div>
+          <div class="flow-step">
+            <h4>モデル適応<br>(Adaptation)</h4>
+            <p>出力層の変更やアーキテクチャ調整</p>
+          </div>
+          <div class="flow-step">
+            <h4>ファインチューニング<br>(Fine-tuning)</h4>
+            <p>特定タスク向けに重みを微調整</p>
+          </div>
+        </div>
+        
+        <h3 class="concept-title">ファインチューニングでの重要な考慮事項</h3>
+        
+        <ul>
+          <li><span class="marker-cyan">学習率設定</span>：通常よりも小さい学習率を使用（一般的に事前学習時の1/10〜1/100）</li>
+          <li><span class="marker-magenta">過学習防止</span>：早期終了、正則化、データ拡張などの技術が重要に</li>
+          <li><span class="marker-yellow">計算効率</span>：全層より部分的ファインチューニングの方が計算効率が高い</li>
+          <li><span class="marker-cyan">データ量</span>：ファインチューニングでも一定以上のデータが必要（少なすぎると性能低下の可能性）</li>
+          <li><span class="marker-magenta">破壊的忘却</span>（Catastrophic Forgetting）：新タスクの学習により既存の知識を「忘れる」問題への対処が必要</li>
+        </ul>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> ファインチューニングのメリット</h3>
+          <p>ファインチューニングは、近年の実用的なAIシステム開発で広く使われる技術です。特に、<span class="keyword">事前学習済みモデル</span>（Pre-trained Models）の公開と共有が進み、BERT、GPT、VGGNetなどのモデルを簡単に利用できるようになったことで普及しました。限られたデータと計算リソースで高性能なAIを開発する上で、不可欠な手法となっています。</p>
+        </div>
+      </section>
+
+      <!-- 主要な技術と手法 -->
+      <section id="techniques" class="section">
+        <h2 class="section-title"><i class="fas fa-tools"></i> 主要な技術と手法</h2>
+        
+        <p>転移学習・ファインチューニングには様々な先進的な手法が存在します。ここでは、G検定のシラバスで重要なキーワードとして挙げられている技術を中心に解説します。</p>
+        
+        <h3 class="concept-title">少数サンプルでの学習</h3>
+        
+        <div class="handwritten-box">
+          <h4>Few-shot・One-shotの概念</h4>
+          <ul>
+            <li><span class="marker-cyan">Few-shot学習</span>（Few-shot Learning）：非常に少数の例（数例〜数十例）から効率的に学習する手法</li>
+            <li><span class="marker-magenta">One-shot学習</span>（One-shot Learning）：各クラスたった1例のみから学習する極端なケース</li>
+            <li><span class="marker-yellow">Zero-shot学習</span>（Zero-shot Learning）：訓練例がなくても推論できる能力（シラバスには直接記載はないが関連する重要概念）</li>
+          </ul>
+          <p>これらの学習方法は、事前学習済みモデルの知識を最大限に活用し、限られたデータでも高い性能を発揮することを目指します。</p>
+        </div>
+        
+        <h3 class="concept-title">半教師あり学習との関係</h3>
+        
+        <p><span class="keyword">半教師あり学習</span>（Semi-supervised Learning）は、少量のラベル付きデータと大量のラベルなしデータを組み合わせて学習する手法です。これは転移学習とよく組み合わされます：</p>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-random"></i> 転移学習と半教師あり学習の組み合わせ</h4>
+          <ul>
+            <li>事前学習モデルの表現能力を活用して、少ないラベル付きデータでの学習を効率化</li>
+            <li>ラベルなしデータを使った自己教師あり学習で事前学習し、少量のラベル付きデータでファインチューニング</li>
+            <li>擬似ラベリング（Pseudo-labeling）：モデルの予測を擬似ラベルとして利用し、データを増やす</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">自己教師あり学習による事前学習</h3>
+        
+        <p><span class="keyword">自己教師あり学習</span>（Self-supervised Learning）は、大量のラベルなしデータから有用な表現を学習するための強力な手法で、現代の転移学習で広く使われています。</p>
+        
+        <div class="flow-chart">
+          <div class="flow-step">
+            <h4>自己教師あり事前学習</h4>
+            <p>データ自体から教師信号を生成して学習（マスク言語モデリングなど）</p>
+          </div>
+          <div class="flow-step">
+            <h4>表現学習獲得</h4>
+            <p>データの本質的な特徴や構造を捉えた表現を獲得</p>
+          </div>
+          <div class="flow-step">
+            <h4>下流タスクへの転移</h4>
+            <p>学習した表現を特定タスクに適応・微調整</p>
+          </div>
+        </div>
+        
+        <p>代表的な自己教師あり学習の例：</p>
+        <ul>
+          <li><span class="marker-cyan">BERT</span>：マスク化された単語を予測する事前学習</li>
+          <li><span class="marker-magenta">SimCLR</span>：画像の異なる変換間の一貫性を学習</li>
+          <li><span class="marker-yellow">CLIP</span>：テキストと画像の関連性を学習</li>
+        </ul>
+        
+        <h3 class="concept-title">破壊的忘却への対処</h3>
+        
+        <p><span class="keyword">破壊的忘却</span>（Catastrophic Forgetting）は、新しいタスクを学習する際に、以前のタスクで獲得した知識を「忘れてしまう」現象です。転移学習・ファインチューニングでは、この問題への対処が重要です。</p>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-shield-alt"></i> 破壊的忘却への対策</h4>
+          <ul>
+            <li><span class="marker-cyan">重要な層の凍結</span>：事前学習で得られた重要な特徴抽出層をファインチューニング中に更新しない</li>
+            <li><span class="marker-magenta">正則化手法</span>：EWC（Elastic Weight Consolidation）などの手法で重要なパラメータの変化を制限</li>
+            <li><span class="marker-yellow">リプレイ戦略</span>：以前のタスクのデータを定期的に再学習に混ぜ込む</li>
+            <li><span class="marker-cyan">多タスク学習</span>：複数のタスクを同時に学習することで、共通の表現を維持</li>
+          </ul>
+        </div>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> 継続学習の重要性</h3>
+          <p>破壊的忘却への対処は、<span class="keyword">継続学習</span>（Continual Learning）の分野で活発に研究されています。実世界のAIシステムでは、新しいデータや状況に適応しながらも既存の知識を保持する能力が重要です。特に長期的に運用するAIシステムでは、この問題への対策が不可欠となります。</p>
+        </div>
+      </section>
+
+      <!-- 実用例と成功事例 -->
+      <section id="applications" class="section">
+        <h2 class="section-title"><i class="fas fa-laptop-code"></i> 実用例と成功事例</h2>
+        
+        <p>転移学習とファインチューニングは、現在のAI開発において最も成功している技術的アプローチの一つです。様々な分野で実用的な成功を収めています。</p>
+        
+        <h3 class="concept-title">コンピュータビジョン領域</h3>
+        
+        <div class="handwritten-box">
+          <h4>画像認識における転移学習の成功事例</h4>
+          <ul>
+            <li><span class="marker-cyan">医療画像診断</span>：ImageNetで事前学習したモデルを医療画像分類（腫瘍検出、疾病診断など）にファインチューニング</li>
+            <li><span class="marker-magenta">ロボットビジョン</span>：一般物体認識で事前学習したモデルを特定環境でのオブジェクト認識に適応</li>
+            <li><span class="marker-yellow">衛星画像分析</span>：限られた衛星データで効率的に土地利用分類や変化検出を実現</li>
+            <li><span class="marker-cyan">顔認識システム</span>：大規模顔画像データで事前学習し、特定個人の認識にファインチューニング</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">自然言語処理領域</h3>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-language"></i> NLPにおける代表的成功事例</h4>
+          <ul>
+            <li><span class="marker-cyan">BERT</span>：大規模なテキストコーパスで事前学習し、質問応答、感情分析、文書分類などの様々なタスクにファインチューニングして高精度を達成</li>
+            <li><span class="marker-magenta">GPT</span>：大規模言語モデルをファインチューニングして特定ドメインの文章生成や翻訳を改善</li>
+            <li><span class="marker-yellow">多言語モデル</span>：多言語で事前学習したモデルを低リソース言語のタスクにファインチューニング</li>
+            <li><span class="marker-cyan">ドメイン適応</span>：一般的な言語モデルを医療や法律などの特定専門分野に適応</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">マルチモーダルAI</h3>
+        
+        <p>画像と言語など複数のモダリティを扱うAIでも転移学習が大きな成功を収めています：</p>
+        
+        <div class="connector-box">
+          <div class="connector-item">
+            <h3><i class="fas fa-image"></i> CLIP</h3>
+            <p>OpenAIが開発した画像とテキストの関連性を学習したモデル。少数例での画像分類に非常に高い転移能力を示す</p>
+          </div>
+          <div class="connector-item">
+            <h3><i class="fas fa-microphone"></i> Whisper</h3>
+            <p>多言語音声認識モデルを様々な言語やアクセントに適応</p>
+          </div>
+          <div class="connector-item">
+            <h3><i class="fas fa-brain"></i> 基盤モデル</h3>
+            <p>大規模に事前学習された基盤モデル（Foundation Models）を様々なタスクに転用</p>
+          </div>
+        </div>
+        
+        <h3 class="concept-title">研究から実用化への橋渡し</h3>
+        
+        <p>転移学習とファインチューニングは、研究段階のモデルを実用システムに転用する際に極めて重要な役割を果たしています：</p>
+        
+        <ul>
+          <li><span class="marker-cyan">実世界のデータへの適応</span>：理想的な研究データから、ノイズや分布シフトのある実世界データへの適応</li>
+          <li><span class="marker-magenta">計算資源の節約</span>：ゼロからの学習に比べて大幅な計算コスト削減</li>
+          <li><span class="marker-yellow">少数データでの実装</span>：多くの実用シナリオでは大量のラベル付きデータを収集できないため、転移学習が不可欠</li>
+          <li><span class="marker-cyan">迅速な開発サイクル</span>：事前学習モデルをベースにすることで開発時間を短縮</li>
+        </ul>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> 転移学習の広がり</h3>
+          <p>転移学習とファインチューニングの概念は、深層学習の多くの分野で標準的なアプローチとなっています。特に<span class="marker-magenta">マルチタスク学習</span>（Multi-task Learning）と組み合わせることで、複数のタスクで共有される知識を効率的に活用できます。また、<span class="marker-yellow">Unified-IO</span>のような統合的なモデルは、画像、テキスト、音声など様々なモダリティやタスクに対応できる汎用的な基盤を提供します。</p>
+        </div>
+      </section>
+      
+      <!-- メリットと適用場面 -->
+      <section id="benefits" class="section">
+        <h2 class="section-title"><i class="fas fa-thumbs-up"></i> メリットと適用場面</h2>
+        
+        <p>転移学習とファインチューニングには多くのメリットがあり、特定の状況で特に効果を発揮します。実際のAI開発プロジェクトを計画する際、これらのメリットと適用場面を理解することが重要です。</p>
+        
+        <h3 class="concept-title">主要なメリット</h3>
+        
+        <div class="handwritten-box">
+          <h4>転移学習・ファインチューニングの主なメリット</h4>
+          <ul>
+            <li><span class="marker-cyan">データ効率の向上</span>：少ないデータで高い性能を実現できる</li>
+            <li><span class="marker-magenta">学習時間の短縮</span>：ゼロからの学習と比較して大幅に学習時間を短縮</li>
+            <li><span class="marker-yellow">精度の向上</span>：事前学習による知識の活用で最終的な性能が向上</li>
+            <li><span class="marker-cyan">汎化性能の改善</span>：大規模データで学習した一般的な特徴表現を活用することで過学習を抑制</li>
+            <li><span class="marker-magenta">計算資源の節約</span>：大規模モデルの学習に必要なGPU/TPUリソースを削減</li>
+            <li><span class="marker-yellow">専門知識の軽減</span>：モデル設計の専門知識が少なくても高性能AIを開発可能に</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">適用に最適な場面</h3>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-check-circle"></i> 転移学習が特に効果的な状況</h4>
+          <ul>
+            <li><span class="marker-cyan">ラベル付きデータが少ない場合</span>：医療画像や専門分野など、ラベル付きデータの収集が困難・高コストな領域</li>
+            <li><span class="marker-magenta">計算リソースに制約がある場合</span>：大規模モデルの学習に必要な計算資源が十分に確保できない状況</li>
+            <li><span class="marker-yellow">迅速な開発が必要な場合</span>：短期間でAIシステムを開発・デプロイする必要がある状況</li>
+            <li><span class="marker-cyan">ソースタスクとターゲットタスクの類似性が高い場合</span>：事前学習タスクと目標タスクの間で必要な特徴表現の共通性が高い場合</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">適用タスクによるメリットの差異</h3>
+        
+        <p>タスクの種類によって転移学習のメリットが異なることを理解することが重要です：</p>
+        
+        <div class="flow-chart">
+          <div class="flow-step">
+            <h4>コンピュータビジョン</h4>
+            <p>低レベルの視覚特徴（エッジ、テクスチャなど）は多くのタスクで共通</p>
+          </div>
+          <div class="flow-step">
+            <h4>自然言語処理</h4>
+            <p>言語の文法や意味構造の知識が様々なタスクで転用可能</p>
+          </div>
+          <div class="flow-step">
+            <h4>音声処理</h4>
+            <p>音響特徴の抽出能力が異なる音声タスクで活用可能</p>
+          </div>
+        </div>
+        
+        <h3 class="concept-title">G検定の観点で重要な適用シーン</h3>
+        
+        <ul>
+          <li><span class="marker-cyan">事前学習済みモデル活用</span>：公開されている事前学習済みモデル（BERT、ResNetなど）を自社タスクに適応</li>
+          <li><span class="marker-magenta">ドメイン適応</span>：一般ドメインで学習したモデルを特定ドメイン（医療、法律、金融など）に適応</li>
+          <li><span class="marker-yellow">クロスモーダル転移</span>：あるモダリティ（例：画像）の知識を別のモダリティ（例：テキスト）に活用</li>
+          <li><span class="marker-cyan">低リソース言語/状況への適応</span>：リソースが豊富な言語/状況から、リソースが限られた言語/状況への知識転移</li>
+        </ul>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> 実務でのポイント</h3>
+          <p>実務でのAI開発では、常に「ゼロから学習するか、転移学習を利用するか」という選択に直面します。多くの場合、転移学習は開発効率とコスト面で大きなメリットがありますが、ソースタスクとターゲットタスクの関連性、利用可能な事前学習モデルの品質、特定のドメイン知識の必要性などを考慮して判断する必要があります。特に、エッジデバイスでの運用など計算リソースに制約がある場合は、転移学習と<span class="keyword">モデル圧縮</span>技術を組み合わせることで効率的な実装が可能になります。</p>
+        </div>
+      </section>
+      
+      <!-- 課題と注意点 -->
+      <section id="challenges" class="section">
+        <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> 課題と注意点</h2>
+        
+        <p>転移学習とファインチューニングには多くのメリットがありますが、実践する際にはいくつかの課題や注意点も存在します。これらを理解し適切に対処することがプロジェクトの成功につながります。</p>
+        
+        <h3 class="concept-title">主な技術的課題</h3>
+        
+        <div class="handwritten-box">
+          <h4>転移学習・ファインチューニングの代表的な課題</h4>
+          <ul>
+            <li><span class="marker-cyan">破壊的忘却</span>（前述）：ファインチューニング中に事前学習の知識が失われる問題</li>
+            <li><span class="marker-magenta">ネガティブトランスファー</span>：ソースタスクとターゲットタスクの差異が大きい場合、転移が悪影響を及ぼす現象</li>
+            <li><span class="marker-yellow">ドメインシフト</span>：事前学習データとターゲットデータの分布の違いによる性能低下</li>
+            <li><span class="marker-cyan">過学習リスク</span>：特に少量データでファインチューニングする場合に発生しやすい</li>
+            <li><span class="marker-magenta">ハイパーパラメータ調整の難しさ</span>：学習率、凍結する層の選択など、最適な設定を見つける難しさ</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">適切なモデル・データの選択</h3>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-database"></i> 事前学習モデル選択の注意点</h4>
+          <ul>
+            <li><span class="marker-cyan">タスク関連性</span>：事前学習タスクと目標タスクの関連性・類似性を考慮する</li>
+            <li><span class="marker-magenta">データの類似性</span>：事前学習データとターゲットデータの分布の類似度を評価</li>
+            <li><span class="marker-yellow">モデルサイズのトレードオフ</span>：大きなモデルは表現力が高いが、計算コストとメモリ使用量も増加</li>
+            <li><span class="marker-cyan">ライセンスと利用条件</span>：事前学習モデルの利用条件やライセンスを確認</li>
+          </ul>
+        </div>
+        
+        <h3 class="concept-title">パラメータ凍結と学習率の設定</h3>
+        
+        <p>ファインチューニングにおいて特に重要なのが、どの層を凍結（更新しない）し、どの学習率で更新するかという設定です：</p>
+        
+        <div class="flow-chart">
+          <div class="flow-step">
+            <h4>浅い層（入力に近い）</h4>
+            <p>より一般的な低レベル特徴を捉える<br>多くの場合凍結が有効</p>
+          </div>
+          <div class="flow-step">
+            <h4>中間層</h4>
+            <p>より抽象的な特徴を表現<br>タスク依存で判断</p>
+          </div>
+          <div class="flow-step">
+            <h4>深い層（出力に近い）</h4>
+            <p>タスク固有の特徴を捉える<br>通常は更新が必要</p>
+          </div>
+        </div>
+        
+        <h3 class="concept-title">バイアスと公平性の課題</h3>
+        
+        <p>事前学習モデルに含まれるバイアスがファインチューニング後も残る可能性があります：</p>
+        
+        <ul>
+          <li><span class="marker-cyan">データバイアスの継承</span>：事前学習データに含まれるバイアスが転移される可能性</li>
+          <li><span class="marker-magenta">表現の不均衡</span>：少数グループや希少事例に対する表現能力の低下</li>
+          <li><span class="marker-yellow">バイアス増幅</span>：ファインチューニングによって既存のバイアスが強化される可能性</li>
+          <li><span class="marker-cyan">公平性の評価</span>：転移学習後のモデルに対する多角的な公平性評価の必要性</li>
+        </ul>
+        
+        <h3 class="concept-title">実用化に向けた検討事項</h3>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-cogs"></i> 実装時の注意点</h4>
+          <ul>
+            <li><span class="marker-cyan">計算資源の確保</span>：GPUメモリなど、ファインチューニングに必要なリソースの確保</li>
+            <li><span class="marker-magenta">モデルの複雑さと推論コスト</span>：実運用環境での推論速度や計算コストの考慮</li>
+            <li><span class="marker-yellow">継続的な更新</span>：新しいデータやタスクに対応するための継続的な学習戦略</li>
+            <li><span class="marker-cyan">評価指標の選択</span>：転移学習の効果を適切に測定するための評価指標の選定</li>
+          </ul>
+        </div>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> 研究の最新動向</h3>
+          <p>転移学習とファインチューニングの課題に対処するため、<span class="marker-magenta">パラメータ効率的なファインチューニング</span>（Parameter-Efficient Fine-Tuning, PEFT）など、モデル全体を更新せずに少数のパラメータのみを調整する手法が注目されています。また、<span class="marker-yellow">プロンプトチューニング</span>（Prompt Tuning）や<span class="marker-cyan">LoRA</span>（Low-Rank Adaptation）などの手法も、大規模言語モデルのような巨大モデルを効率的に適応させるために研究されています。</p>
+        </div>
+      </section>
+      
+      <!-- 試験ポイントと要点まとめ -->
+      <section id="exam-points" class="section">
+        <h2 class="section-title"><i class="fas fa-graduation-cap"></i> G検定試験ポイントと要点まとめ</h2>
+        
+        <p>この項目の内容から、G検定で特に重要となるポイントと覚えておくべき要点をまとめます。</p>
+        
+        <div class="highlight-box">
+          <h3><i class="fas fa-check-circle"></i> 必ず押さえるべき定義と概念</h3>
+          
+          <div class="multi-column">
+            <ul>
+              <li><span class="marker-cyan">転移学習</span>：あるタスクで学習した知識を別のタスクに転用する技術</li>
+              <li><span class="marker-magenta">ファインチューニング</span>：事前学習済みモデルを目標タスクに適応させるために再学習する手法</li>
+              <li><span class="marker-yellow">Few-shot/One-shot/Zero-shot学習</span>：少数または無しのサンプルでの学習アプローチ</li>
+              <li><span class="marker-cyan">破壊的忘却</span>：ファインチューニング時に事前知識が失われる問題</li>
+              <li><span class="marker-magenta">自己教師あり学習</span>：ラベルなしデータから表現を学習する手法</li>
+              <li><span class="marker-yellow">ネガティブトランスファー</span>：転移学習が逆効果になるケース</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="exam-tips">
+          <h3><i class="fas fa-lightbulb"></i> 試験で問われやすいポイント</h3>
+          
+          <ol>
+            <li><span class="marker-cyan">転移学習の主なアプローチ（特徴抽出、モデル微調整）の区別と使い分け</span></li>
+            <li><span class="marker-magenta">ファインチューニングの基本的な手順と主要なパラメータ設定のポイント</span></li>
+            <li><span class="marker-yellow">転移学習が特に効果的なケースと条件</span></li>
+            <li><span class="marker-cyan">事前学習済みモデルの代表例とその特徴・用途</span></li>
+            <li><span class="marker-magenta">少数サンプル学習の各手法の違いと特徴</span></li>
+            <li><span class="marker-yellow">転移学習の主な技術的課題とその対策方法</span></li>
+          </ol>
+        </div>
+        
+        <div class="note-box">
+          <h4><i class="fas fa-exclamation-circle"></i> 転移学習とファインチューニングの対比</h4>
+          <table class="comparison-table">
+            <tr>
+              <th>観点</th>
+              <th>転移学習（広義）</th>
+              <th>ファインチューニング（狭義）</th>
+            </tr>
+            <tr>
+              <td>定義の範囲</td>
+              <td>知識を別タスクに転用する概念全般</td>
+              <td>事前学習モデルのパラメータを調整する具体的手法</td>
+            </tr>
+            <tr>
+              <td>手法の多様性</td>
+              <td>特徴抽出、ファインチューニングを含む多様な手法</td>
+              <td>モデルの重みを再学習する特定の方法</td>
+            </tr>
+            <tr>
+              <td>モデル変更</td>
+              <td>モデル構造の変更を含む場合もある</td>
+              <td>主に重みのみを更新し構造はほぼ維持</td>
+            </tr>
+            <tr>
+              <td>適用範囲</td>
+              <td>広範な知識転移アプローチ</td>
+              <td>主に深層学習モデルの調整に使用</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div class="summary-points">
+          <h3><i class="fas fa-book"></i> 重要性の理解</h3>
+          <p>G検定では、転移学習とファインチューニングが<span class="marker-cyan">現代のAI開発における中心的な技術</span>であることを理解しているかが問われます。特に、<span class="marker-magenta">大規模な事前学習済みモデル</span>の登場により、限られたデータや計算資源でも高性能なAIシステムを構築できるようになった点は重要です。また、<span class="marker-yellow">実務応用場面</span>での判断基準や<span class="marker-cyan">典型的な課題と対策</span>についても出題される可能性があります。</p>
+        </div>
+      </section>
+      
+      <!-- キーインサイト -->
+      <section id="key-insights" class="section">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i> Key Insights</h2>
+        
+        <div class="key-insights">
+          <div class="key-point">
+            <div class="key-point-number">1</div>
+            <h3>事前学習の威力</h3>
+            <p>事前学習モデルには、大規模データから学習した豊富な知識が凝縮されています。この知識は、特徴抽出能力やパターン認識能力として表現され、様々なタスクに転用できます。特に、<span class="marker-cyan">自己教師あり学習</span>によって獲得された表現は、ラベルなしデータからも有用な情報を抽出できる点が強みです。</p>
+          </div>
+          
+          <div class="key-point">
+            <div class="key-point-number">2</div>
+            <h3>効率と性能のバランス</h3>
+            <p>転移学習は「効率」と「性能」を両立させる技術です。ゼロから学習する場合と比較して、<span class="marker-magenta">少ないデータ量</span>、<span class="marker-yellow">短い学習時間</span>、<span class="marker-cyan">少ない計算リソース</span>で高い性能を実現できます。これは特に、リソースが限られた実務環境で重要です。</p>
+          </div>
+          
+          <div class="key-point">
+            <div class="key-point-number">3</div>
+            <h3>適応と特化のトレードオフ</h3>
+            <p>ファインチューニングでは、「汎用性を維持するか」「特定タスクに特化するか」というトレードオフが存在します。層の凍結範囲や学習率の設定によって、このバランスを調整できます。<span class="marker-magenta">破壊的忘却</span>を防ぎながら新しいタスクに適応させる技術が、応用の成否を分けます。</p>
+          </div>
+          
+          <div class="key-point">
+            <div class="key-point-number">4</div>
+            <h3>モデル利用の民主化</h3>
+            <p>転移学習とファインチューニングは、高度なAI技術の<span class="marker-yellow">民主化</span>に貢献しています。事前学習済みモデルが広く公開されることで、専門知識や大規模計算資源がなくても、最先端のAI技術を活用できるようになっています。これにより、ビジネスや社会におけるAI応用の幅が大きく広がっています。</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 用語集 -->
+      <section id="keywords" class="section">
+        <h2 class="section-title"><i class="fas fa-key"></i> 重要キーワード</h2>
+        
+        <div class="glossary">
+          <table>
+            <tr>
+              <th>キーワード</th>
+              <th>説明</th>
+            </tr>
+            <tr>
+              <td class="keyword-column">転移学習<br>(Transfer Learning)</td>
+              <td>あるタスク（ソースタスク）で獲得した知識や特徴を、別の関連するタスク（ターゲットタスク）に応用する機械学習の手法。既存の知識を活用することで、学習効率と性能を向上させる。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">ファインチューニング<br>(Fine-tuning)</td>
+              <td>事前学習済みのモデルのパラメータを、特定の目標タスクのデータを使って微調整する技術。通常、小さな学習率で再学習を行い、モデルを目標タスクに適応させる。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">事前学習済みモデル<br>(Pre-trained Model)</td>
+              <td>大規模なデータセットで事前に学習され、汎用的な特徴表現を獲得したモデル。これを出発点として、特定のタスクに転用・適応させる。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">Few-shot学習</td>
+              <td>非常に少数（数例〜数十例）のラベル付きデータからタスクを学習する手法。事前学習モデルの知識を活用して、少ないデータでも高い性能を実現する。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">One-shot学習</td>
+              <td>各クラスたった1例のみから学習を行う極端なケース。強力な事前知識と効率的な知識転移が必要。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">Zero-shot学習</td>
+              <td>訓練例なしで新しいタスクや未知のクラスに対応できる能力。モデルの汎化能力を極限まで高めた状態。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">自己教師あり学習<br>(Self-supervised Learning)</td>
+              <td>ラベルなしデータからデータ自体が持つ構造を利用して教師信号を自動生成し、有用な表現を学習する手法。事前学習の強力なアプローチとして広く利用される。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">半教師あり学習<br>(Semi-supervised Learning)</td>
+              <td>少量のラベル付きデータと大量のラベルなしデータを組み合わせて学習する手法。転移学習と組み合わせることで高い効果を発揮。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">破壊的忘却<br>(Catastrophic Forgetting)</td>
+              <td>新しいタスクを学習する際に、以前のタスクで獲得した知識を「忘れてしまう」現象。転移学習における主要な課題の一つ。</td>
+            </tr>
+            <tr>
+              <td class="keyword-column">ネガティブトランスファー<br>(Negative Transfer)</td>
+              <td>ソースタスクとターゲットタスクの関連性が低い場合に、知識の転移が逆効果になる現象。転移学習の適用判断において重要な考慮点。</td>
+            </tr>
+          </table>
+        </div>
+      </section>
+      
+      <!-- テイクホームメッセージ -->
+      <section id="take-home" class="section">
+        <h2 class="section-title"><i class="fas fa-home"></i> Take Home Message</h2>
+        
+        <div class="take-home">
+          <h2><i class="fas fa-quote-left"></i> 現代のAI開発の基盤技術</h2>
+          <p>転移学習とファインチューニングは、「車輪の再発明」を避け、既存の知識資産を最大限に活用するための技術です。大規模データによる事前学習と、少量データによる特定タスクへの適応を組み合わせることで、限られたリソースでも高性能なAIシステムを構築できます。これらの技術は、理論的に美しいだけでなく、実用的なAI開発において不可欠な存在となっています。</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+  
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>© 2024 G検定対策ノート | 転移学習・ファインチューニング</p>
+    </div>
+  </footer>
+
+  <script>
+    // サイドバーの開閉機能
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    // スクロールトップボタンの表示/非表示
+    const scrollTopBtn = document.querySelector('.scroll-top');
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('show');
+      } else {
+        scrollTopBtn.classList.remove('show');
+      }
+    });
+    
+    // スクロールトップボタンのクリックイベント
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // スムーススクロール
+    document.querySelectorAll('.toc-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        const offsetTop = targetElement.offsetTop;
+        
+        window.scrollTo({
+          top: offsetTop - 20,
+          behavior: 'smooth'
+        });
+        
+        // モバイル表示の場合はメニューを閉じる
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

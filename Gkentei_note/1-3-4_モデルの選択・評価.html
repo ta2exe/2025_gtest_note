@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-3-4 モデルの選択・評価</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    /* CMYK カラースキーム */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    #sidebar {
+      width: 20%;
+      background-color: var(--magenta);
+      color: var(--white);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cyan) rgba(255, 255, 255, 0.1);
+    }
+
+    /* カスタムスクロールバー */
+    #sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    #sidebar::-webkit-scrollbar-thumb {
+      background: var(--cyan);
+      border-radius: 4px;
+    }
+
+    #sidebar::-webkit-scrollbar-thumb:hover {
+      background: #00c0d0;
+    }
+
+    #sidebar-title {
+      font-family: 'Klee One', cursive;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      text-align: center;
+      color: var(--cyan);
+      border-bottom: 2px dotted var(--cyan);
+      padding-bottom: 0.5rem;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-menu li {
+      margin-bottom: 0.8rem;
+    }
+
+    .nav-menu a {
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .nav-menu a.active {
+      background-color: var(--cyan);
+      color: var(--key);
+    }
+
+    .nav-menu i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツ */
+    #main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .title-section {
+      text-align: center;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg, rgba(0, 216, 232, 0.1), rgba(255, 64, 160, 0.1));
+      border-radius: 15px;
+      position: relative;
+    }
+
+    .title-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+      border-radius: 15px;
+      opacity: 0.5;
+      z-index: -1;
+    }
+
+    h1 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2.5rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2rem;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta));
+      border-radius: 5px;
+    }
+
+    h3 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.5rem;
+      color: var(--magenta);
+      margin: 1.5rem 0 1rem 0;
+      display: flex;
+      align-items: center;
+    }
+
+    h3 i {
+      margin-right: 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    .overview {
+      background-color: rgba(255, 230, 0, 0.1);
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      border-left: 5px solid var(--yellow);
+    }
+
+    li {
+      margin-left: 1.5rem;
+      margin-bottom: 0.5rem;
+      list-style-position: inside;
+    }
+
+    .keyword {
+      font-weight: 700;
+      color: var(--key);
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      padding: 0 0.2rem;
+    }
+
+    /* ノート風デザイン */
+    .note-box {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .note-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 28px,
+        #E6E6E6 28px,
+        #E6E6E6 29px
+      );
+      border-radius: 10px;
+      z-index: -1;
+    }
+
+    /* 手書き風エリア */
+    .handwritten {
+      font-family: 'Klee One', cursive;
+      color: var(--dark-gray);
+      border: 2px dashed var(--yellow);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      position: relative;
+    }
+
+    .handwritten::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 30px;
+      width: 40px;
+      height: 20px;
+      background-color: white;
+      border-top: 2px dashed var(--yellow);
+      border-left: 2px dashed var(--yellow);
+      border-right: 2px dashed var(--yellow);
+      border-radius: 8px 8px 0 0;
+      z-index: -1;
+    }
+
+    /* 図解エリア */
+    .figure {
+      text-align: center;
+      margin: 2rem 0;
+      padding: 1rem;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .figure img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+    }
+
+    .figure-caption {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+    }
+
+    /* テーブル改善 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    th {
+      background-color: var(--cyan);
+      color: var(--white);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+
+    tr:hover {
+      background-color: rgba(255, 230, 0, 0.1);
+    }
+
+    /* 数式スタイル */
+    .mjx-chtml {
+      margin: 0.5rem 0 !important;
+    }
+
+    td .mjx-chtml {
+      display: inline-block;
+      white-space: normal;
+    }
+
+    /* 吹き出し */
+    .speech-bubble {
+      position: relative;
+      background-color: #f8f8f8;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 30px;
+      border-width: 15px 15px 0;
+      border-style: solid;
+      border-color: #f8f8f8 transparent;
+    }
+
+    /* フローチャート風 */
+    .flow-chart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 2rem 0;
+    }
+
+    .flow-item {
+      background-color: var(--white);
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      width: 80%;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-item::after {
+      content: '↓';
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+      color: var(--cyan);
+    }
+
+    .flow-item:last-child::after {
+      content: '';
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* レスポンシブデザイン */
+    @media (max-width: 992px) {
+      #sidebar {
+        width: 30%;
+      }
+
+      #main-content {
+        width: 70%;
+        margin-left: 30%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+
+      #sidebar-title {
+        margin-bottom: 1rem;
+      }
+
+      #main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 1rem;
+      }
+
+      .title-section {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.7rem;
+      }
+
+      h3 {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* スクロールトップボタン */
+    #scroll-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+    }
+
+    #scroll-top.visible {
+      opacity: 1;
+    }
+
+    #scroll-top i {
+      font-size: 1.5rem;
+    }
+
+    /* 用語集のスタイル改善 */
+    .glossary {
+      background-color: rgba(0, 216, 232, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .glossary h3 {
+      margin-top: 0;
+      color: var(--key);
+      border-bottom: 2px solid var(--cyan);
+      padding-bottom: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .glossary dt {
+      font-weight: 700;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      color: var(--magenta);
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .glossary dt::before {
+      content: '•';
+      color: var(--cyan);
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+      line-height: 1;
+    }
+
+    .glossary dd {
+      margin-left: 1.5rem;
+      margin-bottom: 0.7rem;
+      padding-left: 0.5rem;
+      border-left: 2px dotted var(--yellow);
+    }
+
+    /* スクロールトップボタン改善 */
+    #scrollToTop {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--magenta);
+      color: var(--white);
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      z-index: 999;
+      opacity: 0.9;
+      overflow: hidden;
+    }
+
+    #scrollToTop::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #scrollToTop:hover {
+      transform: translateY(-3px);
+      background-color: var(--cyan);
+      opacity: 1;
+    }
+
+    #scrollToTop:hover::before {
+      opacity: 1;
+    }
+
+    #scrollToTop i {
+      position: relative;
+      z-index: 2;
+      transition: transform 0.3s ease;
+    }
+
+    #scrollToTop:hover i {
+      transform: translateY(-2px);
+    }
+
+    /* バイアス・バリアンストレードオフの図解 */
+    .figure {
+      text-align: center;
+      margin: 2rem 0;
+      padding: 1rem;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <div id="sidebar">
+    <div id="sidebar-title">G検定ノート</div>
+    <ul class="nav-menu">
+      <li><a href="#intro"><i class="fas fa-info-circle"></i>はじめに</a></li>
+      <li><a href="#objectives"><i class="fas fa-bullseye"></i>学習目標</a></li>
+      <li><a href="#keywords"><i class="fas fa-key"></i>キーワード</a></li>
+      <li><a href="#model-selection"><i class="fas fa-clipboard-check"></i>モデル選択基準</a></li>
+      <li><a href="#training-generalization"><i class="fas fa-balance-scale"></i>訓練誤差と汎化誤差</a></li>
+      <li><a href="#overfitting"><i class="fas fa-exclamation-triangle"></i>過学習と対策</a></li>
+      <li><a href="#evaluation-methods"><i class="fas fa-chart-bar"></i>評価手法</a></li>
+      <li><a href="#evaluation-metrics-classification"><i class="fas fa-table"></i>評価指標（分類）</a></li>
+      <li><a href="#evaluation-metrics-regression"><i class="fas fa-ruler"></i>評価指標（回帰）</a></li>
+      <li><a href="#model-selection-in-practice"><i class="fas fa-code-branch"></i>モデル選択の実際</a></li>
+      <li><a href="#summary"><i class="fas fa-check-double"></i>まとめと重要ポイント</a></li>
+    </ul>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div id="main-content">
+    <!-- タイトルセクション -->
+    <div class="title-section">
+      <h1>1-3-4 モデルの選択・評価</h1>
+      <p>機械学習モデルの選び方と性能評価のポイント</p>
+    </div>
+
+    <!-- はじめに -->
+    <section id="intro" class="section">
+      <h2>はじめに</h2>
+      <p>機械学習プロジェクトを成功させるためには、適切なモデル選択と正確な評価が不可欠です。「どのモデルを選ぶべきか？」「そのモデルの性能は本当に良いのか？」という問いに答えるためには、体系的なアプローチが必要です。</p>
+      
+      <div class="note-box">
+        <p>モデル選択と評価のプロセスは、データサイエンティストの腕の見せどころです。単に精度の高いモデルを構築するだけでなく、そのモデルが実際の運用環境でどれだけ役立つかを予測するための重要なステップです。</p>
+      </div>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-lightbulb"></i> <strong>ポイント</strong></p>
+        <p>モデル選択と評価は密接に関連しています。良いモデルを選ぶためには適切な評価方法が必要であり、評価方法を選ぶためにはモデルの特性を理解する必要があります。</p>
+      </div>
+    </section>
+
+    <!-- 学習目標 -->
+    <section id="objectives" class="section">
+      <h2>学習目標</h2>
+      <div class="overview">
+        <ul>
+          <li>基本的なモデルの選択基準、評価方法並びに評価指標を理解する</li>
+          <li>訓練誤差と汎化誤差の違いを説明できる</li>
+          <li>データの量や目的に応じて、汎化性能を推定する検証方法を適切に選択できる</li>
+          <li>汎化性能の悪化につながる代表的な現象を列挙・説明できる</li>
+          <li>モデルの適用環境、ビジネス課題、並びに目的に応じて、適切な評価指標・モデルを選択できる</li>
+          <li>モデルの複雑さを上げることによるメリット・デメリットを理解した上で、モデル選択の指針を説明できる</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- キーワード -->
+    <section id="keywords" class="section">
+      <h2>キーワード</h2>
+      <div class="overview">
+        <p>
+          <span class="keyword">k-分割交差検証</span>
+          <span class="keyword">MSE・RMSE・MAE</span>
+          <span class="keyword">ROC 曲線・AUC</span>
+          <span class="keyword">赤池情報量規準 (AIC)</span>
+          <span class="keyword">オッカムの剃刀</span>
+          <span class="keyword">過学習</span>
+          <span class="keyword">交差検証</span>
+          <span class="keyword">偽陽性・偽陰性</span>
+          <span class="keyword">混同行列</span>
+          <span class="keyword">正解率・適合率・再現率・F値</span>
+          <span class="keyword">汎化性能</span>
+          <span class="keyword">ベイズ情報量規準 (BIC)</span>
+          <span class="keyword">ホールドアウト検証</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- モデルの選択基準 -->
+    <section id="model-selection" class="section">
+      <h2>モデル選択基準</h2>
+      
+      <h3><i class="fas fa-check-circle"></i> モデル選択とは</h3>
+      <p>モデル選択とは、与えられたデータや問題に対して最適な機械学習モデルを選ぶプロセスです。これには、アルゴリズムの種類（線形回帰、決定木、ニューラルネットワークなど）の選択だけでなく、選んだアルゴリズムの複雑さ（パラメータ数や階層の深さなど）の決定も含まれます。</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-list-ul"></i> <strong>モデル選択の主な基準</strong></p>
+        <ul>
+          <li><strong>予測性能</strong>：未知のデータに対する予測精度</li>
+          <li><strong>解釈可能性</strong>：モデルの判断プロセスがどれだけ理解しやすいか</li>
+          <li><strong>計算効率</strong>：学習や予測にかかる時間とリソース</li>
+          <li><strong>実装の容易さ</strong>：モデルを実装・保守する際の難易度</li>
+          <li><strong>データ要件</strong>：必要なデータ量や品質</li>
+        </ul>
+      </div>
+      
+      <h3><i class="fas fa-balance-scale"></i> バイアス・バリアンストレードオフ</h3>
+      <p>モデル選択において重要な概念が「バイアス・バリアンストレードオフ」です。これは、モデルの複雑さと汎化性能の関係を示すものです。</p>
+      
+      <div class="figure">
+        <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景と軸 -->
+          <rect width="500" height="300" fill="white" />
+          <line x1="50" y1="250" x2="450" y2="250" stroke="black" stroke-width="2" />
+          <line x1="50" y1="50" x2="50" y2="250" stroke="black" stroke-width="2" />
+          
+          <!-- 軸ラベル -->
+          <text x="250" y="290" text-anchor="middle" font-family="sans-serif" font-size="14">モデルの複雑さ</text>
+          <text x="20" y="150" text-anchor="middle" font-family="sans-serif" font-size="14" transform="rotate(-90, 20, 150)">誤差</text>
+          
+          <!-- バイアス曲線 -->
+          <path d="M 50,200 Q 150,150 250,100 T 450,50" stroke="var(--cyan)" stroke-width="3" fill="none" />
+          <text x="450" y="45" text-anchor="end" font-family="sans-serif" font-size="12" fill="var(--cyan)" font-weight="bold">バイアス</text>
+          
+          <!-- バリアンス曲線 -->
+          <path d="M 50,50 Q 150,100 250,150 T 450,200" stroke="var(--magenta)" stroke-width="3" fill="none" />
+          <text x="450" y="205" text-anchor="end" font-family="sans-serif" font-size="12" fill="var(--magenta)" font-weight="bold">バリアンス</text>
+          
+          <!-- 全体の誤差曲線 -->
+          <path d="M 50,150 Q 90,130 150,120 Q 200,115 250,120 Q 300,130 350,145 Q 400,170 450,210" stroke="var(--key)" stroke-width="3" fill="none" />
+          <text x="450" y="230" text-anchor="end" font-family="sans-serif" font-size="12" fill="var(--key)" font-weight="bold">総誤差</text>
+          
+          <!-- 最適点 -->
+          <circle cx="250" cy="120" r="5" fill="var(--yellow)" stroke="black" />
+          <text x="265" y="110" font-family="sans-serif" font-size="12" font-weight="bold">最適点</text>
+          
+          <!-- 領域ラベル -->
+          <text x="100" y="80" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#666">過小適合領域</text>
+          <text x="400" y="80" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#666">過学習領域</text>
+        </svg>
+        <p class="figure-caption">バイアス・バリアンストレードオフとモデル複雑性の関係</p>
+      </div>
+      
+      <div class="note-box">
+        <p><strong>バイアス（偏り）</strong>：モデルが現実の複雑な関係を単純化しすぎることによる誤差。単純なモデルほどバイアスが高くなりがちです。</p>
+        <p><strong>バリアンス（分散）</strong>：訓練データの小さな変化に対するモデルの敏感さ。複雑なモデルほどバリアンスが高くなりがちです。</p>
+      </div>
+      
+      <p>理想的なモデルは、バイアスとバリアンスのバランスが取れた点（上図の最適点）にあります。ここでは、訓練データへの過度な適合（過学習）も、データのパターンを捉えきれていない状態（過小適合）も避けられています。</p>
+      
+      <div class="speech-bubble">
+        <p>実務では、単一の「最も良いモデル」を探すのではなく、複数の候補モデルを比較検討することが一般的です。また、最終的なモデル選択には、アプリケーションの要件や制約条件も考慮に入れる必要があります。</p>
+      </div>
+    </section>
+
+    <!-- 訓練誤差と汎化誤差 -->
+    <section id="training-generalization" class="section">
+      <h2>訓練誤差と汎化誤差</h2>
+      
+      <h3><i class="fas fa-graduation-cap"></i> 2つの誤差の定義</h3>
+      <p>機械学習モデルの性能を評価する際、「訓練誤差」と「汎化誤差」という2つの重要な指標があります。</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-exclamation-circle"></i> <strong>重要な定義</strong></p>
+        <ul>
+          <li><strong>訓練誤差（Training Error）</strong>：モデルが訓練データに対して示す誤差。モデルが学習に使用したデータをどれだけ正確に予測できるかを示します。</li>
+          <li><strong>汎化誤差（Generalization Error）</strong>：モデルが未知のデータ（訓練に使用していないデータ）に対して示す誤差。実際の運用環境でモデルがどれだけ正確に予測できるかを示します。</li>
+        </ul>
+      </div>
+      
+      <p>機械学習の真の目標は、<strong>汎化誤差を最小化すること</strong>です。なぜなら、実際の運用では常に新しいデータに対して予測を行うからです。しかし、汎化誤差は直接観測できないため、訓練誤差とテストデータでの誤差を通じて推定します。</p>
+      
+      <h3><i class="fas fa-arrow-right"></i> 訓練誤差と汎化誤差の関係</h3>
+      
+      <div class="figure">
+        <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景と軸 -->
+          <rect width="500" height="300" fill="white" />
+          <line x1="50" y1="250" x2="450" y2="250" stroke="black" stroke-width="2" />
+          <line x1="50" y1="50" x2="50" y2="250" stroke="black" stroke-width="2" />
+          
+          <!-- 軸ラベル -->
+          <text x="250" y="290" text-anchor="middle" font-family="sans-serif" font-size="14">モデルの複雑さ / 訓練時間</text>
+          <text x="20" y="150" text-anchor="middle" font-family="sans-serif" font-size="14" transform="rotate(-90, 20, 150)">誤差</text>
+          
+          <!-- 訓練誤差曲線 -->
+          <path d="M 50,200 Q 150,180 250,150 T 450,50" stroke="var(--cyan)" stroke-width="3" fill="none" />
+          <text x="450" y="45" text-anchor="end" font-family="sans-serif" font-size="12" fill="var(--cyan)" font-weight="bold">訓練誤差</text>
+          
+          <!-- 汎化誤差曲線 -->
+          <path d="M 50,220 Q 120,190 200,150 Q 280,130 350,140 Q 400,160 450,210" stroke="var(--magenta)" stroke-width="3" fill="none" />
+          <text x="450" y="215" text-anchor="end" font-family="sans-serif" font-size="12" fill="var(--magenta)" font-weight="bold">汎化誤差</text>
+          
+          <!-- 最適点 -->
+          <circle cx="280" cy="130" r="5" fill="var(--yellow)" stroke="black" />
+          <text x="295" y="120" font-family="sans-serif" font-size="12" font-weight="bold">最適点</text>
+          
+          <!-- 区域マーク -->
+          <text x="150" y="80" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#666">過小適合領域</text>
+          <line x1="220" y1="75" x2="220" y2="250" stroke="#666" stroke-width="1" stroke-dasharray="5,5" />
+          <text x="370" y="80" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#666">過学習領域</text>
+          <line x1="350" y1="75" x2="350" y2="250" stroke="#666" stroke-width="1" stroke-dasharray="5,5" />
+        </svg>
+        <p class="figure-caption">モデル複雑性に対する訓練誤差と汎化誤差の変化。汎化誤差が最小になる点が最適なモデル複雑性を示します。</p>
+      </div>
+      
+      <div class="note-box">
+        <p>モデルの複雑さや訓練時間を増やすにつれて：</p>
+        <ul>
+          <li><strong>訓練誤差</strong>は通常、単調に減少します（モデルが訓練データにより適合するため）。</li>
+          <li><strong>汎化誤差</strong>は最初は減少しますが、ある点から再び増加し始めます（過学習の始まり）。</li>
+        </ul>
+        <p>最適なモデルは、汎化誤差が最小となる点（上図の最適点）にあります。</p>
+      </div>
+      
+      <h3><i class="fas fa-search"></i> 汎化性能の評価方法</h3>
+      <p>汎化誤差を推定するためのいくつかの方法があります：</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-check-square"></i> <strong>主な評価方法</strong></p>
+        <ul>
+          <li><strong>ホールドアウト検証（Hold-out Validation）</strong>：データを訓練セットとテストセットに分割し、テストセットでモデルを評価します。</li>
+          <li><strong>k分割交差検証（k-fold Cross-Validation）</strong>：データをk個のフォルドに分け、各フォルドを順番にテストセットとして使用し、残りを訓練に使います。</li>
+          <li><strong>Leave-One-Out交差検証（LOOCV）</strong>：n個のデータポイントがある場合、n-1個で訓練してn回検証を行います。</li>
+          <li><strong>情報量規準</strong>：モデルの複雑さとデータへの適合度のバランスを評価します。
+            <ul>
+              <li><strong>AIC（赤池情報量規準）</strong>：\( AIC = -2\ln(L) + 2k \)<br>
+                <small>ここで、\(L\)は最大尤度、\(k\)はモデルのパラメータ数</small>
+              </li>
+              <li><strong>BIC（ベイズ情報量規準）</strong>：\( BIC = -2\ln(L) + k\ln(n) \)<br>
+                <small>ここで、\(L\)は最大尤度、\(k\)はパラメータ数、\(n\)はサンプルサイズ</small>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="speech-bubble">
+        <p>汎化性能の評価において最も重要なのは、<strong>テストデータが訓練プロセスに一切影響を与えない</strong>ようにすることです。この原則に従わないと「データ漏洩（Data Leakage）」が発生し、汎化性能を過大評価してしまう危険性があります。</p>
+      </div>
+    </section>
+
+    <!-- 過学習と対策 -->
+    <section id="overfitting" class="section">
+      <h2>過学習と対策</h2>
+      
+      <h3><i class="fas fa-exclamation-triangle"></i> 過学習とは</h3>
+      <p>過学習（Overfitting）は、モデルが訓練データに過度に適合し、その特定のデータセットの特徴やノイズまで学習してしまう現象です。その結果、未知のデータに対する汎化性能が低下します。</p>
+      
+      <div class="figure">
+        <svg width="450" height="250" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景 -->
+          <rect width="450" height="250" fill="white" />
+          
+          <!-- グリッド線 -->
+          <g stroke="#eee" stroke-width="1">
+            <line x1="50" y1="50" x2="400" y2="50" />
+            <line x1="50" y1="100" x2="400" y2="100" />
+            <line x1="50" y1="150" x2="400" y2="150" />
+            <line x1="50" y1="200" x2="400" y2="200" />
+            <line x1="100" y1="50" x2="100" y2="200" />
+            <line x1="150" y1="50" x2="150" y2="200" />
+            <line x1="200" y1="50" x2="200" y2="200" />
+            <line x1="250" y1="50" x2="250" y2="200" />
+            <line x1="300" y1="50" x2="300" y2="200" />
+            <line x1="350" y1="50" x2="350" y2="200" />
+          </g>
+          
+          <!-- 軸 -->
+          <line x1="50" y1="200" x2="400" y2="200" stroke="black" stroke-width="2" />
+          <line x1="50" y1="50" x2="50" y2="200" stroke="black" stroke-width="2" />
+          
+          <!-- データポイント -->
+          <circle cx="80" cy="170" r="4" fill="var(--magenta)" />
+          <circle cx="120" cy="150" r="4" fill="var(--magenta)" />
+          <circle cx="160" cy="130" r="4" fill="var(--magenta)" />
+          <circle cx="200" cy="140" r="4" fill="var(--magenta)" />
+          <circle cx="240" cy="120" r="4" fill="var(--magenta)" />
+          <circle cx="280" cy="140" r="4" fill="var(--magenta)" />
+          <circle cx="320" cy="110" r="4" fill="var(--magenta)" />
+          <circle cx="360" cy="90" r="4" fill="var(--magenta)" />
+          
+          <!-- 単純なモデル（過小適合） -->
+          <path d="M 50,180 L 400,100" stroke="#666" stroke-width="2" fill="none" />
+          <text x="200" y="230" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#666">過小適合</text>
+          
+          <!-- 適切なモデル -->
+          <path d="M 50,180 Q 150,160 250,120 T 400,80" stroke="var(--cyan)" stroke-width="2" fill="none" />
+          <text x="200" y="215" text-anchor="middle" font-family="sans-serif" font-size="12" fill="var(--cyan)">適切なモデル</text>
+          
+          <!-- 過学習モデル -->
+          <path d="M 50,180 Q 60,180 70,175 Q 80,170 90,165 Q 100,160 110,155 Q 120,150 130,145 Q 140,140 150,135 Q 160,130 170,130 Q 180,130 190,135 Q 200,140 210,135 Q 220,130 230,125 Q 240,120 250,125 Q 260,130 270,135 Q 280,140 290,130 Q 300,120 310,115 Q 320,110 330,105 Q 340,100 350,95 Q 360,90 370,85 Q 380,80 390,80 L 400,80" stroke="var(--magenta)" stroke-width="2" fill="none" />
+          <text x="200" y="240" text-anchor="middle" font-family="sans-serif" font-size="12" fill="var(--magenta)">過学習</text>
+          
+          <!-- 数式プレースホルダー -->
+          <foreignObject x="50" y="10" width="350" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:12px; text-align:center;">
+              過学習の場合: \( \text{訓練誤差} \ll \text{汎化誤差} \)
+            </div>
+          </foreignObject>
+        </svg>
+        <p class="figure-caption">過小適合、適切なモデル、過学習の違い。過学習モデルは訓練データに過度に適合し、未知データへの汎化性能が低下します。</p>
+      </div>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-exclamation-circle"></i> <strong>過学習の兆候</strong></p>
+        <ul>
+          <li>訓練データに対する誤差が非常に小さい</li>
+          <li>検証/テストデータに対する誤差が訓練誤差よりも著しく大きい</li>
+          <li>検証誤差がある時点から増加し始める</li>
+          <li>モデルが訓練データの些細な特徴やノイズまで捉えている</li>
+        </ul>
+      </div>
+
+        <!-- 画像の説明をいれる --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-3-4_01.png" alt="過学習のイメージ">
+          <figcaption>過学習のイメージ</figcaption>
+        </div>      
+
+
+
+      <h3><i class="fas fa-shield-alt"></i> 過学習への対策</h3>
+      <p>過学習を防ぐ、または軽減するためのいくつかの方法があります：</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-tools"></i> <strong>主な対策方法</strong></p>
+        <ul>
+          <li><strong>より多くのデータを収集</strong>：訓練データが増えれば、モデルはより一般的なパターンを学習しやすくなります。</li>
+          <li><strong>モデルの複雑さを制限</strong>：パラメータ数の削減、層の削減、特徴量の削減など。</li>
+          <li><strong>正則化（Regularization）</strong>：L1正則化（Lasso）やL2正則化（Ridge）などを用いてモデルのパラメータにペナルティを課します。
+            <ul>
+              <li>L1正則化: \( \lambda \sum_{i=1}^{n} |w_i| \)</li>
+              <li>L2正則化: \( \lambda \sum_{i=1}^{n} w_i^2 \)</li>
+            </ul>
+          </li>
+          <li><strong>ドロップアウト（Dropout）</strong>：ニューラルネットワークの訓練中にランダムにノードを無効化します。</li>
+          <li><strong>早期停止（Early Stopping）</strong>：検証誤差が増加し始めた時点で訓練を停止します。</li>
+          <li><strong>データ拡張（Data Augmentation）</strong>：画像の回転、反転などで訓練データのバリエーションを増やします。</li>
+          <li><strong>アンサンブル学習</strong>：複数のモデルの予測を組み合わせて、より安定した予測を行います。</li>
+        </ul>
+      </div>
+      
+      <h3><i class="fas fa-balance-scale-right"></i> 正則化手法の詳細</h3>
+      <p>正則化は過学習を防ぐための重要なテクニックです。モデルの複雑さにペナルティを与えることで、より単純なモデルが選ばれやすくなります。</p>
+      
+      <div class="note-box">
+        <p>主な正則化手法：</p>
+        <ul>
+          <li><strong>L1正則化（Lasso回帰）</strong>：パラメータの絶対値の和にペナルティを課します。特徴選択の効果があり、多くのパラメータを0にする傾向があります。</li>
+          <li><strong>L2正則化（Ridge回帰）</strong>：パラメータの二乗和にペナルティを課します。すべてのパラメータを小さくする効果があります。</li>
+          <li><strong>ElasticNet</strong>：L1とL2正則化を組み合わせたものです。</li>
+          <li><strong>ドロップアウト</strong>：ニューラルネットワークの各層で、ランダムに選んだノードを無効化します。</li>
+        </ul>
+      </div>
+      
+      <div class="figure">
+        <svg width="450" height="200" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景 -->
+          <rect width="450" height="200" fill="white" />
+          
+          <!-- L1正則化 -->
+          <rect x="50" y="20" width="150" height="150" fill="#f8f8f8" stroke="#ddd" />
+          <text x="125" y="45" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">L1正則化</text>
+          <circle cx="125" cy="100" r="60" stroke="var(--magenta)" stroke-width="2" fill="none" />
+          <line x1="65" y1="100" x2="185" y2="100" stroke="var(--magenta)" stroke-width="2" />
+          <line x1="125" y1="40" x2="125" y2="160" stroke="var(--magenta)" stroke-width="2" />
+          
+          <!-- L2正則化 -->
+          <rect x="250" y="20" width="150" height="150" fill="#f8f8f8" stroke="#ddd" />
+          <text x="325" y="45" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">L2正則化</text>
+          <circle cx="325" cy="100" r="60" stroke="var(--cyan)" stroke-width="2" fill="none" />
+          
+          <!-- キャプション -->
+          <text x="125" y="190" text-anchor="middle" font-family="sans-serif" font-size="12">角を持つ形状（特徴選択）</text>
+          <text x="325" y="190" text-anchor="middle" font-family="sans-serif" font-size="12">滑らかな形状（全体的な縮小）</text>
+        </svg>
+        <p class="figure-caption">L1正則化とL2正則化のペナルティ形状の違い</p>
+      </div>
+        <!-- 画像の説明をいれる --> 
+        <div class="image-container">
+          <img src="img/Gimage_1-3-4_02.png" alt="L1正則化とL2正則化の違い">
+          <figcaption>L1正則化とL2正則化の違い</figcaption>
+        </div>            
+      <div class="speech-bubble">
+        <p>過学習対策は「魔法の杖」ではなく、データの性質やモデルの特性に応じて適切に選択する必要があります。また、複数の対策を組み合わせることで、より効果的に過学習を防げることが多いです。</p>
+      </div>
+    </section>
+
+    <!-- 評価手法 -->
+    <section id="evaluation-methods" class="section">
+      <h2>評価手法</h2>
+      
+      <h3><i class="fas fa-random"></i> データ分割手法</h3>
+      <p>モデルの評価には、適切なデータ分割が不可欠です。以下に代表的なデータ分割手法を示します。</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-divide"></i> <strong>主なデータ分割手法</strong></p>
+        <ul>
+          <li><strong>ホールドアウト法（Hold-out Validation）</strong>：データを訓練セット（通常60-80%）とテストセット（20-40%）に分割します。シンプルですが、テストデータの特性に結果が左右されることがあります。</li>
+          <li><strong>訓練/検証/テスト分割</strong>：データを訓練、検証、テストの3つのセットに分割します。検証セットはモデル選択やハイパーパラメータ調整に使用し、テストセットは最終評価にのみ使用します。</li>
+          <li><strong>k分割交差検証（k-fold Cross-Validation）</strong>：データをk個の等しいサイズのフォルドに分割し、各フォルドを順番にテストセットとして使用します。通常、k=5または10を使用します。</li>
+          <li><strong>層化k分割交差検証（Stratified k-fold CV）</strong>：各フォルドでクラス分布を元のデータセットと同じにする交差検証です。不均衡なクラスを持つデータセットに有効です。</li>
+          <li><strong>Leave-One-Out交差検証（LOOCV）</strong>：n個のデータポイントがある場合、n-1個で訓練し1個でテストするプロセスをn回繰り返します。データが少ない場合に有用ですが、計算コストが高いです。</li>
+          <li><strong>時系列分割（Time Series Split）</strong>：時系列データ用の特殊な分割手法で、未来のデータをテストに、過去のデータを訓練に使用します。</li>
+        </ul>
+      </div>
+      
+      <div class="figure">
+        <svg width="500" height="320" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景 -->
+          <rect width="500" height="320" fill="white" />
+          
+          <!-- タイトル -->
+          <text x="250" y="30" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold">k分割交差検証（k=5）</text>
+          
+          <!-- フォールド1 -->
+          <g transform="translate(50, 60)">
+            <rect width="80" height="30" fill="var(--magenta)" />
+            <rect x="80" width="320" height="30" fill="var(--cyan)" />
+            <text x="40" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">テスト</text>
+            <text x="240" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="-30" y="20" text-anchor="middle" font-family="sans-serif" font-size="12">Fold 1</text>
+          </g>
+          
+          <!-- フォールド2 -->
+          <g transform="translate(50, 110)">
+            <rect width="80" height="30" fill="var(--cyan)" />
+            <rect x="80" width="80" height="30" fill="var(--magenta)" />
+            <rect x="160" width="240" height="30" fill="var(--cyan)" />
+            <text x="120" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">テスト</text>
+            <text x="40" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="280" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="-30" y="20" text-anchor="middle" font-family="sans-serif" font-size="12">Fold 2</text>
+          </g>
+          
+          <!-- フォールド3 -->
+          <g transform="translate(50, 160)">
+            <rect width="160" height="30" fill="var(--cyan)" />
+            <rect x="160" width="80" height="30" fill="var(--magenta)" />
+            <rect x="240" width="160" height="30" fill="var(--cyan)" />
+            <text x="200" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">テスト</text>
+            <text x="80" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="320" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="-30" y="20" text-anchor="middle" font-family="sans-serif" font-size="12">Fold 3</text>
+          </g>
+          
+          <!-- フォールド4 -->
+          <g transform="translate(50, 210)">
+            <rect width="240" height="30" fill="var(--cyan)" />
+            <rect x="240" width="80" height="30" fill="var(--magenta)" />
+            <rect x="320" width="80" height="30" fill="var(--cyan)" />
+            <text x="280" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">テスト</text>
+            <text x="120" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="360" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="-30" y="20" text-anchor="middle" font-family="sans-serif" font-size="12">Fold 4</text>
+          </g>
+          
+          <!-- フォールド5 -->
+          <g transform="translate(50, 260)">
+            <rect width="320" height="30" fill="var(--cyan)" />
+            <rect x="320" width="80" height="30" fill="var(--magenta)" />
+            <text x="360" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">テスト</text>
+            <text x="160" y="20" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">訓練</text>
+            <text x="-30" y="20" text-anchor="middle" font-family="sans-serif" font-size="12">Fold 5</text>
+          </g>
+          
+          <!-- 説明 -->
+          <text x="250" y="310" text-anchor="middle" font-family="sans-serif" font-size="12">最終的な性能評価は5回の評価の平均値</text>
+        </svg>
+        <p class="figure-caption">5分割交差検証の図解</p>
+      </div>
+      
+      <div class="note-box">
+        <p><i class="fas fa-exclamation-triangle"></i> <strong>データ漏洩（Data Leakage）に注意</strong></p>
+        <p>テストデータが訓練プロセス全体から隔離されていることが極めて重要です。例えば、特徴量選択やスケーリングなどの前処理も、テストデータを見ずに訓練データのみで行う必要があります。そうしないと、モデルの汎化性能を過大評価してしまいます。</p>
+      </div>
+      
+      <h3><i class="fas fa-cogs"></i> 検証方法の選択基準</h3>
+      <p>どの検証方法を選ぶべきかは、データの特性や問題の性質によって異なります。</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-check-circle"></i> <strong>検証方法の選択ガイド</strong></p>
+        <ul>
+          <li><strong>データ量が多い場合</strong>：単純なホールドアウト法でも安定した評価が得られます。</li>
+          <li><strong>データ量が少ない場合</strong>：k分割交差検証またはLOOCVを使用すると、限られたデータを効率的に活用できます。</li>
+          <li><strong>クラス不均衡がある場合</strong>：層化k分割交差検証を使用すると、各フォルドで適切なクラス分布を維持できます。</li>
+          <li><strong>時系列データの場合</strong>：時系列分割を使用し、過去のデータで訓練して未来のデータで予測するという実際の使用状況をシミュレートします。</li>
+          <li><strong>ハイパーパラメータ調整が必要な場合</strong>：訓練/検証/テスト分割を使用し、最終評価前にモデルを調整できます。</li>
+        </ul>
+      </div>
+      
+      <div class="speech-bubble">
+        <p>評価手法の選択は、単なる技術的な決定ではなく、モデルの実際の使用状況や目的に合わせる必要があります。例えば、時間的に変化するデータでは、過去から未来への予測パフォーマンスを正確に評価できる手法を選ぶことが重要です。</p>
+      </div>
+    </section>
+
+    <!-- 評価指標（分類問題） -->
+    <section id="evaluation-metrics-classification" class="section">
+      <h2>評価指標（分類問題）</h2>
+      
+      <h3><i class="fas fa-table"></i> 混同行列（Confusion Matrix）</h3>
+      <p>分類問題の評価には、混同行列（Confusion Matrix）が基本となります。これは予測されたクラスと実際のクラスの関係を表形式で示したものです。</p>
+      
+      <div class="figure">
+        <svg width="400" height="320" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景 -->
+          <rect width="400" height="320" fill="white" />
+          
+          <!-- タイトル -->
+          <text x="200" y="30" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold">混同行列（2クラスの場合）</text>
+          
+          <!-- 混同行列の枠 -->
+          <rect x="100" y="60" width="200" height="200" fill="#f0f0f0" stroke="#666" />
+          <line x1="100" y1="160" x2="300" y2="160" stroke="#666" stroke-width="1" />
+          <line x1="200" y1="60" x2="200" y2="260" stroke="#666" stroke-width="1" />
+          
+          <!-- ラベル -->
+          <text x="50" y="110" text-anchor="end" font-family="sans-serif" font-size="14">実際のクラス</text>
+          <text x="70" y="130" text-anchor="end" font-family="sans-serif" font-size="14" font-weight="bold">正（Positive）</text>
+          <text x="70" y="210" text-anchor="end" font-family="sans-serif" font-size="14" font-weight="bold">負（Negative）</text>
+          
+          <text x="200" y="50" text-anchor="middle" font-family="sans-serif" font-size="14">予測されたクラス</text>
+          <text x="150" y="80" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">正（Positive）</text>
+          <text x="250" y="80" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">負（Negative）</text>
+          
+          <!-- セル内容 -->
+          <text x="150" y="130" text-anchor="middle" font-family="sans-serif" font-size="14">真陽性（TP）</text>
+          <text x="250" y="130" text-anchor="middle" font-family="sans-serif" font-size="14">偽陰性（FN）</text>
+          <text x="150" y="210" text-anchor="middle" font-family="sans-serif" font-size="14">偽陽性（FP）</text>
+          <text x="250" y="210" text-anchor="middle" font-family="sans-serif" font-size="14">真陰性（TN）</text>
+          
+          <!-- 説明 -->
+          <text x="200" y="290" text-anchor="middle" font-family="sans-serif" font-size="12">TP: 真陽性、FP: 偽陽性、TN: 真陰性、FN: 偽陰性</text>
+        </svg>
+        <p class="figure-caption">2クラス分類の混同行列</p>
+      </div>
+
+      <!-- 画像の説明をいれる --> 
+      <div class="image-container">
+        <img src="img/Gimage_1-3-4_03.png" alt="混同行列">
+        <figcaption>
+          混同行列は、分類モデルがどれだけ正しく予測できているかを示す図です。茶色の猫🐈は「実際に陽性」、灰色の猫🐈‍⬛は「実際に陰性」を表しています。頭に🍩を乗せている猫は「陽性と予測された」、☕を乗せている猫は「陰性と予測された」ことを示しています。4つの組み合わせによって、モデルの正解・間違いをわかりやすく視覚化しています。</figcaption>         
+          
+      </div>
+
+      <div class="handwritten">
+        <p><i class="fas fa-info-circle"></i> <strong>混同行列の要素</strong></p>
+        <ul>
+          <li><strong>真陽性（True Positive, TP）</strong>：正のクラスを正しく正と予測</li>
+          <li><strong>偽陽性（False Positive, FP）</strong>：負のクラスを誤って正と予測（第1種の誤り）</li>
+          <li><strong>真陰性（True Negative, TN）</strong>：負のクラスを正しく負と予測</li>
+          <li><strong>偽陰性（False Negative, FN）</strong>：正のクラスを誤って負と予測（第2種の誤り）</li>
+        </ul>
+      </div>
+      
+      <h3><i class="fas fa-chart-line"></i> 主な分類評価指標</h3>
+      <p>混同行列から計算される主な評価指標を以下に示します。</p>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>指標</th>
+              <th>数式</th>
+              <th>説明</th>
+              <th>用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>正解率<br>（Accuracy）</td>
+              <td>\( \frac{TP + TN}{TP + TN + FP + FN} \)</td>
+              <td>正しく分類されたサンプルの割合</td>
+              <td>クラスが均衡している場合に有効</td>
+            </tr>
+            <tr>
+              <td>精度<br>（Precision）</td>
+              <td>\( \frac{TP}{TP + FP} \)</td>
+              <td>正と予測したもののうち、実際に正である割合</td>
+              <td>偽陽性を最小化したい場合（スパム検出など）</td>
+            </tr>
+            <tr>
+              <td>再現率・感度<br>（Recall, Sensitivity）</td>
+              <td>\( \frac{TP}{TP + FN} \)</td>
+              <td>実際に正であるもののうち、正しく正と予測できた割合</td>
+              <td>偽陰性を最小化したい場合（疾病検査など）</td>
+            </tr>
+            <tr>
+              <td>特異度<br>（Specificity）</td>
+              <td>\( \frac{TN}{TN + FP} \)</td>
+              <td>実際に負であるもののうち、正しく負と予測できた割合</td>
+              <td>特定の状態/条件を除外したい場合</td>
+            </tr>
+            <tr>
+              <td>F1スコア</td>
+              <td>\( 2 \cdot \frac{精度 \times 再現率}{精度 + 再現率} = \frac{2TP}{2TP + FP + FN} \)</td>
+              <td>精度と再現率の調和平均</td>
+              <td>精度と再現率のバランスが重要な場合</td>
+            </tr>
+            <tr>
+              <td>AUC-ROC</td>
+              <td>ROC曲線下の面積</td>
+              <td>様々な閾値での真陽性率と偽陽性率のトレードオフを評価</td>
+              <td>異なる分類閾値でのモデル性能を比較したい場合</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <h3><i class="fas fa-chart-area"></i> ROC曲線とPR曲線</h3>
+      <p>閾値を変化させたときのモデル性能を視覚化する方法として、ROC曲線とPR曲線があります。</p>
+      
+      <div class="figure">
+        <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景とグリッド -->
+          <rect width="400" height="400" fill="white" />
+          <g stroke="#eee" stroke-width="1">
+            <line x1="50" y1="50" x2="350" y2="50" />
+            <line x1="50" y1="100" x2="350" y2="100" />
+            <line x1="50" y1="150" x2="350" y2="150" />
+            <line x1="50" y1="200" x2="350" y2="200" />
+            <line x1="50" y1="250" x2="350" y2="250" />
+            <line x1="50" y1="300" x2="350" y2="300" />
+            <line x1="50" y1="350" x2="350" y2="350" />
+            <line x1="50" y1="50" x2="50" y2="350" />
+            <line x1="100" y1="50" x2="100" y2="350" />
+            <line x1="150" y1="50" x2="150" y2="350" />
+            <line x1="200" y1="50" x2="200" y2="350" />
+            <line x1="250" y1="50" x2="250" y2="350" />
+            <line x1="300" y1="50" x2="300" y2="350" />
+            <line x1="350" y1="50" x2="350" y2="350" />
+          </g>
+          
+          <!-- タイトル -->
+          <text x="200" y="30" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold">ROC曲線</text>
+          
+          <!-- 軸 -->
+          <line x1="50" y1="350" x2="350" y2="350" stroke="black" stroke-width="2" />
+          <line x1="50" y1="50" x2="50" y2="350" stroke="black" stroke-width="2" />
+          
+          <!-- 軸ラベル -->
+          <text x="200" y="380" text-anchor="middle" font-family="sans-serif" font-size="14">偽陽性率（1 - 特異度）\( \frac{FP}{TN+FP} \)</text>
+          <text x="20" y="200" text-anchor="middle" font-family="sans-serif" font-size="14" transform="rotate(-90, 20, 200)">真陽性率（再現率）\( \frac{TP}{TP+FN} \)</text>
+          
+          <!-- 目盛り -->
+          <text x="50" y="370" text-anchor="middle" font-family="sans-serif" font-size="12">0.0</text>
+          <text x="150" y="370" text-anchor="middle" font-family="sans-serif" font-size="12">0.3</text>
+          <text x="250" y="370" text-anchor="middle" font-family="sans-serif" font-size="12">0.7</text>
+          <text x="350" y="370" text-anchor="middle" font-family="sans-serif" font-size="12">1.0</text>
+          
+          <text x="35" y="350" text-anchor="end" font-family="sans-serif" font-size="12">0.0</text>
+          <text x="35" y="250" text-anchor="end" font-family="sans-serif" font-size="12">0.3</text>
+          <text x="35" y="150" text-anchor="end" font-family="sans-serif" font-size="12">0.7</text>
+          <text x="35" y="50" text-anchor="end" font-family="sans-serif" font-size="12">1.0</text>
+          
+          <!-- 対角線（ランダム分類器） -->
+          <line x1="50" y1="350" x2="350" y2="50" stroke="#999" stroke-width="1.5" stroke-dasharray="5,5" />
+          <text x="200" y="210" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#999">AUC = 0.5（ランダム）</text>
+          
+          <!-- ROC曲線（良いモデル） -->
+          <path d="M 50,350 Q 70,180 150,120 Q 200,80 350,50" stroke="var(--cyan)" stroke-width="2.5" fill="none" />
+          <text x="150" y="160" text-anchor="middle" font-family="sans-serif" font-size="12" fill="var(--cyan)">AUC = 0.9（良いモデル）</text>
+          
+          <!-- ROC曲線（普通のモデル） -->
+          <path d="M 50,350 Q 100,250 200,170 Q 300,100 350,50" stroke="var(--magenta)" stroke-width="2" fill="none" />
+          <text x="250" y="200" text-anchor="middle" font-family="sans-serif" font-size="12" fill="var(--magenta)">AUC = 0.7（普通のモデル）</text>
+          
+          <!-- 閾値マーカー -->
+          <circle cx="100" cy="250" r="3" fill="var(--magenta)" stroke="black" stroke-width="1" />
+          <circle cx="200" cy="170" r="3" fill="var(--magenta)" stroke="black" stroke-width="1" />
+          <circle cx="300" cy="100" r="3" fill="var(--magenta)" stroke="black" stroke-width="1" />
+          <text x="107" y="245" font-family="sans-serif" font-size="10">閾値0.8</text>
+          <text x="207" y="165" font-family="sans-serif" font-size="10">閾値0.5</text>
+          <text x="307" y="95" font-family="sans-serif" font-size="10">閾値0.2</text>
+        </svg>
+        <p class="figure-caption">ROC曲線と異なるAUC値をもつモデルの例。曲線上の点は異なる分類閾値を表し、左上に近いほど性能が良いモデルであることを示します。AUC値は曲線下の面積を表し、1.0に近いほど優れたモデルです。</p>
+      </div>
+      
+      <div class="note-box">
+        <p><i class="fas fa-lightbulb"></i> <strong>ROC曲線 vs PR曲線</strong></p>
+        <ul>
+          <li><strong>ROC曲線（Receiver Operating Characteristic）</strong>：真陽性率（再現率、\(\frac{TP}{TP+FN}\)）を縦軸、偽陽性率（\(\frac{FP}{TN+FP}\)）を横軸にプロットした曲線です。異なる閾値での分類器の性能をバランス良く評価できます。</li>
+          <li><strong>PR曲線（Precision-Recall）</strong>：精度（\(\frac{TP}{TP+FP}\)）を縦軸、再現率（\(\frac{TP}{TP+FN}\)）を横軸にプロットした曲線です。クラスが不均衡な場合（正例が少ない場合）に特に有用です。</li>
+          <li><strong>AUC（Area Under the Curve）</strong>：曲線下の面積であり、モデルの総合的な性能を示します。AUC=1.0が完璧なモデル、AUC=0.5がランダムな予測を意味します。</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-check-double"></i> <strong>分類指標の選択ガイド</strong></p>
+        <ul>
+          <li><strong>バランスの取れたデータセット</strong>：正解率、F1スコアが一般的に適切です。</li>
+          <li><strong>不均衡データセット</strong>：精度、再現率、F1スコア、PR曲線、AUC-PRC（PR曲線下の面積）が適切です。</li>
+          <li><strong>偽陽性のコストが高い場合</strong>：精度、特異度を重視します（スパムフィルタなど）。</li>
+          <li><strong>偽陰性のコストが高い場合</strong>：再現率、感度を重視します（疾病診断など）。</li>
+          <li><strong>閾値に依存しない評価が必要な場合</strong>：AUC-ROCが適切です。</li>
+        </ul>
+      </div>
+      
+      <div class="speech-bubble">
+        <p>評価指標の選択は、ビジネス上の意思決定に大きな影響を与えます。例えば、金融詐欺検出では、詐欺を見逃す（偽陰性）コストと正当な取引を詐欺と誤って判定する（偽陽性）コストのバランスを考慮する必要があります。</p>
+      </div>
+    </section>
+
+    <!-- 評価指標（回帰問題） -->
+    <section id="evaluation-metrics-regression" class="section">
+      <h2>評価指標（回帰問題）</h2>
+      
+      <h3><i class="fas fa-ruler"></i> 主な回帰評価指標</h3>
+      <p>回帰問題の評価には様々な指標があり、問題の性質や重視したい側面によって適切な指標を選択することが重要です。</p>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>指標</th>
+              <th>数式</th>
+              <th>説明</th>
+              <th>特徴</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>平均絶対誤差<br>(MAE: Mean Absolute Error)</td>
+              <td>\( \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i| \)</td>
+              <td>予測値と実測値の差の絶対値の平均</td>
+              <td>外れ値の影響を受けにくく、解釈が容易</td>
+            </tr>
+            <tr>
+              <td>平均二乗誤差<br>(MSE: Mean Squared Error)</td>
+              <td>\( \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 \)</td>
+              <td>予測値と実測値の差の二乗の平均</td>
+              <td>大きな誤差に対してペナルティが大きい</td>
+            </tr>
+            <tr>
+              <td>二乗平均平方根誤差<br>(RMSE: Root Mean Squared Error)</td>
+              <td>\( \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2} \)</td>
+              <td>MSEの平方根</td>
+              <td>元の単位で表現され解釈しやすい</td>
+            </tr>
+            <tr>
+              <td>平均絶対パーセント誤差<br>(MAPE: Mean Absolute Percentage Error)</td>
+              <td>\( \frac{1}{n} \sum_{i=1}^{n} \left| \frac{y_i - \hat{y}_i}{y_i} \right| \times 100\% \)</td>
+              <td>誤差の相対的な大きさを示す</td>
+              <td>異なるスケールのデータで比較しやすい、実測値が0に近いと不安定</td>
+            </tr>
+            <tr>
+              <td>決定係数<br>(R<sup>2</sup>: Coefficient of Determination)</td>
+              <td>\( 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2} \)</td>
+              <td>モデルによって説明される分散の割合</td>
+              <td>通常は0〜1の範囲、1に近いほど良いモデル</td>
+            </tr>
+            <tr>
+              <td>調整済み決定係数<br>(Adjusted R<sup>2</sup>)</td>
+              <td>\( 1 - \left[ \frac{(1 - R^2)(n - 1)}{n - p - 1} \right] \)</td>
+              <td>特徴量数を考慮した決定係数</td>
+              <td>特徴量が増えるほどペナルティが大きくなる</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="figure">
+        <svg width="450" height="300" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景とグリッド -->
+          <rect width="450" height="300" fill="white" />
+          <g stroke="#eee" stroke-width="1">
+            <line x1="50" y1="50" x2="400" y2="50" />
+            <line x1="50" y1="100" x2="400" y2="100" />
+            <line x1="50" y1="150" x2="400" y2="150" />
+            <line x1="50" y1="200" x2="400" y2="200" />
+            <line x1="50" y1="250" x2="400" y2="250" />
+            <line x1="100" y1="50" x2="100" y2="250" />
+            <line x1="150" y1="50" x2="150" y2="250" />
+            <line x1="200" y1="50" x2="200" y2="250" />
+            <line x1="250" y1="50" x2="250" y2="250" />
+            <line x1="300" y1="50" x2="300" y2="250" />
+            <line x1="350" y1="50" x2="350" y2="250" />
+          </g>
+          
+          <!-- 軸 -->
+          <line x1="50" y1="250" x2="400" y2="250" stroke="black" stroke-width="2" />
+          <line x1="50" y1="50" x2="50" y2="250" stroke="black" stroke-width="2" />
+          
+          <!-- 軸ラベル -->
+          <text x="225" y="280" text-anchor="middle" font-family="sans-serif" font-size="14">特徴量 \( x \)</text>
+          <text x="20" y="150" text-anchor="middle" font-family="sans-serif" font-size="14" transform="rotate(-90, 20, 150)">目的変数 \( y \)</text>
+          
+          <!-- データポイント -->
+          <circle cx="80" cy="220" r="4" fill="#333" />
+          <circle cx="120" cy="200" r="4" fill="#333" />
+          <circle cx="160" cy="180" r="4" fill="#333" />
+          <circle cx="200" cy="170" r="4" fill="#333" />
+          <circle cx="240" cy="130" r="4" fill="#333" />
+          <circle cx="280" cy="120" r="4" fill="#333" />
+          <circle cx="320" cy="100" r="4" fill="#333" />
+          <circle cx="360" cy="80" r="4" fill="#333" />
+          
+          <!-- 回帰線 -->
+          <line x1="50" y1="230" x2="400" y2="70" stroke="var(--cyan)" stroke-width="2" />
+          
+          <!-- 誤差の視覚化 -->
+          <line x1="80" y1="220" x2="80" y2="206" stroke="var(--magenta)" stroke-width="1.5" />
+          <line x1="120" y1="200" x2="120" y2="190" stroke="var(--magenta)" stroke-width="1.5" />
+          <line x1="160" y1="180" x2="160" y2="174" stroke="var(--magenta)" stroke-width="1.5" />
+          <line x1="200" y1="170" x2="200" y2="158" stroke="var(--magenta)" stroke-width="1.5" />
+          <line x1="240" y1="130" x2="240" y2="142" stroke="var(--magenta)" stroke-width="1.5" />
+          <line x1="280" y1="120" x2="280" y2="126" stroke="var(--magenta)" stroke-width="1.5" />
+          <line x1="320" y1="100" x2="320" y2="110" stroke="var(--magenta)" stroke-width="1.5" />
+          <line x1="360" y1="80" x2="360" y2="94" stroke="var(--magenta)" stroke-width="1.5" />
+          
+          <!-- 数式表示 -->
+          <foreignObject x="100" y="15" width="250" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:12px; text-align:center;">
+              MSE = \( \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 \)
+            </div>
+          </foreignObject>
+          
+          <!-- ラベル -->
+          <text x="225" y="30" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">回帰モデルの誤差</text>
+          <text x="175" y="135" text-anchor="start" font-family="sans-serif" font-size="12" fill="var(--magenta)">誤差 \( e_i = y_i - \hat{y}_i \)</text>
+          <text x="320" y="180" text-anchor="start" font-family="sans-serif" font-size="12" fill="var(--cyan)">回帰線 \( \hat{y} = f(x) \)</text>
+        </svg>
+        <p class="figure-caption">回帰問題における誤差の図解。各垂直線は実際の値と予測値の差（残差）を表し、これらの二乗平均がMSEとなります。MSEが小さいほどモデルの当てはまりが良いことを示します。</p>
+      </div>
+      
+      <h3><i class="fas fa-balance-scale"></i> 回帰評価指標の選択基準</h3>
+      <p>問題の性質や目標に応じて最適な評価指標を選択することが重要です。</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-check-circle"></i> <strong>回帰指標の選択ガイド</strong></p>
+        <ul>
+          <li><strong>一般的な用途</strong>：RMSEが最も一般的に使用される</li>
+          <li><strong>外れ値が多い場合</strong>：MAEが外れ値の影響を受けにくい</li>
+          <li><strong>大きな誤差を避けたい場合</strong>：MSEまたはRMSEが適切</li>
+          <li><strong>相対的な誤差を測定したい場合</strong>：MAPEまたはSMAPE（対称平均絶対パーセント誤差）</li>
+          <li><strong>モデルの説明力を評価したい場合</strong>：R<sup>2</sup>または調整済みR<sup>2</sup></li>
+          <li><strong>特徴量が多い場合</strong>：過学習を防ぐため、調整済みR<sup>2</sup>を使用</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <p><i class="fas fa-exclamation-triangle"></i> <strong>R<sup>2</sup>の注意点</strong></p>
+        <p>R<sup>2</sup>は一般的に0から1の間の値をとり、1に近いほど良いモデルとされます。しかし、以下の点に注意が必要です：</p>
+        <ul>
+          <li>テストデータではR<sup>2</sup>が負の値になることがある（モデルが平均値よりも悪い予測をしている場合）</li>
+          <li>特徴量を増やすと、モデルの複雑さが増加しR<sup>2</sup>が見かけ上改善することがある（過学習の可能性）</li>
+          <li>異なるデータセット間でR<sup>2</sup>を比較することは適切でない場合がある</li>
+        </ul>
+      </div>
+      
+      <div class="speech-bubble">
+        <p>回帰評価指標は単なる数値ではなく、ビジネス目標や実際の利用状況に関連付けて考える必要があります。例えば、住宅価格予測では、絶対的な誤差（ドル単位）と相対的な誤差（パーセント）のどちらが重要かをビジネス視点で考慮すべきです。</p>
+      </div>
+    </section>
+
+    <!-- モデル選択の実際 -->
+    <section id="model-selection-in-practice" class="section">
+      <h2>モデル選択の実際</h2>
+      
+      <h3><i class="fas fa-code-branch"></i> モデル選択のワークフロー</h3>
+      <p>実際のモデル選択は、以下のような体系的なプロセスで行われます。</p>
+      
+      <div class="figure">
+        <svg width="600" height="320" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景 -->
+          <rect width="600" height="320" fill="white" />
+          
+          <!-- ボックスとフロー -->
+          <rect x="50" y="50" width="120" height="60" rx="10" ry="10" fill="#f0f0f0" stroke="#666" />
+          <rect x="240" y="50" width="120" height="60" rx="10" ry="10" fill="#f0f0f0" stroke="#666" />
+          <rect x="430" y="50" width="120" height="60" rx="10" ry="10" fill="#f0f0f0" stroke="#666" />
+          
+          <rect x="50" y="160" width="120" height="60" rx="10" ry="10" fill="#f0f0f0" stroke="#666" />
+          <rect x="240" y="160" width="120" height="60" rx="10" ry="10" fill="#f0f0f0" stroke="#666" />
+          <rect x="430" y="160" width="120" height="60" rx="10" ry="10" fill="#f0f0f0" stroke="#666" />
+          
+          <rect x="240" y="250" width="120" height="60" rx="10" ry="10" fill="var(--cyan)" stroke="var(--cyan)" stroke-width="2" />
+          
+          <!-- 矢印 -->
+          <path d="M 170 80 L 240 80" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" />
+          <path d="M 360 80 L 430 80" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" />
+          <path d="M 490 110 L 490 160" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" />
+          <path d="M 430 190 L 360 190" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" />
+          <path d="M 240 190 L 170 190" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" />
+          <path d="M 110 160 L 110 110" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" />
+          <path d="M 300 220 L 300 250" stroke="#666" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" />
+          
+          <!-- マーカー定義 -->
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+            </marker>
+          </defs>
+          
+          <!-- テキスト -->
+          <text x="110" y="85" text-anchor="middle" font-family="sans-serif" font-size="12">データの準備と分割</text>
+          <text x="300" y="85" text-anchor="middle" font-family="sans-serif" font-size="12">複数のモデルを訓練</text>
+          <text x="490" y="85" text-anchor="middle" font-family="sans-serif" font-size="12">交差検証で評価</text>
+          
+          <text x="110" y="190" text-anchor="middle" font-family="sans-serif" font-size="12">最終モデルの選択</text>
+          <text x="300" y="190" text-anchor="middle" font-family="sans-serif" font-size="12">ハイパーパラメータ調整</text>
+          <text x="490" y="190" text-anchor="middle" font-family="sans-serif" font-size="12">性能比較</text>
+          
+          <text x="300" y="280" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold">テストデータでの最終評価</text>
+        </svg>
+        <p class="figure-caption">モデル選択の一般的なワークフロー</p>
+      </div>
+      
+      <h3><i class="fas fa-sliders-h"></i> ハイパーパラメータ調整</h3>
+      <p>ハイパーパラメータ調整は、モデルの性能を最適化するために重要なステップです。</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-cog"></i> <strong>主なハイパーパラメータ調整手法</strong></p>
+        <ul>
+          <li><strong>グリッドサーチ（Grid Search）</strong>：可能なハイパーパラメータの組み合わせをすべて試す網羅的な手法。計算コストが高いが、確実に最適値を見つけられる。</li>
+          <li><strong>ランダムサーチ（Random Search）</strong>：ランダムに選んだハイパーパラメータの組み合わせを試す手法。通常、グリッドサーチよりも効率的で、特に高次元の場合に有効。</li>
+          <li><strong>ベイズ最適化（Bayesian Optimization）</strong>：過去の試行結果に基づいて、次に試すべきハイパーパラメータを選択する手法。探索を効率化できる。</li>
+          <li><strong>遺伝的アルゴリズム（Genetic Algorithm）</strong>：生物の進化を模倣し、良いハイパーパラメータの組み合わせを「交配」させて最適解を探す手法。</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <p><i class="fas fa-lightbulb"></i> <strong>ハイパーパラメータ調整の注意点</strong></p>
+        <ul>
+          <li><strong>検証データの分離</strong>：ハイパーパラメータ調整に使用するデータは、最終評価用のテストデータとは別にする必要があります。</li>
+          <li><strong>過学習の監視</strong>：過度な調整は検証データに対する過学習を招く可能性があります。</li>
+          <li><strong>計算リソースの考慮</strong>：特に大規模モデルや大量データでは、調整に必要な計算リソースと時間を考慮する必要があります。</li>
+          <li><strong>ドメイン知識の活用</strong>：ハイパーパラメータの意味と影響を理解し、合理的な範囲で探索することが重要です。</li>
+        </ul>
+      </div>
+      
+      <h3><i class="fas fa-trophy"></i> 最終モデルの選択基準</h3>
+      <p>最終的にどのモデルを選択するかは、様々な要素を総合的に判断する必要があります。</p>
+      
+      <div class="handwritten">
+        <p><i class="fas fa-balance-scale"></i> <strong>モデル選択の総合判断基準</strong></p>
+        <ul>
+          <li><strong>予測性能</strong>：検証データでの性能指標（精度、RMSE、F1スコアなど）</li>
+          <li><strong>汎化能力</strong>：訓練データと検証データの性能差（小さいほど良い）</li>
+          <li><strong>ロバスト性</strong>：異なるデータセットや条件での安定性</li>
+          <li><strong>解釈可能性</strong>：モデルの意思決定プロセスが理解できるか</li>
+          <li><strong>計算効率</strong>：訓練と予測の時間、メモリ要件</li>
+          <li><strong>実装の容易さ</strong>：デプロイと運用の複雑さ</li>
+          <li><strong>ビジネス要件との適合性</strong>：特定の制約やニーズを満たしているか</li>
+        </ul>
+      </div>
+      
+      <div class="speech-bubble">
+        <p>最良のモデルは必ずしも最も複雑なモデルではありません。実際の応用では、多少性能が劣っても、解釈可能で運用しやすいシンプルなモデルが選ばれることも多いです。モデル選択は技術的判断だけでなく、ビジネス目標や実用性を考慮した戦略的な決定です。</p>
+      </div>
+    </section>
+
+    <!-- まとめと重要ポイント -->
+    <section id="summary" class="section">
+      <h2>まとめと重要ポイント</h2>
+      
+      <div class="key-insights">
+        <h3><i class="fas fa-key"></i> 重要な洞察</h3>
+        <ol>
+          <li><strong>バイアス・バリアンストレードオフ</strong>：モデルの複雑さとバイアス・バリアンスのバランスを理解することが、適切なモデル選択の鍵です。</li>
+          <li><strong>評価の一貫性</strong>：適切なデータ分割と評価手法を一貫して適用することで、信頼性の高いモデル比較が可能になります。</li>
+          <li><strong>目的適合性</strong>：評価指標は問題の性質やビジネス目標に合わせて選択すべきです。単一の指標だけでは不十分な場合が多いです。</li>
+          <li><strong>過学習の管理</strong>：複雑なモデルほど過学習のリスクが高まるため、適切な正則化手法と検証が必要です。</li>
+          <li><strong>モデル選択は反復プロセス</strong>：モデル選択は一度で完了するものではなく、データの理解を深め、モデルを改善していく継続的なプロセスです。</li>
+        </ol>
+      </div>
+      
+      <div class="takeaway">
+        <h3><i class="fas fa-graduation-cap"></i> 持ち帰りメッセージ</h3>
+        <p>モデルの選択と評価は機械学習プロジェクトの成否を左右する重要なステップです。適切なモデルは、単に高い精度を持つだけでなく、問題の性質に適合し、過学習を回避し、実際の応用で価値を生み出せるものであるべきです。体系的なアプローチと適切な評価指標の選択により、信頼性の高いモデル選択が可能になります。</p>
+      </div>
+      
+      <div class="glossary">
+        <h3><i class="fas fa-book"></i> 用語集</h3>
+        <dl>
+          <dt><i class="fas fa-balance-scale-left"></i> バイアス（Bias）</dt>
+          <dd>モデルが複雑な関係を学習できないことによる誤差。単純すぎるモデルで発生。過小適合の原因となります。</dd>
+          
+          <dt><i class="fas fa-balance-scale-right"></i> バリアンス（Variance）</dt>
+          <dd>モデルがランダムなノイズまで学習してしまうことによる誤差。複雑すぎるモデルで発生。過学習につながります。</dd>
+          
+          <dt><i class="fas fa-random"></i> 交差検証（Cross-Validation）</dt>
+          <dd>データセットを複数の部分に分割し、その一部をテスト用、残りを訓練用として使用するモデル評価技術。汎化性能の推定に役立ちます。</dd>
+          
+          <dt><i class="fas fa-exclamation-triangle"></i> 過学習（Overfitting）</dt>
+          <dd>モデルが訓練データに過度に適合し、新しいデータに対する汎化能力が低下する現象。正則化やデータ拡張などで対策します。</dd>
+          
+          <dt><i class="fas fa-shield-alt"></i> 正則化（Regularization）</dt>
+          <dd>過学習を防ぐためにモデルの複雑さにペナルティを課す技術。L1正則化、L2正則化、ドロップアウトなどがあります。</dd>
+          
+          <dt><i class="fas fa-chart-area"></i> AUC-ROC</dt>
+          <dd>受信者操作特性曲線下面積。分類器の閾値に依存しない性能評価指標。1.0が完璧なモデル、0.5がランダム予測を表します。</dd>
+          
+          <dt><i class="fas fa-sliders-h"></i> ハイパーパラメータ</dt>
+          <dd>モデルの学習前に設定する必要があるパラメータ。モデルの動作や学習プロセスを制御します。学習率、正則化係数、層の数などが該当します。</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- サイドバー -->
+    <nav id="sidebar">
+      <div id="sidebar-title">G検定ノート</div>
+      <ul class="nav-menu">
+        <li><a href="#intro"><i class="fas fa-info-circle"></i>はじめに</a></li>
+        <li><a href="#objectives"><i class="fas fa-bullseye"></i>学習目標</a></li>
+        <li><a href="#keywords"><i class="fas fa-key"></i>キーワード</a></li>
+        <li><a href="#model-selection"><i class="fas fa-clipboard-check"></i>モデル選択基準</a></li>
+        <li><a href="#training-generalization"><i class="fas fa-balance-scale"></i>訓練誤差と汎化誤差</a></li>
+        <li><a href="#overfitting"><i class="fas fa-exclamation-triangle"></i>過学習と対策</a></li>
+        <li><a href="#evaluation-methods"><i class="fas fa-chart-bar"></i>評価手法</a></li>
+        <li><a href="#evaluation-metrics-classification"><i class="fas fa-table"></i>評価指標（分類）</a></li>
+        <li><a href="#evaluation-metrics-regression"><i class="fas fa-ruler"></i>評価指標（回帰）</a></li>
+        <li><a href="#model-selection-in-practice"><i class="fas fa-code-branch"></i>モデル選択の実際</a></li>
+        <li><a href="#summary"><i class="fas fa-check-double"></i>まとめと重要ポイント</a></li>
+      </ul>
+    </nav>
+    
+    <!-- スクロールトップボタン -->
+    <button id="scrollToTop" title="トップへスクロール">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script>
+      // サイドバートグルボタンの動作
+      document.getElementById('sidebarCollapse').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('content').classList.toggle('active');
+      });
+      
+      // ナビゲーションリンクのスムーススクロール
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          
+          document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+          });
+        });
+      });
+      
+      // スクロールトップボタンの表示/非表示
+      window.onscroll = function() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+          document.getElementById('scrollToTop').style.display = 'flex';
+        } else {
+          document.getElementById('scrollToTop').style.display = 'none';
+        }
+      };
+      
+      // スクロールトップボタンの動作
+      document.getElementById('scrollToTop').addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    </script>
+  </body>
+</html> 

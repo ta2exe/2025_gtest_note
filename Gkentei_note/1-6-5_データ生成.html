@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-6-5 データ生成 | G検定ノート</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    /* CMYK カラーパレット */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+      --border-color: #E0E0E0;
+    }
+
+    /* 基本スタイル */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      line-height: 1.6;
+      color: var(--key);
+      background-color: var(--white);
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: 280px;
+      background-color: var(--yellow);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--cyan);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.5rem;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .sidebar-menu {
+      list-style-type: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.8rem;
+      list-style-type: none;
+    }
+
+    .sidebar-menu a {
+      display: block;
+      padding: 0.6rem 1rem;
+      color: var(--key);
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      position: relative;
+      padding-left: 2.5rem;
+    }
+
+    .sidebar-menu a:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu a.active {
+      background-color: var(--cyan);
+      color: var(--key);
+      font-weight: 500;
+    }
+
+    .sidebar-menu a i {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+    }
+
+    /* スクロールバーのカスタマイズ */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--cyan);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--magenta);
+    }
+
+    /* タイトルセクション */
+    .title-section {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      padding: 2rem;
+      background: rgba(255, 230, 0, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .title-section h1 {
+      font-size: 2.5rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      position: relative;
+      display: inline-block;
+    }
+
+    .title-section h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta));
+      border-radius: 2px;
+    }
+
+    .title-section p {
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      max-width: 800px;
+      margin: 1rem auto;
+    }
+
+    .title-section .objectives {
+      margin: 2rem auto;
+      max-width: 800px;
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      text-align: left;
+      border-left: 4px solid var(--cyan);
+    }
+
+    .title-section .objectives h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .title-section .objectives h2 i {
+      margin-right: 0.5rem;
+      color: var(--cyan);
+    }
+
+    .title-section .objectives ul {
+      padding-left: 1.5rem;
+    }
+
+    .title-section .objectives li {
+      margin-bottom: 0.5rem;
+      position: relative;
+      list-style-position: inside;
+    }
+
+    /* コンテンツセクション */
+    .content-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    .content-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta));
+      border-radius: 10px 10px 0 0;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px dashed var(--cyan);
+      display: flex;
+      align-items: center;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .section-title i {
+      margin-right: 0.8rem;
+      color: var(--magenta);
+      font-size: 1.6rem;
+    }
+
+    .content-section p {
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+    }
+
+    /* 手書き風ボックス */
+    .handwritten-box {
+      border: 2px dashed var(--cyan);
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin: 2rem 0;
+      position: relative;
+      background: rgba(0, 216, 232, 0.05);
+      transform: rotate(-0.5deg);
+      box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+      filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.3));
+    }
+
+    .handwritten-box h3 {
+      font-size: 1.3rem;
+      color: var(--key);
+      margin-bottom: 1rem;
+      font-family: 'Klee One', cursive;
+      text-align: center;
+    }
+
+    .handwritten-box p, .handwritten-box li {
+      font-family: 'Klee One', cursive;
+      line-height: 1.8;
+    }
+
+    /* ノートボックス */
+    .note-box {
+      background: var(--light-gray);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--magenta);
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .note-box h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .note-box h3 i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+
+    /* キーワードリスト */
+    .keyword-list {
+      margin: 2rem 0;
+    }
+
+    .keyword-list h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--yellow);
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .keyword-list h3 i {
+      margin-right: 0.5rem;
+      color: var(--yellow);
+    }
+
+    .keyword-list ul {
+      list-style-type: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .keyword-list li {
+      background: var(--white);
+      padding: 0.8rem 1rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border-left: 3px solid var(--yellow);
+      transition: all 0.3s ease;
+      position: relative;
+      list-style-type: none;
+    }
+
+    .keyword-list li:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .keyword-term {
+      font-weight: 700;
+      color: var(--key);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .keyword-english {
+      font-size: 0.8rem;
+      color: var(--dark-gray);
+      display: block;
+      font-style: italic;
+      margin-bottom: 0.5rem;
+    }
+
+    .keyword-description {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+
+    /* テーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--cyan);
+      color: var(--key);
+      font-weight: 500;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+
+    tr:hover {
+      background-color: rgba(0, 216, 232, 0.1);
+    }
+
+    /* リスト */
+    ul, ol {
+      padding-left: 1.8rem;
+      margin: 1.5rem 0;
+      list-style-position: inside;
+    }
+
+    li {
+      margin-bottom: 0.8rem;
+    }
+
+    ul li {
+      list-style-type: disc;
+    }
+
+    ol li {
+      list-style-type: decimal;
+    }
+
+    /* マーカー・ハイライト */
+    .marker-yellow {
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      font-weight: 500;
+    }
+
+    .marker-cyan {
+      background: linear-gradient(transparent 60%, var(--cyan) 60%);
+      font-weight: 500;
+    }
+
+    .marker-magenta {
+      background: linear-gradient(transparent 60%, var(--magenta) 60%);
+      font-weight: 500;
+    }
+
+    /* 吹き出し */
+    .speech-bubble {
+      position: relative;
+      background: var(--white);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid var(--magenta);
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: 20px;
+      border-width: 0 15px 15px 15px;
+      border-style: solid;
+      border-color: transparent transparent var(--white) transparent;
+    }
+
+    .speech-bubble h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      font-family: 'Klee One', cursive;
+    }
+
+    .speech-bubble h3 i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+
+    /* コネクターボックス（関連概念） */
+    .connector-box {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+    }
+
+    .connector-item {
+      background: var(--white);
+      padding: 1rem;
+      border-radius: 8px;
+      min-width: 200px;
+      max-width: 250px;
+      margin-right: 2rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      border-top: 3px solid var(--cyan);
+      position: relative;
+    }
+
+    .connector-item:not(:last-child)::after {
+      content: '\f061';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: -1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--magenta);
+      font-size: 1.2rem;
+    }
+
+    .connector-item h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+      color: var(--key);
+      text-align: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px dashed var(--cyan);
+    }
+
+    .connector-item p {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      margin-top: 0.5rem;
+    }
+
+    /* アイコンコンテナ */
+    .icon-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .icon-item {
+      text-align: center;
+      width: 120px;
+    }
+
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      transition: all 0.3s ease;
+      border: 2px solid var(--cyan);
+    }
+
+    .icon-circle i {
+      font-size: 2rem;
+      color: var(--magenta);
+    }
+
+    .icon-circle:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .icon-item p {
+      font-size: 0.9rem;
+      color: var(--key);
+    }
+
+    /* キーインサイト */
+    .key-insights {
+      margin: 3rem 0;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .key-insights h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: var(--key);
+      position: relative;
+      padding-bottom: 0.8rem;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    .key-insights h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta));
+      border-radius: 3px;
+    }
+
+    .insights-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .insight-item {
+      background: rgba(0, 216, 232, 0.05);
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      border-left: 3px solid var(--cyan);
+      transition: all 0.3s ease;
+    }
+
+    .insight-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .insight-item h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .insight-item h3 i {
+      margin-right: 0.5rem;
+      color: var(--cyan);
+      font-size: 1.2rem;
+    }
+
+    .insight-item p {
+      color: var(--dark-gray);
+      line-height: 1.7;
+    }
+
+    /* テイクホームメッセージ */
+    .take-home {
+      margin: 3rem auto;
+      max-width: 800px;
+      text-align: center;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      position: relative;
+      border: 2px dashed var(--magenta);
+    }
+
+    .take-home::before {
+      content: "📌";
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    .take-home h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      display: inline-block;
+      position: relative;
+    }
+
+    .take-home h2::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, var(--yellow), var(--magenta));
+      border-radius: 3px;
+    }
+
+    .take-home p {
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+      line-height: 1.8;
+      margin-top: 1.5rem;
+    }
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 3rem;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .footer p {
+      margin-bottom: 0.5rem;
+    }
+
+    /* トップに戻るボタン */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--cyan);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .back-to-top.show {
+      opacity: 1;
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      background: var(--magenta);
+    }
+
+    /* 画像コンテナ */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* レスポンシブデザイン */
+    @media (max-width: 1200px) {
+      .insights-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 240px;
+      }
+      .main-content {
+        margin-left: 240px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+      .connector-box {
+        flex-direction: column;
+      }
+      .connector-item {
+        margin-right: 0;
+        margin-bottom: 2rem;
+        min-width: 100%;
+      }
+      .connector-item:not(:last-child)::after {
+        content: '\f063';
+        right: auto;
+        bottom: -1.5rem;
+        top: auto;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .title-section h1 {
+        font-size: 2rem;
+      }
+      .section-title {
+        font-size: 1.5rem;
+      }
+      .handwritten-box, .note-box, .speech-bubble {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1><i class="fas fa-brain"></i> ディープラーニングの応用例</h1>
+      </div>
+      <ul class="sidebar-menu" id="sidebarMenu">
+        <li><a href="#intro" class="active"><i class="fas fa-star"></i> はじめに</a></li>
+        <li><a href="#data-generation-overview"><i class="fas fa-magic"></i> データ生成の概要</a></li>
+        <li><a href="#generation-models"><i class="fas fa-cubes"></i> 代表的な生成モデル</a></li>
+        <li><a href="#gan-overview"><i class="fas fa-random"></i> GANの仕組み</a></li>
+        <li><a href="#diffusion-models"><i class="fas fa-atom"></i> 拡散モデル</a></li>
+        <li><a href="#applications"><i class="fas fa-laptop-code"></i> 実世界での活用例</a></li>
+        <li><a href="#keywords"><i class="fas fa-key"></i> 重要キーワード</a></li>
+        <li><a href="#key-insights"><i class="fas fa-lightbulb"></i> Key Insights</a></li>
+        <li><a href="#take-home"><i class="fas fa-home"></i> Take Home Message</a></li>
+      </ul>
+    </aside>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- タイトルセクション -->
+      <section id="intro" class="title-section">
+        <h1>1-6-5 データ生成</h1>
+        <p>ディープラーニングを用いて画像、音声、テキストなどの新しいデータを生成する技術</p>
+        
+        <div class="objectives">
+          <h2><i class="fas fa-bullseye"></i> 学習目標</h2>
+          <ul>
+            <li>データ生成タスクの種類とその概要について理解する</li>
+            <li>代表的なデータ生成モデルについて理解する</li>
+            <li>データ生成モデルが実世界において、どのように活用されているか理解する</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- データ生成の概要 -->
+      <section id="data-generation-overview" class="content-section">
+        <h2 class="section-title"><i class="fas fa-magic"></i> データ生成の概要</h2>
+        
+        <p>データ生成は、学習したデータの特徴を捉えて、新たなデータサンプルを生成する技術です。従来のディープラーニングモデルがデータを分類・認識するのに対し、生成モデルは<span class="marker-cyan">学習したデータに似た新しいデータを創造</span>することができます。</p>
+        
+        <div class="handwritten-box">
+          <h3>データ生成モデルの特徴</h3>
+          <ul>
+            <li>既存のデータから特徴やパターンを学習</li>
+            <li>確率分布を推定・モデル化して新しいサンプルを生成</li>
+            <li>生成されたデータは学習データに似ているが、完全に同一ではない</li>
+            <li>人間の創造性を模倣・補助する能力を持つ</li>
+          </ul>
+        </div>
+        
+        <h3><i class="fas fa-sitemap"></i> 主なデータ生成タスク</h3>
+        
+        <div class="connector-box">
+          <div class="connector-item">
+            <h3><i class="fas fa-image"></i> 画像生成</h3>
+            <p>テキスト指示や参照画像から新しい画像を生成するタスク</p>
+          </div>
+          <div class="connector-item">
+            <h3><i class="fas fa-music"></i> 音声生成</h3>
+            <p>テキストから音声を生成したり、特定の話者の声を模倣する技術</p>
+          </div>
+          <div class="connector-item">
+            <h3><i class="fas fa-font"></i> 文章生成</h3>
+            <p>指示や文脈に基づいて自然言語テキストを生成するタスク</p>
+          </div>
+        </div>
+        
+        <div class="note-box">
+          <h3><i class="fas fa-lightbulb"></i> データ生成モデルの重要性</h3>
+          <p>データ生成技術は、創作支援、データ拡張、コンテンツ制作、シミュレーションなど様々な分野で活用されています。特に近年は、高品質なコンテンツを生成できるようになり、クリエイティブ産業や研究開発に革命をもたらしています。</p>
+        </div>
+      </section>
+      
+      <!-- 代表的な生成モデル -->
+      <section id="generation-models" class="content-section">
+        <h2 class="section-title"><i class="fas fa-cubes"></i> 代表的な生成モデル</h2>
+        
+        <p>ディープラーニングにおけるデータ生成モデルは、その仕組みや生成手法によっていくつかのタイプに分類されます。ここでは、シラバスに含まれる重要モデルについて解説します。</p>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>モデル名</th>
+              <th>特徴</th>
+              <th>主な用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="marker-yellow">敵対的生成ネットワーク<br>(GAN, Generative Adversarial Network)</span></td>
+              <td>生成器と識別器を競争させながら学習させるモデル</td>
+              <td>画像生成、スタイル変換、超解像など</td>
+            </tr>
+            <tr>
+              <td>DCGAN<br>(Deep Convolutional GAN)</td>
+              <td>畳み込み層を用いた画像生成に特化したGAN</td>
+              <td>高品質な画像生成、特徴学習</td>
+            </tr>
+            <tr>
+              <td>CycleGAN</td>
+              <td>ペアのない画像間での変換を可能にするGAN</td>
+              <td>スタイル変換、ドメイン変換（馬→シマウマなど）</td>
+            </tr>
+            <tr>
+              <td>Pix2Pix</td>
+              <td>ペアの画像を用いた条件付き画像生成GAN</td>
+              <td>線画の着色、白黒画像のカラー化、エッジからの画像生成</td>
+            </tr>
+            <tr>
+              <td><span class="marker-cyan">拡散モデル<br>(Diffusion Model)</span></td>
+              <td>徐々にノイズを除去して画像を生成するプロセスを用いるモデル</td>
+              <td>高品質画像生成、テキストから画像生成</td>
+            </tr>
+            <tr>
+              <td>NeRF<br>(Neural Radiance Fields)</td>
+              <td>3D空間の陰影と視点を学習するニューラルネットワーク</td>
+              <td>3Dシーン表現、新しい視点からの画像生成</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="handwritten-box">
+          <h3>注目ポイント</h3>
+          <p>G検定では特に<span class="marker-yellow">GAN</span>と<span class="marker-cyan">Diffusion Model</span>が重要です。これらは近年のAIアートやコンテンツ生成技術の基盤となっており、その基本概念と応用例について理解しておきましょう。</p>
+        </div>
+        
+        <div class="icon-container">
+          <div class="icon-item">
+            <div class="icon-circle">
+              <i class="fas fa-random"></i>
+            </div>
+            <p>GAN</p>
+          </div>
+          <div class="icon-item">
+            <div class="icon-circle">
+              <i class="fas fa-atom"></i>
+            </div>
+            <p>Diffusion Model</p>
+          </div>
+          <div class="icon-item">
+            <div class="icon-circle">
+              <i class="fas fa-sync"></i>
+            </div>
+            <p>CycleGAN</p>
+          </div>
+          <div class="icon-item">
+            <div class="icon-circle">
+              <i class="fas fa-cube"></i>
+            </div>
+            <p>NeRF</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- GANの仕組み -->
+      <section id="gan-overview" class="content-section">
+        <h2 class="section-title"><i class="fas fa-random"></i> GANの仕組み</h2>
+        
+        <p><span class="marker-magenta">敵対的生成ネットワーク（Generative Adversarial Network, GAN）</span>は、2014年にIan Goodfellowらによって提案された生成モデルです。GANは2つのニューラルネットワークが互いに競争しながら学習を進める仕組みが特徴的です。</p>
+        
+        <div class="image-container">
+          <img src="img/Gimage_1-6-5_01.png" alt="GANの基本的な仕組みを示す図">
+          <figcaption>GANの基本的な仕組み：Generator（生成器）とDiscriminator（識別器）が敵対的に学習を進め、より本物らしいデータを生成できるようになる</figcaption>
+        </div>
+        
+        <h3><i class="fas fa-cogs"></i> GANの構成要素</h3>
+        
+        <div class="connector-box">
+          <div class="connector-item">
+            <h3>Generator（生成器）</h3>
+            <p>ランダムなノイズから本物らしいデータを生成するネットワーク</p>
+          </div>
+          <div class="connector-item">
+            <h3>Discriminator（識別器）</h3>
+            <p>入力データが本物か偽物（生成されたもの）かを判別するネットワーク</p>
+          </div>
+        </div>
+        
+        <div class="handwritten-box">
+          <h3>GANの学習プロセス</h3>
+          <ol>
+            <li>Generatorはランダムなノイズから偽のデータを生成</li>
+            <li>Discriminatorは本物のデータと生成されたデータを区別するよう学習</li>
+            <li>Generatorは「Discriminatorを騙す」ことを目標に学習</li>
+            <li>二つのネットワークが互いに競争しながら性能を向上させる</li>
+            <li>理想的には、Generatorが本物と見分けがつかないデータを生成できるようになる</li>
+          </ol>
+        </div>
+        
+        <h3><i class="fas fa-code-branch"></i> GANの派生モデル</h3>
+        
+        <div class="note-box">
+          <h3><i class="fas fa-laptop-code"></i> 主なGAN派生モデル</h3>
+          <ul>
+            <li><span class="marker-yellow">DCGAN (Deep Convolutional GAN)</span>: 畳み込み層を使用して安定した画像生成を実現したGAN</li>
+            <li><span class="marker-yellow">CycleGAN</span>: ペアデータなしでドメイン間の変換を可能にするGAN（写真から絵画スタイルへの変換など）</li>
+            <li><span class="marker-yellow">Pix2Pix</span>: 画像から画像への変換を学習するGAN（エッジ画像から写真風の画像生成など）</li>
+          </ul>
+        </div>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-exclamation-circle"></i> GANの課題</h3>
+          <p>GANの学習は不安定になりやすいという課題があります。「モード崩壊」と呼ばれる現象では、Generatorが多様なサンプルを生成せず、少数のパターンのみを生成するようになってしまいます。また、学習の収束判定が難しく、バランスの取れた学習が重要です。</p>
+        </div>
+      </section>
+      
+      <!-- 拡散モデル -->
+      <section id="diffusion-models" class="content-section">
+        <h2 class="section-title"><i class="fas fa-atom"></i> 拡散モデル（Diffusion Model）</h2>
+        
+        <p><span class="marker-cyan">拡散モデル（Diffusion Model）</span>は、近年画像生成分野で大きな成功を収めているモデルです。Stable Diffusion、DALL-E 2、Midjourney等の最新画像生成AIはこの拡散モデルに基づいています。</p>
+        
+        <div class="handwritten-box">
+          <h3>拡散モデルの基本概念</h3>
+          <p>拡散モデルは<span class="marker-yellow">ノイズ除去プロセス</span>を学習します。まず画像に徐々にノイズを加えていき、最終的に完全なノイズにします。次に、このノイズ除去過程を逆に学習させ、ノイズから徐々に意味のある画像を生成する能力を獲得します。</p>
+        </div>
+        
+        <h3><i class="fas fa-arrows-alt-h"></i> 拡散モデルのプロセス</h3>
+        
+        <div class="connector-box">
+          <div class="connector-item">
+            <h3>順拡散過程</h3>
+            <p>元画像に徐々にノイズを加えていくプロセス</p>
+          </div>
+          <div class="connector-item">
+            <h3>逆拡散過程</h3>
+            <p>ノイズから徐々に画像を復元するプロセス</p>
+          </div>
+          <div class="connector-item">
+            <h3>サンプリング</h3>
+            <p>学習済みモデルを使ってノイズから新しい画像を生成</p>
+          </div>
+        </div>
+        
+        <div class="note-box">
+          <h3><i class="fas fa-star"></i> 拡散モデルの特徴と利点</h3>
+          <ul>
+            <li>GANと比較して学習が安定している</li>
+            <li>多様なサンプル生成が可能（モード崩壊が起きにくい）</li>
+            <li>テキスト条件付けと相性が良い（テキストから画像生成など）</li>
+            <li>高品質で詳細な画像生成が可能</li>
+            <li>サンプリングプロセスを制御しやすい</li>
+          </ul>
+        </div>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> 拡散モデルの応用例</h3>
+          <p>最新の画像生成AIである<span class="marker-magenta">Stable Diffusion</span>や<span class="marker-magenta">DALL-E</span>は拡散モデルをベースにしています。テキスト指示から詳細な画像を生成したり、既存画像の編集・変換を行ったりすることができます。また、医療画像の生成や修復、3Dモデリングなど様々な分野への応用が進んでいます。</p>
+        </div>
+      </section>
+      
+      <!-- 実世界での活用例 -->
+      <section id="applications" class="content-section">
+        <h2 class="section-title"><i class="fas fa-laptop-code"></i> 実世界での活用例</h2>
+        
+        <p>データ生成モデルは多様な領域で革新的な応用を見せています。以下では、シラバスで触れられている主要なデータ生成タスクとその実世界での活用例を紹介します。</p>
+        
+        <h3><i class="fas fa-image"></i> 画像生成（Image Generation）</h3>
+        
+        <div class="note-box">
+          <h3><i class="fas fa-images"></i> 画像生成の応用例</h3>
+          <ul>
+            <li><span class="marker-cyan">クリエイティブ支援</span>：デザイナーやアーティストの創作プロセスをサポート</li>
+            <li><span class="marker-cyan">映像制作・ゲーム開発</span>：キャラクターやシーンの自動生成、テクスチャ作成</li>
+            <li><span class="marker-cyan">ファッションデザイン</span>：新しいアパレルデザインの提案や生成</li>
+            <li><span class="marker-cyan">建築設計</span>：建物の外観や内装デザインの生成・バリエーション提案</li>
+            <li><span class="marker-cyan">データ拡張</span>：機械学習のトレーニングデータセットを拡張</li>
+          </ul>
+        </div>
+        
+        <h3><i class="fas fa-music"></i> 音声生成（Audio Generation）</h3>
+        
+        <div class="note-box">
+          <h3><i class="fas fa-volume-up"></i> 音声生成の応用例</h3>
+          <ul>
+            <li><span class="marker-magenta">テキスト読み上げ（TTS）</span>：自然な声でテキストを読み上げる技術</li>
+            <li><span class="marker-magenta">音楽生成</span>：指定したスタイルや感情に基づく音楽制作</li>
+            <li><span class="marker-magenta">声質変換</span>：ある話者の声を別の話者の声質に変換</li>
+            <li><span class="marker-magenta">音響効果生成</span>：映画や映像作品向けの効果音作成</li>
+            <li><span class="marker-magenta">音声補間・修復</span>：古い音源や破損した音声データの修復</li>
+          </ul>
+        </div>
+        
+        <h3><i class="fas fa-font"></i> 文章生成（Text Generation）</h3>
+        
+        <div class="note-box">
+          <h3><i class="fas fa-paragraph"></i> 文章生成の応用例</h3>
+          <ul>
+            <li><span class="marker-yellow">コンテンツ作成</span>：ブログ記事、レポート、広告文の自動生成</li>
+            <li><span class="marker-yellow">創作支援</span>：小説、脚本、詩などの創作サポート</li>
+            <li><span class="marker-yellow">自動要約</span>：長文を要約して重要ポイントを抽出</li>
+            <li><span class="marker-yellow">対話システム</span>：チャットボットや仮想アシスタント</li>
+            <li><span class="marker-yellow">言語翻訳</span>：自然な翻訳文の生成</li>
+          </ul>
+        </div>
+        
+        <div class="speech-bubble">
+          <h3><i class="fas fa-lightbulb"></i> データ生成モデルの社会的インパクト</h3>
+          <p>データ生成モデルは創造的な作業を大幅に効率化し、新たな表現手法を可能にしています。同時に、<span class="marker-magenta">ディープフェイク</span>などの悪用リスクも存在するため、倫理的な配慮や適切な利用ガイドラインが重要です。生成AIの発展に伴い、著作権や知的財産権に関わる議論も活発化しています。</p>
+        </div>
+      </section>
+      
+      <!-- 重要キーワード -->
+      <section id="keywords" class="content-section">
+        <h2 class="section-title"><i class="fas fa-key"></i> 重要キーワード</h2>
+        
+        <p>G検定試験において重要となるシラバス記載のキーワードをまとめます。それぞれの意味とポイントを理解しておきましょう。</p>
+        
+        <div class="keyword-list">
+          <h3><i class="fas fa-tags"></i> シラバスに記載されているキーワード</h3>
+          <ul>
+            <li>
+              <span class="keyword-term">CycleGAN</span>
+              <span class="keyword-english">Cycle-Consistent Generative Adversarial Networks</span>
+              <span class="keyword-description">ペアになっていない画像間の変換を可能にするGANモデル。対応するペア画像がなくてもドメイン間の変換が可能。</span>
+            </li>
+            <li>
+              <span class="keyword-term">DCGAN</span>
+              <span class="keyword-english">Deep Convolutional Generative Adversarial Networks</span>
+              <span class="keyword-description">畳み込み層を使用して安定した画像生成を実現したGANの拡張モデル。</span>
+            </li>
+            <li>
+              <span class="keyword-term">Diffusion Model</span>
+              <span class="keyword-english">拡散モデル</span>
+              <span class="keyword-description">徐々にノイズを加えるプロセスを学習し、逆過程でノイズから画像を生成するモデル。Stable Diffusionなどに使用。</span>
+            </li>
+            <li>
+              <span class="keyword-term">NeRF</span>
+              <span class="keyword-english">Neural Radiance Fields</span>
+              <span class="keyword-description">3D空間における物体の外観と視点依存の効果を表現する技術。3Dシーンを連続関数として表現。</span>
+            </li>
+            <li>
+              <span class="keyword-term">Pix2Pix</span>
+              <span class="keyword-english">Image-to-Image Translation with Conditional GANs</span>
+              <span class="keyword-description">ペアの画像を使用して条件付き画像変換を行うGANモデル。エッジから写真や白黒からカラーへの変換など。</span>
+            </li>
+            <li>
+              <span class="keyword-term">敵対的生成ネットワーク</span>
+              <span class="keyword-english">Generative Adversarial Network, GAN</span>
+              <span class="keyword-description">生成器と識別器の二つのネットワークが競合しながら学習を進める生成モデル。</span>
+            </li>
+            <li>
+              <span class="keyword-term">画像生成</span>
+              <span class="keyword-english">Image Generation</span>
+              <span class="keyword-description">AIが新しい画像を生成するタスク。テキストプロンプトからの生成やスタイル変換など。</span>
+            </li>
+            <li>
+              <span class="keyword-term">音声生成</span>
+              <span class="keyword-english">Audio Generation</span>
+              <span class="keyword-description">AIが音声、音楽、効果音などを生成するタスク。テキスト読み上げ(TTS)などを含む。</span>
+            </li>
+            <li>
+              <span class="keyword-term">文章生成</span>
+              <span class="keyword-english">Text Generation</span>
+              <span class="keyword-description">プロンプトや文脈に基づいて自然言語テキストを生成するタスク。大規模言語モデル(LLM)が広く使用される。</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- Key Insights -->
+      <section id="key-insights" class="key-insights">
+        <h2><i class="fas fa-lightbulb"></i> Key Insights</h2>
+        
+        <div class="insights-container">
+          <div class="insight-item">
+            <h3><i class="fas fa-puzzle-piece"></i> GANの仕組みと特徴</h3>
+            <p>GANは「生成器」と「識別器」の二つのネットワークが敵対的に学習することで、高品質なデータ生成を実現します。生成器がより本物らしいデータを生成し、識別器がそれを見破ろうとする競争により、学習が進みます。DCGANやCycleGANなどの派生モデルが様々な応用に使用されています。</p>
+          </div>
+          <div class="insight-item">
+            <h3><i class="fas fa-chart-line"></i> 拡散モデルの台頭</h3>
+            <p>近年の画像生成AIの主流となった拡散モデル（Diffusion Model）は、ノイズ除去プロセスを学習することで高品質な画像生成を実現しています。GANよりも学習が安定しており、多様なサンプル生成が可能で、テキスト条件付けとの相性も良いため、Stable DiffusionやDALL-Eなどの最先端技術に活用されています。</p>
+          </div>
+          <div class="insight-item">
+            <h3><i class="fas fa-globe"></i> 実世界での応用</h3>
+            <p>データ生成モデルは画像、音声、文章など多様なメディアで応用され、クリエイティブ産業やコンテンツ制作、医療、製品設計など幅広い分野に革新をもたらしています。同時に、著作権問題やディープフェイクなどの倫理的課題も生じており、技術の発展と適切な利用のバランスが重要です。</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Take Home Message -->
+      <section id="take-home" class="take-home">
+        <h2><i class="fas fa-home"></i> Take Home Message</h2>
+        <p>データ生成モデルはAIの創造性を具現化する技術です。GANや拡散モデルなどの手法により、高品質で多様なコンテンツを生成できるようになり、様々な産業や創作活動に革命をもたらしています。これらの技術の基本原理と応用例を理解することで、AIが実世界で創造的に活用される可能性と課題を把握することができます。</p>
+      </section>
+      
+      <!-- フッター -->
+      <footer class="footer">
+        <p>G検定対策ノート：1-6-5 データ生成</p>
+        <p>作成：2024年</p>
+        <p>原稿とコード: Claude | 画像: ChatGPT</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- トップへ戻るボタン -->
+  <div class="back-to-top" id="backToTop">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <script>
+    // サイドバーメニューのアクティブ表示を制御
+    document.addEventListener("DOMContentLoaded", function() {
+      const sections = document.querySelectorAll("section");
+      const menuItems = document.querySelectorAll(".sidebar-menu a");
+      
+      // スクロール位置に応じてメニューをアクティブにする
+      function setActiveMenuItem() {
+        let current = "";
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (pageYOffset >= sectionTop - 150) {
+            current = "#" + section.getAttribute("id");
+          }
+        });
+        
+        menuItems.forEach(item => {
+          item.classList.remove("active");
+          if (item.getAttribute("href") === current) {
+            item.classList.add("active");
+          }
+        });
+      }
+      
+      // スクロールイベントリスナー
+      window.addEventListener("scroll", setActiveMenuItem);
+      
+      // スムーズスクロール
+      menuItems.forEach(item => {
+        item.addEventListener("click", function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute("href");
+          const targetSection = document.querySelector(targetId);
+          
+          window.scrollTo({
+            top: targetSection.offsetTop,
+            behavior: "smooth"
+          });
+        });
+      });
+      
+      // トップに戻るボタン
+      const backToTopButton = document.getElementById("backToTop");
+      
+      window.addEventListener("scroll", function() {
+        if (window.pageYOffset > 300) {
+          backToTopButton.classList.add("show");
+        } else {
+          backToTopButton.classList.remove("show");
+        }
+      });
+      
+      backToTopButton.addEventListener("click", function() {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

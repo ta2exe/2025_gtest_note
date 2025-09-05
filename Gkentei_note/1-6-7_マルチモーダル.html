@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-6-7 マルチモーダル | G検定学習ノート</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    /* CMYK カラーパレット */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+      --sidebar-width: 280px;
+      --content-max-width: 1000px;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    /* 基本スタイル */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      line-height: 1.6;
+      color: var(--key);
+      background-color: var(--white);
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: var(--sidebar-width);
+      position: fixed;
+      height: 100vh;
+      background-color: var(--cyan);
+      color: var(--key);
+      padding: 1.5rem;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--white);
+    }
+
+    .sidebar-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-subtitle {
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .sidebar-nav {
+      margin-top: 1rem;
+    }
+
+    .sidebar-nav-item {
+      display: block;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .sidebar-nav-item:hover, .sidebar-nav-item.active {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: translateX(5px);
+    }
+
+    .sidebar-nav-item i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* スクロールバーのカスタマイズ */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      width: calc(100% - var(--sidebar-width));
+      padding: 2rem;
+      max-width: var(--content-max-width);
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    /* タイトルスタイル */
+    .section-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 3px solid var(--cyan);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title i {
+      color: var(--magenta);
+      margin-right: 0.75rem;
+    }
+
+    /* サブタイトルスタイル */
+    .subsection-title {
+      font-family: 'Klee One', cursive;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 1.5rem 0 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .subsection-title i {
+      color: var(--yellow);
+      margin-right: 0.75rem;
+    }
+
+    /* 段落スタイル */
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+
+    /* リストスタイル */
+    ul, ol {
+      margin: 1rem 0 1.5rem 1.5rem;
+      list-style-position: inside;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    li::marker {
+      color: var(--magenta);
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* 強調表示 */
+    .highlight {
+      background: linear-gradient(transparent 60%, var(--yellow) 60%);
+      font-weight: 500;
+      padding: 0 4px;
+    }
+
+    .important {
+      color: var(--magenta);
+      font-weight: 700;
+    }
+
+    /* カード/ボックススタイル */
+    .card {
+      background-color: var(--light-gray);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--cyan);
+    }
+
+    .note-box {
+      background-color: rgba(255, 230, 0, 0.1);
+      border: 2px dashed var(--yellow);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .note-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background-color: var(--white);
+      padding: 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .handwritten-box {
+      font-family: 'Klee One', cursive;
+      background-color: var(--white);
+      border: 2px dotted var(--magenta);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      transform: rotate(-0.5deg);
+      box-shadow: var(--box-shadow);
+    }
+
+    /* テーブルスタイル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      box-shadow: var(--box-shadow);
+    }
+
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid var(--dark-gray);
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--cyan);
+      color: var(--key);
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+
+    /* 引用スタイル */
+    blockquote {
+      font-style: italic;
+      border-left: 4px solid var(--cyan);
+      padding-left: 1.5rem;
+      margin: 1.5rem 0;
+      color: var(--dark-gray);
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--cyan);
+      color: var(--key);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+      background-color: var(--magenta);
+      color: var(--white);
+    }
+
+    /* キーワードリスト */
+    .keyword-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .keyword-badge {
+      background-color: rgba(0, 216, 232, 0.2);
+      border: 1px solid var(--cyan);
+      border-radius: 20px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--key);
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .keyword-badge i {
+      margin-right: 0.4rem;
+      color: var(--cyan);
+    }
+
+    /* Key Insights & Take Home Message */
+    .key-insights {
+      background-color: rgba(255, 64, 160, 0.1);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .key-insights-title {
+      display: flex;
+      align-items: center;
+      color: var(--magenta);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .key-insights-title i {
+      margin-right: 0.75rem;
+    }
+
+    .key-insight-item {
+      display: flex;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+
+    .key-insight-number {
+      background-color: var(--magenta);
+      color: var(--white);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+
+    .key-insight-content {
+      flex-grow: 1;
+    }
+
+    .take-home {
+      background-color: rgba(255, 230, 0, 0.15);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+      box-shadow: var(--box-shadow);
+    }
+
+    .take-home-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--key);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .take-home-title i {
+      margin-right: 0.75rem;
+      color: var(--yellow);
+    }
+
+    .take-home-message {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 500;
+      line-height: 1.8;
+    }
+
+    /* 用語集スタイル */
+    .glossary {
+      margin-top: 2.5rem;
+    }
+
+    .glossary-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .glossary-title i {
+      color: var(--cyan);
+      margin-right: 0.75rem;
+    }
+
+    .glossary-item {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px dotted var(--dark-gray);
+    }
+
+    .glossary-term {
+      font-weight: 700;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+
+    .glossary-term i {
+      color: var(--cyan);
+      margin-right: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .glossary-definition {
+      margin-top: 0.35rem;
+      margin-left: 1.5rem;
+    }
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 2rem;
+      color: var(--dark-gray);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--light-gray);
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 992px) {
+      :root {
+        --sidebar-width: 240px;
+      }
+      
+      .main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 60vh;
+        position: relative;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+      }
+      
+      .section-title {
+        font-size: 1.6rem;
+      }
+      
+      .subsection-title {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドメニュー -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1 class="sidebar-title">ディープラーニングの応用例</h1>
+        <div class="sidebar-subtitle">G検定学習ノート</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#intro" class="sidebar-nav-item active">
+          <i class="fas fa-sync-alt"></i>マルチモーダルとは
+        </a>
+        <a href="#tasks-types" class="sidebar-nav-item">
+          <i class="fas fa-tasks"></i>マルチモーダルタスクの種類
+        </a>
+        <a href="#models" class="sidebar-nav-item">
+          <i class="fas fa-brain"></i>代表的なマルチモーダルモデル
+        </a>
+        <a href="#applications" class="sidebar-nav-item">
+          <i class="fas fa-laptop-code"></i>実世界での活用
+        </a>
+        <a href="#foundation-models" class="sidebar-nav-item">
+          <i class="fas fa-layer-group"></i>基盤モデルの進化
+        </a>
+        <a href="#key-insights" class="sidebar-nav-item">
+          <i class="fas fa-lightbulb"></i>Key Insights
+        </a>
+        <a href="#take-home" class="sidebar-nav-item">
+          <i class="fas fa-key"></i>Take Home Message
+        </a>
+        <a href="#glossary" class="sidebar-nav-item">
+          <i class="fas fa-book"></i>用語集
+        </a>
+      </nav>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- イントロダクションセクション -->
+      <section id="intro" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-sync-alt"></i>
+          1-6-7 マルチモーダル
+        </h2>
+        
+        <div class="keyword-list">
+          <div class="keyword-badge"><i class="fas fa-tag"></i>CLIP</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>DALL-E</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>Flamingo</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>Image Captioning</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>Text-To-Image</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>Visual Question Answering</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>Unified-IO</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>zero-shot</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>基盤モデル</div>
+          <div class="keyword-badge"><i class="fas fa-tag"></i>マルチタスク学習</div>
+        </div>
+        
+        <div class="card">
+          <p>マルチモーダルとは、複数の異なる種類のデータ（モダリティ）を組み合わせて処理・分析する技術です。画像、テキスト、音声、動画などの異なる形式の情報を統合して理解し、より豊かで総合的な知識表現を実現します。</p>
+          <p>この分野は近年急速に発展し、AI技術の中でも特に注目される領域となっています。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-info-circle"></i>
+          マルチモーダルの基本概念
+        </h3>
+        
+        <p>マルチモーダル（multimodal）とは、<span class="highlight">複数（multi）の情報様式（modality）</span>を扱うアプローチのことです。人間は視覚、聴覚、触覚など複数の感覚を通じて情報を処理していますが、従来のAIは単一のデータ形式（テキストのみ、画像のみなど）を扱うことが一般的でした。</p>
+        
+        <p>マルチモーダルAIは、人間のように複数の情報様式を統合して理解・処理することを目指しています。例えば：</p>
+        
+        <ul>
+          <li>画像とテキストを組み合わせて理解する</li>
+          <li>音声と映像からコンテキストを把握する</li>
+          <li>テキスト入力から画像を生成する</li>
+          <li>画像を見て質問に答える</li>
+        </ul>
+        
+        <div class="handwritten-box">
+          <p>モダリティ（modality）とは何か？</p>
+          <p>AIの文脈では「情報が表現される様式や形式」のことを指します。主なモダリティには以下があります：</p>
+          <ul>
+            <li>テキスト（文章、単語）</li>
+            <li>画像（写真、イラスト、図表）</li>
+            <li>音声（人の声、音楽、環境音）</li>
+            <li>動画（映像シーケンス）</li>
+            <li>時系列データ（センサーデータなど）</li>
+          </ul>
+          <p>マルチモーダルAIはこれらの異なるモダリティ間の関係性を学習し、相互に変換したり組み合わせたりできるようになります。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-lightbulb"></i>
+          なぜマルチモーダルが重要なのか
+        </h3>
+        
+        <p>マルチモーダルAIが注目される理由は以下のとおりです：</p>
+        
+        <ol>
+          <li><span class="important">人間に近い情報処理</span> - 人間は複数の感覚を組み合わせて世界を認識しています。マルチモーダルAIは人間の認知に近づくことで、より自然なAIの実現を目指しています。</li>
+          <li><span class="important">より豊かな表現学習</span> - 異なるモダリティの情報を組み合わせることで、単一モダリティでは獲得できない豊かな知識表現が可能になります。</li>
+          <li><span class="important">汎用AI技術への発展</span> - 様々なデータ形式を横断的に扱えることで、より汎用的なAIシステムの構築につながります。</li>
+          <li><span class="important">実世界の問題への応用</span> - 実世界の問題は多くの場合、複数の種類のデータが関わっています。マルチモーダルAIはこうした複雑な問題に対処できます。</li>
+        </ol>
+        
+        <div class="note-box">
+          <p>マルチモーダルAIの進化は<span class="important">基盤モデル（Foundation Models）</span>の発展と密接に関連しています。大規模なデータで事前学習された基盤モデルが、異なるモダリティ間の橋渡しを可能にし、様々なタスクに応用できるようになっています。</p>
+        </div>
+      </section>
+      
+      <!-- マルチモーダルタスクの種類セクション -->
+      <section id="tasks-types" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-tasks"></i>
+          マルチモーダルタスクの種類
+        </h2>
+        
+        <p>マルチモーダルAIは様々なタスクに応用されています。シラバスで言及されている主要なタスクとその概要を以下に説明します。</p>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-image"></i>
+          Image Captioning（画像キャプション生成）
+        </h3>
+        
+        <p><span class="highlight">Image Captioning（画像キャプション生成）</span>は、入力された画像の内容を説明する自然言語のキャプション（説明文）を自動的に生成するタスクです。</p>
+        
+        <div class="card">
+          <p><strong>仕組み：</strong> 一般的には、CNN（畳み込みニューラルネットワーク）で画像の特徴を抽出し、それをRNN（リカレントニューラルネットワーク）やTransformerなどの言語モデルに入力して、テキストを生成します。</p>
+          <p><strong>応用例：</strong> 視覚障害者向けの支援技術、画像検索システム、ソーシャルメディアの自動キャプション生成など。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-pen"></i>
+          Text-To-Image（テキストから画像生成）
+        </h3>
+        
+        <p><span class="highlight">Text-To-Image（テキストから画像生成）</span>は、テキスト説明から、その内容に合致する画像を生成するタスクです。近年、DALL-E、Stable Diffusion、Midjourney などのモデルにより大きく進化した分野です。</p>
+        
+        <div class="card">
+          <p><strong>仕組み：</strong> テキストエンコーダでテキストを意味的な特徴ベクトルに変換し、その特徴を条件として画像生成モデル（GANやDiffusion Modelなど）を制御します。</p>
+          <p><strong>応用例：</strong> デザイン支援、コンテンツ制作、エンターテイメント、教育用素材の自動生成など。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-question-circle"></i>
+          Visual Question Answering（視覚的質問応答）
+        </h3>
+        
+        <p><span class="highlight">Visual Question Answering（VQA、視覚的質問応答）</span>は、画像と、その画像に関する質問が与えられたとき、画像の内容に基づいて質問に回答するタスクです。</p>
+        
+        <div class="card">
+          <p><strong>仕組み：</strong> 画像エンコーダと言語エンコーダで特徴を抽出し、それらを結合または相互に注意を向けあう機構を通じて回答を生成します。</p>
+          <p><strong>応用例：</strong> ロボットビジョン、教育支援システム、情報検索、視覚障害者支援など。</p>
+        </div>
+        
+        <div class="handwritten-box">
+          <p>マルチモーダルタスクのその他の例：</p>
+          <ul>
+            <li><strong>クロスモーダル検索（Cross-modal Retrieval）</strong>：あるモダリティ（例：テキスト）で検索クエリを入力し、別のモダリティ（例：画像）のデータを検索する</li>
+            <li><strong>マルチモーダル感情分析（Multimodal Sentiment Analysis）</strong>：テキスト、音声、表情などを組み合わせて感情を分析する</li>
+            <li><strong>マルチモーダル機械翻訳（Multimodal Machine Translation）</strong>：画像の文脈も考慮してテキスト翻訳の精度を向上させる</li>
+            <li><strong>音声-テキスト変換（Speech-to-Text）</strong>：音声を認識してテキストに変換する</li>
+            <li><strong>音楽生成（Music Generation）</strong>：テキスト指示から音楽を生成する</li>
+          </ul>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-random"></i>
+          マルチタスク学習
+        </h3>
+        
+        <p><span class="highlight">マルチタスク学習（Multi-task Learning）</span>は、1つのモデルで複数の関連タスクを同時に学習する手法です。マルチモーダルの文脈では、異なるモダリティ間のタスクを統合して学習することで、より汎用的な表現を獲得することが目指されています。</p>
+        
+        <div class="note-box">
+          <p>マルチタスク学習では、タスク間で知識の転移が起こります。例えば、画像認識タスクで学んだ特徴がテキスト生成に役立ったり、逆にテキスト理解の能力が画像認識を助けたりします。これにより、単一タスクで学習するよりも総合的に性能が向上することがあります。</p>
+        </div>
+        
+        <p>近年のマルチモーダルモデルは、異なるモダリティ間の変換だけでなく、<span class="important">zero-shot（ゼロショット）</span>能力も持つようになっています。これは、特定のタスクについて明示的に学習していなくても、そのタスクを実行できる能力を指します。</p>
+      </section>
+      
+      <!-- 代表的なマルチモーダルモデルセクション -->
+      <section id="models" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-brain"></i>
+          代表的なマルチモーダルモデル
+        </h2>
+        
+        <p>G検定シラバスでは、いくつかの重要なマルチモーダルモデルが言及されています。これらのモデルは各々独自のアプローチと技術的特徴を持っています。</p>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-link"></i>
+          CLIP（Contrastive Language-Image Pre-training）
+        </h3>
+        
+        <p><span class="highlight">CLIP</span>は、OpenAIが開発した画像とテキストを対応づける事前学習モデルです。大量の画像とそれに対応するテキストのペアを使って学習し、画像とテキストの意味的な関連性を捉える能力を獲得しています。</p>
+        
+        <div class="card">
+          <p><strong>特徴：</strong></p>
+          <ul>
+            <li>対照学習（Contrastive Learning）を用いて画像とテキストの表現を共通の特徴空間に投影</li>
+            <li>4億組以上の画像とテキストのペアで事前学習</li>
+            <li>学習していないカテゴリにも対応できるzero-shot能力を持つ</li>
+            <li>画像分類だけでなく、画像検索やクロスモーダルな理解にも活用できる</li>
+          </ul>
+          <p><strong>重要性：</strong> CLIPは画像とテキストの意味的な紐付けを大規模に学習することで、特定のタスク用にモデルを微調整しなくても様々な視覚的判断ができる汎用性を実現しました。これは後続のマルチモーダルモデルに大きな影響を与えています。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-paint-brush"></i>
+          DALL-E
+        </h3>
+        
+        <p><span class="highlight">DALL-E</span>（およびその後継のDALL-E 2, DALL-E 3）は、OpenAIによって開発されたテキストから画像を生成するモデルです。テキスト記述から高品質で創造的な画像を生成することができます。</p>
+        
+        <div class="card">
+          <p><strong>特徴：</strong></p>
+          <ul>
+            <li>テキスト入力から詳細な画像を生成できる</li>
+            <li>DALL-E（初代）はGPT-3の画像版として開発され、Transformerアーキテクチャを使用</li>
+            <li>DALL-E 2はCLIPの埋め込みを活用し、Diffusion Modelを採用</li>
+            <li>DALL-E 3はさらに改良され、より正確な指示への対応能力が向上</li>
+          </ul>
+          <p><strong>応用：</strong> デザイン、イラスト制作、広告、エンターテイメント、コンセプトアートなど、クリエイティブ産業に広く応用されています。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-feather-alt"></i>
+          Flamingo
+        </h3>
+        
+        <p><span class="highlight">Flamingo</span>は、Google DeepMindが開発した視覚言語モデルで、画像や動画を見て質問に答えたり、文脈を理解したりできる能力を持っています。</p>
+        
+        <div class="card">
+          <p><strong>特徴：</strong></p>
+          <ul>
+            <li>テキストと視覚情報（画像や動画）を柔軟に統合して処理できる</li>
+            <li>少数の例からの学習（few-shot learning）に優れている</li>
+            <li>ユーザーとの対話的なコミュニケーションが可能</li>
+            <li>視覚的文脈を考慮した自然な言語生成ができる</li>
+          </ul>
+          <p><strong>アーキテクチャ：</strong> 視覚エンコーダと大規模言語モデルを組み合わせ、その間に「パーセプション・クロスアテンション」という機構を導入して視覚情報と言語情報の効果的な統合を実現しています。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-cubes"></i>
+          Unified-IO
+        </h3>
+        
+        <p><span class="highlight">Unified-IO</span>は、異なる種類の入出力（テキスト、画像、音声など）を統一的に扱うための枠組みを提供するモデルです。多様なモダリティとタスクを単一のモデルで処理できるように設計されています。</p>
+        
+        <div class="card">
+          <p><strong>特徴：</strong></p>
+          <ul>
+            <li>様々なモダリティの入力を受け取り、様々なモダリティの出力を生成可能</li>
+            <li>単一のモデルで多数のタスクをこなせるよう設計</li>
+            <li>入力と出力の形式を統一的に扱うためのフレームワークを提供</li>
+            <li>新しいタスクにも容易に適応できる汎用性</li>
+          </ul>
+          <p><strong>意義：</strong> 従来は特定のモダリティや特定のタスク向けに個別のモデルが必要でしたが、Unified-IOのようなアプローチにより、より汎用的でシームレスなAIシステムの構築が可能になります。</p>
+        </div>
+        
+        <div class="note-box">
+          <p>マルチモーダルモデルの発展は急速に進んでおり、G検定シラバスに記載されているモデル以外にも多くの重要なモデルが登場しています。例えば、StableDiffusion、Midjourney、Google GeminiなどがText-to-Imageやマルチモーダル理解の分野で注目を集めています。G検定では、シラバスに記載されているモデルの基本的な特徴と役割を理解することが重要です。</p>
+        </div>
+      </section>
+      
+      <!-- 実世界での活用セクション -->
+      <section id="applications" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-laptop-code"></i>
+          実世界での活用
+        </h2>
+        
+        <p>マルチモーダルAIは、様々な産業や領域で活用され始めています。シラバスの「マルチモーダルモデルが実世界において、どのように活用されているか理解する」という目標に沿って、主要な応用例を見ていきましょう。</p>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-universal-access"></i>
+          アクセシビリティ向上
+        </h3>
+        
+        <p>マルチモーダルAIは、障害のある人々を支援するためのアクセシビリティ技術として重要な役割を果たしています。</p>
+        
+        <div class="card">
+          <p><strong>主要な応用例：</strong></p>
+          <ul>
+            <li><span class="important">視覚障害者向け画像説明</span> - 画像コンテンツを音声で説明（Image Captioning技術を活用）</li>
+            <li><span class="important">手話の翻訳</span> - 手話を認識してテキストや音声に変換</li>
+            <li><span class="important">読唇技術</span> - 口の動きから発話内容を推測する技術</li>
+            <li><span class="important">感情認識支援</span> - 社会的コミュニケーションが困難な人向けに表情や声のトーンから感情を解析</li>
+          </ul>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-hospital"></i>
+          医療・ヘルスケア
+        </h3>
+        
+        <p>医療分野では、マルチモーダルAIが診断支援や患者ケアの改善に貢献しています。</p>
+        
+        <div class="card">
+          <p><strong>主要な応用例：</strong></p>
+          <ul>
+            <li><span class="important">マルチモーダル診断支援</span> - 画像（X線、MRIなど）と患者データ（検査結果、症状など）を組み合わせた診断支援</li>
+            <li><span class="important">医療画像理解</span> - 医療画像に対する自然言語での質問応答システム</li>
+            <li><span class="important">治療計画の最適化</span> - 様々なデータソースを統合した個別化治療計画</li>
+            <li><span class="important">医療文献検索</span> - テキストと画像を組み合わせた専門文献の検索・要約</li>
+          </ul>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-shopping-cart"></i>
+          小売・Eコマース
+        </h3>
+        
+        <p>小売業では、マルチモーダルAIがパーソナライズされたショッピング体験を提供するために活用されています。</p>
+        
+        <div class="card">
+          <p><strong>主要な応用例：</strong></p>
+          <ul>
+            <li><span class="important">ビジュアル検索</span> - 画像からそれと同様の商品を検索する機能</li>
+            <li><span class="important">バーチャル試着</span> - 画像処理と拡張現実技術を組み合わせたバーチャル試着システム</li>
+            <li><span class="important">商品推薦システム</span> - ユーザーの視覚的好みとテキストによる検索履歴を組み合わせた推薦</li>
+            <li><span class="important">インタラクティブショッピングアシスタント</span> - 画像とテキストで対話するショッピング支援AI</li>
+          </ul>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-video"></i>
+          エンターテイメント・メディア
+        </h3>
+        
+        <p>エンターテイメント業界では、マルチモーダルAIがコンテンツ制作やユーザーエクスペリエンスの向上に役立てられています。</p>
+        
+        <div class="card">
+          <p><strong>主要な応用例：</strong></p>
+          <ul>
+            <li><span class="important">コンテンツ生成</span> - テキスト入力から画像、音楽、ビデオなどを生成</li>
+            <li><span class="important">自動字幕生成</span> - 動画コンテンツの音声を認識して字幕を自動生成</li>
+            <li><span class="important">コンテンツ分析とタグ付け</span> - 動画や画像の内容を自動分析してメタデータを付与</li>
+            <li><span class="important">パーソナライズされた推薦</span> - 視聴履歴、好み、テキストレビューなどを統合した推薦システム</li>
+          </ul>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-robot"></i>
+          ロボティクス・自動運転
+        </h3>
+        
+        <p>物理世界とデジタル世界のインターフェースとなるロボットや自動運転車には、マルチモーダルAIが欠かせません。</p>
+        
+        <div class="card">
+          <p><strong>主要な応用例：</strong></p>
+          <ul>
+            <li><span class="important">環境認識</span> - カメラ、LiDAR、音声センサーなどの多様なセンサーデータを統合した環境理解</li>
+            <li><span class="important">自然な対話インターフェース</span> - 音声指示と視覚情報を組み合わせたロボットとの対話</li>
+            <li><span class="important">行動計画</span> - 視覚情報と言語指示に基づく行動計画の策定</li>
+            <li><span class="important">マルチモーダル異常検知</span> - 様々なセンサーデータに基づく異常の検出</li>
+          </ul>
+        </div>
+        
+        <div class="handwritten-box">
+          <p>マルチモーダルAIの社会的インパクト</p>
+          <p>マルチモーダルAIの普及により、以下のような社会的変化が期待されています：</p>
+          <ul>
+            <li>情報格差の縮小（障害の有無や言語の壁を越えたコミュニケーション）</li>
+            <li>クリエイティブワークの民主化（高度なデザインやコンテンツ制作の敷居を下げる）</li>
+            <li>より自然で直感的なヒューマン・コンピュータインタラクション</li>
+            <li>特定領域の専門知識の活用支援（医療診断支援など）</li>
+          </ul>
+          <p>一方で、偽情報の生成や著作権の問題など、新たな倫理的・社会的課題も生まれています。</p>
+        </div>
+      </section>
+      
+      <!-- 基盤モデルの進化セクション -->
+      <section id="foundation-models" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-layer-group"></i>
+          基盤モデルの進化
+        </h2>
+        
+        <p>マルチモーダルAIの発展において、<span class="highlight">基盤モデル（Foundation Models）</span>は中心的な役割を果たしています。基盤モデルの進化がマルチモーダルAIの可能性を大きく広げています。</p>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-project-diagram"></i>
+          基盤モデルとは
+        </h3>
+        
+        <p>基盤モデル（Foundation Models）とは、膨大なデータで事前学習され、様々なタスクに転用できる大規模AIモデルを指します。特定のタスク向けに設計されたモデルではなく、汎用的な能力を持つモデルという特徴があります。</p>
+        
+        <div class="card">
+          <p><strong>基盤モデルの主な特徴：</strong></p>
+          <ul>
+            <li>大規模なデータセットを用いた自己教師あり学習</li>
+            <li>膨大なパラメータ数と計算リソース</li>
+            <li>転移学習によって様々なタスクに適応可能</li>
+            <li>少数の例からの学習（few-shot学習）能力</li>
+            <li>複数のモダリティを扱える柔軟性</li>
+          </ul>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-code-branch"></i>
+          マルチモーダル基盤モデルの進化
+        </h3>
+        
+        <p>マルチモーダル基盤モデルは、以下のような進化の過程を辿っています：</p>
+        
+        <ol>
+          <li><span class="important">単一モダリティモデルの拡張</span> - 最初は画像のみ、テキストのみのモデルから始まり、異なるモダリティを扱えるようにモデルを拡張</li>
+          <li><span class="important">モダリティ間の接続</span> - 異なるモダリティ間の関係性を学習できるように設計</li>
+          <li><span class="important">統一的なアーキテクチャ</span> - 様々なモダリティを共通の表現空間で扱えるアーキテクチャの発展</li>
+          <li><span class="important">大規模化と汎用化</span> - より大規模なデータとモデルサイズによる汎用的な能力の獲得</li>
+        </ol>
+        
+        <div class="handwritten-box">
+          <p>基盤モデルとマルチモーダルの相乗効果</p>
+          <p>基盤モデルとマルチモーダルアプローチは互いに強化し合う関係にあります：</p>
+          <ul>
+            <li>基盤モデルの大規模なパラメータ空間は、複数のモダリティの情報を統合するのに十分な容量を提供</li>
+            <li>マルチモーダルアプローチは、様々な情報源からの豊かな情報を基盤モデルに供給</li>
+            <li>その結果、より柔軟で知的なAIシステムが実現可能に</li>
+          </ul>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-rocket"></i>
+          Zero-shotとマルチモーダル基盤モデル
+        </h3>
+        
+        <p><span class="highlight">Zero-shot（ゼロショット）</span>能力は、マルチモーダル基盤モデルの重要な特性の一つです。これは、特定のタスクについて明示的な訓練を受けていなくても、そのタスクを実行できる能力を指します。</p>
+        
+        <div class="card">
+          <p><strong>Zero-shot能力の重要性：</strong></p>
+          <ul>
+            <li>新しい概念やカテゴリへの対応が可能</li>
+            <li>特定のタスクごとに再訓練する必要がない</li>
+            <li>限られたデータしかない領域でも応用可能</li>
+            <li>複数のモダリティ間の橋渡しが可能</li>
+          </ul>
+          <p>例えば、CLIPモデルは特定の画像カテゴリでの学習なしに、テキスト記述から新しいカテゴリの画像を認識できます。これは、異なるモダリティ（テキストと画像）間の意味的関係を学習したことによって実現します。</p>
+        </div>
+        
+        <h3 class="subsection-title">
+          <i class="fas fa-forward"></i>
+          今後の展望
+        </h3>
+        
+        <p>マルチモーダル基盤モデルの今後の展望としては、以下のような方向性が考えられます：</p>
+        
+        <ul>
+          <li><span class="important">さらなるモダリティの統合</span> - 触覚、嗅覚などより多様なモダリティの取り込み</li>
+          <li><span class="important">解釈可能性の向上</span> - ブラックボックス的な側面を減らし、判断理由の説明が可能に</li>
+          <li><span class="important">効率化</span> - 現状のモデルは計算リソースを大量に必要とするため、より効率的なアーキテクチャの開発</li>
+          <li><span class="important">特定領域への特化</span> - 医療や科学研究などの専門領域向けのマルチモーダル基盤モデルの開発</li>
+          <li><span class="important">ロボティクスとの統合</span> - 物理世界とのインタラクションを含むマルチモーダルシステムの発展</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>G検定で重要なポイントは、<span class="important">基盤モデル（Foundation Models）</span>という概念がシラバスに明示的に含まれていることです。マルチモーダルAIの文脈において、基盤モデルがどのような役割を果たしているかを理解することが求められています。また、<span class="important">zero-shot（ゼロショット）</span>能力についても、マルチモーダルモデルの重要な特性として理解しておくことが必要です。</p>
+        </div>
+      </section>
+      
+      <!-- Key Insightsセクション -->
+      <section id="key-insights" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-lightbulb"></i>
+          Key Insights
+        </h2>
+        
+        <div class="key-insights">
+          <h3 class="key-insights-title">
+            <i class="fas fa-star"></i>
+            マルチモーダルAIの重要ポイント
+          </h3>
+          
+          <div class="key-insight-item">
+            <div class="key-insight-number">1</div>
+            <div class="key-insight-content">
+              <h4>複数のモダリティの統合</h4>
+              <p>マルチモーダルAIは、テキスト、画像、音声、動画などの異なるモダリティの情報を統合して処理できるモデルです。これにより、単一モダリティのモデルよりも豊かな理解と生成が可能になります。</p>
+            </div>
+          </div>
+          
+          <div class="key-insight-item">
+            <div class="key-insight-number">2</div>
+            <div class="key-insight-content">
+              <h4>代表的なタスクとモデル</h4>
+              <p>G検定では、Image Captioning、Text-To-Image、Visual Question Answeringなどの代表的なマルチモーダルタスクと、CLIP、DALL-E、Flamingo、Unified-IOなどの代表的なモデルの基本概念を理解しておく必要があります。</p>
+            </div>
+          </div>
+          
+          <div class="key-insight-item">
+            <div class="key-insight-number">3</div>
+            <div class="key-insight-content">
+              <h4>基盤モデルとの関係</h4>
+              <p>マルチモーダルAIの発展は基盤モデル（Foundation Models）の進化と密接に関連しています。大規模な事前学習とモダリティ間の橋渡しによって、より柔軟で汎用的なAIシステムが実現されています。</p>
+            </div>
+          </div>
+          
+          <div class="key-insight-item">
+            <div class="key-insight-number">4</div>
+            <div class="key-insight-content">
+              <h4>Zero-shot能力</h4>
+              <p>現代のマルチモーダルモデルの特徴として、特定のタスクについて明示的に学習していなくても、そのタスクを実行できるzero-shot能力があります。これは、異なるモダリティ間の意味的関係の学習によって実現されています。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Take Home Messageセクション -->
+      <section id="take-home" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-key"></i>
+          Take Home Message
+        </h2>
+        
+        <div class="take-home">
+          <h3 class="take-home-title">
+            <i class="fas fa-quote-left"></i>
+            重要メッセージ
+          </h3>
+          <p class="take-home-message">
+            マルチモーダルAIは、複数の情報形式（テキスト・画像・音声など）を組み合わせて処理する技術です。CLIP、DALL-E、Flamingoなどの代表的モデルを理解し、基盤モデルとの関連性やzero-shot能力を把握しておきましょう。この技術は人間のような情報処理を目指し、様々な産業で革新的な応用が進んでいます。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 用語集セクション -->
+      <section id="glossary" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-book"></i>
+          用語集
+        </h2>
+        
+        <div class="glossary">
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>マルチモーダル（Multimodal）</div>
+            <div class="glossary-definition">複数の異なる情報様式（モダリティ）を組み合わせて処理・分析する技術や手法のこと。テキスト、画像、音声などの異なる形式の情報を統合して扱う。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>CLIP（Contrastive Language-Image Pre-training）</div>
+            <div class="glossary-definition">OpenAIが開発した、画像とテキストの関連性を大量のデータから学習する事前学習モデル。画像分類やクロスモーダル検索などのタスクでzero-shot能力を発揮する。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>DALL-E</div>
+            <div class="glossary-definition">OpenAIが開発したText-to-Imageモデル。テキスト記述から詳細な画像を生成することができる。DALL-E、DALL-E 2、DALL-E 3と進化している。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>Flamingo</div>
+            <div class="glossary-definition">Google DeepMindが開発した視覚言語モデル。画像や動画を見て質問に答えたり、文脈を理解したりする能力を持つ。few-shot学習に優れている。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>Image Captioning（画像キャプション生成）</div>
+            <div class="glossary-definition">入力された画像の内容を説明する自然言語のキャプション（説明文）を自動的に生成するタスク。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>Text-To-Image（テキストから画像生成）</div>
+            <div class="glossary-definition">テキスト説明から、その内容に合致する画像を生成するタスク。DALL-E、Stable Diffusion、Midjourneyなどのモデルが知られている。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>Visual Question Answering（視覚的質問応答）</div>
+            <div class="glossary-definition">画像と、その画像に関する質問が与えられたとき、画像の内容に基づいて質問に回答するタスク。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>Unified-IO</div>
+            <div class="glossary-definition">異なる種類の入出力（テキスト、画像、音声など）を統一的に扱うための枠組みを提供するモデル。多様なモダリティとタスクを単一のモデルで処理できる。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>zero-shot（ゼロショット）</div>
+            <div class="glossary-definition">特定のタスクについて明示的に学習していなくても、そのタスクを実行できる能力。事前学習で獲得した知識を活用して新しい状況に対応する。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>基盤モデル（Foundation Models）</div>
+            <div class="glossary-definition">膨大なデータで事前学習され、様々なタスクに転用できる大規模AIモデル。特定のタスク向けではなく、汎用的な能力を持つ。</div>
+          </div>
+          
+          <div class="glossary-item">
+            <div class="glossary-term"><i class="fas fa-caret-right"></i>マルチタスク学習（Multi-task Learning）</div>
+            <div class="glossary-definition">1つのモデルで複数の関連タスクを同時に学習する手法。マルチモーダルの文脈では、異なるモダリティ間のタスクを統合して学習することで、より汎用的な表現を獲得する。</div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- フッター -->
+      <footer class="footer">
+        <p>1-6-7 マルチモーダル | G検定学習ノート</p>
+        <p>作成日: 2024年5月 | Text & Code: Claude 3.7 Sonnet | Images may be created by other AI models</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <script>
+    // サイドバーのアクティブ状態管理
+    const sections = document.querySelectorAll('.section');
+    const navItems = document.querySelectorAll('.sidebar-nav-item');
+    
+    // スクロール位置に応じてナビゲーションをハイライト
+    window.addEventListener('scroll', () => {
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= (sectionTop - 300)) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href').slice(1) === current) {
+          item.classList.add('active');
+        }
+      });
+      
+      // スクロールトップボタンの表示/非表示
+      const scrollBtn = document.querySelector('.scroll-top');
+      if (pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+    
+    // スムーズスクロール
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        window.scrollTo({
+          top: targetElement.offsetTop - 80,
+          behavior: 'smooth'
+        });
+      });
+    });
+    
+    // スクロールトップボタンのクリックイベント
+    document.querySelector('.scroll-top').addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  </script>
+</body>
+</html> 

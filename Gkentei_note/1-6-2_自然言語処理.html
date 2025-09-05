@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G検定学習ノート - 1-6-2 自然言語処理</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔤</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    /* CMYK配色 */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      line-height: 1.6;
+      color: var(--key);
+      background-color: var(--white);
+    }
+    
+    /* コンテナ */
+    .container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 20%;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      background-color: #181818;
+      color: var(--white);
+      padding: 2rem 1rem;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar-title {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--cyan);
+      color: var(--white);
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+    }
+    
+    .sidebar-menu li {
+      margin-bottom: 1rem;
+    }
+    
+    .sidebar-menu a {
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+      background-color: var(--cyan);
+      color: var(--key);
+    }
+
+    .sidebar-menu i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      text-align: center;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      border-bottom: 3px solid var(--cyan);
+      padding-bottom: 0.5rem;
+    }
+    
+    h3 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+    }
+    
+    p {
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      background-color: rgba(255, 230, 0, 0.1);
+      border: 2px dashed var(--yellow);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 10px;
+      position: relative;
+      font-family: 'Klee One', cursive;
+    }
+    
+    .handwritten-box::before {
+      content: '\f304';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      position: absolute;
+      top: -15px;
+      left: 20px;
+      background-color: var(--white);
+      color: var(--yellow);
+      padding: 0 10px;
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      background-color: rgba(0, 216, 232, 0.1);
+      border-left: 4px solid var(--cyan);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .note-box::before {
+      content: '📌';
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      font-size: 1.2rem;
+    }
+    
+    /* コンセプトボックス */
+    .concept-box {
+      background-color: rgba(255, 64, 160, 0.1);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .concept-title {
+      display: inline-block;
+      color: var(--magenta);
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    /* キーワードマーカー */
+    .keyword-marker {
+      background-color: rgba(255, 230, 0, 0.3);
+      padding: 0 5px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    /* 関連コンセプト */
+    .related-concepts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 1.5rem 0;
+    }
+
+    .related-concept {
+      background-color: rgba(0, 216, 232, 0.1);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      border: 1px solid var(--cyan);
+    }
+    
+    /* テーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    
+    th {
+      background-color: rgba(0, 216, 232, 0.2);
+      padding: 10px;
+      text-align: left;
+      border-bottom: 2px solid var(--cyan);
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    /* リスト */
+    ul, ol {
+      margin: 1rem 0 1.5rem 1.5rem;
+      list-style-position: inside;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* 画像コンテナ */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* フローデザイン */
+    .flow-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .flow-step {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+    }
+    
+    .flow-step:not(:last-child)::after {
+      content: '\f054';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      position: absolute;
+      top: 50%;
+      right: -10px;
+      transform: translateY(-50%);
+      color: var(--dark-gray);
+    }
+
+    .flow-step-icon {
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .flow-step-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    /* 用語集テーブル */
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    
+    .glossary-table th {
+      background-color: rgba(0, 216, 232, 0.2);
+      color: var(--key);
+      padding: 12px 15px;
+      text-align: left;
+    }
+
+    .glossary-table td {
+      padding: 10px 15px;
+      border-bottom: 1px solid #ddd;
+      vertical-align: top;
+    }
+
+    .glossary-table tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 3rem;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      border-top: 1px solid #eee;
+    }
+    
+    /* トップに戻るボタン */
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--magenta);
+      color: var(--white);
+      text-align: center;
+      line-height: 40px;
+      font-size: 20px;
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+
+    .back-to-top:hover {
+      opacity: 1;
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+      }
+      
+      .flow-step {
+        min-width: 100%;
+        margin-bottom: 2rem;
+      }
+      
+      .flow-step:not(:last-child)::after {
+        content: '\f078';
+        right: 50%;
+        top: auto;
+        bottom: -20px;
+        transform: translateX(50%);
+      }
+    }
+    
+    /* Transformer図用のスタイル */
+    .transformer-diagram {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+    }
+    .transformer-column {
+      flex: 1;
+      max-width: 45%;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .encoder {
+      background-color: rgba(0, 216, 232, 0.1);
+      border: 1px solid rgba(0, 216, 232, 0.3);
+    }
+    .decoder {
+      background-color: rgba(255, 64, 160, 0.1);
+      border: 1px solid rgba(255, 64, 160, 0.3);
+    }
+    .transformer-column h4 {
+      text-align: center;
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .architecture-block {
+      margin: 15px 0;
+    }
+    .layer {
+      background-color: white;
+      padding: 8px 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .arrow {
+      text-align: center;
+      color: var(--dark-gray);
+      font-size: 14px;
+    }
+    .model-examples {
+      margin-top: 15px;
+      font-size: 0.9em;
+    }
+    .model-examples p {
+      margin: 5px 0;
+    }
+    .diagram-caption {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      font-size: 0.9em;
+      color: var(--dark-gray);
+    }
+    
+    /* タイムライン用スタイル */
+    .timeline {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .timeline::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      background-color: var(--cyan);
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      margin-left: -3px;
+      border-radius: 3px;
+    }
+    
+    .timeline-item {
+      padding: 10px 40px;
+      position: relative;
+      width: 50%;
+      box-sizing: border-box;
+    }
+    
+    .timeline-item:nth-child(odd) {
+      left: 0;
+    }
+    
+    .timeline-item:nth-child(even) {
+      left: 50%;
+    }
+    
+    .timeline-date {
+      font-weight: bold;
+      color: var(--key);
+      margin-bottom: 10px;
+    }
+    
+    .timeline-content {
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 6px;
+      border-left: 4px solid var(--cyan);
+      position: relative;
+    }
+    
+    .timeline-content h4 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: var(--cyan);
+    }
+    
+    .timeline-content p {
+      margin: 5px 0;
+    }
+    
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: white;
+      border: 4px solid var(--cyan);
+      border-radius: 50%;
+      top: 15px;
+      z-index: 1;
+    }
+    
+    .timeline-item:nth-child(odd)::after {
+      right: -10px;
+    }
+    
+    .timeline-item:nth-child(even)::after {
+      left: -10px;
+    }
+    
+    @media (max-width: 768px) {
+      .timeline::after {
+        left: 31px;
+      }
+      
+      .timeline-item {
+        width: 100%;
+        padding-left: 70px;
+        padding-right: 25px;
+      }
+      
+      .timeline-item:nth-child(even) {
+        left: 0;
+      }
+      
+      .timeline-item::after {
+        left: 21px;
+      }
+    }
+    
+    /* 強調表示 */
+    .highlight {
+      background-color: rgba(255, 64, 160, 0.8);
+      padding: 2px 5px;
+      border-radius: 3px;
+      color: white;
+      font-weight: 500;
+    }
+    
+    .diagram {
+      margin: 25px 0;
+      padding: 20px;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .diagram h3 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: var(--key);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <h2 class="sidebar-title">ディープラーニングの応用例</h2>
+      <ul class="sidebar-menu">
+        <li><a href="#intro"><i class="fas fa-info-circle"></i>はじめに</a></li>
+        <li><a href="#nlp-tasks"><i class="fas fa-tasks"></i>自然言語処理のタスク</a></li>
+        <li><a href="#feature-representation"><i class="fas fa-vector-square"></i>特徴表現手法</a></li>
+        <li><a href="#models"><i class="fas fa-brain"></i>代表的なモデル</a></li>
+        <li><a href="#applications"><i class="fas fa-laptop-code"></i>実世界での活用</a></li>
+        <li><a href="#glossary"><i class="fas fa-book"></i>用語集</a></li>
+        <li><a href="#key-insights"><i class="fas fa-lightbulb"></i>重要ポイント</a></li>
+        <li><a href="#take-home"><i class="fas fa-key"></i>まとめ</a></li>
+      </ul>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- イントロダクションセクション -->
+      <section id="intro">
+        <h1>1-6-2 自然言語処理</h1>
+        <p>自然言語処理（Natural Language Processing, NLP）は、人間の言語をコンピュータに理解・生成させるための技術で、ディープラーニングの重要な応用分野です。テキストデータを分析・理解し、翻訳・要約・質問応答などを行うための技術基盤となります。</p>
+        
+        <div class="handwritten-box">
+          <h3>G検定で求められる理解</h3>
+          <ul>
+            <li>自然言語処理の代表的なタスクとその概要を説明できる</li>
+            <li>テキストデータの特徴表現手法の種類と特徴を理解する</li>
+            <li>代表的なNLPモデルの構造と特徴を理解する</li>
+            <li>自然言語処理の実世界における活用事例を説明できる</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-history"></i> 自然言語処理の発展</h3>
+          <div class="flow-container">
+            <div class="flow-step">
+              <div class="flow-step-icon"><i class="fas fa-book"></i></div>
+              <div class="flow-step-title">ルールベース時代</div>
+              <p>文法規則や辞書に基づく手作業のルール設計</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-icon"><i class="fas fa-chart-bar"></i></div>
+              <div class="flow-step-title">統計的NLP時代</div>
+              <p>確率モデルと大量のテキストデータによる学習</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-icon"><i class="fas fa-network-wired"></i></div>
+              <div class="flow-step-title">ニューラルNLP時代</div>
+              <p>ディープラーニングによる特徴の自動抽出と表現学習</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-icon"><i class="fas fa-brain"></i></div>
+              <div class="flow-step-title">大規模言語モデル時代</div>
+              <p>事前学習と転移学習に基づく巨大モデル</p>
+            </div>
+          </div>
+        </div>
+        
+        <p>自然言語処理は、テキストの意味理解や生成に関わる複雑な問題に取り組む分野です。人間の言語は曖昧さや文脈依存性、言語固有の複雑さを持ち、これらを計算機で処理することは大きな課題です。近年のディープラーニングの発展により、これらの課題に対する解決策が急速に進化しています。</p>
+        
+        <div class="note-box">
+          <p>自然言語処理はAI技術の中で最も身近な応用例の一つです。スマートフォンの音声アシスタント、自動翻訳、検索エンジン、メールの自動返信提案、チャットボットなど、日常的に利用する多くのサービスにNLP技術が組み込まれています。</p>
+        </div>
+        
+        <div class="related-concepts">
+          <span class="related-concept"><i class="fas fa-link"></i> 機械翻訳</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 感情分析</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 質問応答</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 形態素解析</span>
+          <span class="related-concept"><i class="fas fa-link"></i> 文書要約</span>
+          <span class="related-concept"><i class="fas fa-link"></i> LLM</span>
+        </div>
+      </section>
+      
+      <!-- 自然言語処理のタスクセクション -->
+      <section id="nlp-tasks">
+        <h2><i class="fas fa-tasks"></i> 自然言語処理のタスク</h2>
+        <p>自然言語処理には、様々な目的に対応した多種多様なタスクが存在します。これらは言語理解の基礎となる低レベルタスクから、高度な推論が必要な高レベルタスクまで幅広く存在します。</p>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-layer-group"></i> 基礎的タスク</h3>
+          <ul>
+            <li><strong><span class="keyword-marker">形態素解析</span> (Morphological Analysis)</strong>：文を意味を持つ最小単位（形態素）に分割する処理。日本語など分かち書きされない言語で特に重要。</li>
+            <li><strong><span class="keyword-marker">構文解析</span> (Syntactic Parsing)</strong>：文の文法構造を解析し、文の構成要素（主語、述語、目的語など）やその関係を特定する。</li>
+            <li><strong>固有表現認識 (Named Entity Recognition)</strong>：テキスト中の人名、組織名、地名、日付などの固有表現を識別する。</li>
+            <li><strong>品詞タグ付け (Part-of-Speech Tagging)</strong>：文中の各単語に品詞（名詞、動詞、形容詞など）を割り当てる。</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-search"></i> 情報抽出・検索タスク</h3>
+          <ul>
+            <li><strong><span class="keyword-marker">情報検索</span> (Information Retrieval)</strong>：ユーザーのクエリに関連する文書を大量のコレクションから検索する。検索エンジンの基本技術。</li>
+            <li><strong>関係抽出 (Relation Extraction)</strong>：テキスト内のエンティティ間の関係（例：「Aは会社Bの創業者である」）を抽出する。</li>
+            <li><strong>イベント抽出 (Event Extraction)</strong>：テキストからイベント（何が、誰によって、いつ、どこで起きたか）を検出する。</li>
+            <li><strong>オープンドメイン質問応答 (Open-domain Question Answering)</strong>：特定のドメインに限らず、様々な質問に対して適切な回答を提供する。</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-exchange-alt"></i> 変換タスク</h3>
+          <ul>
+            <li><strong><span class="keyword-marker">機械翻訳</span> (Machine Translation)</strong>：あるソース言語のテキストを別のターゲット言語に自動的に翻訳する。</li>
+            <li><strong><span class="keyword-marker">文書要約</span> (Document Summarization)</strong>：長い文書から重要な情報を抽出し、短い要約を生成する。抽出型と生成型がある。</li>
+            <li><strong>パラフレーズ生成 (Paraphrasing)</strong>：意味を保持しながら、異なる表現で文を書き換える。</li>
+            <li><strong>テキスト音声変換 (Text-to-Speech)</strong>：書かれたテキストを自然な音声に変換する。</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-comment-dots"></i> 対話・生成タスク</h3>
+          <ul>
+            <li><strong>対話システム (Dialogue Systems)</strong>：人間とコンピュータ間の自然な会話を可能にするシステム。タスク指向型と非タスク指向型（チャットボット）に分けられる。</li>
+            <li><strong>質問生成 (Question Generation)</strong>：与えられたテキストに基づいて質問を自動生成する。</li>
+            <li><strong>物語生成 (Story Generation)</strong>：与えられたプロンプトや設定から一貫性のある物語を生成する。</li>
+            <li><strong>テキスト補完 (Text Completion)</strong>：部分的なテキストの続きを予測し生成する。</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-chart-pie"></i> 分析タスク</h3>
+          <ul>
+            <li><strong><span class="keyword-marker">感情分析</span> (Sentiment Analysis)</strong>：テキストの感情極性（ポジティブ、ネガティブ、中立）を判定する。</li>
+            <li><strong>トピックモデリング (Topic Modeling)</strong>：文書集合から共通のトピックを自動的に抽出する。</li>
+            <li><strong>意図認識 (Intent Recognition)</strong>：ユーザーの発話からその意図（質問、命令、情報提供など）を識別する。</li>
+            <li><strong>スタンス検出 (Stance Detection)</strong>：特定のトピックに対する著者の立場（賛成、反対、中立）を検出する。</li>
+          </ul>
+        </div>
+        
+        <div class="note-box">
+          <p>G検定ではシラバスに記載されている感情分析、機械翻訳、形態素解析、構文解析、質問応答、情報検索、文書要約などの基本的なタスクについて理解することが重要です。また、大規模言語モデル（LLM）の登場により、これらのタスクの多くが単一のモデルで高いレベルで実現できるようになった点も押さえておきましょう。</p>
+        </div>
+        
+        <h3>自然言語処理タスクの階層構造</h3>
+        <p>自然言語処理タスクは一般的に以下のような階層構造を持つと考えられています：</p>
+        
+        <ol>
+          <li><strong>前処理層</strong>：トークン化、形態素解析、品詞タグ付けなど</li>
+          <li><strong>構文層</strong>：構文解析、依存関係解析など</li>
+          <li><strong>意味層</strong>：意味役割ラベリング、固有表現認識、関係抽出など</li>
+          <li><strong>談話層</strong>：照応解決、談話解析、文書要約など</li>
+          <li><strong>応用層</strong>：質問応答、機械翻訳、対話システムなど</li>
+        </ol>
+        
+        <p>従来は階層的にタスクを解決していく必要がありましたが、現代のディープラーニングモデル、特に大規模言語モデルはこれらのタスクを統合的に解決できることが特徴です。</p>
+      </section>
+      
+      <!-- 特徴表現手法セクション -->
+      <section id="feature-representation">
+        <h2><i class="fas fa-vector-square"></i> 自然言語処理における特徴表現手法</h2>
+        <p>自然言語をコンピュータで処理するためには、テキストを数値ベクトルに変換する必要があります。この変換方法は時代とともに進化してきました。</p>
+        
+        <h3>古典的な特徴表現</h3>
+        <ul>
+          <li><strong>ワンホットベクトル</strong>：単語をボキャブラリサイズの次元を持つベクトルで表現。該当単語の位置のみが1で他は0。</li>
+          <li><strong>Bag-of-Words (BoW)</strong>：文書内の各単語の出現回数をカウントしたベクトル。単語の順序は無視される。</li>
+          <li><strong>TF-IDF</strong>：単語頻度（TF）と逆文書頻度（IDF）の積を用いた重み付け。一般的な単語より特徴的な単語を重視。</li>
+          <li><strong>N-gram</strong>：連続するN個の単語や文字の組み合わせを考慮した特徴表現。</li>
+        </ul>
+        
+        <!-- 自然言語処理の発展図 -->
+        <div class="diagram-container">
+          <div class="diagram">
+            <h3>自然言語処理モデルの発展</h3>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-date">～2013</div>
+                <div class="timeline-content">
+                  <h4>統計的NLP時代</h4>
+                  <p>BoW、TF-IDF、N-gram</p>
+                  <p>統計的機械翻訳</p>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2013～2015</div>
+                <div class="timeline-content">
+                  <h4>単語埋め込み時代</h4>
+                  <p>word2vec、GloVe</p>
+                  <p>固定的なベクトル表現</p>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2015～2017</div>
+                <div class="timeline-content">
+                  <h4>RNN/LSTM時代</h4>
+                  <p>Seq2Seq</p>
+                  <p>ニューラル機械翻訳</p>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2017～2020</div>
+                <div class="timeline-content">
+                  <h4>Transformer時代</h4>
+                  <p>BERT、GPT-2/3</p>
+                  <p>事前学習と転移学習</p>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2020～</div>
+                <div class="timeline-content">
+                  <h4>LLM時代</h4>
+                  <p>GPT-4、PaLM、LLaMA</p>
+                  <p>ChatGPT</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3>ニューラル特徴表現</h3>
+        <ul>
+          <li><strong>word2vec</strong>：単語の分散表現を学習するニューラルネットワークモデル。類似した単語は近いベクトルになる。</li>
+          <li><strong>GloVe</strong>：グローバルな共起統計と局所的な文脈情報を組み合わせた単語表現学習手法。</li>
+          <li><strong>fastText</strong>：部分文字列（サブワード）情報も考慮した単語埋め込み。未知語にも対応できる。</li>
+        </ul>
+        
+        <h3>文脈依存型表現</h3>
+        <ul>
+          <li><strong>ELMo</strong>：双方向LSTMを用いた文脈依存型の単語表現。単語の多義性に対応。</li>
+          <li><strong>BERT</strong>：Transformerエンコーダを用いた双方向の文脈表現。文全体の情報を考慮。</li>
+          <li><strong>GPT</strong>：Transformerデコーダを用いた単方向（左から右）の文脈表現。次単語予測タスクで事前学習。</li>
+        </ul>
+        
+        <div class="note-box">
+          <p><strong>G検定ポイント</strong>：単語表現手法の進化（BoW→word2vec→BERT）に伴い、単語の意味的な類似性や多義性、文脈を考慮できるようになりました。それぞれの特徴と長所・短所を理解しておきましょう。</p>
+        </div>
+      </section>
+      
+      <!-- 代表的なNLPモデルセクション -->
+      <section id="models">
+        <h2><i class="fas fa-brain"></i> 代表的な自然言語処理モデル</h2>
+        <p>自然言語処理の発展は、使用するモデルの進化と密接に関連しています。G検定では、RNN、LSTM、Transformerなど、主要なモデルについて理解することが重要です。</p>
+        
+        <h3>RNNとLSTM</h3>
+        <p>初期のニューラルNLPでは、RNN（Recurrent Neural Network：再帰型ニューラルネットワーク）が中心的な役割を果たしていました。</p>
+        
+        <ul>
+          <li><strong>RNN</strong>：時系列データを扱うニューラルネットワーク。過去の情報を「隠れ状態」として保持し、次の入力と組み合わせて処理する。</li>
+          <li><strong>LSTM</strong>（Long Short-Term Memory）：長期依存関係を学習するためのRNNの拡張。忘却ゲート、入力ゲート、出力ゲートを持ち、勾配消失問題を軽減。</li>
+          <li><strong>GRU</strong>（Gated Recurrent Unit）：LSTMを簡略化したモデル。リセットゲートと更新ゲートを持つ。</li>
+          <li><strong>双方向RNN/LSTM</strong>：前向きと後ろ向きの2つのRNN/LSTMを組み合わせ、過去と未来の両方の文脈を考慮。</li>
+        </ul>
+        
+        <h3>Seq2Seq</h3>
+        <p>Sequence-to-Sequence（Seq2Seq）モデルは、機械翻訳や要約などのタスクのために設計されたアーキテクチャです。</p>
+        
+        <ul>
+          <li><strong>エンコーダ</strong>：入力シーケンスを固定長ベクトル（文脈ベクトル）に変換</li>
+          <li><strong>デコーダ</strong>：文脈ベクトルから出力シーケンスを生成</li>
+          <li><strong>アテンション機構</strong>：デコーダが出力を生成する際に、入力シーケンスの関連部分に注目する仕組み</li>
+        </ul>
+        
+        <div class="note-box">
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-history"></i> 系譜で見る自然言語処理モデルの進化</h3>
+          
+          <h4>1. RNN/LSTM時代（〜2017年頃）</h4>
+          <ul>
+            <li><strong>基本RNN</strong>：シンプルで直感的だが、長距離依存関係の学習が困難（勾配消失問題）</li>
+            <li><strong>LSTM</strong>：ゲート機構により長期依存関係の学習が改善。機械翻訳や音声認識で活用</li>
+            <li><strong>GRU</strong>：LSTMを簡略化したモデルで、少ないパラメータ数で同等の性能</li>
+            <li><strong>双方向LSTM</strong>：過去と未来の文脈を考慮でき、品詞タグ付けや固有表現抽出に有効</li>
+            <li><strong>Seq2Seq+Attention</strong>：エンコーダ-デコーダモデルにアテンション機構を追加。翻訳性能が向上</li>
+          </ul>
+          
+          <h4>2. Transformer革命（2017年〜）</h4>
+          <ul>
+            <li><strong>Transformer</strong>：「Attention is All You Need」論文で提案。RNNを使わず並列計算が可能</li>
+            <li><strong>BERT (2018)</strong>：双方向Transformerモデルで文脈を考慮した表現学習。多くのNLPタスクでSOTA達成</li>
+            <li><strong>GPT/GPT-2 (2018-2019)</strong>：単方向Transformerモデルで強力な文章生成能力</li>
+            <li><strong>RoBERTa/XLNet/T5</strong>：BERTの改良版や代替モデル。学習方法やアーキテクチャの最適化</li>
+          </ul>
+          
+          <h4>3. 大規模言語モデル（LLM）時代（2020年〜）</h4>
+          <ul>
+            <li><strong>GPT-3 (2020)</strong>：1750億パラメータの大規模モデル。フューショット学習能力を獲得</li>
+            <li><strong>PaLM (2022)</strong>：Googleの5400億パラメータモデル。推論や常識理解など高度な能力</li>
+            <li><strong>ChatGPT/GPT-4 (2022-2023)</strong>：人間の指示に従う対話モデル。実用的なタスクに広く応用可能</li>
+            <li><strong>LLaMA/Vicuna/Alpaca</strong>：オープンな大規模言語モデル。比較的小規模でも高性能</li>
+          </ul>
+          
+          <p>重要な転換点は、2017年のTransformerの登場と、それに続くBERTとGPTによる「事前学習と微調整」パラダイムの確立です。</p>
+        </div>
+        
+        <!-- Transformerアーキテクチャ図 -->
+        <div class="diagram-container">
+          <div class="diagram">
+            <h3>Transformerアーキテクチャ</h3>
+            <div class="transformer-diagram">
+              <div class="transformer-column encoder">
+                <h4>エンコーダ（BERT系）</h4>
+                <div class="architecture-block">
+                  <div class="layer">マルチヘッドアテンション</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">Add & Norm</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">フィードフォワードネットワーク</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">Add & Norm</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">出力埋め込み</div>
+                </div>
+                <div class="model-examples">
+                  <p>代表モデル: BERT, RoBERTa</p>
+                  <p>特徴: 双方向アテンション</p>
+                  <p>得意タスク: 分類, QA, NER</p>
+                </div>
+              </div>
+              <div class="transformer-column decoder">
+                <h4>デコーダ（GPT系）</h4>
+                <div class="architecture-block">
+                  <div class="layer">マスク付きアテンション</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">Add & Norm</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">フィードフォワードネットワーク</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">Add & Norm</div>
+                  <div class="arrow">↓</div>
+                  <div class="layer">出力埋め込み</div>
+                </div>
+                <div class="model-examples">
+                  <p>代表モデル: GPT-2, GPT-3, GPT-4</p>
+                  <p>特徴: 単方向（左→右）アテンション</p>
+                  <p>得意タスク: 文章生成, 対話</p>
+                </div>
+              </div>
+            </div>
+            <div class="diagram-caption">
+              <p>Transformerの大きな特徴は「自己注意機構」（Self-Attention）を用いることで、文のすべての単語間の関係性を一度に計算できる点です。これにより、長距離依存関係の学習が容易になりました。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-lightbulb"></i> BERTとGPTの違い</h3>
+          <p>BERTとGPTは、どちらもTransformerベースのモデルですが、以下のような違いがあります：</p>
+          <ul>
+            <li><strong>BERT</strong>：双方向の文脈を考慮した事前学習モデル。多くのNLPタスクでSOTAを達成。</li>
+            <li><strong>GPT</strong>：単方向の文脈を考慮した生成モデル。文章生成や要約などに特化。</li>
+          </ul>
+          <p>BERTは理解向きのモデルであり、GPTは生成向きのモデルです。BERTは文脈を双方向から捉えるのに対し、GPTは文脈を単方向から捉えます。</p>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-puzzle-piece"></i> モデルアーキテクチャの比較</h3>
+          
+          <h4>RNN vs Transformer</h4>
+          <table>
+            <tr>
+              <th>特性</th>
+              <th>RNN</th>
+              <th>Transformer</th>
+            </tr>
+            <tr>
+              <td>並列処理</td>
+              <td>逐次処理（遅い）</td>
+              <td>並列処理可能（速い）</td>
+            </tr>
+            <tr>
+              <td>長距離依存関係</td>
+              <td>捉えにくい（勾配消失問題）</td>
+              <td>自己注意機構で直接捉えられる</td>
+            </tr>
+            <tr>
+              <td>計算量</td>
+              <td>シーケンス長に対して線形</td>
+              <td>シーケンス長に対して二次（ただし並列化可能）</td>
+            </tr>
+            <tr>
+              <td>位置情報</td>
+              <td>順序通りに処理するため自然に埋め込まれる</td>
+              <td>位置エンコーディングが必要</td>
+            </tr>
+          </table>
+          
+          <h4>BERT vs GPT</h4>
+          <table>
+            <tr>
+              <th>特性</th>
+              <th>BERT</th>
+              <th>GPT</th>
+            </tr>
+            <tr>
+              <td>アーキテクチャ</td>
+              <td>Transformerエンコーダ</td>
+              <td>Transformerデコーダ</td>
+            </tr>
+            <tr>
+              <td>文脈の扱い</td>
+              <td>双方向（単語の前後を考慮）</td>
+              <td>単方向（左から右へ）</td>
+            </tr>
+            <tr>
+              <td>事前学習タスク</td>
+              <td>マスク言語モデル＋次文予測</td>
+              <td>次単語予測</td>
+            </tr>
+            <tr>
+              <td>主な用途</td>
+              <td>理解系タスク（分類、抽出等）</td>
+              <td>生成系タスク（文章生成等）</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div class="note-box">
+          <p>G検定では、モデルの詳細な実装よりも、各モデルの特徴、長所・短所、適したタスクなどの概要を理解することが重要です。特に、BERT、GPT、Seq2Seq、LLMなどのシラバスに記載されているモデルの基本的な特徴と違いを押さえておきましょう。</p>
+        </div>
+        
+        <h3>評価基準と競争</h3>
+        <p>自然言語処理モデルの性能評価には<span class="keyword-marker">GLUE</span> (General Language Understanding Evaluation) などのベンチマークが使用されます。これは、複数のNLPタスク（感情分析、含意関係認識、質問応答など）の集合体で、モデルの汎用的な言語理解能力を測定します。</p>
+        
+        <p>近年の大規模言語モデルは多くのベンチマークで人間レベルの性能を達成していますが、常識推論や意図理解などの高次の能力については依然として課題があります。</p>
+      </section>
+      
+      <!-- 実世界での活用セクション -->
+      <section id="applications">
+        <h2><i class="fas fa-laptop-code"></i> 実世界での自然言語処理の活用</h2>
+        <p>自然言語処理は現代社会の様々な分野で活用されており、日常生活からビジネス、医療、教育まで幅広い応用があります。ここでは、G検定に関連する主要な応用例を紹介します。</p>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-language"></i> <span class="keyword-marker">機械翻訳</span> (Machine Translation)</h3>
+          <p>異なる言語間の自動翻訳技術で、近年のニューラル機械翻訳（NMT）の発展により急速に精度が向上しました。</p>
+          
+          <h4>代表的なシステム</h4>
+          <ul>
+            <li><strong>Google翻訳</strong>：100以上の言語間の翻訳に対応</li>
+            <li><strong>DeepL</strong>：少数の言語に特化し高品質な翻訳を提供</li>
+            <li><strong>Microsoft Translator</strong>：アプリやOfficeソフトに統合された翻訳機能</li>
+          </ul>
+          
+          <h4>最新の技術動向</h4>
+          <ul>
+            <li><strong>多言語翻訳モデル</strong>：単一のモデルで複数の言語間の翻訳が可能</li>
+            <li><strong>ドキュメントレベル翻訳</strong>：文単位だけでなく文書全体の文脈を考慮</li>
+            <li><strong>特定ドメイン最適化</strong>：医療、法律、技術文書など専門分野に特化した翻訳</li>
+            <li><strong>リアルタイム音声翻訳</strong>：異なる言語間の会話をリアルタイムで翻訳</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-search"></i> <span class="keyword-marker">情報検索</span> (Information Retrieval) と <span class="keyword-marker">質問応答</span> (Question Answering)</h3>
+          <p>大量の情報から必要な情報を効率的に探し出し、具体的な質問に対して適切な回答を提供する技術です。</p>
+          
+          <h4>代表的なシステム</h4>
+          <ul>
+            <li><strong>検索エンジン</strong>：Google、Bing、Baiduなど</li>
+            <li><strong>質問応答システム</strong>：IBM Watson、ChatGPTなど</li>
+            <li><strong>企業内検索</strong>：社内文書やナレッジベースの検索最適化</li>
+          </ul>
+          
+          <h4>技術的進展</h4>
+          <ul>
+            <li><strong>意味検索</strong>：キーワードマッチングだけでなく、意味的関連性に基づく検索</li>
+            <li><strong>多ステップ推論</strong>：複雑な質問に複数のステップで回答</li>
+            <li><strong>マルチモーダル質問応答</strong>：テキストだけでなく画像や動画も対象にした質問応答</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-robot"></i> 対話システムとチャットボット</h3>
+          <p>人間とコンピュータ間の自然な会話を実現するシステムで、タスク指向型と非タスク指向型（雑談型）に大別されます。</p>
+          
+          <h4>代表的なシステム</h4>
+          <ul>
+            <li><strong>バーチャルアシスタント</strong>：Siri、Alexa、Google Assistantなど</li>
+            <li><strong>カスタマーサポートボット</strong>：企業のWebサイトやアプリに組み込まれたサポートチャット</li>
+            <li><strong>会話型AI</strong>：ChatGPT、Claude、Bard、Bing AIなど</li>
+          </ul>
+          
+          <h4>応用領域</h4>
+          <ul>
+            <li><strong>カスタマーサポート</strong>：24時間対応の自動応答システム</li>
+            <li><strong>ヘルスケア</strong>：症状チェックや健康アドバイス</li>
+            <li><strong>教育支援</strong>：学習サポートや質問への回答</li>
+            <li><strong>エンターテイメント</strong>：会話型のゲームやコンパニオン</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-file-alt"></i> <span class="keyword-marker">文書要約</span> (Document Summarization)</h3>
+          <p>長い文書から重要な情報を抽出し、短く要約する技術です。抽出型と生成型の2種類のアプローチがあります。</p>
+          
+          <h4>タイプ</h4>
+          <ul>
+            <li><strong>抽出型要約</strong>：原文から重要な文や句を選択して組み合わせる</li>
+            <li><strong>生成型要約</strong>：原文の内容を理解し、新たな表現で要約を生成する</li>
+            <li><strong>ハイブリッド型</strong>：抽出と生成を組み合わせたアプローチ</li>
+          </ul>
+          
+          <h4>応用例</h4>
+          <ul>
+            <li><strong>ニュース要約</strong>：長い記事を短いダイジェストに</li>
+            <li><strong>学術論文要約</strong>：研究論文の主要点の抽出</li>
+            <li><strong>会議議事録要約</strong>：長い会議の内容をポイントに絞って要約</li>
+            <li><strong>メール要約</strong>：大量のメールの内容を簡潔にまとめる</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-smile"></i> <span class="keyword-marker">感情分析</span> (Sentiment Analysis)</h3>
+          <p>テキストから筆者の感情、態度、評価を抽出する技術です。主にポジティブ/ネガティブ/中立の分類が基本ですが、より細かい感情カテゴリ分析も行われています。</p>
+          
+          <h4>応用分野</h4>
+          <ul>
+            <li><strong>マーケティング</strong>：ブランドや製品に対する消費者感情の分析</li>
+            <li><strong>ソーシャルメディア監視</strong>：オンライン上の評判やトレンドの追跡</li>
+            <li><strong>カスタマーサービス</strong>：苦情や満足度の自動分析</li>
+            <li><strong>市場調査</strong>：製品レビューからの洞察抽出</li>
+          </ul>
+          
+          <h4>技術的進展</h4>
+          <ul>
+            <li><strong>アスペクトベース感情分析</strong>：製品の特定の側面に対する感情を分析</li>
+            <li><strong>多言語感情分析</strong>：異なる言語での感情表現の分析</li>
+            <li><strong>文脈依存感情分析</strong>：皮肉や隠喩などの文脈を考慮</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-book-open"></i> <span class="keyword-marker">形態素解析</span>・<span class="keyword-marker">構文解析</span></h3>
+          <p>これらは自然言語処理の基礎となる技術で、様々な応用の前処理として重要です。</p>
+          
+          <h4>形態素解析の応用</h4>
+          <ul>
+            <li><strong>日本語入力システム</strong>：予測変換や文章校正</li>
+            <li><strong>検索エンジン</strong>：インデックス作成のための単語分割</li>
+            <li><strong>テキストマイニング</strong>：単語頻度分析などの基礎</li>
+          </ul>
+          
+          <h4>構文解析の応用</h4>
+          <ul>
+            <li><strong>機械翻訳</strong>：言語間の構造の変換</li>
+            <li><strong>質問応答</strong>：質問の構造理解と情報抽出</li>
+            <li><strong>関係抽出</strong>：エンティティ間の関係性の把握</li>
+          </ul>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-industry"></i> 産業別応用例</h3>
+          
+          <h4>金融業界</h4>
+          <ul>
+            <li><strong>市場センチメント分析</strong>：ニュースやSNSからの市場動向予測</li>
+            <li><strong>規制文書処理</strong>：大量の法規制文書の分析と遵守確認</li>
+            <li><strong>詐欺検出</strong>：異常な取引パターンや通信の検出</li>
+          </ul>
+          
+          <h4>医療業界</h4>
+          <ul>
+            <li><strong>電子カルテ分析</strong>：非構造化医療データからの情報抽出</li>
+            <li><strong>医学文献検索</strong>：研究論文からの関連情報検索</li>
+            <li><strong>診断支援</strong>：症状説明からの診断候補提示</li>
+          </ul>
+          
+          <h4>小売業界</h4>
+          <ul>
+            <li><strong>レビュー分析</strong>：製品評価からの洞察抽出</li>
+            <li><strong>商品推薦</strong>：顧客の嗜好に基づく商品提案</li>
+            <li><strong>需要予測</strong>：市場トレンドの分析に基づく需要予測</li>
+          </ul>
+        </div>
+        
+        <div class="note-box">
+          <p>G検定では、自然言語処理がどのように実世界で活用されているかの具体例を理解することが重要です。特に、シラバスに記載されている「機械翻訳」「感情分析」「質問応答」「情報検索」「文書要約」などの応用例について、基本的な概念と実用事例を把握しておきましょう。</p>
+        </div>
+        
+        <h3>NLP技術の社会的影響と課題</h3>
+        <p>自然言語処理技術の急速な発展は、多くの便益をもたらす一方で、以下のような課題も生み出しています：</p>
+        <ul>
+          <li><strong>言語・文化的バイアス</strong>：モデルが特定の言語や文化に偏る問題</li>
+          <li><strong>プライバシー懸念</strong>：個人的なテキストデータの処理における情報漏洩リスク</li>
+          <li><strong>情報の信頼性</strong>：AIが生成した情報の真偽判断の難しさ</li>
+          <li><strong>偽情報の生成</strong>：高品質な虚偽コンテンツ生成の可能性</li>
+          <li><strong>労働市場への影響</strong>：翻訳や文書作成などの職業の変化</li>
+        </ul>
+        <p>これらの課題に対処するためには、技術的改善だけでなく、倫理的・社会的側面も考慮した総合的なアプローチが必要です。</p>
+      </section>
+      
+      <!-- 用語集セクション -->
+      <section id="glossary">
+        <h2><i class="fas fa-book"></i> 用語集</h2>
+        <p>自然言語処理の重要用語をまとめました。G検定対策に特に重要なキーワードを中心に解説します。</p>
+        
+        <table class="glossary-table">
+          <thead>
+            <tr>
+              <th>用語</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BERT (Bidirectional Encoder Representations from Transformers)</td>
+              <td>Googleが開発した双方向Transformerエンコーダベースの言語モデル。マスク言語モデリングと次文予測タスクで事前学習され、多様なNLPタスクで高性能を実現。</td>
+            </tr>
+            <tr>
+              <td>BoW (Bag-of-Words)</td>
+              <td>文書を単語の出現頻度の集合として表現する手法。単語の順序情報は無視され、各単語の出現回数だけを考慮する。</td>
+            </tr>
+            <tr>
+              <td>CBOW (Continuous Bag-of-Words)</td>
+              <td>word2vecの学習手法の一つ。周囲の単語から中心単語を予測するモデル。</td>
+            </tr>
+            <tr>
+              <td>CEC (Constant Error Carousel)</td>
+              <td>LSTMにおいて誤差の流れを制御する機構。勾配消失問題を緩和する。</td>
+            </tr>
+            <tr>
+              <td>ChatGPT</td>
+              <td>OpenAIが開発した対話に特化した大規模言語モデル。GPTをベースに人間との対話データで調整されている。</td>
+            </tr>
+            <tr>
+              <td>CTC (Connectionist Temporal Classification)</td>
+              <td>音声認識など、入力と出力の明示的なアライメントなしでシーケンスラベリングを学習できる手法。</td>
+            </tr>
+            <tr>
+              <td>ELMo (Embeddings from Language Models)</td>
+              <td>双方向LSTMで学習された文脈依存型の単語表現。単語の多義性を捉えることができる。</td>
+            </tr>
+            <tr>
+              <td>fastText</td>
+              <td>Facebookが開発した単語埋め込みモデル。word2vecの拡張で、部分文字列（サブワード）情報も利用する。</td>
+            </tr>
+            <tr>
+              <td>GLUE (General Language Understanding Evaluation)</td>
+              <td>様々な自然言語理解タスクを統合したベンチマーク。言語モデルの汎用性を評価するために使用される。</td>
+            </tr>
+            <tr>
+              <td>GPT-n (Generative Pre-trained Transformer)</td>
+              <td>OpenAIが開発した自己回帰型大規模言語モデル。次々と大規模化し、GPT-1, GPT-2, GPT-3, GPT-4と進化している。</td>
+            </tr>
+            <tr>
+              <td>N-gram</td>
+              <td>連続するN個の要素（文字や単語）のシーケンスをモデル化する手法。N=1でunigram、N=2でbigram、N=3でtrigramなど。</td>
+            </tr>
+            <tr>
+              <td>PaLM (Pathways Language Model)</td>
+              <td>Googleが開発した5400億パラメータの大規模言語モデル。Pathwaysアーキテクチャ上で訓練された。</td>
+            </tr>
+            <tr>
+              <td>Seq2Seq (Sequence-to-Sequence)</td>
+              <td>エンコーダとデコーダから成る、ある系列を別の系列に変換するためのモデル。機械翻訳や要約に用いられる。</td>
+            </tr>
+            <tr>
+              <td>TF-IDF (Term Frequency-Inverse Document Frequency)</td>
+              <td>単語の重要度を、文書内での出現頻度と逆文書頻度の積で表す重み付け手法。</td>
+            </tr>
+            <tr>
+              <td>word2vec</td>
+              <td>単語を低次元の密ベクトル空間に埋め込む手法。CBOWとスキップグラムの2つの学習方法がある。</td>
+            </tr>
+            <tr>
+              <td>感情分析 (Sentiment Analysis)</td>
+              <td>テキストから筆者の感情、態度、評価などを抽出する技術。ポジティブ/ネガティブ/中立などに分類する。</td>
+            </tr>
+            <tr>
+              <td>機械翻訳 (Machine Translation)</td>
+              <td>ある言語のテキストを別の言語に自動的に翻訳する技術。近年はニューラル機械翻訳（NMT）が主流。</td>
+            </tr>
+            <tr>
+              <td>形態素解析 (Morphological Analysis)</td>
+              <td>文を意味を持つ最小単位（形態素）に分割する処理。日本語など分かち書きされない言語で特に重要。</td>
+            </tr>
+            <tr>
+              <td>構文解析 (Syntactic Parsing)</td>
+              <td>文の文法構造を解析し、文の構成要素（主語、述語、目的語など）やその関係を特定する処理。</td>
+            </tr>
+            <tr>
+              <td>質問応答 (Question Answering)</td>
+              <td>自然言語の質問に対して適切な回答を生成するシステム。事実検索型と生成型がある。</td>
+            </tr>
+            <tr>
+              <td>情報検索 (Information Retrieval)</td>
+              <td>大量の情報源から特定のクエリに関連する情報を探し出す技術。検索エンジンの基本技術。</td>
+            </tr>
+            <tr>
+              <td>スキップグラム (Skip-gram)</td>
+              <td>word2vecの学習手法の一つ。中心単語から周囲の単語を予測するモデル。</td>
+            </tr>
+            <tr>
+              <td>単語埋め込み (Word Embedding)</td>
+              <td>単語を低次元のベクトル空間に写像する技術。単語の意味的関係をベクトル空間で表現する。</td>
+            </tr>
+            <tr>
+              <td>分散表現 (Distributed Representation)</td>
+              <td>概念を多次元ベクトルで表現する方法。各次元が特徴の一部を表し、全体として意味を分散して表現する。</td>
+            </tr>
+            <tr>
+              <td>文書要約 (Document Summarization)</td>
+              <td>長い文書から重要な情報を抽出し、短い要約を生成する技術。抽出型と生成型がある。</td>
+            </tr>
+            <tr>
+              <td>ワンホットベクトル (One-hot Vector)</td>
+              <td>単語を表現する最も単純な方法。各単語に対応する位置のみが1で、他はすべて0のベクトル。</td>
+            </tr>
+            <tr>
+              <td>LLM (大規模言語モデル, Large Language Model)</td>
+              <td>膨大なパラメータ（数十億～数兆）を持ち、大量のテキストデータで訓練された言語モデル。多様なタスクに対応できる汎用性が特徴。</td>
+            </tr>
+            <tr>
+              <td>統計的機械翻訳 (Statistical Machine Translation)</td>
+              <td>確率モデルに基づいて翻訳を行う手法。大量の対訳コーパスから翻訳規則を学習する。ニューラル機械翻訳以前の主流技術。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <!-- Key Insightsセクション -->
+      <section id="key-insights">
+        <h2><i class="fas fa-lightbulb"></i> 重要ポイント</h2>
+        <p>G検定で問われる自然言語処理の重要なポイントをまとめました。</p>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-star"></i> 自然言語処理の発展の流れを理解する</h3>
+          <p>自然言語処理は以下のような発展を遂げています：</p>
+          <ol>
+            <li><strong>ルールベース時代</strong>：言語学者の知識に基づく規則を手作業で設計</li>
+            <li><strong>統計的NLP時代</strong>：大量のテキストデータから統計的パターンを学習</li>
+            <li><strong>ニューラルNLP時代</strong>：ニューラルネットワークによる特徴の自動学習</li>
+            <li><strong>事前学習モデル時代</strong>：大規模データで事前学習し、特定タスクに微調整</li>
+            <li><strong>大規模言語モデル時代</strong>：超大規模な汎用モデルによる多様なタスク処理</li>
+          </ol>
+          <p>この発展により、自然言語処理の精度と適用範囲は飛躍的に向上しています。</p>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-star"></i> 特徴表現手法の進化と特性を把握する</h3>
+          <p>テキストの特徴表現手法は以下のように進化してきました：</p>
+          <ul>
+            <li><strong>ワンホットベクトル／BoW</strong>：単純だが疎で高次元、単語間の関係を表現できない</li>
+            <li><strong>TF-IDF</strong>：単語の重要度を考慮した重み付け表現</li>
+            <li><strong>word2vec / fastText</strong>：意味的類似性を反映した密な分散表現</li>
+            <li><strong>ELMo</strong>：文脈に応じて変化する動的な単語表現</li>
+            <li><strong>BERT / GPT</strong>：Transformerベースの双方向または単方向文脈表現</li>
+          </ul>
+          <p>より新しい手法ほど、文脈依存性や意味的豊かさが向上していますが、計算コストも増加します。</p>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-star"></i> 代表的なNLPモデルの特徴を比較できる</h3>
+          <p>主要なモデルの違いを理解することが重要です：</p>
+          <ul>
+            <li><strong>BERT vs GPT</strong>：双方向（理解向き）vs 単方向（生成向き）、エンコーダ vs デコーダ</li>
+            <li><strong>RNN vs Transformer</strong>：逐次処理 vs 並列処理、自然な順序性 vs 高速計算と長距離依存</li>
+            <li><strong>伝統的NLP vs LLM</strong>：タスク特化 vs 汎用性、小規模 vs 大規模、複数モデル vs 単一モデル</li>
+          </ul>
+          <p>各モデルの長所と短所を理解し、適切なモデルを選択できることが重要です。</p>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-star"></i> 自然言語処理の実用アプリケーションを把握する</h3>
+          <p>G検定でよく問われる応用例は以下の通りです：</p>
+          <ul>
+            <li><strong>機械翻訳</strong>：ニューラル翻訳モデルによる高精度な言語間変換</li>
+            <li><strong>感情分析</strong>：テキストからの感情や評価の抽出と分類</li>
+            <li><strong>質問応答</strong>：自然言語の質問に対する適切な回答の生成</li>
+            <li><strong>文書要約</strong>：長文から重要情報を抽出した簡潔な要約の作成</li>
+            <li><strong>情報検索</strong>：関連性の高い文書や情報の効率的な検索</li>
+          </ul>
+          <p>これらの技術が様々な業界でどのように活用されているかを理解しておくことも重要です。</p>
+        </div>
+      </section>
+      
+      <!-- Take Home Messageセクション -->
+      <section id="take-home">
+        <h2><i class="fas fa-key"></i> まとめ</h2>
+        <div class="handwritten-box">
+          <h3>自然言語処理（NLP）の重要ポイント</h3>
+          <ul>
+            <li>自然言語処理はディープラーニングの重要な応用分野で、人間の言語を計算機で処理する技術</li>
+            <li>形態素解析・構文解析から機械翻訳・感情分析まで様々なタスクが存在する</li>
+            <li>特徴表現手法は「BoW→word2vec→BERT/GPT」と進化し、より豊かな意味表現が可能に</li>
+            <li>TransformerアーキテクチャとLLMの登場により、NLP技術は飛躍的に進化している</li>
+            <li>実世界では翻訳、検索、質問応答、チャットボットなど身近なサービスで広く活用されている</li>
+          </ul>
+          
+          <p>G検定では、自然言語処理の基本タスク、代表的なモデル（特にBERT、GPT、Seq2Seqなど）、特徴表現手法、実用例について理解することが重要です。また、最新の大規模言語モデル（LLM）についても基本的な知識を持っておくことが求められます。</p>
+        </div>
+      </section>
+      
+      <!-- フッター -->
+      <footer>
+        <p>G検定学習ノート - 1-6-2 自然言語処理</p>
+        <p>Created with Claude (content and code)</p>
+      </footer>
+    </div>
+  </div>
+  
+  <!-- トップに戻るボタン -->
+  <a href="#" class="back-to-top">
+    <i class="fas fa-arrow-up"></i>
+  </a>
+
+  <script>
+    // サイドバーのアクティブリンク制御
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('section');
+      const menuLinks = document.querySelectorAll('.sidebar-menu a');
+      
+      function setActiveLink() {
+        let currentSection = '';
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (window.scrollY >= (sectionTop - 300)) {
+            currentSection = '#' + section.getAttribute('id');
+          }
+        });
+        
+        menuLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === currentSection) {
+            link.classList.add('active');
+          }
+        });
+      }
+      
+      window.addEventListener('scroll', setActiveLink);
+      setActiveLink();
+      
+      // スムーズスクロール
+      menuLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetSection = document.querySelector(targetId);
+          window.scrollTo({
+            top: targetSection.offsetTop,
+            behavior: 'smooth'
+          });
+        });
+      });
+      
+      // トップに戻るボタン
+      const backToTopButton = document.querySelector('.back-to-top');
+      backToTopButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

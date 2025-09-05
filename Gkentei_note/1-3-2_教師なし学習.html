@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-3-2 - 教師なし学習</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* CMYK カラースキーム */
+    :root {
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+      --secondary: #7ea9aa;
+      --primary: #FF40A0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* サイドバーのスタイル */
+    .sidebar {
+      width: 20%;
+      background-color: var(--cyan);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      /* スクロールバーのデザイン */
+      scrollbar-width: thin;
+      scrollbar-color: var(--magenta) var(--cyan);
+    }
+
+    /* Webkit（Chrome, Safari）のスクロールバーデザイン */
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(0, 216, 232, 0.5);
+      border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: var(--magenta);
+      border-radius: 10px;
+      border: 2px solid var(--cyan);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: #e033a0;
+    }
+
+    .sidebar-title {
+      text-align: center;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: var(--white);
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 1rem;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.5rem;
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      font-family: 'Klee One', cursive;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツのスタイル */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 2rem;
+    }
+
+    .title-section {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(245, 245, 245, 0.7));
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .main-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      position: relative;
+      display: inline-block;
+    }
+
+    .main-title::after {
+      content: '';
+      position: absolute;
+      width: 80%;
+      height: 6px;
+      bottom: 0;
+      left: 10%;
+      background-color: var(--cyan);
+      border-radius: 3px;
+    }
+
+    .subtitle {
+      font-family: 'Klee One', cursive;
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      color: var(--dark-gray);
+    }
+
+    .overview {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    /* リストスタイルの統一 */
+    ul {
+      list-style-position: inside;
+      padding-left: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    ol {
+      list-style-position: outside;
+      padding-left: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    ol li {
+      margin-bottom: 0.5rem;
+      text-indent: 0;
+      padding-left: 0;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+      text-indent: -1.2rem;
+      padding-left: 1.2rem;
+    }
+    
+    .overview-list {
+      list-style: none;
+      margin-left: 1rem;
+    }
+    
+    .overview-list li {
+      position: relative;
+      margin-bottom: 0.7rem;
+      text-indent: 0;
+      padding-left: 1.8rem;
+    }
+    
+    .overview-list li i {
+      position: absolute;
+      left: 0;
+      color: #7ea9aa;
+    }
+    
+    /* ハンドライティングボックス内のリストスタイル */
+    .handwritten-box ul {
+      list-style-type: none;
+      padding-left: 0.5rem;
+    }
+    
+    .handwritten-box li {
+      position: relative;
+      margin-bottom: 0.7rem;
+      text-indent: 0;
+      padding-left: 1.5rem;
+    }
+    
+    .handwritten-box li::before {
+      content: "•";
+      position: absolute;
+      left: 0.2rem;
+      color: var(--key);
+      font-weight: bold;
+    }
+    
+    /* ノート内のリストスタイル */
+    .note ul {
+      list-style-type: none;
+      padding-left: 0.5rem;
+    }
+    
+    .note li {
+      position: relative;
+      margin-bottom: 0.5rem;
+      text-indent: 0;
+      padding-left: 1.5rem;
+    }
+    
+    .note li::before {
+      content: "→";
+      position: absolute;
+      left: 0.2rem;
+      color: var(--secondary);
+    }
+    
+    /* 一般的なリストスタイル */
+    .concept-box > ul {
+      list-style-type: none;
+      padding-left: 0.5rem;
+    }
+    
+    .concept-box > ul > li {
+      position: relative;
+      margin-bottom: 0.7rem;
+      text-indent: 0;
+      padding-left: 1.5rem;
+    }
+    
+    .concept-box > ul > li::before {
+      content: "•";
+      position: absolute;
+      left: 0.2rem;
+      color: var(--primary);
+      font-weight: bold;
+    }
+    
+    /* ネストされたリストスタイル */
+    .concept-box ul ul {
+      padding-left: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .concept-box ul ul li {
+      margin-bottom: 0.5rem;
+      text-indent: 0;
+      padding-left: 1.5rem;
+    }
+    
+    .concept-box ul ul li::before {
+      content: "◦";
+      position: absolute;
+      left: 0.2rem;
+      color: var(--secondary);
+    }
+
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* 強調表示のスタイル */
+    .highlight {
+      background-color: rgba(212, 104, 104, 0.2);
+      padding: 0 0.3rem;
+      border-radius: 3px;
+    }
+
+    /* テーブルスタイル */
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+    }
+
+    .glossary-table th, .glossary-table td {
+      padding: 0.75rem;
+      border: 1px solid var(--light-gray);
+    }
+
+    .glossary-table th {
+      background-color: var(--cyan);
+      color: var(--white);
+      text-align: left;
+    }
+
+    .glossary-table tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+
+    /* 吹き出しスタイル */
+    .speech-bubble {
+      position: relative;
+      background-color: var(--light-gray);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-family: 'Klee One', cursive;
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 20px;
+      border-width: 10px;
+      border-style: solid;
+      border-color: var(--light-gray) transparent transparent transparent;
+    }
+
+    /* 手書き風ボックス */
+    .handwritten-box {
+      border: 2px dashed var(--magenta);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      transform: rotate(-0.5deg);
+      background-color: rgba(255, 255, 255, 0.8);
+      font-family: 'Klee One', cursive;
+    }
+
+    /* 手書き風ボックス内の見出し */
+    .handwritten-box p:first-child {
+      color: var(--magenta);
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+      padding: 0.3rem 0.6rem;
+      background-color: rgba(255, 64, 160, 0.1);
+      border-radius: 5px;
+      display: inline-block;
+      transform: rotate(0.5deg);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ノートスタイル */
+    .note {
+      background-color: var(--white);
+      border-left: 4px solid var(--yellow);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .note::before {
+      content: '📌';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      font-size: 1.5rem;
+    }
+
+    /* 注釈タイトル強調 */
+    .note p:first-child strong {
+      color: var(--key);
+      font-size: 1.05rem;
+      background-color: rgba(255, 230, 0, 0.2);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+    }
+
+    /* キーインサイトスタイル */
+    .key-insights {
+      background: linear-gradient(135deg, rgba(0, 216, 232, 0.1), rgba(255, 64, 160, 0.1));
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .insight-item {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+
+    .insight-number {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background-color: var(--cyan);
+      color: var(--white);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+
+    .insight-content {
+      flex-grow: 1;
+    }
+
+    .insight-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+    }
+
+    /* テイクホームメッセージスタイル */
+    .take-home {
+      text-align: center;
+      padding: 2rem;
+      margin: 3rem 0;
+      background-color: var(--white);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .take-home::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border: 2px dashed var(--yellow);
+      border-radius: 20px;
+      z-index: -1;
+    }
+
+    .take-home-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* レスポンシブデザインのためのメディアクエリ */
+    @media screen and (max-width: 1024px) {
+      .sidebar {
+        width: 25%;
+      }
+      
+      .main-content {
+        width: 75%;
+        margin-left: 25%;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+        max-height: 300px;
+      }
+      
+      .sidebar-title {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+      }
+      
+      .nav-item {
+        margin-bottom: 0.5rem;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+
+      section {
+        padding: 1.5rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      h3 {
+        font-size: 1.2rem;
+      }
+      
+      .image-container img {
+        max-width: 95%;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .sidebar {
+        max-height: 250px;
+        padding: 0.8rem;
+      }
+      
+      .sidebar-title {
+        font-size: 1.2rem;
+      }
+      
+      .nav-link {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .main-content {
+        padding: 1rem;
+      }
+      
+      section {
+        padding: 1rem;
+        margin-bottom: 2rem;
+      }
+      
+      .main-title {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .handwritten-box, .note, .speech-bubble {
+        padding: 1rem;
+      }
+      
+      .insight-item {
+        flex-direction: column;
+      }
+      
+      .insight-number {
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    .take-home-title i {
+      margin-right: 0.5rem;
+      color: var(--yellow);
+    }
+
+    .take-home-message {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.3rem;
+      line-height: 1.8;
+      color: var(--key);
+    }
+
+    /* フッタースタイル */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      margin-top: 3rem;
+      border-top: 1px solid var(--light-gray);
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--cyan);
+      color: var(--white);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scroll-top.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* セクションタイトルスタイル */
+    .section-title {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      border-bottom: 2px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+    }
+    
+    .section-title i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+      font-size: 1.3rem;
+    }
+    
+    /* コンセプトボックススタイル */
+    .concept-box {
+      background-color: var(--white);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      border-left: 5px solid var(--cyan);
+    }
+    
+    .concept-title {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--light-gray);
+      padding-bottom: 0.5rem;
+    }
+    
+    .concept-title i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+    
+    /* キーワードスタイル */
+    .keyword {
+      background-color: rgba(255, 230, 0, 0.3);
+      padding: 0 3px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    
+    .keyword-en {
+      font-style: italic;
+      color: var(--dark-gray);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <h2 class="sidebar-title">教師なし学習</h2>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#introduction" class="nav-link"><i class="fas fa-book-open"></i>はじめに</a>
+        </li>
+        <li class="nav-item">
+          <a href="#basic-concept" class="nav-link"><i class="fas fa-lightbulb"></i>基本概念</a>
+        </li>
+        <li class="nav-item">
+          <a href="#clustering" class="nav-link"><i class="fas fa-object-group"></i>クラスタリング</a>
+        </li>
+        <li class="nav-item">
+          <a href="#dimension-reduction" class="nav-link"><i class="fas fa-compress-arrows-alt"></i>次元削減</a>
+        </li>
+        <li class="nav-item">
+          <a href="#recommendation" class="nav-link"><i class="fas fa-thumbs-up"></i>レコメンデーション</a>
+        </li>
+        <li class="nav-item">
+          <a href="#topic-model" class="nav-link"><i class="fas fa-comment-dots"></i>トピックモデル</a>
+        </li>
+        <li class="nav-item">
+          <a href="#business-application" class="nav-link"><i class="fas fa-briefcase"></i>ビジネス応用</a>
+        </li>
+        <li class="nav-item">
+          <a href="#model-selection" class="nav-link"><i class="fas fa-tasks"></i>モデル選択</a>
+        </li>
+        <li class="nav-item">
+          <a href="#key-insights" class="nav-link"><i class="fas fa-key"></i>Key Insights</a>
+        </li>
+        <li class="nav-item">
+          <a href="#take-home" class="nav-link"><i class="fas fa-home"></i>Take Home Message</a>
+        </li>
+        <li class="nav-item">
+          <a href="#glossary" class="nav-link"><i class="fas fa-book"></i>用語集</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- タイトルセクション -->
+      <section id="introduction" class="section title-section">
+        <h1 class="main-title">教師なし学習</h1>
+        <p class="subtitle">特徴量のみから学習するモデルとその応用</p>
+        <div class="overview">
+          <ul class="overview-list">
+            <li><i class="fas fa-check-circle" style="color: var(--cyan);"></i> 教師なし学習には、特徴量のみが必要であることを理解します</li>
+            <li><i class="fas fa-check-circle" style="color: var(--cyan);"></i> 教師なし学習における、分析対象に応じた問題の種類を列挙・説明できるようになります</li>
+            <li><i class="fas fa-check-circle" style="color: var(--cyan);"></i> 代表的な教師なし学習モデルの基本概念を理解します</li>
+            <li><i class="fas fa-check-circle" style="color: var(--cyan);"></i> 目的やデータの特性・量に応じて、適切な教師なし学習モデルを選択できるようになります</li>
+            <li><i class="fas fa-check-circle" style="color: var(--cyan);"></i> ビジネスにおける教師なし学習の応用例を学びます</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 基本概念セクション -->
+      <section id="basic-concept" class="section">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i>教師なし学習の基本概念</h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-question-circle"></i>教師なし学習とは</h3>
+          <p>教師なし学習（<span class="keyword-en">Unsupervised Learning</span>）とは、機械学習の一分野で、<span class="keyword">特徴量のみ</span>を用いてデータの隠れた構造やパターンを発見するアプローチです。教師あり学習と異なり、正解ラベル（教師データ）を必要としません。</p>
+          
+          <div class="handwritten-box">
+            <p>💡 教師なし学習の本質は「データ自体が持つ自然な構造やパターンを見つけること」です。人間が事前に分類や解釈を与えるのではなく、データそのものから学習します。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-exchange-alt"></i>教師あり学習との違い</h3>
+          
+          <table class="glossary-table">
+            <tr>
+              <th>比較項目</th>
+              <th>教師あり学習</th>
+              <th>教師なし学習</th>
+            </tr>
+            <tr>
+              <td>必要なデータ</td>
+              <td>特徴量と教師データ（正解ラベル）のペア</td>
+              <td>特徴量のみ</td>
+            </tr>
+            <tr>
+              <td>目的</td>
+              <td>入力から出力への対応関係の学習</td>
+              <td>データ内の隠れた構造やパターンの発見</td>
+            </tr>
+            <tr>
+              <td>代表的な問題</td>
+              <td>分類問題、回帰問題</td>
+              <td>クラスタリング、次元削減、異常検知</td>
+            </tr>
+            <tr>
+              <td>評価方法</td>
+              <td>予測精度や誤差などの明確な指標</td>
+              <td>ビジネス価値や解釈のしやすさなど間接的な評価</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-list-ol"></i>教師なし学習の主な問題タイプ</h3>
+          <ul>
+            <li><strong><span class="keyword">クラスタリング</span>（<span class="keyword-en">Clustering</span>）</strong>：データを類似した特徴を持つグループに分ける</li>
+            <li><strong><span class="keyword">次元削減</span>（<span class="keyword-en">Dimension Reduction</span>）</strong>：データの重要な特徴を保持しながら次元数を減らす</li>
+            <li><strong><span class="keyword">密度推定</span>（<span class="keyword-en">Density Estimation</span>）</strong>：観測データからその確率分布を推定する</li>
+            <li><strong><span class="keyword">異常検知</span>（<span class="keyword-en">Anomaly Detection</span>）</strong>：通常のパターンから外れたデータを検出する</li>
+            <li><strong><span class="keyword">関連規則学習</span>（<span class="keyword-en">Association Rule Learning</span>）</strong>：データ項目間の関連性や規則を発見する</li>
+          </ol>
+        </div>
+
+        <div class="note">
+          <p>教師なし学習の特徴として、事前に正解が不明な探索的なデータ分析に適している点が挙げられます。新しい洞察や予想外のパターンを発見できる可能性があり、ビジネスにおいて価値ある知見をもたらすことがあります。</p>
+        </div>
+
+        <div class="speech-bubble">
+          <p>教師なし学習では「正解」が明確ではないため、モデルの評価が難しいことが課題です。結果の解釈やビジネス的な価値を考慮した評価が重要になります。</p>
+        </div>
+      </section>
+
+      <!-- クラスタリングセクション -->
+      <section id="clustering" class="section">
+        <h2 class="section-title"><i class="fas fa-object-group"></i>クラスタリング</h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-cubes"></i>クラスタリングとは</h3>
+          <p>クラスタリングは、データ点を類似性に基づいてグループ（クラスタ）に分割する教師なし学習手法です。ラベルなしのデータから自然なグループを発見することで、データの構造を理解する助けとなります。</p>
+          
+          <div class="note">
+            <p><strong>クラスタリングの目的</strong></p>
+            <ul>
+              <li>データの自然な分類・構造の発見</li>
+              <li>データの要約と圧縮</li>
+              <li>異常値の検出</li>
+              <li>セグメンテーション（市場、顧客など）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-cogs"></i>K-means法</h3>
+          <p><span class="keyword">k-means法</span>（<span class="keyword-en">k-means method</span>）は、最も一般的なクラスタリングアルゴリズムの一つです。予め指定した数（k）のクラスタにデータを分割します。</p>
+          
+          <div class="handwritten-box">
+            <p>【k-means法の手順】</p>
+            <ul style="padding-left: 1.5rem; color: var(--key);">
+              <li style="font-weight: 500; margin-bottom: 0.5rem;">k個のクラスタ中心（セントロイド）をランダムに初期化</li>
+              <li style="font-weight: 500; margin-bottom: 0.5rem;">各データ点を最も近いセントロイドのクラスタに割り当て</li>
+              <li style="font-weight: 500; margin-bottom: 0.5rem;">各クラスタのセントロイドを、そのクラスタに属するデータ点の平均位置に更新</li>
+              <li style="font-weight: 500; margin-bottom: 0.5rem;">クラスタの割り当てが変化しなくなるまで2と3を繰り返す</li>
+            </ul>
+          </div>
+          
+          <!-- 画像プレースホルダー -->
+          <div class="image-container">
+            <img src="img/Gimage_1-3-2_01.png" alt="K-means法のクラスタリング過程">
+            <figcaption>K-means法によるクラスタリングの過程。初期セントロイドからクラスタが徐々に収束していく様子を示しています。</figcaption>
+          </div>
+          
+          <div class="note">
+            <p>k-means法は計算効率が良く、大規模データにも適用できる利点がありますが、初期値依存性やクラスタ数kの事前指定が必要という課題もあります。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-project-diagram"></i>階層的クラスタリング</h3>
+          <p>階層的クラスタリングは、データの階層構造を作成するアプローチです。<span class="keyword">ウォード法</span>（<span class="keyword-en">Ward's method</span>）はその代表的な手法の一つです。</p>
+          
+          <div class="handwritten-box">
+            <p>【階層的クラスタリングの2つのアプローチ】</p>
+            <ul>
+              <li><strong>凝集型（ボトムアップ）</strong>：個々のデータ点から始めて、徐々にクラスタを統合していく</li>
+              <li><strong>分割型（トップダウン）</strong>：全データを1つのクラスタから始めて、徐々に分割していく</li>
+            </ul>
+          </div>
+          
+          <p><span class="keyword">ウォード法</span>は凝集型階層的クラスタリングの一種で、クラスタ内の分散を最小化する方法でクラスタを統合します。これにより、比較的サイズの揃ったクラスタが生成される傾向があります。</p>
+          
+          <p>階層的クラスタリングの結果は<span class="keyword">デンドログラム</span>（<span class="keyword-en">dendrogram</span>）または<span class="keyword">樹形図</span>として視覚化されることが多く、これによりクラスタの階層構造が明示されます。</p>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-chart-bar"></i>クラスタリングの評価</h3>
+          <p>クラスタリングの結果を評価する際、以下のような指標が用いられます：</p>
+          <ul>
+            <li><strong>シルエット係数</strong>：クラスタ内の凝集度とクラスタ間の分離度を測定</li>
+            <li><strong>Davies-Bouldin指標</strong>：クラスタ内の分散とクラスタ間の距離に基づく評価（低いほど良い）</li>
+            <li><strong>エルボー法</strong>：k-means法におけるクラスタ数kの適切な値を決定するための手法</li>
+          </ul>
+          
+          <div class="speech-bubble">
+            <p>クラスタリングは「正解」のない探索的手法なので、結果の解釈や活用がとても重要です。得られたクラスタが実際のビジネス文脈で意味を持つかどうかを検討しましょう。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 次元削減セクション -->
+      <section id="dimension-reduction" class="section">
+        <h2 class="section-title"><i class="fas fa-compress-arrows-alt"></i>次元削減</h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-project-diagram"></i>次元削減とは</h3>
+          <p>次元削減は、データの本質的な構造を保持しながら、特徴量の次元数を減らす教師なし学習手法です。高次元データを低次元空間に変換することで、データの可視化や後続の分析が容易になります。</p>
+          
+          <!-- ビジュアル要素: 次元削減の概念図 -->
+          <div style="text-align: center; margin: 1.5rem 0;">
+            <div style="background-color: #f8f8f8; padding: 1rem; border-radius: 10px; display: inline-block;">
+              <div style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 1rem;">
+                <!-- 左側：高次元データ -->
+                <div style="position: relative; width: 120px; height: 120px; background-color: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                  <!-- 3D空間を表現 -->
+                  <div style="position: absolute; top: 25px; left: 25px; width: 70px; height: 70px;">
+                    <!-- 3D空間の軸 -->
+                    <div style="position: absolute; top: 0; left: 0; width: 70px; height: 1px; background-color: var(--key); transform: rotate(10deg);"></div>
+                    <div style="position: absolute; top: 0; left: 0; width: 1px; height: 70px; background-color: var(--key);"></div>
+                    <div style="position: absolute; top: 0; left: 0; width: 70px; height: 1px; background-color: var(--key); transform: rotate(-45deg);"></div>
+                    
+                    <!-- 点をプロット -->
+                    <div style="position: absolute; top: 20px; left: 30px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 25px; left: 40px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 30px; left: 35px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 15px; left: 45px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    
+                    <div style="position: absolute; top: 50px; left: 20px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 45px; left: 25px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 55px; left: 15px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 50px; left: 30px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                  </div>
+                  
+                  <div style="position: absolute; bottom: 0; width: 100%; text-align: center; font-size: 0.8rem; padding-bottom: 3px;">高次元空間</div>
+                </div>
+                
+                <!-- 矢印 -->
+                <div style="font-size: 1.5rem; color: var(--dark-gray);">
+                  <i class="fas fa-arrow-right"></i>
+                </div>
+                
+                <!-- 右側：低次元データ -->
+                <div style="position: relative; width: 120px; height: 120px; background-color: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                  <!-- 2D空間を表現 -->
+                  <div style="position: absolute; top: 25px; left: 25px; width: 70px; height: 70px;">
+                    <!-- 2D空間の軸 -->
+                    <div style="position: absolute; top: 35px; left: 0; width: 70px; height: 1px; background-color: var(--key);"></div>
+                    <div style="position: absolute; top: 0; left: 35px; width: 1px; height: 70px; background-color: var(--key);"></div>
+                    
+                    <!-- 投影された点 -->
+                    <div style="position: absolute; top: 20px; left: 45px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 25px; left: 48px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 22px; left: 42px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 18px; left: 47px; width: 6px; height: 6px; background-color: var(--magenta); border-radius: 50%;"></div>
+                    
+                    <div style="position: absolute; top: 50px; left: 25px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 48px; left: 22px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 52px; left: 20px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                    <div style="position: absolute; top: 45px; left: 24px; width: 6px; height: 6px; background-color: var(--cyan); border-radius: 50%;"></div>
+                  </div>
+                  
+                  <div style="position: absolute; bottom: 0; width: 100%; text-align: center; font-size: 0.8rem; padding-bottom: 3px;">低次元空間</div>
+                </div>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--dark-gray); text-align: center;">
+                次元削減：高次元データの本質的な構造を低次元空間で表現
+              </div>
+            </div>
+          </div>
+          
+          <div class="note">
+            <p><strong>次元削減の目的</strong></p>
+            <ul>
+              <li>データの可視化（2次元・3次元）</li>
+              <li>特徴量の抽出と選択</li>
+              <li>ノイズの除去</li>
+              <li>計算効率の向上</li>
+              <li>後続タスク（分類・回帰など）の性能向上</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-chart-line"></i>主成分分析 (PCA)</h3>
+          <p><span class="keyword">主成分分析</span>（<span class="keyword-en">Principal Component Analysis, PCA</span>）は最も一般的な線形次元削減手法です。データの分散を最大化する方向（主成分）を見つけ、元の特徴量をこれらの主成分に射影します。</p>
+          
+          <div class="note">
+            <p>PCAは、元のデータの変動（分散）をできるだけ保持しながら次元を削減します。最初の数個の主成分が元データの変動の大部分を説明することが多いです。</p>
+          </div>
+          
+          <div class="handwritten-box">
+            <p>【PCAの手順】</p>
+            <ul>
+              <li>データを標準化（平均0、分散1）</li>
+              <li>共分散行列を計算</li>
+              <li>共分散行列の固有値と固有ベクトルを計算</li>
+              <li>固有値の大きさでソートし、対応する固有ベクトルを主成分として選択</li>
+              <li>元データを選択した主成分に射影</li>
+            </ul>
+          </div>
+          
+          <!-- 画像プレースホルダー -->
+          <div class="image-container">
+            <img src="img/Gimage_1-3-2_02.png" alt="主成分分析（PCA）の概念図">
+            <figcaption>主成分分析（PCA）の概念図。データの分散が最大となる方向（第1主成分）と、それに直交する方向（第2主成分）に元データを射影している様子を示しています。</figcaption>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-project-diagram"></i>t-SNE</h3>
+          <p><span class="keyword">t-SNE</span>（<span class="keyword-en">t-distributed Stochastic Neighbor Embedding</span>）は非線形次元削減手法の一つで、高次元データの局所的な構造を保持しながら低次元に埋め込みます。特にデータの可視化に優れています。</p>
+          
+          <div class="note">
+            <p>t-SNEは類似したデータ点を近くに、異なるデータ点を遠くに配置するよう最適化します。クラスタ構造の可視化に非常に効果的ですが、大規模データセットでは計算コストが高くなる点に注意が必要です。</p>
+          </div>
+          
+          <div class="speech-bubble">
+            <p>t-SNEはハイパーパラメータ（特にperplexity）の設定に敏感で、結果の解釈には注意が必要です。グローバルな構造よりも局所的な関係性の保持に重点を置いています。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-ruler-combined"></i>多次元尺度構成法 (MDS)</h3>
+          <p><span class="keyword">多次元尺度構成法</span>（<span class="keyword-en">Multidimensional Scaling, MDS</span>）は、高次元空間でのデータ点間の距離関係を低次元空間で再現しようとする手法です。</p>
+          
+          <div class="handwritten-box">
+            <p>MDSの目的は、元の高次元空間におけるデータ点間の距離関係をできるだけ保持した低次元表現を見つけることです。類似性や非類似性の関係を視覚化するのに役立ちます。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-table"></i>特異値分解 (SVD)</h3>
+          <p><span class="keyword">特異値分解</span>（<span class="keyword-en">Singular Value Decomposition, SVD</span>）は任意の行列Aを A = UΣV<sup>T</sup> と3つの行列の積に分解する手法。U・Vは直交行列、Σは対角行列。次元削減や潜在的な構造の抽出に利用される。</p>
+          
+          <p>SVDは任意の行列 A を A = UΣV<sup>T</sup> と分解します：</p>
+          <ul>
+            <li><strong>U</strong>：左特異ベクトル（列直交行列）</li>
+            <li><strong>Σ</strong>：特異値を対角成分に持つ対角行列</li>
+            <li><strong>V<sup>T</sup></strong>：右特異ベクトルの転置（行直交行列）</li>
+          </ul>
+          
+          <div class="note">
+            <p>SVDは推薦システム（協調フィルタリング）、画像圧縮、ノイズ除去など多くの応用があります。また、PCAの実装にもSVDが利用されることが多いです。</p>
+          </div>
+        </div>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-random"></i>次元削減の選択基準</h3>
+          <p>次元削減手法を選ぶ際の考慮点：</p>
+          <ul>
+            <li><strong>線形 vs 非線形</strong>：データが線形構造を持つならPCAなどの線形手法、非線形構造ならt-SNEなどの非線形手法</li>
+            <li><strong>局所構造 vs グローバル構造</strong>：局所的な関係を保持したいならt-SNE、全体的な構造を保持したいならPCA</li>
+            <li><strong>計算効率</strong>：大規模データセットではPCAやSVDが計算効率に優れる</li>
+            <li><strong>解釈可能性</strong>：PCAの主成分は元の特徴の線形結合として解釈可能</li>
+            <li><strong>目的</strong>：可視化が目的ならt-SNE、特徴抽出が目的ならPCA</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- レコメンデーションセクション -->
+      <section id="recommendation" class="section">
+        <h2 class="section-title"><i class="fas fa-thumbs-up"></i>レコメンデーション</h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-info-circle"></i>レコメンデーションシステムとは</h3>
+          <p>レコメンデーションシステム（推薦システム）は、ユーザーの好みや過去の行動に基づいて、関心を持ちそうなアイテム（製品、コンテンツなど）を提案するシステムです。教師なし学習の重要な応用例の一つです。</p>
+          
+          <div class="handwritten-box">
+            <p>レコメンデーションシステムの例：</p>
+            <ul>
+              <li>Amazonの「この商品を買った人はこんな商品も買っています」</li>
+              <li>Netflixの映画・ドラマ推薦</li>
+              <li>YouTubeの動画推薦</li>
+              <li>Spotifyのプレイリスト推薦</li>
+              <li>ニュースサイトの記事推薦</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-users"></i>協調フィルタリング</h3>
+          <p><span class="keyword">協調フィルタリング</span>（<span class="keyword-en">Collaborative Filtering</span>）は、類似したユーザーの行動や評価に基づいて推薦を行うアプローチです。「あなたと似た好みを持つ人々が好んだものをあなたも好むだろう」という考え方に基づいています。</p>
+          
+          <div class="handwritten-box">
+            <p>【協調フィルタリングの2つの主なアプローチ】</p>
+            <ul>
+              <li><strong>ユーザーベース協調フィルタリング</strong>：似たユーザーが高評価したアイテムを推薦</li>
+              <li><strong>アイテムベース協調フィルタリング</strong>：ユーザーが高評価したアイテムと似たアイテムを推薦</li>
+            </ul>
+          </div>
+          
+          <p>協調フィルタリングの実装方法としては、近傍法（k最近傍法など）や行列分解法（<span class="keyword">特異値分解 (SVD)</span>など）が広く使われています。</p>
+          
+          <div class="note">
+            <p>協調フィルタリングの利点は、アイテムの内容を理解する必要がなく、ユーザーの行動パターンだけでレコメンデーションができる点です。一方で、新しいユーザーや新しいアイテムに対処できない「<span class="keyword">コールドスタート問題</span>」が課題となります。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-file-alt"></i>コンテンツベースフィルタリング</h3>
+          <p><span class="keyword">コンテンツベースフィルタリング</span>（<span class="keyword-en">Content-based Filtering</span>）は、アイテムの特徴や属性に基づいて推薦を行うアプローチです。「あなたが過去に好んだアイテムと似た特徴を持つアイテムをあなたも好むだろう」という考え方に基づいています。</p>
+          
+          <div class="handwritten-box">
+            <p>コンテンツベースフィルタリングでは、各アイテムの特徴（映画なら俳優、ジャンル、監督など）を抽出し、ユーザーが過去に高評価したアイテムの特徴と類似した特徴を持つ新しいアイテムを推薦します。</p>
+          </div>
+          
+          <div class="note">
+            <p>コンテンツベースフィルタリングの利点は、新しいアイテムでも特徴さえ分かれば推薦できる点です。一方で、アイテムの特徴を適切に抽出・表現することが難しい場合があります。また、ユーザーの過去の行動と似たアイテムばかりを推薦する「フィルターバブル」問題も起こりえます。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-exclamation-triangle"></i>コールドスタート問題</h3>
+          <p><span class="keyword">コールドスタート問題</span>（<span class="keyword-en">Cold Start Problem</span>）とは、新規ユーザーや新規アイテムに対して十分な情報がないため、適切なレコメンデーションができない問題です。</p>
+          
+          <div class="handwritten-box">
+            <p>【コールドスタート問題の種類】</p>
+            <ul>
+              <li><strong>新規ユーザー問題</strong>：ユーザーの好みや履歴がないため、個人に適したレコメンデーションができない</li>
+              <li><strong>新規アイテム問題</strong>：新しいアイテムに対する評価データがないため、推薦されにくい</li>
+            </ul>
+          </div>
+          <!-- 画像プレースホルダー -->
+          <div class="image-container">
+            <img src="img/Gimage_1-3-2_03.png" alt="コールドスタート問題の概念図">
+            <figcaption>コールドスタート問題：新しいユーザーやアイテムに関するデータが不足しているため、モデルがうまく予測・推薦できない初期状態。</figcaption>
+          </div>          
+          <div class="speech-bubble">
+            <p>コールドスタート問題への対策としては、初期アンケートの実施、人気アイテムの推薦、ハイブリッドアプローチ（協調フィルタリングとコンテンツベースフィルタリングの組み合わせ）などがあります。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-random"></i>ハイブリッドアプローチ</h3>
+          <p>実際のレコメンデーションシステムでは、協調フィルタリングとコンテンツベースフィルタリングを組み合わせた「ハイブリッドアプローチ」が多く採用されています。これにより、各アプローチの欠点を互いに補完することができます。</p>
+          
+          <div class="handwritten-box">
+            <p>【ハイブリッド方式の例】</p>
+            <ul>
+              <li><strong>重み付け方式</strong>：異なるレコメンデーション手法の結果を重み付けして組み合わせる</li>
+              <li><strong>切り替え方式</strong>：状況に応じて最適な手法を選択する</li>
+              <li><strong>特徴結合方式</strong>：複数の情報源からの特徴を結合して一つのモデルとする</li>
+              <li><strong>カスケード方式</strong>：一つの手法の出力を別の手法の入力として使用する</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- トピックモデルセクション -->
+      <section id="topic-model" class="section">
+        <h2 class="section-title"><i class="fas fa-comment-dots"></i>トピックモデル</h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-file-alt"></i>トピックモデルとは</h3>
+          <p>トピックモデルは、大量のテキストデータから自動的にトピック（話題）を抽出する教師なし学習技術です。文書をトピックの混合として表現することで、文書集合の潜在的な意味構造を明らかにします。</p>
+          
+          <!-- ビジュアル要素: トピックモデルの概念図 -->
+          <div style="text-align: center; margin: 1.5rem 0;">
+            <div style="background-color: #f8f8f8; padding: 1rem; border-radius: 10px; display: inline-block; max-width: 90%;">
+              <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px; margin-bottom: 1rem;">
+                <!-- 左側：文書集合 -->
+                <div style="flex: 0 0 auto; max-width: 150px;">
+                  <div style="background-color: white; padding: 0.7rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 5px;">
+                    <div style="height: 8px; width: 80%; background-color: var(--cyan); opacity: 0.3; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 90%; background-color: var(--magenta); opacity: 0.3; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 60%; background-color: var(--yellow); opacity: 0.7; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 70%; background-color: var(--cyan); opacity: 0.3; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 85%; background-color: var(--yellow); opacity: 0.7;"></div>
+                  </div>
+                  <div style="background-color: white; padding: 0.7rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 5px;">
+                    <div style="height: 8px; width: 75%; background-color: var(--cyan); opacity: 0.6; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 90%; background-color: var(--cyan); opacity: 0.6; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 60%; background-color: var(--yellow); opacity: 0.2; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 80%; background-color: var(--cyan); opacity: 0.6; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 70%; background-color: var(--magenta); opacity: 0.2;"></div>
+                  </div>
+                  <div style="background-color: white; padding: 0.7rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <div style="height: 8px; width: 85%; background-color: var(--magenta); opacity: 0.8; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 70%; background-color: var(--magenta); opacity: 0.8; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 90%; background-color: var(--magenta); opacity: 0.8; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 60%; background-color: var(--cyan); opacity: 0.2; margin-bottom: 5px;"></div>
+                    <div style="height: 8px; width: 80%; background-color: var(--yellow); opacity: 0.2;"></div>
+                  </div>
+                  <div style="font-size: 0.8rem; text-align: center; margin-top: 5px;">文書集合</div>
+                </div>
+                
+                <!-- 矢印 -->
+                <div style="align-self: center; font-size: 1.5rem; color: var(--dark-gray);">
+                  <i class="fas fa-arrow-right"></i>
+                </div>
+                
+                <!-- 右側：抽出されたトピック -->
+                <div style="flex: 0 0 auto; max-width: 300px;">
+                  <div style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;">
+                    <div style="background-color: white; padding: 0.7rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--cyan); width: calc(50% - 5px);">
+                      <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: var(--cyan);">トピック1: AI技術</div>
+                      <div style="font-size: 0.75rem; color: var(--dark-gray);">
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(0, 216, 232, 0.1); border-radius: 3px;">機械学習</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(0, 216, 232, 0.1); border-radius: 3px;">アルゴリズム</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(0, 216, 232, 0.1); border-radius: 3px;">ディープラーニング</span>
+                      </div>
+                    </div>
+                    <div style="background-color: white; padding: 0.7rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--magenta); width: calc(50% - 5px);">
+                      <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: var(--magenta);">トピック2: ビジネス</div>
+                      <div style="font-size: 0.75rem; color: var(--dark-gray);">
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(255, 64, 160, 0.1); border-radius: 3px;">マーケティング</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(255, 64, 160, 0.1); border-radius: 3px;">戦略</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(255, 64, 160, 0.1); border-radius: 3px;">顧客</span>
+                      </div>
+                    </div>
+                    <div style="background-color: white; padding: 0.7rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--yellow); width: calc(50% - 5px);">
+                      <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: var(--yellow);">トピック3: データ分析</div>
+                      <div style="font-size: 0.75rem; color: var(--dark-gray);">
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(255, 230, 0, 0.1); border-radius: 3px;">統計</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(255, 230, 0, 0.1); border-radius: 3px;">可視化</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(255, 230, 0, 0.1); border-radius: 3px;">予測</span>
+                      </div>
+                    </div>
+                    <div style="background-color: white; padding: 0.7rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--key); width: calc(50% - 5px);">
+                      <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: var(--key);">トピック4: クラウド</div>
+                      <div style="font-size: 0.75rem; color: var(--dark-gray);">
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(24, 24, 24, 0.1); border-radius: 3px;">サーバー</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(24, 24, 24, 0.1); border-radius: 3px;">ストレージ</span>
+                        <span style="display: inline-block; margin: 2px; padding: 2px 5px; background-color: rgba(24, 24, 24, 0.1); border-radius: 3px;">セキュリティ</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.8rem; text-align: center; margin-top: 5px;">抽出されたトピック</div>
+                </div>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--dark-gray); text-align: center;">
+                トピックモデル：文書集合から潜在的なトピックを抽出し、各文書のトピック構成を推定
+              </div>
+            </div>
+          </div>
+          
+          <div class="note">
+            <p><strong>トピックモデルの目的</strong></p>
+            <ul>
+              <li>大量のテキストデータからの情報抽出</li>
+              <li>文書の自動分類</li>
+              <li>文書間の類似度計算</li>
+              <li>トレンド分析</li>
+              <li>レコメンデーションシステムへの応用</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-project-diagram"></i>潜在的ディリクレ配分法 (LDA)</h3>
+          <p><span class="keyword">潜在的ディリクレ配分法</span>（<span class="keyword-en">Latent Dirichlet Allocation, LDA</span>）は、最も広く使われているトピックモデルの一つです。文書集合に含まれる潜在的なトピックを確率的に推定する生成モデルです。</p>
+          
+          <div class="handwritten-box">
+            <p>【LDAの基本的な前提】</p>
+            <ul>
+              <li>各文書は複数のトピックの確率的な混合物である</li>
+              <li>各トピックは単語の確率分布である</li>
+              <li>文書内の各単語は、まずトピックを選び、そのトピックから単語を選ぶというプロセスで生成される</li>
+            </ul>
+          </div>
+          
+          <p>LDAのプロセスを数学的に表現すると、次のようになります：</p>
+          <ol>
+            <li>文書ごとにトピック分布をディリクレ分布からサンプリング</li>
+            <li>文書内の各単語位置について：
+              <ul>
+                <li>トピック分布からトピックをサンプリング</li>
+                <li>選択されたトピックの単語分布から単語をサンプリング</li>
+              </ul>
+            </li>
+          </ol>
+          
+          <div class="note">
+            <p>「ディリクレ配分」とは、確率分布のパラメータを定義するための確率分布（事前分布）です。LDAでは、文書のトピック分布と各トピックの単語分布にディリクレ分布を事前分布として使用しています。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-cogs"></i>LDAの応用例</h3>
+          <p>潜在的ディリクレ配分法（LDA）は様々な分野で応用されています：</p>
+          
+          <ul>
+            <li><strong>文書分類・組織化</strong>：大量の文書を自動的にカテゴリに分類する</li>
+            <li><strong>情報検索の改善</strong>：クエリ拡張やトピックベースの検索を実現</li>
+            <li><strong>レコメンデーションシステム</strong>：ユーザーの興味に合ったコンテンツを推薦</li>
+            <li><strong>傾向分析</strong>：テキストデータから時間的なトピックの変化を追跡</li>
+            <li><strong>異常検出</strong>：トピック分布が一般的なパターンから逸脱する文書を検出</li>
+            <li><strong>科学論文の分析</strong>：研究領域や研究トレンドの把握</li>
+          </ul>
+          
+          <div class="speech-bubble">
+            <p>LDAは単なるトピック抽出だけでなく、文書間の類似性の測定にも使われます。トピック分布を特徴量として活用することで、高次元のテキストデータを低次元の「トピック空間」に変換できます。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-code-branch"></i>トピックモデルの発展形</h3>
+          <p>LDA以外にも、様々なトピックモデルが提案されています：</p>
+          
+          <ul>
+            <li><strong>潜在意味解析（LSA/LSI）</strong>：特異値分解を使用して文書-単語行列の次元を削減</li>
+            <li><strong>非負値行列因子分解（NMF）</strong>：文書-単語行列を非負値の2つの行列の積に分解</li>
+            <li><strong>階層的ディリクレ過程（HDP）</strong>：トピック数を自動的に決定できる拡張モデル</li>
+            <li><strong>相関トピックモデル（CTM）</strong>：トピック間の相関を考慮したモデル</li>
+            <li><strong>動的トピックモデル（DTM）</strong>：時間的変化を考慮したトピックモデル</li>
+          </ul>
+          
+          <div class="note">
+            <p>G検定ではLDAの基本概念を理解しておくことが重要ですが、他のモデルの存在も知っておくと良いでしょう。特に、「トピックモデル」という用語がLDAと同義で使われることがあるため、トピックモデルはLDAだけではないことに注意が必要です。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ビジネス応用セクション -->
+      <section id="business-application" class="section">
+        <h2 class="section-title"><i class="fas fa-briefcase"></i>ビジネス応用</h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-chart-line"></i>教師なし学習のビジネス価値</h3>
+          <p>教師なし学習は、教師データ（正解ラベル）を必要としないため、多くのビジネスシーンで活用できます。特に以下のような場面で価値を発揮します：</p>
+          
+          <div class="handwritten-box">
+            <p>教師なし学習がビジネスにもたらす価値：</p>
+            <ul>
+              <li><strong>正解データの収集が難しい問題に対応可能</strong></li>
+              <li><strong>人間が気づいていないパターンや関係性の発見</strong></li>
+              <li><strong>データの特徴や構造の理解の深化</strong></li>
+              <li><strong>情報の整理・構造化・次元削減による意思決定支援</strong></li>
+              <li><strong>異常検知による問題の早期発見</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-users"></i>顧客分析と市場セグメンテーション</h3>
+          <p>教師なし学習の代表的なビジネス応用として、顧客データの分析と市場セグメンテーションがあります。</p>
+          
+          <div class="note">
+            <p><span class="keyword">クラスタリング</span>技術を使って顧客を類似した行動や特性を持つグループに分けることで、ターゲットを絞ったマーケティング戦略の立案や、顧客理解の深化が可能になります。</p>
+          </div>
+          
+          <div class="handwritten-box">
+            <p>【顧客分析の具体例】</p>
+            <ul>
+              <li><strong>RFM分析</strong>：最近性（Recency）、頻度（Frequency）、金額（Monetary）に基づく顧客グループ化</li>
+              <li><strong>ライフスタイルセグメンテーション</strong>：生活様式や価値観に基づく顧客グループ化</li>
+              <li><strong>行動パターン分析</strong>：Web上での行動履歴やアプリ使用状況に基づくユーザーグループ化</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-shopping-cart"></i>商品レコメンデーション</h3>
+          <p><span class="keyword">協調フィルタリング</span>や<span class="keyword">コンテンツベースフィルタリング</span>などの手法を用いたレコメンデーションシステムは、ECサイトや動画・音楽配信サービスなど、多くのビジネスで活用されています。</p>
+          
+          <div class="handwritten-box">
+            <p>【ビジネスにおけるレコメンデーション活用例】</p>
+            <ul>
+              <li><strong>Eコマース</strong>：「この商品を見た人はこんな商品も見ています」「よく一緒に購入されている商品」</li>
+              <li><strong>コンテンツプラットフォーム</strong>：ユーザーの好みに合った動画、音楽、記事の推薦</li>
+              <li><strong>金融サービス</strong>：顧客の投資行動や資産状況に基づく金融商品の推薦</li>
+              <li><strong>旅行サービス</strong>：過去の旅行履歴や好みに基づく宿泊施設や観光地の推薦</li>
+            </ul>
+          </div>
+          
+          <div class="speech-bubble">
+            <p>レコメンデーションシステムは、ユーザー体験の向上だけでなく、クロスセル（関連商品の販売）やアップセル（より高価な商品への誘導）を促進し、企業の売上向上にも貢献します。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-search"></i>情報検索と文書分析</h3>
+          <p><span class="keyword">トピックモデル</span>や<span class="keyword">次元削減</span>技術は、大量のテキストデータから有用な情報を抽出するビジネス場面で活用されています。</p>
+          
+          <div class="handwritten-box">
+            <p>【情報検索・文書分析の応用例】</p>
+            <ul>
+              <li><strong>社内文書管理</strong>：大量の文書を自動的にカテゴリ分類し、検索性を向上</li>
+              <li><strong>顧客レビュー分析</strong>：製品やサービスに関する顧客の声からトピックを抽出</li>
+              <li><strong>特許分析</strong>：特許文書から技術トレンドや競合情報を抽出</li>
+              <li><strong>ニュース記事分析</strong>：大量のニュース記事から時事トピックを抽出・追跡</li>
+              <li><strong>法的文書分析</strong>：契約書や法律文書から重要な条項や要点を抽出</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-exclamation-triangle"></i>異常検知と不正検出</h3>
+          <p>教師なし学習を用いた<span class="keyword">異常検知</span>（<span class="keyword-en">Anomaly Detection</span>）は、通常のパターンから外れたデータを検出し、不正や障害を早期に発見するために使われます。</p>
+          
+          <div class="handwritten-box">
+            <p>【異常検知の応用例】</p>
+            <ul>
+              <li><strong>金融取引監視</strong>：通常と異なるパターンを示す取引を検出し、不正を防止</li>
+              <li><strong>ネットワークセキュリティ</strong>：異常なネットワークトラフィックを検出し、サイバー攻撃を防止</li>
+              <li><strong>製造品質管理</strong>：製造プロセスの異常を検出し、不良品発生を防止</li>
+              <li><strong>設備故障予測</strong>：センサーデータの異常を検出し、機器の故障を予測</li>
+              <li><strong>医療診断支援</strong>：通常と異なる検査結果や症状パターンを検出</li>
+            </ul>
+          </div>
+          
+          <div class="note">
+            <p>異常検知は、「何が正常か」を学習し、そこから外れたものを検出するアプローチであるため、教師なし学習（あるいは半教師あり学習）の典型的な応用例です。正常データは豊富にある一方、異常データは少なく、また様々なパターンがあるため、教師あり学習よりも教師なし学習のアプローチが適していることが多いです。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-database"></i>データ前処理とビジネスインテリジェンス</h3>
+          <p><span class="keyword">次元削減</span>技術は、高次元データの可視化や特徴抽出に活用され、データ分析の前処理やビジネスインテリジェンスのためのデータ準備に広く使われています。</p>
+          
+          <div class="handwritten-box">
+            <p>【データ前処理・BIへの応用例】</p>
+            <ul>
+              <li><strong>データ可視化</strong>：高次元データを2次元・3次元空間に写像して可視化</li>
+              <li><strong>ノイズ除去</strong>：データの本質的な構造を抽出し、ノイズを除去</li>
+              <li><strong>データ圧縮</strong>：高次元データを効率的に保存・処理するためのサイズ削減</li>
+              <li><strong>特徴選択の補助</strong>：重要な特徴を特定するための前処理</li>
+              <li><strong>教師あり学習の前処理</strong>：次元の呪いを軽減し、モデルの性能向上</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- モデル選択セクション -->
+      <section id="model-selection" class="section">
+        <h2 class="section-title"><i class="fas fa-tasks"></i>モデル選択と評価</h2>
+        
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-question-circle"></i>教師なし学習の評価の難しさ</h3>
+          <p>教師なし学習の大きな課題の一つは、評価の難しさです。教師あり学習のように明確な「正解」がないため、モデルの良し悪しを客観的に評価することが難しいという特徴があります。</p>
+          
+          <div class="handwritten-box">
+            <p><i class="fas fa-exclamation-triangle"></i> 教師なし学習の評価に関する課題</p>
+            <ul>
+              <li><strong style="color: var(--key);">正解ラベルの不在</strong>：精度やF値などの一般的な評価指標が使えない</li>
+              <li><strong style="color: var(--key);">目的依存性</strong>：目的に応じて評価基準が大きく異なる</li>
+              <li><strong style="color: var(--key);">評価の多面性</strong>：定量的評価と定性的評価の両方が必要になることが多い</li>
+              <li><strong style="color: var(--key);">ビジネス価値</strong>：直接的なビジネス価値での評価が重要</li>
+            </ul>
+          </div>
+          
+          <div class="speech-bubble">
+            <p>教師なし学習の評価は「モデルが見つけたパターンが実際にビジネス価値や洞察につながるか」という観点が特に重要です。技術的な評価指標だけでなく、ドメイン知識を持つ専門家の解釈や、最終的なビジネス指標での評価が必要になります。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-balance-scale"></i>クラスタリングの評価指標</h3>
+          <p>クラスタリングモデルの評価には、以下のような内部評価指標と外部評価指標があります。</p>
+          
+          <div class="note">
+            <p><strong>内部評価指標</strong>：正解ラベルなしでクラスタリングの品質を評価</p>
+            <ul>
+              <li><strong>シルエット係数</strong>：各データ点がクラスタにどれだけ適合しているかを測定（-1〜1、高いほど良い）</li>
+              <li><strong>Davies-Bouldin指標</strong>：クラスタ内の分散とクラスタ間の距離に基づく評価（低いほど良い）</li>
+              <li><strong>Calinski-Harabasz指標</strong>：クラスタ内の密度とクラスタ間の分離度を評価（高いほど良い）</li>
+              <li><strong>Dunn指標</strong>：最小クラスタ間距離と最大クラスタ内距離の比（高いほど良い）</li>
+              <li><strong>エルボー法</strong>：クラスタ数と誤差の関係からクラスタ数を決定する方法</li>
+            </ul>
+          </div>
+          
+          <div class="note">
+            <p><strong>外部評価指標</strong>：正解ラベルがある場合に使用</p>
+            <ul>
+              <li><strong>調整ランド指標（ARI）</strong>：真のラベルとクラスタリング結果の一致度（-1〜1、高いほど良い）</li>
+              <li><strong>正規化相互情報量（NMI）</strong>：真のラベルとクラスタリング結果の相互情報量（0〜1、高いほど良い）</li>
+              <li><strong>Fowlkes-Mallows指標</strong>：真のラベルとクラスタリング結果の適合率と再現率の幾何平均（0〜1、高いほど良い）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-compress-arrows-alt"></i>次元削減の評価指標</h3>
+          <p>次元削減手法の評価には、以下のような指標が使われます。</p>
+          
+          <div class="handwritten-box">
+            <p><i class="fas fa-compress-arrows-alt"></i> 次元削減の評価指標</p>
+            <ul>
+              <li><strong style="color: var(--cyan);">再構成誤差</strong>：元データと低次元表現から再構成したデータとの差</li>
+              <li><strong style="color: var(--cyan);">説明分散率</strong>：低次元表現が元データの分散をどれだけ説明できるか（PCAでよく使用）</li>
+              <li><strong style="color: var(--cyan);">近傍保存度</strong>：元空間と低次元空間でのデータ点間の近傍関係がどれだけ保持されているか</li>
+              <li><strong style="color: var(--cyan);">ストレス</strong>：元空間と低次元空間の距離の差の二乗和（MDSでよく使用）</li>
+              <li><strong style="color: var(--cyan);">下流タスクでの性能</strong>：次元削減後のデータを用いた分類や回帰などの性能</li>
+            </ul>
+          </div>
+          
+          <div class="note">
+            <p>次元削減の評価では、目的に応じた指標選択が重要です。データ可視化が目的なら近傍保存度、特徴抽出が目的なら説明分散率や下流タスクでの性能などが重視されます。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-thumbs-up"></i>レコメンデーションシステムの評価指標</h3>
+          <p>レコメンデーションシステムの評価には、オフライン評価とオンライン評価の両方が使われます。</p>
+          
+          <div class="handwritten-box">
+            <p><i class="fas fa-chart-bar"></i> オフライン評価指標</p>
+            <ul>
+              <li><strong style="color: var(--yellow);">平均絶対誤差（MAE）</strong>：予測評価値と実際の評価値の差の絶対値平均</li>
+              <li><strong style="color: var(--yellow);">平均二乗誤差（MSE）</strong>：予測評価値と実際の評価値の差の二乗平均</li>
+              <li><strong style="color: var(--yellow);">適合率（Precision）</strong>：推薦されたアイテムのうち、実際に関連性があったものの割合</li>
+              <li><strong style="color: var(--yellow);">再現率（Recall）</strong>：関連性のあるアイテムのうち、実際に推薦されたものの割合</li>
+              <li><strong style="color: var(--yellow);">F値</strong>：適合率と再現率の調和平均</li>
+              <li><strong style="color: var(--yellow);">MAP（Mean Average Precision）</strong>：各ユーザーの平均適合率の平均</li>
+              <li><strong style="color: var(--yellow);">NDCG（Normalized Discounted Cumulative Gain）</strong>：ランキングの質を評価する指標</li>
+            </ul>
+          </div>
+          
+          <div class="note">
+            <p><strong>オンライン評価指標</strong>：実際のユーザー行動に基づく評価</p>
+            <ul>
+              <li><strong>クリック率（CTR）</strong>：推薦されたアイテムがクリックされる割合</li>
+              <li><strong>コンバージョン率</strong>：推薦からの購入や登録などの成果につながった割合</li>
+              <li><strong>滞在時間</strong>：推薦されたコンテンツでのユーザーの滞在時間</li>
+              <li><strong>ユーザー満足度</strong>：アンケートなどによる定性的評価</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-comment-dots"></i>トピックモデルの評価指標</h3>
+          <p>トピックモデル（特にLDA）の評価には、以下のような指標が使われます。</p>
+          
+          <div class="handwritten-box">
+            <p><i class="fas fa-chart-line"></i> トピックモデルの評価指標</p>
+            <ul>
+              <li><strong style="color: var(--magenta);">パープレキシティ（Perplexity）</strong>：モデルが新しい文書をどれだけよく予測できるか（低いほど良い）</li>
+              <li><strong style="color: var(--magenta);">コヒーレンス（Coherence）</strong>：抽出されたトピックが意味的にどれだけ一貫しているか（高いほど良い）</li>
+              <li><strong style="color: var(--magenta);">トピック解釈可能性</strong>：人間がトピックの内容を理解できるか（定性的評価）</li>
+              <li><strong style="color: var(--magenta);">下流タスクでの性能</strong>：トピック表現を用いた分類や検索などの性能</li>
+            </ul>
+          </div>
+          
+          <div class="speech-bubble">
+            <p>トピックモデルの評価では、統計的な指標だけでなく、抽出されたトピックが人間にとって解釈可能で意味のあるものかという定性的な評価も非常に重要です。</p>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h3 class="concept-title"><i class="fas fa-sitemap"></i>モデル選択の基準</h3>
+          <p>目的やデータの特性・量に応じて、適切な教師なし学習モデルを選択することが重要です。以下のような基準でモデルを選択します。</p>
+          
+          <div class="handwritten-box">
+            <p><i class="fas fa-filter"></i> モデル選択の基準</p>
+            <ul>
+              <li><strong style="color: var(--magenta);">タスク目的</strong>：クラスタリング、次元削減、異常検知など、目的に合ったアルゴリズム選択</li>
+              <li><strong style="color: var(--magenta);">データ量</strong>：大規模データには計算効率の良いアルゴリズム（k-means、PCAなど）</li>
+              <li><strong style="color: var(--magenta);">データの性質</strong>：線形/非線形、密度分布、次元数などに応じたアルゴリズム選択</li>
+              <li><strong style="color: var(--magenta);">解釈可能性</strong>：結果の解釈が重要な場合は解釈しやすいモデル（k-means、PCAなど）</li>
+              <li><strong style="color: var(--magenta);">計算リソース</strong>：利用可能な計算リソースに応じたアルゴリズム選択</li>
+              <li><strong style="color: var(--magenta);">ハイパーパラメータ感度</strong>：チューニングの難易度や重要性</li>
+              <li><strong style="color: var(--magenta);">ビジネス価値</strong>：最終的なビジネス目標への貢献度</li>
+            </ul>
+          </div>
+          
+          <div class="note">
+            <p>教師なし学習では、「正解」がないため、複数のアルゴリズムを試し、結果を比較検討することが重要です。また、ドメイン知識を持つ専門家と協力して結果の妥当性や有用性を評価することも不可欠です。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Insightsセクション -->
+      <section id="key-insights" class="section">
+        <h2 class="section-title"><i class="fas fa-key"></i>Key Insights</h2>
+        
+        <div class="key-insights">
+          <div class="insight-item">
+            <div class="insight-number">1</div>
+            <div class="insight-content">
+              <h3 class="insight-title">教師なし学習は特徴量のみを使用</h3>
+              <p>教師なし学習の最大の特徴は、<span class="keyword">特徴量のみ</span>を用いてデータの隠れた構造やパターンを発見することです。教師あり学習とは異なり、正解ラベル（教師データ）を必要としないため、ラベル付けが困難な場面でも適用できます。</p>
+            </div>
+          </div>
+          
+          <div class="insight-item">
+            <div class="insight-number">2</div>
+            <div class="insight-content">
+              <h3 class="insight-title">代表的な問題タイプと手法を押さえる</h3>
+              <p>教師なし学習の代表的な問題タイプには、<span class="keyword">クラスタリング</span>（<span class="keyword">k-means法</span>、<span class="keyword">ウォード法</span>など）、<span class="keyword">次元削減</span>（<span class="keyword">主成分分析</span>、<span class="keyword">t-SNE</span>など）、<span class="keyword">トピックモデル</span>（<span class="keyword">潜在的ディリクレ配分法</span>など）があります。それぞれの手法の基本概念と使い分けを理解することが重要です。</p>
+            </div>
+          </div>
+          
+          <div class="insight-item">
+            <div class="insight-number">3</div>
+            <div class="insight-content">
+              <h3 class="insight-title">レコメンデーションシステムの理解</h3>
+              <p><span class="keyword">協調フィルタリング</span>と<span class="keyword">コンテンツベースフィルタリング</span>の違いと特徴を理解し、<span class="keyword">コールドスタート問題</span>などの課題とその対策を把握することが重要です。実際の業務では両者を組み合わせたハイブリッドアプローチが多く用いられます。</p>
+            </div>
+          </div>
+          
+          <div class="insight-item">
+            <div class="insight-number">4</div>
+            <div class="insight-content">
+              <h3 class="insight-title">評価方法の難しさと工夫</h3>
+              <p>教師なし学習では「正解」がないため評価が難しく、タスクに応じた適切な評価指標の選択と、ビジネス価値での評価が重要です。目的やデータの特性に応じて適切なモデル選択を行うことも、成功のカギとなります。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Take Home Messageセクション -->
+      <section id="take-home" class="section">
+        <h2 class="section-title"><i class="fas fa-home"></i>Take Home Message</h2>
+        
+        <div class="take-home">
+          <h3 class="take-home-title"><i class="fas fa-lightbulb"></i>教師なし学習の本質</h3>
+          <p class="take-home-message">
+            教師なし学習とは、「特徴量のみ」を用いてデータの隠れた構造やパターンを発見する手法です。クラスタリング、次元削減、トピックモデルなどの多様な技術があり、それぞれビジネス上の異なる課題解決に役立ちます。「正解」がない中での評価や適切なモデル選択が難しい一方で、人間が気づかない洞察を得られる可能性があります。G検定では各手法の基本概念と使い分けを理解することがポイントです。
+          </p>
+        </div>
+      </section>
+
+      <!-- 用語集セクション -->
+      <section id="glossary" class="section">
+        <h2 class="section-title"><i class="fas fa-book"></i>用語集</h2>
+        
+        <div class="concept-box">
+          <table class="glossary-table">
+            <tr>
+              <th>用語</th>
+              <th>意味</th>
+            </tr>
+            <tr>
+              <td>k-means法 (k-means method)</td>
+              <td>データをk個のクラスタに分割するクラスタリングアルゴリズム。各クラスタの中心（セントロイド）を反復的に更新することで最適なクラスタリングを行う。</td>
+            </tr>
+            <tr>
+              <td>t-SNE (t-distributed Stochastic Neighbor Embedding)</td>
+              <td>高次元データを低次元空間に埋め込む非線形次元削減手法。特に可視化に優れており、局所的な構造を保持する。</td>
+            </tr>
+            <tr>
+              <td>ウォード法 (Ward's method)</td>
+              <td>階層的クラスタリングの一種で、クラスタ内の分散を最小化する方法でクラスタを統合する手法。</td>
+            </tr>
+            <tr>
+              <td>クラスタリング (Clustering)</td>
+              <td>データを類似性に基づいてグループ（クラスタ）に分割する教師なし学習の手法。</td>
+            </tr>
+            <tr>
+              <td>コールドスタート問題 (Cold Start Problem)</td>
+              <td>新規ユーザーや新規アイテムに対して十分な情報がないため、適切なレコメンデーションができない問題。</td>
+            </tr>
+            <tr>
+              <td>コンテンツベースフィルタリング (Content-based Filtering)</td>
+              <td>アイテムの特徴や属性に基づいて推薦を行うアプローチ。ユーザーの過去の行動と類似した特徴を持つアイテムを推薦する。</td>
+            </tr>
+            <tr>
+              <td>協調フィルタリング (Collaborative Filtering)</td>
+              <td>ユーザーの行動や評価の類似性に基づいて推薦を行うアプローチ。類似したユーザーが好むアイテムを推薦する。</td>
+            </tr>
+            <tr>
+              <td>次元削減 (Dimension Reduction)</td>
+              <td>データの本質的な構造を保持しながら、特徴量の次元数を減らす技術。データの可視化や後続の分析を容易にする。</td>
+            </tr>
+            <tr>
+              <td>主成分分析 (Principal Component Analysis, PCA)</td>
+              <td>データの分散を最大化する方向（主成分）を見つけ、元の特徴量をこれらの主成分に射影する線形次元削減手法。</td>
+            </tr>
+            <tr>
+              <td>潜在的ディリクレ配分法 (Latent Dirichlet Allocation, LDA)</td>
+              <td>文書集合に含まれる潜在的なトピックを確率的に推定する生成モデル。代表的なトピックモデル。</td>
+            </tr>
+            <tr>
+              <td>多次元尺度構成法 (Multidimensional Scaling, MDS)</td>
+              <td>高次元空間でのデータ点間の距離関係を低次元空間で再現しようとする次元削減手法。</td>
+            </tr>
+            <tr>
+              <td>特異値分解 (Singular Value Decomposition, SVD)</td>
+              <td>任意の行列Aを A = UΣV<sup>T</sup> と3つの行列の積に分解する手法。U・Vは直交行列、Σは対角行列。次元削減や潜在的な構造の抽出に利用される。</td>
+            </tr>
+            <tr>
+              <td>デンドログラム/樹形図 (Dendrogram)</td>
+              <td>階層的クラスタリングの結果を視覚的に表現する樹木状の図。クラスタの階層構造を示す。</td>
+            </tr>
+            <tr>
+              <td>トピックモデル (Topic Model)</td>
+              <td>大量のテキストデータから自動的にトピック（話題）を抽出する教師なし学習技術。</td>
+            </tr>
+          </table>
+        </div>
+      </section>
+
+      <!-- フッター -->
+      <footer class="footer">
+        <p>グラフィックレコーディング - 教師なし学習 | 作成日: 2024年</p>
+        <p>原稿とコード: Claude | 画像: ChatGPT</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <script>
+    // スクロール位置に応じてナビゲーションをアクティブにする
+    const sections = document.querySelectorAll('.section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    window.addEventListener('scroll', () => {
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= sectionTop - 100) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').substring(1) === current) {
+          link.classList.add('active');
+        }
+      });
+    });
+    
+    // スクロールトップボタンの表示/非表示
+    const scrollTopBtn = document.querySelector('.scroll-top');
+    
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('show');
+      } else {
+        scrollTopBtn.classList.remove('show');
+      }
+    });
+    
+    // スクロールトップボタンのクリックイベント
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // ナビゲーションのスムーススクロール
+    navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        
+        const targetId = link.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        window.scrollTo({
+          top: targetSection.offsetTop,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

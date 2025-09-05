@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-6-1 画像認識 - G検定ノート</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖼️</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    :root {
+      /* CMYK (デフォルト) パレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      
+      /* フォントファミリー */
+      --handwritten-font: 'Klee One', cursive;
+      --rounded-font: 'M PLUS Rounded 1c', sans-serif;
+      --main-font: 'Zen Maru Gothic', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--main-font);
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバースタイル */
+    .sidebar {
+      width: 280px;
+      background-color: var(--cyan);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      /* スクロールバーのデザイン */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Webkit（Chrome、Safari、新しいEdgeなど）向けのスクロールバーデザイン */
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 4px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .sidebar-title {
+      font-family: var(--rounded-font);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      color: var(--white);
+      text-align: center;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px dashed var(--white);
+    }
+    
+    .nav-menu {
+      list-style-type: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.8rem;
+    }
+    
+    .nav-link {
+      display: block;
+      color: var(--key);
+      text-decoration: none;
+      padding: 0.5rem 0.8rem;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--white);
+      transform: translateX(5px);
+      color: var(--magenta);
+    }
+    
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* メインコンテンツスタイル */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      max-width: calc(100% - 280px);
+    }
+    
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      font-family: var(--rounded-font);
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      color: var(--key);
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--cyan);
+    }
+    
+    .section-title i {
+      color: var(--cyan);
+      margin-right: 0.8rem;
+      font-size: 1.8rem;
+    }
+    
+    h3 {
+      font-family: var(--rounded-font);
+      font-size: 1.3rem;
+      color: var(--magenta);
+      margin: 1.5rem 0 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    h3 i {
+      margin-right: 0.5rem;
+    }
+    
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.7;
+    }
+    
+    /* ハンドライティングボックス */
+    .handwritten-box {
+      font-family: var(--handwritten-font);
+      background-color: var(--white);
+      border: 2px dashed var(--cyan);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      position: relative;
+      transform: rotate(-0.5deg);
+    }
+    
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -0.5rem;
+      left: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .handwritten-box h4 {
+      font-size: 1.1rem;
+      color: var(--magenta);
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid var(--yellow);
+      display: inline-block;
+      padding-bottom: 0.3rem;
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      background-color: var(--white);
+      border-left: 4px solid var(--yellow);
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .note-box-title {
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .note-box-title i {
+      color: var(--yellow);
+      margin-right: 0.5rem;
+    }
+    
+    /* キーポイントボックス */
+    .key-point {
+      background-color: rgba(255, 230, 0, 0.12);
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+    }
+    
+    .key-point h4 {
+      display: flex;
+      align-items: center;
+      color: var(--key);
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+    }
+    
+    .key-point h4 i {
+      color: var(--yellow);
+      margin-right: 0.5rem;
+      font-size: 1.2rem;
+    }
+    
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* 用語リスト */
+    .term-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    
+    .term-item {
+      background-color: var(--white);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border-left: 3px solid var(--cyan);
+    }
+    
+    .term-name {
+      font-weight: 700;
+      color: var(--magenta);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    .term-desc {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    
+    /* 重要単語のハイライト */
+    .highlight {
+      background: linear-gradient(transparent 60%, rgba(255, 64, 160, 0.2) 40%);
+      font-weight: 500;
+      padding: 0 2px;
+    }
+    
+    .highlight-yellow {
+      background: linear-gradient(transparent 60%, rgba(255, 230, 0, 0.4) 40%);
+      font-weight: 500;
+      padding: 0 2px;
+    }
+    
+    .highlight-cyan {
+      background: linear-gradient(transparent 60%, rgba(0, 216, 232, 0.2) 40%);
+      font-weight: 500;
+      padding: 0 2px;
+    }
+    
+    /* 画像コンテナ */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* テーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    
+    th, td {
+      padding: 0.8rem;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    
+    th {
+      background-color: rgba(0, 216, 232, 0.1);
+      font-weight: 600;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba(248, 248, 248, 0.7);
+    }
+    
+    /* トップに戻るボタン */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--cyan);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      z-index: 99;
+      opacity: 0.8;
+    }
+    
+    .back-to-top:hover {
+      transform: translateY(-5px);
+      opacity: 1;
+    }
+    
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 3rem;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      border-top: 1px dashed #e0e0e0;
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 220px;
+      }
+      
+      .main-content {
+        margin-left: 220px;
+        max-width: calc(100% - 220px);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 1.5rem;
+      }
+      
+      .term-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <h2 class="sidebar-title">ディープラーニングの応用例</h2>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#introduction" class="nav-link active">
+            <i class="fas fa-info-circle"></i>概要
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#object-classification" class="nav-link">
+            <i class="fas fa-tag"></i>物体識別
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#object-detection" class="nav-link">
+            <i class="fas fa-search"></i>物体検出
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#semantic-segmentation" class="nav-link">
+            <i class="fas fa-puzzle-piece"></i>セマンティックセグメンテーション
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#instance-segmentation" class="nav-link">
+            <i class="fas fa-object-group"></i>インスタンスセグメンテーション
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#panoptic-segmentation" class="nav-link">
+            <i class="fas fa-layer-group"></i>パノプティックセグメンテーション
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#pose-estimation" class="nav-link">
+            <i class="fas fa-walking"></i>姿勢推定
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#cnn-models" class="nav-link">
+            <i class="fas fa-sitemap"></i>代表的なCNNモデル
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#real-world-applications" class="nav-link">
+            <i class="fas fa-industry"></i>実世界での活用
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#key-insights" class="nav-link">
+            <i class="fas fa-lightbulb"></i>Key Insights
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#take-home" class="nav-link">
+            <i class="fas fa-key"></i>Take Home Message
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#terminology" class="nav-link">
+            <i class="fas fa-book"></i>用語集
+          </a>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+      <!-- 概要 -->
+      <section id="introduction" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-image"></i>1-6-1 画像認識
+        </h2>
+        
+        <div class="handwritten-box">
+          <h4>G検定での学習目標</h4>
+          <ul>
+            <li>画像認識タスクの種類とその概要について理解する</li>
+            <li>代表的な画像認識モデルについて理解する</li>
+            <li>画像認識が実世界において、どのように活用されているか理解する</li>
+          </ul>
+        </div>
+        
+        <p>
+          <span class="highlight">画像認識</span>はコンピュータビジョンの中核となる技術であり、ディープラーニングの主要な応用分野の一つです。画像認識とは、コンピュータが画像を入力として受け取り、その内容を理解する技術を指します。
+        </p>
+        
+        <p>
+          画像認識技術は主に<span class="highlight-cyan">畳み込みニューラルネットワーク（Convolutional Neural Network, CNN）</span>を基盤として発展しました。CNNは画像の特徴を自動的に抽出し、それを基に認識タスクを実行することができます。
+        </p>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>画像認識の進化
+          </div>
+          <p>
+            画像認識技術は2012年のAlexNetの登場以降、急速に発展しました。現在では、人間と同等以上の精度で多くの画像認識タスクを実行できるようになっています。画像認識の精度向上には、大規模データセット（ImageNetなど）の登場と、GPUによる計算能力の向上が大きく貢献しています。
+          </p>
+        </div>
+        
+        <h3><i class="fas fa-check-circle"></i>画像認識の主な特徴</h3>
+        <ul>
+          <li>ピクセル値から直接特徴を学習できる（従来の手法では人間が特徴を設計する必要があった）</li>
+          <li>階層的な特徴表現を獲得できる（低レベルから高レベルの特徴まで）</li>
+          <li>転移学習が可能であり、事前学習モデルを異なるタスクに適用できる</li>
+          <li>様々なタスク（分類、検出、セグメンテーションなど）に応用可能</li>
+        </ul>
+        
+        <div class="key-point">
+          <h4><i class="fas fa-key"></i>ポイント</h4>
+          <p>
+            画像認識の発展は、単なる画像分類から始まり、物体検出、セグメンテーション、姿勢推定などの複雑なタスクへと進化してきました。現在では、医療診断、自動運転、監視システム、顔認識など、様々な実世界のアプリケーションで活用されています。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 物体識別 -->
+      <section id="object-classification" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-tag"></i>物体識別（物体分類）
+        </h2>
+        
+        <p>
+          <span class="highlight">物体識別</span>（物体分類、Object Classification）は、与えられた画像に何が写っているのかを特定するタスクです。このタスクは画像認識の最も基本的な形式であり、多くの画像認識モデルの発展はこの物体識別から始まりました。
+        </p>
+        
+        <h3><i class="fas fa-cogs"></i>物体識別の仕組み</h3>
+        <p>
+          物体識別モデルは、入力画像から特徴を抽出し、それをベースに画像が特定のクラス（カテゴリ）に属する確率を出力します。主に<span class="highlight-cyan">畳み込みニューラルネットワーク（CNN）</span>が用いられ、特徴抽出部（畳み込み層とプーリング層）と分類部（全結合層）で構成されます。
+        </p>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>一般物体認識について
+          </div>
+          <p>
+            <span class="highlight-yellow">一般物体認識</span>（Generic Object Recognition）とは、様々なカテゴリの物体を識別する能力を指します。ImageNetコンペティション（ILSVRC）はこの一般物体認識の精度を競うもので、1000クラスもの多様な物体を識別できるモデルの開発に貢献しました。
+          </p>
+        </div>
+        
+        <h3><i class="fas fa-code-branch"></i>代表的な物体識別モデル</h3>
+        <div class="term-list">
+          <div class="term-item">
+            <div class="term-name">AlexNet</div>
+            <div class="term-desc">
+              2012年のILSVRCで優勝したモデル。5つの畳み込み層と3つの全結合層からなり、ReLU活性化関数やドロップアウトを導入。ディープラーニングによる画像認識の転換点となった。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">VGG</div>
+            <div class="term-desc">
+              Oxford大学のVisual Geometry Groupが開発。3×3の小さな畳み込みフィルタを積み重ねる単純だが深いアーキテクチャ。VGG16、VGG19などのバリエーションがある。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">GoogLeNet (Inception)</div>
+            <div class="term-desc">
+              2014年ILSVRCの優勝モデル。Inceptionモジュールを導入し、異なるサイズの畳み込みを並列に行う。効率的にパラメータ数を削減しながら高い表現力を実現。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">ResNet</div>
+            <div class="term-desc">
+              残差接続（スキップ結合）を導入したモデル。勾配消失問題を軽減し、非常に深いネットワーク（ResNet-152など）を実現。現在も多くのモデルの基盤となっている。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">DenseNet</div>
+            <div class="term-desc">
+              各層が全ての先行層からの特徴マップを入力として受け取る稠密接続を特徴とするモデル。特徴の再利用により効率的な学習が可能。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">SENet</div>
+            <div class="term-desc">
+              Squeeze-and-Excitationブロックを導入。チャネル間の相互依存関係をモデル化することで、重要な特徴を強調し、精度を向上させる。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">EfficientNet</div>
+            <div class="term-desc">
+              ネットワークの深さ、幅、解像度を同時にスケーリングする複合スケーリング手法を導入。少ないパラメータ数で高い精度を実現。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">Vision Transformer</div>
+            <div class="term-desc">
+              自然言語処理で成功したTransformerアーキテクチャを画像認識に適用。画像をパッチに分割し、それらをシーケンスとして扱うことで高い精度を実現。
+            </div>
+          </div>
+        </div>
+        
+        <div class="key-point">
+          <h4><i class="fas fa-key"></i>物体識別技術の発展と特徴</h4>
+          <ul>
+            <li>初期のモデル（AlexNet、VGG）は比較的単純な構造で深層化</li>
+            <li>中期のモデル（GoogLeNet、ResNet）は新しいモジュールや接続方法を導入</li>
+            <li>後期のモデル（DenseNet、SENet）はさらに効率的な情報伝達や注意機構を導入</li>
+            <li>最新のモデル（EfficientNet、Vision Transformer）は効率性や別のアーキテクチャからの知見を取り入れている</li>
+            <li>現在の最先端モデルはImageNetデータセットでは人間の識別能力を超える精度を達成</li>
+          </ul>
+        </div>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>NAS (Neural Architecture Search)
+          </div>
+          <p>
+            <span class="highlight-cyan">NAS</span>（Neural Architecture Search）は、ニューラルネットワークのアーキテクチャを自動的に設計する技術です。MnasNetやEfficientNetなどのモデルはこの技術によって設計され、人間の設計よりも効率的なアーキテクチャを発見することに成功しています。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 物体検出 -->
+      <section id="object-detection" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-search"></i>物体検出
+        </h2>
+        
+        <p>
+          <span class="highlight">物体検出</span>（Object Detection）は、画像内の複数の物体の位置と種類を同時に特定するタスクです。物体識別が「何が写っているか」を特定するのに対し、物体検出は「どこに何が写っているか」を特定します。
+        </p>
+        
+        <h3><i class="fas fa-cogs"></i>物体検出の仕組み</h3>
+        <p>
+          物体検出モデルは一般的に、画像内の複数の領域（バウンディングボックス）を検出し、各領域に対してクラス分類を行います。出力として、検出された各物体の位置（バウンディングボックスの座標）とクラス（カテゴリ）、そして検出の確信度スコアが得られます。
+        </p>
+        
+        <div class="handwritten-box">
+          <h4>物体検出アプローチの種類</h4>
+          <ol>
+            <li><span class="highlight-yellow">二段階検出器</span>: 領域提案と分類の2ステップで検出を行う（R-CNNシリーズなど）</li>
+            <li><span class="highlight-yellow">一段階検出器</span>: 領域提案と分類を同時に行い、より高速（YOLO、SSDなど）</li>
+            <li><span class="highlight-yellow">アンカーベース</span>: 事前定義されたボックス（アンカー）を基準にして検出</li>
+            <li><span class="highlight-yellow">アンカーフリー</span>: アンカーを使わずに直接物体を検出（より最近のアプローチ）</li>
+          </ol>
+        </div>
+        
+        <h3><i class="fas fa-code-branch"></i>代表的な物体検出モデル</h3>
+        <div class="term-list">
+          <div class="term-item">
+            <div class="term-name">R-CNN</div>
+            <div class="term-desc">
+              Region-based CNN。候補領域を抽出し、各領域にCNNを適用して分類する二段階の手法。初期の物体検出モデルだが計算コストが高い。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">Fast R-CNN</div>
+            <div class="term-desc">
+              R-CNNの改良版。画像全体にCNNを適用し、RoI（Region of Interest）プーリングで特徴を共有。計算効率が向上。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">Faster R-CNN</div>
+            <div class="term-desc">
+              Region Proposal Network (RPN)を導入し、領域提案もニューラルネットワークで行う。現在も幅広く使われている二段階検出器の代表格。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">SSD (Single Shot Detector)</div>
+            <div class="term-desc">
+              多層の特徴マップから異なるスケールの物体を検出する一段階検出器。高速かつ比較的高精度。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">YOLO (You Only Look Once)</div>
+            <div class="term-desc">
+              画像を一度だけ見て物体検出を行う一段階検出器。高速で実時間処理に適している。YOLOv3、YOLOv4などの進化版がある。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">FPN (Feature Pyramid Network)</div>
+            <div class="term-desc">
+              異なるレベルの特徴マップを階層的に組み合わせるネットワーク。様々なスケールの物体を効果的に検出できる。
+            </div>
+          </div>
+        </div>
+        
+        <div class="key-point">
+          <h4><i class="fas fa-key"></i>物体検出の進化ポイント</h4>
+          <ul>
+            <li>初期の検出器（R-CNN）は二段階処理で計算コストが高かった</li>
+            <li>Fast R-CNN、Faster R-CNNと改良を重ね、計算効率と精度を向上</li>
+            <li>一段階検出器（YOLO、SSD）は高速処理を実現し、リアルタイム応用に適している</li>
+            <li>複数のスケールを扱う技術（FPN）が検出精度向上に貢献</li>
+            <li>最新のモデルでは、小さな物体の検出や複雑な背景下での検出精度が向上</li>
+          </ul>
+        </div>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>物体検出の評価指標
+          </div>
+          <p>
+            物体検出の評価には、主にmAP（mean Average Precision）が使用されます。これは、各クラスのAPを平均したものです。APは精度-再現率曲線の下部面積で、真のバウンディングボックスとの重なり（IoU: Intersection over Union）が特定のしきい値（よく使われるのは0.5）を超える検出が正解とみなされます。COCO評価では、複数のIoUしきい値（0.5〜0.95）での平均を使用することもあります。
+          </p>
+        </div>
+      </section>
+      
+      <!-- セマンティックセグメンテーション -->
+      <section id="semantic-segmentation" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-puzzle-piece"></i>セマンティックセグメンテーション
+        </h2>
+        
+        <p>
+          <span class="highlight">セマンティックセグメンテーション</span>（Semantic Segmentation）は、画像内の各ピクセルにクラスラベルを割り当てるタスクです。物体検出がバウンディングボックスで物体の大まかな位置を示すのに対し、セマンティックセグメンテーションは物体の正確な形状を特定します。
+        </p>
+        
+        <h3><i class="fas fa-cogs"></i>セマンティックセグメンテーションの仕組み</h3>
+        <p>
+          セマンティックセグメンテーションモデルは、入力画像と同じサイズの出力マップを生成し、各ピクセルがどのクラスに属するかを予測します。同一クラスの異なるインスタンス（例：複数の人）は区別せず、同じラベルが割り当てられます。
+        </p>
+        
+        <div class="handwritten-box">
+          <h4>セマンティックセグメンテーションの特徴</h4>
+          <ul>
+            <li>ピクセル単位の分類を行う</li>
+            <li>同じクラスの物体は同じラベルで表現される</li>
+            <li>個々のインスタンスは区別されない</li>
+            <li>自動運転や医療画像解析などに応用</li>
+            <li>入力画像と同じサイズの分類マップを出力</li>
+          </ul>
+        </div>
+        
+        <h3><i class="fas fa-code-branch"></i>代表的なセマンティックセグメンテーションモデル</h3>
+        <div class="term-list">
+          <div class="term-item">
+            <div class="term-name">FCN (Fully Convolutional Network)</div>
+            <div class="term-desc">
+              全結合層を畳み込み層に置き換え、エンド・ツー・エンドでセグメンテーションを行う先駆的なモデル。空間情報を維持したまま画像全体を処理できる。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">U-Net</div>
+            <div class="term-desc">
+              医療画像セグメンテーション向けに開発されたアーキテクチャ。コントラクティングパス（エンコーダ）とエクスパンシブパス（デコーダ）のU字型構造とスキップ接続が特徴。少ないデータでも高精度。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">SegNet</div>
+            <div class="term-desc">
+              エンコーダとデコーダ構造を持ち、プーリング層のインデックスを記録してアップサンプリングに利用する。効率的にセグメンテーションを行える。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">DeepLab</div>
+            <div class="term-desc">
+              Atrous（拡張）畳み込みとAtrous Spatial Pyramid Pooling (ASPP)を導入。様々なスケールの情報を効果的に捉え、高精度なセグメンテーションを実現。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">PSPNet (Pyramid Scene Parsing Network)</div>
+            <div class="term-desc">
+              ピラミッドプーリングモジュールを使用して様々なスケールの特徴を抽出。グローバルなコンテキスト情報とローカルな特徴を組み合わせる。
+            </div>
+          </div>
+        </div>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>アーキテクチャの主な構成要素
+          </div>
+          <p>
+            セマンティックセグメンテーションモデルは一般的に、特徴抽出を行う<span class="highlight-cyan">エンコーダ</span>とセグメンテーションマップを生成する<span class="highlight-cyan">デコーダ</span>で構成されます。多くのモデルでは、詳細な空間情報を保持するために<span class="highlight-cyan">スキップ接続</span>を使用します。また、受容野を効率的に拡大するために<span class="highlight-cyan">Atrous畳み込み</span>（拡張畳み込み）が用いられることもあります。
+          </p>
+        </div>
+        
+        <div class="key-point">
+          <h4><i class="fas fa-key"></i>セマンティックセグメンテーションの発展ポイント</h4>
+          <ul>
+            <li>FCNによりエンド・ツー・エンドのセグメンテーションが可能に</li>
+            <li>エンコーダ・デコーダ構造（U-Net、SegNet）で細部の正確なセグメンテーションを実現</li>
+            <li>拡張畳み込み（DeepLab）により効率的に受容野を拡大</li>
+            <li>ピラミッド構造（PSPNet）によりマルチスケールな特徴表現を獲得</li>
+            <li>リアルタイム処理に適した軽量モデルの開発も進んでいる</li>
+          </ul>
+        </div>
+        
+        <p>
+          セマンティックセグメンテーションは、自動運転における道路と障害物の認識、医療画像における臓器や腫瘍の検出、衛星画像における土地利用の分析など、正確な領域分割が必要なアプリケーションで広く活用されています。
+        </p>
+      </section>
+      
+      <!-- インスタンスセグメンテーション -->
+      <section id="instance-segmentation" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-object-group"></i>インスタンスセグメンテーション
+        </h2>
+        
+        <p>
+          <span class="highlight">インスタンスセグメンテーション</span>（Instance Segmentation）は、画像内の各物体インスタンスを個別に識別し、ピクセルレベルで分割するタスクです。セマンティックセグメンテーションが同一クラスの物体を区別しないのに対し、インスタンスセグメンテーションでは同じクラスの異なる物体（例：複数の人）を個別に識別します。
+        </p>
+        
+        <h3><i class="fas fa-cogs"></i>インスタンスセグメンテーションの仕組み</h3>
+        <p>
+          インスタンスセグメンテーションは、物体検出とセマンティックセグメンテーションを組み合わせたようなタスクと考えることができます。多くのアプローチでは、まず物体を検出し、次にそれぞれの検出された物体領域内でセグメンテーションを行います。
+        </p>
+        
+        <div class="handwritten-box">
+          <h4>インスタンスセグメンテーションの特徴</h4>
+          <ul>
+            <li>各物体インスタンスを個別に識別</li>
+            <li>同じクラスの異なる物体を区別できる</li>
+            <li>物体検出とセグメンテーションの両方の特性を持つ</li>
+            <li>画像内の各物体の正確な形状と位置を特定</li>
+            <li>複雑なシーン理解やインタラクションに適している</li>
+          </ul>
+        </div>
+        
+        <h3><i class="fas fa-code-branch"></i>代表的なインスタンスセグメンテーションモデル</h3>
+        <div class="term-list">
+          <div class="term-item">
+            <div class="term-name">Mask R-CNN</div>
+            <div class="term-desc">
+              Faster R-CNNを拡張したモデル。物体検出と並行してマスク予測ブランチを追加し、各検出された物体のセグメンテーションマスクを生成。高精度かつ効率的なインスタンスセグメンテーションを実現。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">YOLACT (You Only Look At CoefficienTs)</div>
+            <div class="term-desc">
+              リアルタイムインスタンスセグメンテーションを目指したモデル。プロトタイプマスクと予測係数を組み合わせて効率的にマスクを生成する。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">PointRend</div>
+            <div class="term-desc">
+              境界領域などの難しい部分に対して適応的にサンプリングと予測を行う手法。より精細なマスク生成が可能。
+            </div>
+          </div>
+        </div>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>Mask R-CNNの革新性
+          </div>
+          <p>
+            <span class="highlight-cyan">Mask R-CNN</span>は、物体検出のFaster R-CNNにマスク予測ブランチを追加した革新的なモデルです。RoIAlign（Region of Interest Alignment）という技術を導入し、特徴マップの位置情報のずれを修正することで高精度なマスク生成を可能にしました。また、クラス予測、バウンディングボックス予測、マスク予測を並列に行うマルチタスク学習アプローチを採用しています。これらの革新により、インスタンスセグメンテーションタスクの標準的なベースラインとなりました。
+          </p>
+        </div>
+        
+        <div class="key-point">
+          <h4><i class="fas fa-key"></i>インスタンスセグメンテーションの応用</h4>
+          <ul>
+            <li>自動運転：道路上の各車両、歩行者を個別に認識・追跡</li>
+            <li>ロボティクス：物体の正確な把握と操作</li>
+            <li>拡張現実（AR）：現実世界の物体との自然なインタラクション</li>
+            <li>医療画像：複数の細胞や臓器の個別識別と分析</li>
+            <li>ビデオ監視：複数の人物の検出と追跡</li>
+          </ul>
+        </div>
+        
+        <p>
+          インスタンスセグメンテーションは、物体検出よりも詳細な情報を提供し、セマンティックセグメンテーションよりも物体の個別性を捉えることができるため、より高度なシーン理解や複雑なインタラクションが必要なアプリケーションで重要な役割を果たしています。
+        </p>
+      </section>
+      
+      <!-- パノプティックセグメンテーション -->
+      <section id="panoptic-segmentation" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-layer-group"></i>パノプティックセグメンテーション
+        </h2>
+        
+        <p>
+          <span class="highlight">パノプティックセグメンテーション</span>（Panoptic Segmentation）は、セマンティックセグメンテーションとインスタンスセグメンテーションを統合したタスクです。画像内の全てのピクセルにクラスラベルを割り当てると同時に、「物」（things）カテゴリの各インスタンスを個別に識別します。
+        </p>
+        
+        <h3><i class="fas fa-cogs"></i>パノプティックセグメンテーションの仕組み</h3>
+        <p>
+          パノプティックセグメンテーションでは、セグメンテーション対象を「物」（things）と「もの」（stuff）の2種類に分類します。
+        </p>
+        <ul>
+          <li><span class="highlight-cyan">物（things）</span>: 人、車、動物などの可算オブジェクト。インスタンスレベルでセグメンテーションされる。</li>
+          <li><span class="highlight-cyan">もの（stuff）</span>: 空、道路、草原など形状が不定で可算ではない背景。セマンティックレベルでセグメンテーションされる。</li>
+        </ul>
+        
+        <div class="handwritten-box">
+          <h4>パノプティックセグメンテーションの特徴</h4>
+          <ul>
+            <li>画像内の全てのピクセルにクラスラベルを割り当てる</li>
+            <li>「物」カテゴリのオブジェクトは個別のインスタンスとして識別</li>
+            <li>「もの」カテゴリは背景としてセマンティックセグメンテーション</li>
+            <li>画像のより完全な理解を可能にする</li>
+            <li>自動運転など複雑なシーン理解が必要な応用に適している</li>
+          </ul>
+        </div>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>パノプティックセグメンテーションの実装アプローチ
+          </div>
+          <p>
+            パノプティックセグメンテーションの実装には主に2つのアプローチがあります。<span class="highlight-cyan">トップダウンアプローチ</span>では、インスタンスセグメンテーションとセマンティックセグメンテーションを別々に行い、後処理で結果を統合します。<span class="highlight-cyan">ボトムアップアプローチ</span>では、単一のネットワークで直接パノプティックセグメンテーションを行います。各アプローチにはそれぞれ利点があり、最新のモデルではこれらを組み合わせたハイブリッドアプローチも提案されています。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 姿勢推定 -->
+      <section id="pose-estimation" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-walking"></i>姿勢推定
+        </h2>
+        
+        <p>
+          <span class="highlight">姿勢推定</span>（Pose Estimation）は、画像や動画内の人物や物体の姿勢（ポーズ）を検出するタスクです。人物の場合、頭、肩、肘、手首、腰、膝、足首などの身体の関節位置（キーポイント）を特定します。
+        </p>
+        
+        <h3><i class="fas fa-cogs"></i>姿勢推定の仕組み</h3>
+        <p>
+          姿勢推定モデルは、入力画像から人物や物体の関節位置（キーポイント）を検出し、それらを繋げてスケルトン（骨格）を形成します。主に以下の2つのアプローチがあります：
+        </p>
+        <ul>
+          <li><span class="highlight-cyan">トップダウン方式</span>: まず人物を検出し、その後各人物に対して姿勢推定を行う</li>
+          <li><span class="highlight-cyan">ボトムアップ方式</span>: まずキーポイントを全て検出し、その後それらをグループ化して個々の人物の姿勢を推定する</li>
+        </ul>
+        
+        <div class="handwritten-box">
+          <h4>姿勢推定の応用分野</h4>
+          <ul>
+            <li>アクションや行動の認識・分析</li>
+            <li>スポーツパフォーマンスの分析</li>
+            <li>ゲームやVR/ARでのモーションキャプチャ</li>
+            <li>リハビリテーションやフィットネス支援</li>
+            <li>監視システムでの異常行動検知</li>
+            <li>ロボティクスにおける人間との自然なインタラクション</li>
+          </ul>
+        </div>
+        
+        <h3><i class="fas fa-code-branch"></i>代表的な姿勢推定モデル</h3>
+        <div class="term-list">
+          <div class="term-item">
+            <div class="term-name">OpenPose</div>
+            <div class="term-desc">
+              最初の実時間マルチパーソン姿勢推定システム。ボトムアップアプローチで、まず関節位置を検出し、次に関節間の関連性（Part Affinity Fields）を使用して個人ごとにグループ化する。複数人の姿勢を同時に高速に推定できる。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">Mask R-CNN</div>
+            <div class="term-desc">
+              インスタンスセグメンテーションだけでなく、キーポイント検出にも適用可能。トップダウンアプローチで、人物を検出してから各人物の姿勢を推定する。高精度だが計算コストが高い。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">HRNet (High-Resolution Network)</div>
+            <div class="term-desc">
+              高解像度表現を維持しながら学習する姿勢推定モデル。異なる解像度の特徴を並列に処理し、複数のスケールで情報を交換することで精度を向上させる。
+            </div>
+          </div>
+        </div>
+        
+        <div class="key-point">
+          <h4><i class="fas fa-key"></i>姿勢推定の難しさと研究の進展</h4>
+          <ul>
+            <li>遮蔽（オクルージョン）：身体の一部が見えない場合の推定</li>
+            <li>複数人：多人数が重なり合うシーンでの個別推定</li>
+            <li>様々な姿勢：通常とは異なる姿勢への対応</li>
+            <li>3D推定：2D画像から3D姿勢を推定する研究も進んでいる</li>
+            <li>時間的整合性：動画における姿勢の滑らかな追跡</li>
+          </ul>
+        </div>
+        
+        <p>
+          姿勢推定技術は、人間の行動や状態を理解するための重要な技術であり、コンピュータビジョンの重要な研究分野となっています。最新の研究では、3D姿勢推定や時間的なコンテキストを考慮した動的姿勢推定、さらに少ないラベル付きデータでの効率的な学習などに焦点が当てられています。
+        </p>
+      </section>
+      
+      <!-- 代表的なCNNモデル -->
+      <section id="cnn-models" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-sitemap"></i>代表的なCNNモデル
+        </h2>
+        
+        <p>
+          画像認識に使用される代表的なCNNモデルを時系列でまとめます。これらのモデルはそれぞれ革新的なアーキテクチャやアイデアを導入し、画像認識の精度向上に貢献しました。
+        </p>
+        
+        <div class="term-list">
+          <div class="term-item">
+            <div class="term-name">AlexNet (2012)</div>
+            <div class="term-desc">
+              ImageNetコンペティション（ILSVRC）で優勝し、ディープラーニングによる画像認識のブレイクスルーとなったモデル。ReLU活性化関数、ドロップアウト、複数GPUでの学習などを導入。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">VGG (2014)</div>
+            <div class="term-desc">
+              小さな3×3畳み込みフィルタを積み重ねる単純だが深いアーキテクチャ。VGG16、VGG19などのバリエーションがあり、シンプルな構造ながら高い性能を持つ。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">GoogLeNet/Inception (2014)</div>
+            <div class="term-desc">
+              Inceptionモジュールを導入し、異なるサイズの畳み込みを並列に行う。効率的にパラメータ数を削減しながら高い表現力を実現。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">ResNet (2015)</div>
+            <div class="term-desc">
+              残差接続（スキップ結合）を導入し、勾配消失問題を軽減。これにより非常に深いネットワーク（ResNet-152など）の学習が可能になった。現在も多くのモデルの基盤となっている。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">DenseNet (2017)</div>
+            <div class="term-desc">
+              各層が全ての先行層からの特徴マップを入力として受け取る稠密接続を特徴とするモデル。特徴の再利用により効率的な学習が可能。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">MobileNet (2017)</div>
+            <div class="term-desc">
+              モバイルデバイスでの実行を念頭に設計された軽量なCNN。Depthwise Separable Convolutionを使用して計算コストを削減しながら高い精度を維持。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">SENet (2018)</div>
+            <div class="term-desc">
+              Squeeze-and-Excitationブロックを導入し、チャネル間の相互依存関係をモデル化。重要な特徴を強調することで精度を向上。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">EfficientNet (2019)</div>
+            <div class="term-desc">
+              ネットワークの深さ、幅、解像度を同時にスケーリングする複合スケーリング手法を導入。少ないパラメータ数で高い精度を実現。
+            </div>
+          </div>
+          <div class="term-item">
+            <div class="term-name">Vision Transformer (2020)</div>
+            <div class="term-desc">
+              自然言語処理で成功したTransformerアーキテクチャを画像認識に適用。画像をパッチに分割し、それらをシーケンスとして扱う。
+            </div>
+          </div>
+        </div>
+        
+        <div class="note-box">
+          <div class="note-box-title">
+            <i class="fas fa-sticky-note"></i>CNNアーキテクチャの発展の潮流
+          </div>
+          <p>
+            CNNアーキテクチャの発展は、（1）より深いネットワーク、（2）効率的な接続方法、（3）計算効率の向上、（4）自動アーキテクチャ探索（NAS）、（5）Transformerなどの新しいパラダイムの導入、という流れで進んできました。また近年は、大規模なプリトレーニングと転移学習によって、より少ないラベル付きデータでも高い性能を発揮できるモデルの研究が活発化しています。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 実世界での活用 -->
+      <section id="real-world-applications" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-industry"></i>実世界での活用
+        </h2>
+        
+        <p>
+          画像認識技術は様々な産業や分野で活用されており、私たちの生活や社会に大きな影響を与えています。以下に代表的な応用例を紹介します。
+        </p>
+        
+        <h3><i class="fas fa-car"></i>自動運転</h3>
+        <p>
+          自動運転車では、画像認識技術を使用して道路、交通標識、信号、歩行者、他の車両などを検出し認識します。物体検出、セマンティックセグメンテーション、インスタンスセグメンテーションなどの技術が複合的に使われ、車両の周囲の環境を理解するのに役立っています。
+        </p>
+        
+        <h3><i class="fas fa-hospital"></i>医療画像解析</h3>
+        <p>
+          X線、CT、MRI、超音波などの医療画像から、腫瘍、骨折、異常細胞などを検出するために画像認識技術が活用されています。セグメンテーション技術は臓器や病変の正確な位置や大きさを測定するのに役立ち、医師の診断支援や治療計画の立案に貢献しています。
+        </p>
+        
+        <h3><i class="fas fa-industry"></i>製造業・品質管理</h3>
+        <p>
+          製造ラインでの製品検査や品質管理に画像認識技術が導入されています。傷、欠陥、異物などを自動的に検出することで、製品の品質向上とコスト削減に貢献しています。また、ロボットによる部品の把握やアセンブリなどにも物体検出や姿勢推定技術が使われています。
+        </p>
+        
+        <h3><i class="fas fa-camera"></i>監視・セキュリティ</h3>
+        <p>
+          監視カメラの映像から人物や車両を検出・追跡したり、顔認識技術を用いた入退室管理や不審者検知などにも画像認識技術が活用されています。また、異常行動や危険な状況を自動検出するシステムも開発されています。
+        </p>
+        
+        <h3><i class="fas fa-mobile-alt"></i>モバイルアプリケーション</h3>
+        <p>
+          スマートフォンのカメラアプリでの顔検出、ポートレートモード（背景ぼかし）、AR（拡張現実）アプリケーションなど、様々な機能に画像認識技術が使われています。また、画像検索、植物や商品の識別アプリなども普及しています。
+        </p>
+        
+        <h3><i class="fas fa-shopping-cart"></i>小売・マーケティング</h3>
+        <p>
+          店舗内での顧客行動分析、商品棚の在庫管理、レジなしショッピングシステムなどに画像認識技術が活用されています。顧客の動線や商品との相互作用を分析することで、店舗レイアウトの最適化やマーケティング戦略の立案に役立てられています。
+        </p>
+        
+        <h3><i class="fas fa-satellite"></i>農業・環境モニタリング</h3>
+        <p>
+          衛星画像や空撮画像から、作物の生育状況、病害虫の発生、土地利用の変化などを検出するために画像認識技術が活用されています。また、野生動物の個体数調査や環境変化のモニタリングにも利用されています。
+        </p>
+        
+        <div class="key-point">
+          <h4><i class="fas fa-key"></i>画像認識技術の実用化における課題</h4>
+          <ul>
+            <li>ロバスト性：様々な環境条件（照明、天候、視点など）での安定した認識</li>
+            <li>リアルタイム性：限られた計算リソースでの高速処理</li>
+            <li>プライバシー・倫理的懸念：顔認識や行動分析における個人情報保護</li>
+            <li>説明可能性：認識結果の根拠や理由を説明できる技術</li>
+            <li>エッジでの実行：クラウドに依存しない省電力・省メモリの実装</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- Key Insights -->
+      <section id="key-insights" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-lightbulb"></i>Key Insights
+        </h2>
+        
+        <div class="handwritten-box">
+          <h4>1. 画像認識タスクの階層性</h4>
+          <p>
+            画像認識タスクは、単純なものから複雑なものへと階層的に発展してきました。物体識別（何があるか）→物体検出（どこに何があるか）→セグメンテーション（物体の正確な形状）→インスタンスセグメンテーション（個々の物体の正確な形状）と、より詳細な情報を得られるようになっています。各タスクはそれぞれ特有の問題を解決するために開発されたアーキテクチャを持ち、応用分野も異なります。
+          </p>
+        </div>
+        
+        <div class="handwritten-box">
+          <h4>2. CNNアーキテクチャの進化</h4>
+          <p>
+            CNNアーキテクチャはAlexNetから始まり、VGG、GoogLeNet、ResNet、DenseNet、SENetなどへと進化してきました。単純に層を深くするだけでなく、残差接続、稠密接続、注意機構、効率的な畳み込み操作など、様々な革新的なアイデアが導入されてきました。また近年では、TransformerアーキテクチャがCNNに代わる新しいパラダイムとして注目されています。
+          </p>
+        </div>
+        
+        <div class="handwritten-box">
+          <h4>3. 精度と効率のトレードオフ</h4>
+          <p>
+            画像認識モデルの設計においては、精度と効率（計算コスト、メモリ使用量、推論速度）のトレードオフが常に考慮されます。実世界のアプリケーションでは、単純に精度を高めるだけでなく、リソース制約下での効率的な処理が求められます。MobileNetやEfficientNetなどの軽量モデルや、モデル圧縮、量子化、知識蒸留などの技術が開発されています。
+          </p>
+        </div>
+        
+        <div class="handwritten-box">
+          <h4>4. 実世界への応用の広がり</h4>
+          <p>
+            画像認識技術は自動運転、医療画像解析、製造業、小売、農業、環境モニタリングなど、様々な分野に応用が広がっています。各分野特有の課題に対応するため、ドメイン適応や少数サンプル学習、自己教師あり学習などの技術も発展しています。また、ロバスト性、説明可能性、プライバシー保護など、実用化に向けた様々な課題にも取り組まれています。
+          </p>
+        </div>
+      </section>
+      
+      <!-- Take Home Message -->
+      <section id="take-home" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-key"></i>Take Home Message
+        </h2>
+        
+        <div class="key-point" style="background-color: rgba(255, 64, 160, 0.12); padding: 2rem; text-align: center;">
+          <h4 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--key);">
+            <i class="fas fa-star" style="color: var(--magenta);"></i> 
+            G検定で押さえるべき画像認識のポイント
+          </h4>
+          <p style="font-size: 1.1rem; line-height: 1.8; font-weight: 500;">
+            画像認識は<span class="highlight-yellow">物体識別</span>、<span class="highlight-yellow">物体検出</span>、<span class="highlight-yellow">セマンティックセグメンテーション</span>、<span class="highlight-yellow">インスタンスセグメンテーション</span>、<span class="highlight-yellow">パノプティックセグメンテーション</span>、<span class="highlight-yellow">姿勢推定</span>などのタスクがあり、それぞれに代表的なモデル（<span class="highlight-cyan">AlexNet</span>、<span class="highlight-cyan">ResNet</span>、<span class="highlight-cyan">YOLO</span>、<span class="highlight-cyan">Mask R-CNN</span>など）が存在します。画像認識技術は自動運転、医療、製造業など幅広い分野で活用され、社会に大きな影響を与えています。G検定では各タスクの違いと代表的なモデル、実世界での応用例を理解しておくことが重要です。
+          </p>
+        </div>
+      </section>
+      
+      <!-- 用語集 -->
+      <section id="terminology" class="section">
+        <h2 class="section-title">
+          <i class="fas fa-book"></i>用語集
+        </h2>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>用語</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AlexNet</td>
+              <td>2012年のILSVRCで優勝したディープラーニングによる画像認識モデル。畳み込みニューラルネットワークの可能性を示し、ディープラーニングブームの火付け役となった。</td>
+            </tr>
+            <tr>
+              <td>DeepLab</td>
+              <td>Atrous（拡張）畳み込みとASPP（Atrous Spatial Pyramid Pooling）を導入したセマンティックセグメンテーションモデル。様々なスケールの情報を効果的に捉え、高精度なセグメンテーションを実現。</td>
+            </tr>
+            <tr>
+              <td>DenseNet</td>
+              <td>各層が全ての先行層からの特徴マップを入力として受け取る稠密接続を特徴とするモデル。特徴の再利用により効率的な学習が可能。</td>
+            </tr>
+            <tr>
+              <td>EfficientNet</td>
+              <td>ネットワークの深さ、幅、解像度を同時にスケーリングする複合スケーリング手法を導入。少ないパラメータ数で高い精度を実現。</td>
+            </tr>
+            <tr>
+              <td>Fast R-CNN</td>
+              <td>R-CNNの改良版。画像全体にCNNを適用し、RoI（Region of Interest）プーリングで特徴を共有。計算効率が向上。</td>
+            </tr>
+            <tr>
+              <td>Faster R-CNN</td>
+              <td>Region Proposal Network (RPN)を導入し、領域提案もニューラルネットワークで行う二段階検出器。物体検出の代表的なモデル。</td>
+            </tr>
+            <tr>
+              <td>FCN (Fully Convolutional Network)</td>
+              <td>全結合層を畳み込み層に置き換え、エンド・ツー・エンドでセグメンテーションを行う先駆的なモデル。空間情報を維持したまま画像全体を処理できる。</td>
+            </tr>
+            <tr>
+              <td>FPN (Feature Pyramid Network)</td>
+              <td>異なるレベルの特徴マップを階層的に組み合わせるネットワーク。様々なスケールの物体を効果的に検出できる。</td>
+            </tr>
+            <tr>
+              <td>GoogLeNet</td>
+              <td>Inceptionモジュールを導入し、異なるサイズの畳み込みを並列に行うCNNモデル。2014年のILSVRCで優勝。</td>
+            </tr>
+            <tr>
+              <td>Mask R-CNN</td>
+              <td>Faster R-CNNを拡張し、物体検出と並行して各検出された物体のセグメンテーションマスクを生成するモデル。インスタンスセグメンテーションの代表的なモデル。</td>
+            </tr>
+            <tr>
+              <td>MnasNet</td>
+              <td>Googleが開発したモバイル向けの軽量なCNNモデル。NAS（Neural Architecture Search）技術で設計され、計算効率と精度のバランスを最適化。</td>
+            </tr>
+            <tr>
+              <td>MobileNet</td>
+              <td>モバイルデバイスでの実行を念頭に設計された軽量なCNN。Depthwise Separable Convolutionを使用して計算コストを削減しながら高い精度を維持。</td>
+            </tr>
+            <tr>
+              <td>NAS (Neural Architecture Search)</td>
+              <td>ニューラルネットワークのアーキテクチャを自動的に設計する技術。強化学習や進化的アルゴリズムなどを用いて最適なネットワーク構造を探索する。</td>
+            </tr>
+            <tr>
+              <td>Open Pose</td>
+              <td>最初の実時間マルチパーソン姿勢推定システム。ボトムアップアプローチで複数人の姿勢を同時に高速に推定できる。</td>
+            </tr>
+            <tr>
+              <td>PSPNet (Pyramid Scene Parsing Network)</td>
+              <td>ピラミッドプーリングモジュールを使用して様々なスケールの特徴を抽出するセマンティックセグメンテーションモデル。グローバルなコンテキスト情報とローカルな特徴を組み合わせる。</td>
+            </tr>
+            <tr>
+              <td>ResNet</td>
+              <td>残差接続（スキップ結合）を導入したCNNモデル。勾配消失問題を軽減し、非常に深いネットワーク（ResNet-152など）を実現。2015年のILSVRCで優勝。</td>
+            </tr>
+            <tr>
+              <td>SegNet</td>
+              <td>エンコーダとデコーダ構造を持ち、プーリング層のインデックスを記録してアップサンプリングに利用するセマンティックセグメンテーションモデル。</td>
+            </tr>
+            <tr>
+              <td>SENet</td>
+              <td>Squeeze-and-Excitationブロックを導入し、チャネル間の相互依存関係をモデル化するCNNモデル。2017年のILSVRCで優勝。</td>
+            </tr>
+            <tr>
+              <td>SSD (Single Shot Detector)</td>
+              <td>多層の特徴マップから異なるスケールの物体を検出する一段階検出器。高速かつ比較的高精度な物体検出モデル。</td>
+            </tr>
+            <tr>
+              <td>U-Net</td>
+              <td>医療画像セグメンテーション向けに開発されたアーキテクチャ。コントラクティングパス（エンコーダ）とエクスパンシブパス（デコーダ）のU字型構造とスキップ接続が特徴。</td>
+            </tr>
+            <tr>
+              <td>Vision Transformer</td>
+              <td>自然言語処理で成功したTransformerアーキテクチャを画像認識に適用したモデル。画像をパッチに分割し、それらをシーケンスとして扱う。</td>
+            </tr>
+            <tr>
+              <td>Wide ResNet</td>
+              <td>ResNetの派生モデルで、深さよりも幅（チャネル数）を増やしたアーキテクチャ。より少ない層で高い性能を実現。</td>
+            </tr>
+            <tr>
+              <td>YOLO (You Only Look Once)</td>
+              <td>画像を一度だけ見て物体検出を行う一段階検出器。高速で実時間処理に適している。YOLOv3、YOLOv4などの進化版がある。</td>
+            </tr>
+            <tr>
+              <td>一般物体認識</td>
+              <td>様々なカテゴリの物体を識別する能力。ImageNetコンペティションなどで評価される。</td>
+            </tr>
+            <tr>
+              <td>インスタンスセグメンテーション</td>
+              <td>セマンティックセグメンテーションに加え、同一クラスの個々のインスタンスを識別するタスク。各物体インスタンスを個別に識別し、ピクセルレベルで分割する。</td>
+            </tr>
+            <tr>
+              <td>姿勢推定</td>
+              <td>人体などの関節位置を検出し、姿勢を推定するタスク。人物の頭、肩、肘、手首、腰、膝、足首などの身体の関節位置（キーポイント）を特定する。</td>
+            </tr>
+            <tr>
+              <td>セマンティックセグメンテーション</td>
+              <td>画像内の各ピクセルにクラスラベルを割り当てるタスク。物体の正確な形状を特定するが、同一クラスの異なるインスタンスは区別しない。</td>
+            </tr>
+            <tr>
+              <td>パノプティックセグメンテーション</td>
+              <td>セマンティックセグメンテーションとインスタンスセグメンテーションを統合したタスク。画像内の全てのピクセルにクラスラベルを割り当てると同時に、「物」カテゴリの各インスタンスを個別に識別する。</td>
+            </tr>
+            <tr>
+              <td>物体検出</td>
+              <td>画像内の物体の位置と種類を特定するタスク。物体の位置をバウンディングボックスで表し、各ボックス内の物体のクラスを予測する。</td>
+            </tr>
+            <tr>
+              <td>物体識別</td>
+              <td>画像に何が写っているのかを特定するタスク。画像全体を対象に、含まれる物体のクラス（カテゴリ）を予測する。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <!-- フッター -->
+      <footer>
+        <p>G検定学習ノート - 1-6-1 画像認識</p>
+        <p>Created with Claude (content) and ChatGPT (images)</p>
+      </footer>
+    </div>
+  </div>
+  
+  <!-- トップに戻るボタン -->
+  <a href="#" class="back-to-top">
+    <i class="fas fa-arrow-up"></i>
+  </a>
+  
+  <script>
+    // スムーズスクロール
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          window.scrollTo({
+            top: target.offsetTop - 20,
+            behavior: 'smooth'
+          });
+          
+          // アクティブクラスの更新
+          document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+          });
+          this.classList.add('active');
+        }
+      });
+    });
+    
+    // スクロール位置に応じたアクティブメニューの更新
+    window.addEventListener('scroll', function() {
+      const sections = document.querySelectorAll('.section');
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        const sectionHeight = section.offsetHeight;
+        
+        if (pageYOffset >= sectionTop && pageYOffset < sectionTop + sectionHeight) {
+          current = '#' + section.getAttribute('id');
+        }
+      });
+      
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-2-2 - G検定学習ノート</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS変数定義 - CMYKカラーパレット */
+    :root {
+      /* カラーパレット */
+      --cyan: #00D8E8;
+      --cyan-light: rgba(0, 216, 232, 0.2);
+      --magenta: #FF40A0;
+      --magenta-light: rgba(255, 64, 160, 0.2);
+      --yellow: #FFE600;
+      --yellow-light: rgba(255, 230, 0, 0.2);
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+      
+      /* フォント */
+      --main-font: 'Zen Maru Gothic', sans-serif;
+      --accent-font: 'M PLUS Rounded 1c', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--main-font);
+      line-height: 1.6;
+      color: var(--key);
+      background-color: var(--white);
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバーのスタイル */
+    .sidebar {
+      width: 20%;
+      background-color: var(--key);
+      color: var(--white);
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    
+    .sidebar-title {
+      font-family: var(--accent-font);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--cyan);
+    }
+    
+    .menu-item {
+      margin-bottom: 0.8rem;
+      padding: 0.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+    }
+    
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .menu-item.active {
+      background-color: rgba(0, 216, 232, 0.3);
+      border-left: 3px solid var(--cyan);
+    }
+    
+    .menu-item i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+      color: var(--cyan);
+    }
+    
+    .menu-item.active i {
+      color: var(--white);
+    }
+    
+    /* メインコンテンツエリア */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem;
+    }
+    
+    /* セクションのスタイル */
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    
+    .section.animate {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+    }
+    
+    .section-icon {
+      color: var(--magenta);
+      margin-right: 0.6rem;
+    }
+    
+    /* ヘッダーセクション特別スタイル */
+    #header-section {
+      background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+      padding: 2.5rem;
+      border-left: 5px solid var(--magenta);
+      margin-bottom: 2.5rem;
+    }
+    
+    .main-title {
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+      color: var(--key);
+      border-bottom: 3px solid var(--magenta);
+      padding-bottom: 0.3rem;
+      display: inline-block;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-overview {
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid var(--cyan);
+    }
+    
+    /* リストスタイルの改善 */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin: 0.8rem 0;
+    }
+    
+    ul li, ol li {
+      margin-bottom: 0.5rem;
+      padding-left: 0.3rem;
+    }
+    
+    /* コンセプトボックス */
+    .concept-box {
+      background-color: var(--white);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.8rem;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid var(--cyan);
+      transition: transform 0.3s ease;
+    }
+    
+    .concept-box:hover {
+      transform: translateY(-3px);
+    }
+    
+    .concept-box:nth-child(3n+1) {
+      border-left-color: var(--cyan);
+    }
+    
+    .concept-box:nth-child(3n+2) {
+      border-left-color: var(--magenta);
+    }
+    
+    .concept-box:nth-child(3n+3) {
+      border-left-color: var(--yellow);
+    }
+    
+    .concept-title {
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+    }
+    
+    .concept-title i {
+      color: var(--magenta);
+      margin-right: 0.5rem;
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      background-color: var(--white);
+      border: 2px dashed var(--dark-gray);
+      padding: 1.5rem 1.8rem;
+      margin: 1.8rem 0;
+      border-radius: 12px;
+      position: relative;
+      transform: rotate(-0.5deg);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 1.5rem;
+    }
+    
+    .handwritten-box h3 {
+      color: var(--magenta);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      background-color: var(--yellow-light);
+      padding: 1.2rem;
+      border-radius: 10px;
+      margin: 1.2rem 0;
+      border-left: 4px solid var(--yellow);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* キーワードマーカー */
+    .keyword-marker {
+      background: linear-gradient(transparent 60%, rgba(255, 64, 160, 0.2) 40%);
+      font-weight: 700;
+    }
+    
+    /* 図解ボックス */
+    .diagram-box {
+      background-color: var(--light-gray);
+      border-radius: 12px;
+      padding: 1.8rem;
+      margin: 1.8rem 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+    
+    .diagram-title {
+      font-weight: 500;
+      margin-bottom: 1.2rem;
+      color: var(--magenta);
+      display: inline-block;
+      border-bottom: 2px dotted var(--magenta);
+      padding-bottom: 5px;
+      font-size: 1.1rem;
+    }
+    
+    .glossary-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .table-container {
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+    }
+    
+    th, td {
+      padding: 0.9rem;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    
+    th {
+      background-color: var(--cyan-light);
+      font-weight: 700;
+      color: var(--key);
+    }
+    
+    tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+    
+    tr:hover {
+      background-color: rgba(0, 216, 232, 0.05);
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--cyan);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .scroll-top-btn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .scroll-top-btn:hover {
+      background-color: var(--magenta);
+      transform: translateY(-3px);
+    }
+    
+    .scroll-top-btn i {
+      font-size: 1.2rem;
+    }
+    
+    /* フッター */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--dark-gray);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--light-gray);
+      background: linear-gradient(to right, var(--cyan-light), var(--magenta-light));
+      border-radius: 0 0 10px 10px;
+    }
+    
+    /* 新しいカラフルなアイコンスタイル */
+    .icon-bubble {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-right: 10px;
+      color: white;
+      font-size: 0.9rem;
+    }
+    
+    .icon-cyan {
+      background-color: var(--cyan);
+      box-shadow: 0 3px 6px rgba(0, 216, 232, 0.3);
+    }
+    
+    .icon-magenta {
+      background-color: var(--magenta);
+      box-shadow: 0 3px 6px rgba(255, 64, 160, 0.3);
+    }
+    
+    .icon-yellow {
+      background-color: var(--yellow);
+      box-shadow: 0 3px 6px rgba(255, 230, 0, 0.3);
+      color: var(--key);
+    }
+    
+    /* 関係性テーブル */
+    .relationship-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .relationship-table th {
+      background-color: var(--magenta-light);
+      color: var(--key);
+      font-weight: 700;
+      padding: 0.8rem;
+      text-align: center;
+    }
+    
+    .relationship-table td {
+      padding: 0.8rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .relationship-table tr:nth-child(odd) {
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .relationship-table tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+    
+    .relationship-name {
+      font-weight: 700;
+      color: var(--magenta);
+    }
+    
+    /* 図解コンテナ */
+    .visual-diagram {
+      margin: 1.5rem auto;
+      max-width: 650px;
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <h2 class="sidebar-title">G検定学習ノート</h2>
+    <div id="menu">
+      <div class="menu-item" onclick="scrollToSection('header-section')">
+        <i class="fas fa-home"></i>トップ
+      </div>
+      <div class="menu-item" onclick="scrollToSection('what-is-knowledge-representation')">
+        <i class="fas fa-brain"></i>知識表現とは
+      </div>
+      <div class="menu-item" onclick="scrollToSection('knowledge-representation-methods')">
+        <i class="fas fa-project-diagram"></i>代表的な知識表現手法
+      </div>
+      <div class="menu-item" onclick="scrollToSection('what-is-expert-system')">
+        <i class="fas fa-robot"></i>エキスパートシステム
+      </div>
+      <div class="menu-item" onclick="scrollToSection('expert-system-structure')">
+        <i class="fas fa-cogs"></i>エキスパートシステムの構造
+      </div>
+      <div class="menu-item" onclick="scrollToSection('famous-expert-systems')">
+        <i class="fas fa-flask"></i>有名なエキスパートシステム
+      </div>
+      <div class="menu-item" onclick="scrollToSection('modern-applications')">
+        <i class="fas fa-laptop-code"></i>現代への応用
+      </div>
+      <div class="menu-item" onclick="scrollToSection('keyword-list')">
+        <i class="fas fa-key"></i>キーワード一覧
+      </div>
+      <div class="menu-item" onclick="scrollToSection('key-insights')">
+        <i class="fas fa-lightbulb"></i>重要ポイント
+      </div>
+      <div class="menu-item" onclick="scrollToSection('take-home')">
+        <i class="fas fa-check-circle"></i>まとめ
+      </div>
+    </div>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div class="main-content">
+    <!-- ヘッダーセクション -->
+    <section class="section animate" id="header-section">
+      <h1 class="main-title">1-2-2 知識表現とエキスパートシステム</h1>
+      <p class="subtitle">Knowledge Representation and Expert Systems</p>
+      
+      <div class="section-overview">
+        <h3><i class="fas fa-bullseye" style="color: var(--magenta);"></i> 学習目標</h3>
+        <ul>
+          <li>知識表現とは何か説明できる</li>
+          <li>エキスパートシステムとは何か説明できる</li>
+          <li>知識表現に係る代表的な研究や手法について理解する</li>
+          <li>エキスパートシステムに係る代表的な研究や手法について理解する</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 知識表現とは セクション -->
+    <section class="section animate" id="what-is-knowledge-representation">
+      <h2 class="section-title">
+        <i class="fas fa-brain section-icon"></i>知識表現とは
+      </h2>
+      
+      <p><span class="keyword-marker">知識表現</span>（Knowledge Representation）とは、コンピュータが知識を扱いやすいように形式化・表現する方法やその研究分野のことです。人間の知識をコンピュータが処理できる形式に変換し、推論や問題解決に活用することを目的としています。</p>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-lightbulb"></i>知識表現の本質
+        </h3>
+        <p>知識表現の核心は、「世界に関する知識をコンピュータプログラムが理解し操作できる形式で表現する」ことにあります。これによって、AIシステムが知識に基づいた推論や判断を行うことが可能になります。</p>
+      </div>
+      
+      <h3>知識表現の特徴と要件</h3>
+      <ul>
+        <li><strong>表現力</strong>：様々な種類の知識を表現できること</li>
+        <li><strong>推論可能性</strong>：表現された知識から新しい知識を導き出せること</li>
+        <li><strong>効率性</strong>：計算機での処理が効率的であること</li>
+        <li><strong>理解可能性</strong>：人間にとって理解・修正しやすいこと</li>
+      </ul>
+      
+      <div class="handwritten-box">
+        <h3>知識表現の重要性</h3>
+        <p>知識表現は以下のような理由から人工知能研究において重要な役割を果たしています：</p>
+        <ul>
+          <li>問題解決の効率化：適切な知識表現により、問題解決の効率が大幅に向上</li>
+          <li>推論の基盤：論理的推論や意思決定の基礎となる</li>
+          <li>知識の共有と再利用：標準的な形式で知識を表現することで、異なるシステム間での知識の共有が可能に</li>
+          <li>人間の知能理解：知識表現研究は人間の知能の理解にも貢献</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <p>知識表現は単なる「データの保存方法」ではなく、「知識をどう構造化し、どう関連づけ、どのように推論に利用するか」という包括的な枠組みです。</p>
+      </div>
+    </section>
+
+    <!-- 代表的な知識表現手法 セクション -->
+    <section class="section animate" id="knowledge-representation-methods">
+      <h2 class="section-title">
+        <i class="fas fa-project-diagram section-icon"></i>代表的な知識表現手法
+      </h2>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-cyan"><i class="fas fa-share-alt"></i></span>意味ネットワーク (Semantic Network)
+        </h3>
+        <p><span class="keyword-marker">意味ネットワーク</span>は、概念や実体をノードとし、それらの関係を有向エッジで表現するグラフ構造です。意味的関連性を視覚的に表現でき、人間の記憶構造に近いモデルと考えられています。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">意味ネットワークの例</span>
+          <div class="visual-diagram">
+            <svg width="100%" height="300" viewBox="0 0 600 300">
+              <!-- ノードの定義 -->
+              <!-- 動物ノード -->
+              <g transform="translate(150, 50)">
+                <rect x="-50" y="-25" width="100" height="50" rx="10" ry="10" fill="#e0f7fa" stroke="#00D8E8" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" font-family="var(--main-font)" font-size="16">動物</text>
+              </g>
+              
+              <!-- 哺乳類ノード -->
+              <g transform="translate(150, 150)">
+                <rect x="-50" y="-25" width="100" height="50" rx="10" ry="10" fill="#e0f7fa" stroke="#00D8E8" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" font-family="var(--main-font)" font-size="16">哺乳類</text>
+              </g>
+              
+              <!-- イヌ科ノード -->
+              <g transform="translate(150, 250)">
+                <rect x="-50" y="-25" width="100" height="50" rx="10" ry="10" fill="#e0f7fa" stroke="#00D8E8" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" font-family="var(--main-font)" font-size="16">イヌ科</text>
+              </g>
+              
+              <!-- 犬ノード -->
+              <g transform="translate(450, 50)">
+                <rect x="-50" y="-25" width="100" height="50" rx="10" ry="10" fill="#fce4ec" stroke="#FF40A0" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" font-family="var(--main-font)" font-size="16">犬</text>
+              </g>
+              
+              <!-- 尻尾ノード -->
+              <g transform="translate(450, 150)">
+                <rect x="-50" y="-25" width="100" height="50" rx="10" ry="10" fill="#fff9c4" stroke="#FFE600" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" font-family="var(--main-font)" font-size="16">尻尾</text>
+              </g>
+              
+              <!-- 毛ノード -->
+              <g transform="translate(450, 250)">
+                <rect x="-50" y="-25" width="100" height="50" rx="10" ry="10" fill="#fff9c4" stroke="#FFE600" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" font-family="var(--main-font)" font-size="16">毛</text>
+              </g>
+              
+              <!-- エッジの定義 -->
+              <!-- 犬から動物へのis-a関係 -->
+              <g>
+                <path d="M400,50 L200,50" fill="none" stroke="#404040" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <text x="300" y="40" text-anchor="middle" font-family="var(--main-font)" font-size="14" fill="#FF40A0">is-a</text>
+              </g>
+              
+              <!-- 哺乳類から動物へのis-a関係 -->
+              <g>
+                <path d="M150,125 L150,75" fill="none" stroke="#404040" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <text x="120" y="100" text-anchor="middle" font-family="var(--main-font)" font-size="14" fill="#FF40A0">is-a</text>
+              </g>
+              
+              <!-- イヌ科から哺乳類へのis-a関係 -->
+              <g>
+                <path d="M150,225 L150,175" fill="none" stroke="#404040" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <text x="120" y="200" text-anchor="middle" font-family="var(--main-font)" font-size="14" fill="#FF40A0">is-a</text>
+              </g>
+              
+              <!-- 犬から尻尾へのhas-a関係 -->
+              <g>
+                <path d="M450,75 L450,125" fill="none" stroke="#404040" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <text x="490" y="100" text-anchor="middle" font-family="var(--main-font)" font-size="14" fill="#00D8E8">has-a</text>
+              </g>
+              
+              <!-- 毛から尻尾へのpart-of関係 -->
+              <g>
+                <path d="M450,225 L450,175" fill="none" stroke="#404040" stroke-width="2" marker-end="url(#arrowhead)"/>
+                <text x="490" y="200" text-anchor="middle" font-family="var(--main-font)" font-size="14" fill="#FFE600">part-of</text>
+              </g>
+              
+              <!-- 矢印の定義 -->
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#404040" />
+                </marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+        
+        <div class="table-container">
+          <table class="relationship-table">
+            <thead>
+              <tr>
+                <th>関係性</th>
+                <th>意味</th>
+                <th>例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="relationship-name">is-a</span></td>
+                <td>「〜は〜の一種である」という分類関係</td>
+                <td>「犬は動物である」</td>
+              </tr>
+              <tr>
+                <td><span class="relationship-name">has-a</span></td>
+                <td>「〜は〜を持つ」という所有関係</td>
+                <td>「犬は尻尾を持つ」</td>
+              </tr>
+              <tr>
+                <td><span class="relationship-name">part-of</span></td>
+                <td>「〜は〜の一部である」という構成関係</td>
+                <td>「毛は尻尾の一部である」</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-magenta"><i class="fas fa-sitemap"></i></span>オントロジー (Ontology)
+        </h3>
+        <p><span class="keyword-marker">オントロジー</span>は、特定の領域における概念と、それらの間の関係を形式的に記述する知識表現の枠組みです。より構造化され厳密な意味ネットワークとも言えます。</p>
+        
+        <p>オントロジーの特徴：</p>
+        <ul>
+          <li>概念の階層関係（タクソノミー）を定義</li>
+          <li>概念間の関係を明示的に定義</li>
+          <li>属性（プロパティ）による概念の詳細な記述</li>
+          <li>推論ルールの組み込み</li>
+        </ul>
+        
+        <div class="note-box">
+          <p><span class="keyword-marker">Cycプロジェクト</span>は、人間の常識をオントロジーとして表現する大規模プロジェクトです。1984年に開始され、数十万の概念と数百万の事実を含む知識ベースを構築しました。</p>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-yellow"><i class="fas fa-code-branch"></i></span>論理ベースの表現
+        </h3>
+        <p>論理（特に一階述語論理）を用いて知識を表現する方法です。形式的で厳密な推論が可能です。</p>
+        
+        <div class="handwritten-box">
+          <h3>論理表現の例</h3>
+          <p>「すべての人間は死ぬ」「ソクラテスは人間である」という知識から「ソクラテスは死ぬ」と推論する：</p>
+          <pre style="background-color: #f5f5f5; padding: 1rem; border-radius: 10px; margin-top: 0.8rem;">
+<span style="color: var(--cyan);">∀x (Human(x) → Mortal(x))</span>  // すべての人間xは死ぬ
+<span style="color: var(--magenta);">Human(Socrates)</span>            // ソクラテスは人間である
+<span style="color: var(--yellow); font-weight: bold;">∴ Mortal(Socrates)</span>         // よって、ソクラテスは死ぬ
+          </pre>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-cyan"><i class="fas fa-stream"></i></span>フレーム/スクリプト
+        </h3>
+        <p>フレームは、オブジェクト指向的に知識を表現する方法で、特定の概念や状況に関連する属性（スロット）と値を持つ構造です。スクリプトは、一連の出来事や手順を表現するフレームの拡張です。</p>
+        
+        <div class="diagram-box">
+          <span class="diagram-title">フレームの例: 「レストラン」</span>
+          <div class="visual-diagram">
+            <div style="background-color: var(--cyan-light); border: 2px solid var(--cyan); border-radius: 10px; padding: 1.2rem; text-align: left;">
+              <h4 style="color: var(--key); margin-bottom: 0.8rem; border-bottom: 1px dashed var(--cyan); padding-bottom: 0.5rem; font-size: 1.1rem;">Frame: レストラン</h4>
+              <ul style="list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.6rem; padding: 0.4rem; border-radius: 5px; background-color: rgba(255, 255, 255, 0.7);">
+                  <strong style="color: var(--magenta);">種類:</strong> 飲食店
+                </li>
+                <li style="margin-bottom: 0.6rem; padding: 0.4rem; border-radius: 5px; background-color: rgba(255, 255, 255, 0.7);">
+                  <strong style="color: var(--magenta);">提供するもの:</strong> 食事, 飲み物
+                </li>
+                <li style="margin-bottom: 0.6rem; padding: 0.4rem; border-radius: 5px; background-color: rgba(255, 255, 255, 0.7);">
+                  <strong style="color: var(--magenta);">スタッフ:</strong> [シェフ, ウェイター, マネージャー]
+                </li>
+                <li style="margin-bottom: 0.6rem; padding: 0.4rem; border-radius: 5px; background-color: rgba(255, 255, 255, 0.7);">
+                  <strong style="color: var(--magenta);">営業時間:</strong> [開店時間, 閉店時間]
+                </li>
+                <li style="margin-bottom: 0.6rem; padding: 0.4rem; border-radius: 5px; background-color: rgba(255, 255, 255, 0.7);">
+                  <strong style="color: var(--magenta);">設備:</strong> [キッチン, ダイニングエリア, トイレ]
+                </li>
+                <li style="margin-bottom: 0; padding: 0.4rem; border-radius: 5px; background-color: rgba(255, 255, 255, 0.7);">
+                  <strong style="color: var(--magenta);">行為:</strong> [予約する, 注文する, 食事する, 支払う]
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-magenta"><i class="fas fa-globe"></i></span>セマンティックWeb (Semantic Web)
+        </h3>
+        <p><span class="keyword-marker">セマンティックWeb</span>は、Webページの内容を機械が理解できるように構造化・標準化する技術フレームワークです。RDF (Resource Description Framework)やOWL (Web Ontology Language)などの標準を用いて、Webコンテンツに意味的なアノテーションを付与します。</p>
+        
+        <p>セマンティックWebの目的：</p>
+        <ul>
+          <li>ウェブ上の情報を機械可読にする</li>
+          <li>異なるウェブサービス間でのデータ統合を可能にする</li>
+          <li>より高度な情報検索と推論を実現する</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- エキスパートシステムとは セクション -->
+    <section class="section animate" id="what-is-expert-system">
+      <h2 class="section-title">
+        <i class="fas fa-robot section-icon"></i>エキスパートシステムとは
+      </h2>
+      
+      <p><span class="keyword-marker">エキスパートシステム</span>（Expert System）は、特定の専門分野における人間の専門家の知識と推論能力をモデル化したAIシステムです。専門家の持つ経験則やノウハウをルールとして実装し、専門家に近い判断や助言を行うことができます。</p>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-history"></i>エキスパートシステムの歴史的背景
+        </h3>
+        <p>エキスパートシステムは1970年代から1980年代にかけて人工知能の主要な研究分野となりました。当時はまだ機械学習が現在ほど発達していなかったため、人間の専門家の知識を明示的にシステムに実装する手法として注目されました。</p>
+        
+        <p>黎明期から現在に至る発展：</p>
+        <ul>
+          <li>1965年：スタンフォード大学でDENDRALプロジェクト開始（最初期のエキスパートシステム）</li>
+          <li>1970年代：MYCINなどの医療診断システムが開発される</li>
+          <li>1980年代：エキスパートシステムのビジネス応用が進み、一時的なブームに</li>
+          <li>1990年代：「AIの冬」の一因となった知識獲得のボトルネック問題</li>
+          <li>2000年代以降：機械学習との融合や特定ドメインでの継続的な利用</li>
+        </ul>
+      </div>
+      
+      <h3>エキスパートシステムの特徴</h3>
+      <ul>
+        <li><strong>特定分野に特化</strong>：医療診断、鉱物探査、化学分析など特定の専門分野の問題解決に特化</li>
+        <li><strong>説明能力</strong>：判断の根拠や推論過程を説明できる透明性を持つ</li>
+        <li><strong>ルールベース</strong>：「もし〜ならば〜」という形式のルールを使用</li>
+        <li><strong>知識の明示的表現</strong>：専門家の知識を明示的にコード化して表現</li>
+        <li><strong>不確実性の取り扱い</strong>：確信度や信頼度をルールに付与して不確実性を処理</li>
+      </ul>
+      
+      <div class="handwritten-box">
+        <h3>エキスパートシステムのメリット・デメリット</h3>
+        <p><strong>メリット：</strong></p>
+        <ul>
+          <li>専門知識の保存と共有が可能</li>
+          <li>判断の一貫性が保たれる</li>
+          <li>推論過程の説明が可能（説明可能性が高い）</li>
+          <li>希少な専門知識を広く活用できる</li>
+        </ul>
+        <p><strong>デメリット：</strong></p>
+        <ul>
+          <li>知識獲得のボトルネック（専門家の知識を抽出・形式化する難しさ）</li>
+          <li>ルール数の増加に伴う保守の困難さ</li>
+          <li>想定外の問題への対応が難しい</li>
+          <li>暗黙知（言語化しにくい知識）の表現が困難</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <p>エキスパートシステムは現代の機械学習手法と比べると柔軟性や学習能力では劣りますが、「説明可能性」や「専門知識の明示的な表現」という点では優れており、医療や法律などの分野で今でも活用されています。</p>
+      </div>
+    </section>
+
+    <!-- エキスパートシステムの構造 セクション -->
+    <section class="section animate" id="expert-system-structure">
+      <h2 class="section-title">
+        <i class="fas fa-cogs section-icon"></i>エキスパートシステムの構造
+      </h2>
+      
+      <p>エキスパートシステムは通常、以下の主要コンポーネントから構成されています：</p>
+      
+      <div class="diagram-box">
+        <span class="diagram-title">エキスパートシステムの基本構造</span>
+        <div class="visual-diagram">
+          <svg width="100%" height="350" viewBox="0 0 700 350">
+            <!-- 知識ベース -->
+            <g transform="translate(180, 100)">
+              <rect x="-120" y="-50" width="240" height="100" rx="10" ry="10" fill="#e0f7fa" stroke="#00D8E8" stroke-width="2.5"/>
+              <text x="0" y="-20" text-anchor="middle" font-family="var(--main-font)" font-size="18" font-weight="bold">知識ベース</text>
+              <text x="0" y="10" text-anchor="middle" font-family="var(--main-font)" font-size="14">(Knowledge Base)</text>
+              <path d="M-85,-10 L85,-10" stroke="#00D8E8" stroke-width="1" stroke-dasharray="5,3"/>
+            </g>
+            
+            <!-- ユーザーインターフェース -->
+            <g transform="translate(520, 100)">
+              <rect x="-120" y="-50" width="240" height="100" rx="10" ry="10" fill="#fce4ec" stroke="#FF40A0" stroke-width="2.5"/>
+              <text x="0" y="-20" text-anchor="middle" font-family="var(--main-font)" font-size="18" font-weight="bold">ユーザーインターフェース</text>
+              <text x="0" y="10" text-anchor="middle" font-family="var(--main-font)" font-size="14">(User Interface)</text>
+              <path d="M-85,-10 L85,-10" stroke="#FF40A0" stroke-width="1" stroke-dasharray="5,3"/>
+            </g>
+            
+            <!-- 推論エンジン -->
+            <g transform="translate(180, 250)">
+              <rect x="-120" y="-50" width="240" height="100" rx="10" ry="10" fill="#fff9c4" stroke="#E6D000" stroke-width="2.5"/>
+              <text x="0" y="-20" text-anchor="middle" font-family="var(--main-font)" font-size="18" font-weight="bold">推論エンジン</text>
+              <text x="0" y="10" text-anchor="middle" font-family="var(--main-font)" font-size="14">(Inference Engine)</text>
+              <path d="M-85,-10 L85,-10" stroke="#E6D000" stroke-width="1" stroke-dasharray="5,3"/>
+            </g>
+            
+            <!-- 説明機構 -->
+            <g transform="translate(520, 250)">
+              <rect x="-120" y="-50" width="240" height="100" rx="10" ry="10" fill="#e3f2fd" stroke="#2196F3" stroke-width="2.5"/>
+              <text x="0" y="-20" text-anchor="middle" font-family="var(--main-font)" font-size="18" font-weight="bold">説明機構</text>
+              <text x="0" y="10" text-anchor="middle" font-family="var(--main-font)" font-size="14">(Explanation Facility)</text>
+              <path d="M-85,-10 L85,-10" stroke="#2196F3" stroke-width="1" stroke-dasharray="5,3"/>
+            </g>
+            
+            <!-- 接続線 -->
+            <!-- 知識ベース ←→ ユーザーインターフェース -->
+            <g>
+              <path d="M300,100 L400,100" fill="none" stroke="#404040" stroke-width="2" stroke-dasharray="10,5"/>
+              <polygon points="395,95 405,100 395,105" fill="#404040"/>
+              <polygon points="305,95 295,100 305,105" fill="#404040"/>
+            </g>
+            
+            <!-- 知識ベース ←→ 推論エンジン -->
+            <g>
+              <path d="M180,150 L180,200" fill="none" stroke="#404040" stroke-width="2" stroke-dasharray="10,5"/>
+              <polygon points="175,195 180,205 185,195" fill="#404040"/>
+              <polygon points="175,155 180,145 185,155" fill="#404040"/>
+            </g>
+            
+            <!-- 推論エンジン ←→ 説明機構 -->
+            <g>
+              <path d="M300,250 L400,250" fill="none" stroke="#404040" stroke-width="2" stroke-dasharray="10,5"/>
+              <polygon points="395,245 405,250 395,255" fill="#404040"/>
+              <polygon points="305,245 295,250 305,255" fill="#404040"/>
+            </g>
+            
+            <!-- ユーザーインターフェース ←→ 説明機構 -->
+            <g>
+              <path d="M520,150 L520,200" fill="none" stroke="#404040" stroke-width="2" stroke-dasharray="10,5"/>
+              <polygon points="515,195 520,205 525,195" fill="#404040"/>
+              <polygon points="515,155 520,145 525,155" fill="#404040"/>
+            </g>
+            
+            <!-- コンポーネントアイコン -->
+            <g transform="translate(100, 80)">
+              <circle cx="0" cy="0" r="20" fill="white" stroke="#00D8E8" stroke-width="2"/>
+              <text x="0" y="5" text-anchor="middle" font-family="FontAwesome" font-size="16" fill="#00D8E8">&#xf1c0;</text>
+            </g>
+            
+            <g transform="translate(600, 80)">
+              <circle cx="0" cy="0" r="20" fill="white" stroke="#FF40A0" stroke-width="2"/>
+              <text x="0" y="5" text-anchor="middle" font-family="FontAwesome" font-size="16" fill="#FF40A0">&#xf108;</text>
+            </g>
+            
+            <g transform="translate(100, 230)">
+              <circle cx="0" cy="0" r="20" fill="white" stroke="#E6D000" stroke-width="2"/>
+              <text x="0" y="5" text-anchor="middle" font-family="FontAwesome" font-size="16" fill="#E6D000">&#xf085;</text>
+            </g>
+            
+            <g transform="translate(600, 230)">
+              <circle cx="0" cy="0" r="20" fill="white" stroke="#2196F3" stroke-width="2"/>
+              <text x="0" y="5" text-anchor="middle" font-family="FontAwesome" font-size="16" fill="#2196F3">&#xf059;</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      
+      <h3 style="margin-top: 2rem; color: var(--magenta); display: flex; align-items: center;">
+        <i class="fas fa-puzzle-piece" style="margin-right: 10px;"></i>
+        エキスパートシステムの主要コンポーネント
+      </h3>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-cyan"><i class="fas fa-database"></i></span>知識ベース (Knowledge Base)
+        </h3>
+        <p>専門家の知識を格納するデータベースです。主に以下の形式で知識を表現します：</p>
+        <ul>
+          <li><strong>IF-THENルール</strong>：「もし条件Aが成り立つならば、結論Bである」という形式</li>
+          <li><strong>事実</strong>：対象領域に関する基本的事実や前提</li>
+          <li><strong>ヒューリスティック</strong>：経験則や実用的なノウハウ</li>
+        </ul>
+        
+        <div class="handwritten-box">
+          <h3>知識ベースの例（医療診断）</h3>
+          <div style="background-color: var(--cyan-light); border-radius: 10px; padding: 1.2rem; margin-top: 1rem;">
+            <p style="font-weight: bold; color: var(--key); margin-bottom: 0.6rem;">【事実】</p>
+            <ul style="list-style-type: none; padding-left: 0.5rem;">
+              <li style="margin-bottom: 0.4rem;">患者ID001は<span style="color: var(--magenta);">38.5度の発熱</span>がある</li>
+              <li style="margin-bottom: 0.4rem;">患者ID001は<span style="color: var(--magenta);">咳</span>がある</li>
+              <li style="margin-bottom: 0.4rem;">患者ID001は<span style="color: var(--magenta);">倦怠感</span>がある</li>
+            </ul>
+            
+            <p style="font-weight: bold; color: var(--key); margin: 1rem 0 0.6rem 0;">【ルール】</p>
+            <ul style="list-style-type: none; padding-left: 0.5rem;">
+              <li style="margin-bottom: 0.6rem; padding: 0.4rem; border-left: 3px solid var(--cyan);">
+                <strong>ルール1:</strong> <span style="color: var(--yellow);">IF</span> 発熱 <span style="color: var(--magenta);">AND</span> 咳 <span style="color: var(--magenta);">AND</span> 倦怠感 <span style="color: var(--cyan);">THEN</span> インフルエンザの可能性(0.7)
+              </li>
+              <li style="margin-bottom: 0.6rem; padding: 0.4rem; border-left: 3px solid var(--magenta);">
+                <strong>ルール2:</strong> <span style="color: var(--yellow);">IF</span> 発熱 <span style="color: var(--magenta);">AND</span> 咳 <span style="color: var(--magenta);">AND</span> 喉の痛み <span style="color: var(--cyan);">THEN</span> 風邪の可能性(0.8)
+              </li>
+              <li style="margin-bottom: 0; padding: 0.4rem; border-left: 3px solid var(--yellow);">
+                <strong>ルール3:</strong> <span style="color: var(--yellow);">IF</span> インフルエンザの可能性 <span style="color: var(--magenta);">AND</span> 急な発症 <span style="color: var(--cyan);">THEN</span> インフルエンザと診断(0.9)
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-yellow"><i class="fas fa-cog"></i></span>推論エンジン (Inference Engine)
+        </h3>
+        <p>知識ベースのルールと事実を用いて推論を行うコンポーネントです。主に以下の推論戦略があります：</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+          <div style="flex: 1; min-width: 250px; background-color: var(--yellow-light); padding: 1rem; border-radius: 10px; border-left: 4px solid var(--yellow);">
+            <h4 style="color: var(--key); margin-bottom: 0.5rem;">
+              <i class="fas fa-arrow-right" style="color: var(--yellow); margin-right: 5px;"></i>
+              前向き連鎖（Forward Chaining）
+            </h4>
+            <p>既知の事実からスタートし、ルールを適用して結論を導く方法</p>
+          </div>
+          
+          <div style="flex: 1; min-width: 250px; background-color: var(--magenta-light); padding: 1rem; border-radius: 10px; border-left: 4px solid var(--magenta);">
+            <h4 style="color: var(--key); margin-bottom: 0.5rem;">
+              <i class="fas fa-arrow-left" style="color: var(--magenta); margin-right: 5px;"></i>
+              後ろ向き連鎖（Backward Chaining）
+            </h4>
+            <p>目標の結論から始め、その条件を満たす事実やルールを探索する方法</p>
+          </div>
+          
+          <div style="flex: 1; min-width: 250px; background-color: var(--cyan-light); padding: 1rem; border-radius: 10px; border-left: 4px solid var(--cyan);">
+            <h4 style="color: var(--key); margin-bottom: 0.5rem;">
+              <i class="fas fa-random" style="color: var(--cyan); margin-right: 5px;"></i>
+              混合戦略
+            </h4>
+            <p>前向きと後ろ向きの手法を状況に応じて組み合わせる方法</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-magenta"><i class="fas fa-comment-dots"></i></span>説明機構 (Explanation Facility)
+        </h3>
+        <p>システムがどのように結論に達したかを説明するコンポーネントです。ユーザーが「なぜこの結論になったのか」「なぜこの質問をするのか」を理解するのに役立ちます。</p>
+        
+        <div class="note-box">
+          <p>説明機能はエキスパートシステムの重要な特徴で、ユーザーの信頼獲得と教育的目的に役立ちます。現代の「説明可能AI（XAI）」の先駆けともいえます。</p>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-cyan"><i class="fas fa-desktop"></i></span>ユーザーインターフェース (User Interface)
+        </h3>
+        <p>ユーザーがシステムと対話するためのインターフェースです。質問の提示、情報入力、結果表示などの機能を提供します。</p>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <span class="icon-bubble icon-yellow"><i class="fas fa-tools"></i></span>知識獲得機構 (Knowledge Acquisition)
+        </h3>
+        <p>専門家からの知識を収集し、知識ベースに追加・更新するためのツールやインターフェースです。知識エンジニアが専門家との対話を通じて知識を抽出し、ルール化します。</p>
+        
+        <div class="handwritten-box">
+          <h3>知識獲得のボトルネック</h3>
+          <p>専門家の知識をコンピュータが処理可能な形式に変換する過程の難しさは「知識獲得のボトルネック」と呼ばれ、エキスパートシステム開発の主要な課題です。以下のような問題が含まれます：</p>
+          <ul style="padding-left: 1.2rem;">
+            <li>専門家が自分の知識を明示的に説明できない（暗黙知の問題）</li>
+            <li>知識エンジニアが専門分野を十分理解できない</li>
+            <li>専門知識をルールとして形式化する難しさ</li>
+            <li>大量のルールの管理と更新の困難さ</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 有名なエキスパートシステム セクション -->
+    <section class="section animate" id="famous-expert-systems">
+      <h2 class="section-title">
+        <i class="fas fa-flask section-icon"></i>有名なエキスパートシステム
+      </h2>
+      
+      <p>1960年代から1980年代にかけて、多くの画期的なエキスパートシステムが開発されました。以下に代表的な例を紹介します。</p>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-microscope"></i>DENDRAL
+        </h3>
+        <p><span class="keyword-marker">DENDRAL</span>は、1965年にスタンフォード大学で開発された最初期のエキスパートシステムの一つです。質量分析データと核磁気共鳴から有機化合物の分子構造を推定するシステムでした。</p>
+        
+        <ul>
+          <li>開発：Edward Feigenbaum、Joshua Lederberg、Bruce Buchanan、他</li>
+          <li>目的：化学者の構造解析作業を支援</li>
+          <li>特徴：特定の問題領域に焦点を当てた初めての成功例</li>
+          <li>影響：後のエキスパートシステム研究に大きな影響を与えた</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-heartbeat"></i>MYCIN
+        </h3>
+        <p><span class="keyword-marker">マイシン（MYCIN）</span>は、1970年代にスタンフォード大学で開発された医療診断システムです。血液感染症の診断と抗生物質の推奨を行いました。</p>
+        
+        <ul>
+          <li>開発：Edward Shortliffe</li>
+          <li>知識ベース：約600のルール</li>
+          <li>特徴：
+            <ul>
+              <li>後ろ向き連鎖推論を使用</li>
+              <li>不確実性を確信度因子（certainty factors）で処理</li>
+              <li>「なぜ」の質問に答える説明機能</li>
+            </ul>
+          </li>
+          <li>成果：人間の専門家に匹敵する診断精度を達成</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>MYCINは実際の臨床現場で広く使用されることはありませんでしたが、医療における人工知能応用の先駆けとなり、その設計原則は多くの後続システムに影響を与えました。</p>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-comments"></i>ELIZA
+        </h3>
+        <p><span class="keyword-marker">イライザ（ELIZA）</span>は、1966年にMITのJoseph Weizenbaumによって開発された初期の自然言語処理システムです。精神科医のカール・ロジャースの手法を模倣し、患者（ユーザー）との会話を行いました。</p>
+        
+        <ul>
+          <li>特徴：
+            <ul>
+              <li>単純なパターンマッチングと置換ルールを使用</li>
+              <li>ユーザーの発言を質問や言い換えに変換</li>
+              <li>実際の「理解」はなかったが、対話の錯覚を生み出した</li>
+            </ul>
+          </li>
+          <li>影響：人間とコンピュータの自然な対話の可能性を示した</li>
+          <li>教訓：システムが人間のように振る舞うだけで、ユーザーは「理解」があると錯覚する（「ELIZA効果」）</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-desktop"></i>その他の重要なエキスパートシステム
+        </h3>
+        <p>歴史的に重要なその他のエキスパートシステム：</p>
+        <ul>
+          <li><strong>PROSPECTOR</strong>：鉱物探査支援システム</li>
+          <li><strong>XCON/R1</strong>：DEC社のコンピュータ構成支援システム</li>
+          <li><strong>INTERNIST/CADUCEUS</strong>：内科診断システム</li>
+          <li><strong>HEARSAY</strong>：音声認識システム</li>
+          <li><strong>PXDES</strong>：植物病害診断システム</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-microchip"></i>現代の知識ベースAI
+        </h3>
+        <p><span class="keyword-marker">ワトソン（Watson）</span>はIBMが開発した質問応答システムで、自然言語処理、機械学習、知識表現を組み合わせたシステムです。2011年のテレビクイズ番組「Jeopardy!」（日本の「クイズ！ヒューマン」に相当）で人間のチャンピオンに勝利したことで有名になりました。</p>
+        
+        <ul>
+          <li>特徴：
+            <ul>
+              <li>大規模な知識ベースと自然言語処理</li>
+              <li>機械学習と従来の知識ベースアプローチの融合</li>
+              <li>証拠に基づく回答生成と確信度評価</li>
+            </ul>
+          </li>
+          <li>応用分野：医療診断支援、ビジネスアナリティクス、顧客サービスなど</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <h3>東ロボくん</h3>
+        <p><span class="keyword-marker">東ロボくん</span>（東京大学入試向けAIプロジェクト）は、国立情報学研究所（NII）などが2011年から2016年まで実施した、東京大学の入試問題を解くAIシステムの開発プロジェクトです。</p>
+        <ul>
+          <li>目標：東大入試の全科目で偏差値60以上を達成すること</li>
+          <li>特徴：自然言語処理、画像認識、知識処理、推論などの技術を統合</li>
+          <li>成果：センター試験模試で偏差値57.8を達成。東大二次試験相当では数学で偏差値50を超える成績</li>
+        </ul>
+        <p>東ロボくんは従来の知識ベース手法と現代の機械学習手法を組み合わせたアプローチを採用し、特に数学や物理の問題解決には論理的推論と知識表現が重要な役割を果たしました。</p>
+      </div>
+    </section>
+
+    <!-- 現代への応用 セクション -->
+    <section class="section animate" id="modern-applications">
+      <h2 class="section-title">
+        <i class="fas fa-laptop-code section-icon"></i>現代への応用
+      </h2>
+      
+      <p>伝統的なエキスパートシステムは現代のAIにおいてもなお重要な役割を果たしており、また新しい技術と融合することで進化し続けています。</p>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-search"></i>知識表現の現代的応用
+        </h3>
+        <p>現代における知識表現の主な応用分野：</p>
+        <ul>
+          <li><span class="keyword-marker">質問応答システム（Question-Answering）</span>：Googleの知識グラフ、AppleのSiri、Amazon Alexaなど</li>
+          <li><span class="keyword-marker">セマンティックWeb</span>：リンクトデータ（Linked Data）、RDF、OWLを活用したウェブの知識構造化</li>
+          <li><span class="keyword-marker">ナレッジグラフ</span>：実体間の関係を表現する大規模グラフデータベース</li>
+          <li><span class="keyword-marker">オントロジー工学</span>：医学（SNOMED CT）、生物学（Gene Ontology）などの分野別知識体系</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-robot"></i>エキスパートシステムの現代的進化
+        </h3>
+        <p>現代のエキスパートシステムは、従来の手法と新しいAI技術を融合して進化しています：</p>
+        <ul>
+          <li><strong>ハイブリッドシステム</strong>：ルールベースと機械学習の組み合わせ</li>
+          <li><strong>ファジーエキスパートシステム</strong>：ファジー論理を用いた不確実性の取り扱い</li>
+          <li><strong>説明可能AI（XAI）</strong>：ディープラーニングの判断を説明する機構</li>
+          <li><strong>LLMとの連携</strong>：大規模言語モデルと知識ベースの組み合わせ</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-industry"></i>応用分野
+        </h3>
+        <p>知識表現とエキスパートシステムの主な現代的応用分野：</p>
+        <ul>
+          <li><strong>医療診断支援</strong>：臨床意思決定支援システム（CDSS）</li>
+          <li><strong>金融</strong>：与信評価、不正検出、ポートフォリオ管理</li>
+          <li><strong>法律</strong>：法令遵守チェック、契約書分析</li>
+          <li><strong>製造業</strong>：異常検知、予知保全</li>
+          <li><strong>カスタマーサポート</strong>：インテリジェントチャットボット</li>
+          <li><strong>教育</strong>：インテリジェント・チュータリング・システム</li>
+        </ul>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-laptop"></i>データマイニングとウェブマイニング
+        </h3>
+        <p><span class="keyword-marker">データマイニング</span>は大量のデータから有用なパターンや知識を抽出する技術です。<span class="keyword-marker">ウェブマイニング</span>はWeb上のデータを対象としたデータマイニングの一種です。これらは現代の知識獲得の重要な手段となっています。</p>
+        
+        <ul>
+          <li>テキストマイニング：文書から知識やパターンを抽出</li>
+          <li>Webコンテンツマイニング：Webページの内容から情報抽出</li>
+          <li>Web構造マイニング：Webのリンク構造から関係性を分析</li>
+          <li>Webユーザビリティマイニング：ユーザーのWeb行動パターンを分析</li>
+        </ul>
+        
+        <div class="note-box">
+          <p>これらの技術は、従来の人手による知識獲得の限界（知識獲得のボトルネック）を克服する一助となっています。</p>
+        </div>
+      </div>
+      
+      <div class="concept-box">
+        <h3 class="concept-title">
+          <i class="fas fa-comments"></i>対話システムとインタビューシステム
+        </h3>
+        <p><span class="keyword-marker">インタビューシステム</span>は、ユーザーとの対話を通じて情報を収集・整理するシステムです。現代では自然言語処理の進歩により、より高度な対話が可能になっています。</p>
+        
+        <ul>
+          <li>医療問診システム：患者から症状を効率的に聞き取り</li>
+          <li>顧客調査システム：ユーザー体験データの収集</li>
+          <li>知識獲得インタビュー：専門家からの知識抽出を支援</li>
+          <li>就職面接練習システム：模擬面接と評価を提供</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <h3>知識表現とLLMの関係</h3>
+        <p>最新の<span class="keyword-marker">大規模言語モデル（LLM）</span>は、従来の知識表現と異なるアプローチで「知識」を扱いますが、両者には相補的な関係があります：</p>
+        <ul>
+          <li>LLMは統計的パターンとして暗黙的に知識を表現するのに対し、従来の知識表現は明示的で解釈可能</li>
+          <li>LLMは柔軟で広範囲な知識を持つが精度保証が難しく、知識表現は厳密だが範囲が限定的</li>
+          <li>現代の研究では、LLMと従来の知識表現を組み合わせる「ニューロシンボリックAI」が注目されている</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- キーワード一覧 セクション -->
+    <section class="section animate" id="keyword-list">
+      <h2 class="section-title">
+        <i class="fas fa-key section-icon"></i>キーワード一覧
+      </h2>
+      
+      <p>G検定シラバスで取り上げられている重要キーワードをまとめました。</p>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>キーワード</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cycプロジェクト (Cyc Project)</td>
+              <td>人間の常識をオントロジーとして大規模に表現するプロジェクト。1984年に開始され、数十万の概念と数百万の事実を含む知識ベースを構築</td>
+            </tr>
+            <tr>
+              <td>DENDRAL (DENDRAL)</td>
+              <td>1965年にスタンフォード大学で開発された初期のエキスパートシステム。質量分析データから分子構造を推定</td>
+            </tr>
+            <tr>
+              <td>is-aの関係 (is-a Relationship)</td>
+              <td>意味ネットワークにおける「〜は〜の一種である」という分類関係。例：「犬は動物である」</td>
+            </tr>
+            <tr>
+              <td>has-aの関係 (has-a Relationship)</td>
+              <td>意味ネットワークにおける「〜は〜を持つ」という所有関係。例：「犬は尻尾を持つ」</td>
+            </tr>
+            <tr>
+              <td>part-ofの関係 (part-of Relationship)</td>
+              <td>意味ネットワークにおける「〜は〜の一部である」という構成関係。例：「毛は尻尾の一部である」</td>
+            </tr>
+            <tr>
+              <td>Question-Answering (質問応答)</td>
+              <td>自然言語での質問に対して適切な回答を生成するシステム。現代ではWatsonやBert、GPTなどのモデルで実現</td>
+            </tr>
+            <tr>
+              <td>意味ネットワーク (Semantic Network)</td>
+              <td>概念や実体をノードとし、それらの関係を有向エッジで表現するグラフ構造の知識表現手法</td>
+            </tr>
+            <tr>
+              <td>イライザ (ELIZA)</td>
+              <td>1966年にMITのJoseph Weizenbaumによって開発された初期の会話システム。精神科医を模倣</td>
+            </tr>
+            <tr>
+              <td>インタビューシステム (Interview System)</td>
+              <td>ユーザーとの対話を通じて情報を収集・整理するシステム。知識獲得や問診などに利用</td>
+            </tr>
+            <tr>
+              <td>ウェブマイニング (Web Mining)</td>
+              <td>Web上の大量のデータから有用なパターンや知識を抽出する技術</td>
+            </tr>
+            <tr>
+              <td>オントロジー (Ontology)</td>
+              <td>特定の領域における概念と、それらの間の関係を形式的に記述する知識表現の枠組み</td>
+            </tr>
+            <tr>
+              <td>セマンティックWeb (Semantic Web)</td>
+              <td>Webページの内容を機械が理解できるように構造化・標準化する技術フレームワーク</td>
+            </tr>
+            <tr>
+              <td>データマイニング (Data Mining)</td>
+              <td>大量のデータから有用なパターンや知識を発見・抽出する技術</td>
+            </tr>
+            <tr>
+              <td>東ロボくん (Todai Robot Project)</td>
+              <td>国立情報学研究所が主導した、東京大学の入試問題を解くAIシステムの開発プロジェクト（2011-2016）</td>
+            </tr>
+            <tr>
+              <td>マイシン (MYCIN)</td>
+              <td>1970年代にStanford大学で開発された医療診断システム。血液感染症の診断と抗生物質の推奨を行った</td>
+            </tr>
+            <tr>
+              <td>ワトソン (Watson)</td>
+              <td>IBMが開発した質問応答システム。2011年のクイズ番組「Jeopardy!」で人間のチャンピオンに勝利</td>
+            </tr>
+            <tr>
+              <td>知識表現 (Knowledge Representation)</td>
+              <td>人間の知識をコンピュータが処理できる形式に変換し、推論や問題解決に活用する技術や研究分野</td>
+            </tr>
+            <tr>
+              <td>エキスパートシステム (Expert System)</td>
+              <td>特定の専門分野における人間の専門家の知識と推論能力をモデル化した人工知能システム</td>
+            </tr>
+            <tr>
+              <td>知識ベース (Knowledge Base)</td>
+              <td>専門家の知識を格納するデータベース。ルール、事実、ヒューリスティックなどを含む</td>
+            </tr>
+            <tr>
+              <td>推論エンジン (Inference Engine)</td>
+              <td>知識ベースのルールと事実を用いて推論を行うコンポーネント。前向き連鎖や後ろ向き連鎖などの戦略を採用</td>
+            </tr>
+            <tr>
+              <td>知識獲得のボトルネック (Knowledge Acquisition Bottleneck)</td>
+              <td>専門家の知識をコンピュータが処理可能な形式に変換する過程の難しさを指す問題</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 重要ポイント セクション -->
+    <section class="section animate" id="key-insights">
+      <h2 class="section-title">
+        <i class="fas fa-lightbulb section-icon"></i>重要ポイント
+      </h2>
+      
+      <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem;">
+        <!-- ポイント1 -->
+        <div style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--cyan);">
+          <h3 style="color: var(--key); margin-bottom: 1rem; display: flex; align-items: center;">
+            <i class="fas fa-check-circle" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+            <span>知識表現の特性と役割</span>
+          </h3>
+          <p>知識表現は単なる「データの保存方法」ではなく、「知識をどう構造化し、どう関連づけ、どのように推論に利用するか」という包括的な枠組みである。適切な知識表現により、AIシステムの問題解決能力が大きく向上する。</p>
+        </div>
+        
+        <!-- ポイント2 -->
+        <div style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--magenta);">
+          <h3 style="color: var(--key); margin-bottom: 1rem; display: flex; align-items: center;">
+            <i class="fas fa-check-circle" style="color: var(--magenta); margin-right: 0.5rem;"></i>
+            <span>エキスパートシステムの構造と特徴</span>
+          </h3>
+          <p>エキスパートシステムは「知識ベース」「推論エンジン」「説明機構」「ユーザーインターフェース」から構成される。最大の特徴は「説明可能性」にあり、判断の根拠を明示できる点が現代のXAI（説明可能AI）の先駆けとなっている。</p>
+        </div>
+        
+        <!-- ポイント3 -->
+        <div style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--yellow);">
+          <h3 style="color: var(--key); margin-bottom: 1rem; display: flex; align-items: center;">
+            <i class="fas fa-check-circle" style="color: var(--yellow); margin-right: 0.5rem;"></i>
+            <span>代表的エキスパートシステム</span>
+          </h3>
+          <p>DENDRAL（化学構造分析）やMYCIN（医療診断）、ELIZA（対話）など、各分野で先駆的なエキスパートシステムが開発された。これらのシステムは、特定領域の専門知識をルール化し、人間の専門家に近い判断を行うことができた。</p>
+        </div>
+        
+        <!-- ポイント4 -->
+        <div style="flex: 1; min-width: 300px; background-color: var(--white); border-radius: 10px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--cyan);">
+          <h3 style="color: var(--key); margin-bottom: 1rem; display: flex; align-items: center;">
+            <i class="fas fa-check-circle" style="color: var(--cyan); margin-right: 0.5rem;"></i>
+            <span>知識獲得のボトルネック</span>
+          </h3>
+          <p>エキスパートシステムの最大の課題は「知識獲得のボトルネック」と呼ばれる、専門家の知識を形式化する困難さである。この問題はAIの発展において重要な制約となり、「AIの冬」を招いた一因ともなった。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- まとめ セクション -->
+    <section class="section animate" id="take-home">
+      <h2 class="section-title">
+        <i class="fas fa-check-circle section-icon"></i>まとめ
+      </h2>
+      
+      <div style="background: linear-gradient(135deg, rgba(255, 64, 160, 0.1) 0%, rgba(0, 216, 232, 0.1) 100%); padding: 2rem; border-radius: 10px; text-align: center; max-width: 800px; margin: 0 auto;">
+        <i class="fas fa-quote-left" style="font-size: 2rem; color: var(--magenta); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+        
+        <p style="font-size: 1.2rem; line-height: 1.8; margin-bottom: 1.5rem;">
+          知識表現とエキスパートシステムは、人間の専門知識をコンピュータが扱える形に変換し活用する人工知能の重要な分野です。意味ネットワークやオントロジーなどの知識表現手法と、それを活用するMYCINやDENDRALなどのエキスパートシステムは、現代のAI発展に大きく貢献しました。これらの技術は「説明可能性」という点で優れており、現代のセマンティックウェブや質問応答システムなどにも影響を与え続けています。
+        </p>
+        
+        <i class="fas fa-quote-right" style="font-size: 2rem; color: var(--cyan); opacity: 0.5; display: block; margin-top: 1rem;"></i>
+      </div>
+      
+      <div class="handwritten-box" style="margin-top: 2rem;">
+        <h3>G検定の勉強ポイント</h3>
+        <p>知識表現とエキスパートシステムに関して、特に以下の点を押さえておきましょう：</p>
+        <ul>
+          <li>知識表現の主要手法（意味ネットワーク、オントロジーなど）とその特徴</li>
+          <li>is-a、has-a、part-ofの関係の意味と違い</li>
+          <li>代表的なエキスパートシステム（MYCIN、DENDRAL、ELIZAなど）の用途と特徴</li>
+          <li>エキスパートシステムの4つの主要コンポーネントとその役割</li>
+          <li>知識獲得のボトルネック問題とその影響</li>
+          <li>現代の応用例（セマンティックWeb、質問応答システムなど）</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- フッター -->
+    <div class="footer">
+      <p>1-2-2 知識表現とエキスパートシステム | G検定学習ノート</p>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem;">Created with 💻 Claude (content) & DALL-E (illustrations) | Updated: 2024年4月</p>
+    </div>
+
+    <!-- スクロールトップボタン -->
+    <div class="scroll-top-btn" id="scrollTopBtn">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+  </div>
+
+  <script>
+    // セクションのアニメーション
+    document.addEventListener('DOMContentLoaded', function() {
+      const sections = document.querySelectorAll('.section');
+      
+      function checkVisibility() {
+        sections.forEach(section => {
+          const rect = section.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          
+          if (rect.top < windowHeight * 0.9) {
+            section.classList.add('animate');
+          }
+        });
+      }
+      
+      // 初期チェック
+      checkVisibility();
+      
+      // スクロール時にチェック
+      window.addEventListener('scroll', checkVisibility);
+      
+      // アクティブなメニュー項目のハイライト
+      const menuItems = document.querySelectorAll('.menu-item');
+      
+      function highlightActiveSection() {
+        const scrollPosition = window.scrollY;
+        
+        sections.forEach((section, index) => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionBottom = sectionTop + section.offsetHeight;
+          
+          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            menuItems.forEach(item => item.classList.remove('active'));
+            menuItems[index].classList.add('active');
+          }
+        });
+      }
+      
+      // スクロール時にアクティブセクションをハイライト
+      window.addEventListener('scroll', highlightActiveSection);
+      
+      // スクロールトップボタン
+      const scrollTopBtn = document.getElementById('scrollTopBtn');
+      
+      function toggleScrollTopBtn() {
+        if (window.scrollY > 500) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+      }
+      
+      window.addEventListener('scroll', toggleScrollTopBtn);
+      
+      scrollTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    });
+    
+    // セクションへのスムーズスクロール
+    function scrollToSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      window.scrollTo({
+        top: section.offsetTop - 20,
+        behavior: 'smooth'
+      });
+    }
+  </script>
+</body>
+</html> 

@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活性化関数 - G検定学習ノート</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;      /* 明るいシアン */
+      --magenta: #FF40A0;   /* 明るいマゼンタ */
+      --yellow: #FFE600;    /* レモンイエロー */
+      --key: #181818;       /* テキスト用ブラック */
+      --dark-gray: #404040; /* 補助テキスト */
+      --white: #FFFFFF;     /* 背景用ホワイト */
+      
+      /* フォント設定 */
+      --header-font: 'M PLUS Rounded 1c', sans-serif;
+      --body-font: 'Zen Maru Gothic', sans-serif;
+      --accent-font: 'Klee One', cursive;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--body-font);
+      color: var(--key);
+      background-color: var(--white);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* サイドバー */
+    .sidebar {
+      width: 22%;
+      position: fixed;
+      height: 100vh;
+      background-color: var(--yellow);
+      padding: 2rem 1rem;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
+    
+    /* Webkit用スクロールバーカスタマイズ（Chrome, Safari） */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .sidebar-title {
+      font-family: var(--header-font);
+      font-size: 1.3rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--key);
+      font-weight: 700;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.8rem;
+    }
+    
+    .nav-link {
+      display: block;
+      padding: 0.8rem;
+      color: var(--key);
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-link i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* メインコンテンツ */
+    main {
+      margin-left: 22%;
+      width: 78%;
+      padding: 2rem;
+    }
+    
+    section {
+      margin-bottom: 4rem;
+      padding: 2rem;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: var(--header-font);
+      margin-bottom: 1.5rem;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      border-bottom: 3px solid var(--cyan);
+      padding-bottom: 0.8rem;
+      display: inline-block;
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      color: var(--key);
+      position: relative;
+      padding-left: 1.8rem;
+    }
+    
+    h2:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.2rem;
+      height: 1.2rem;
+      background-color: var(--cyan);
+      border-radius: 50%;
+    }
+    
+    h3 {
+      font-size: 1.4rem;
+      color: var(--key);
+      border-left: 4px solid var(--magenta);
+      padding-left: 1rem;
+    }
+    
+    p {
+      margin-bottom: 1.2rem;
+      font-size: 1.05rem;
+    }
+    
+    /* 追加コンポーネントスタイル */
+    .header-section {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem 2rem;
+      background-color: rgba(255, 230, 0, 0.1);
+      border-radius: 15px;
+      position: relative;
+    }
+    
+    .header-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top right, rgba(0, 216, 232, 0.2), transparent 70%),
+                  radial-gradient(circle at bottom left, rgba(255, 64, 160, 0.2), transparent 70%);
+      border-radius: 15px;
+      z-index: -1;
+    }
+    
+    .header-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--key);
+      text-shadow: 2px 2px 0 rgba(255, 230, 0, 0.3);
+    }
+    
+    .header-subtitle {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      color: var(--dark-gray);
+      font-family: var(--accent-font);
+    }
+    
+    .summary-list {
+      text-align: left;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .summary-list ul {
+      list-style-type: none;
+      list-style-position: inside;
+      margin-left: 1rem;
+    }
+    
+    .summary-list li {
+      margin-bottom: 0.8rem;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    
+    .summary-list li::before {
+      content: "•";
+      color: var(--magenta);
+      font-size: 1.5rem;
+      position: absolute;
+      left: 0;
+      top: -0.2rem;
+    }
+    
+    /* コンセプトボックス */
+    .concept-box {
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background-color: rgba(0, 216, 232, 0.08);
+      border-radius: 10px;
+      border: 2px dashed var(--cyan);
+      position: relative;
+    }
+    
+    .concept-title {
+      position: absolute;
+      top: -0.8rem;
+      left: 1rem;
+      padding: 0 0.8rem;
+      background-color: var(--white);
+      color: var(--cyan);
+      font-weight: 700;
+      font-family: var(--accent-font);
+      font-size: 1.1rem;
+    }
+    
+    /* 数式表示 */
+    .formula-container {
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      overflow-x: auto;
+    }
+    
+    .formula {
+      font-family: 'Courier New', monospace;
+      font-size: 1.2rem;
+      padding: 0.8rem;
+      display: inline-block;
+      margin: 0 auto;
+    }
+    
+    /* 重要ポイント */
+    .important-note {
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      background-color: rgba(255, 64, 160, 0.08);
+      border-left: 4px solid var(--magenta);
+      border-radius: 0 10px 10px 0;
+      position: relative;
+    }
+    
+    .important-note::before {
+      content: "📌";
+      position: absolute;
+      top: -0.6rem;
+      left: -0.6rem;
+      font-size: 1.5rem;
+    }
+    
+    /* キーワード強調 */
+    .keyword {
+      font-weight: 700;
+      color: var(--magenta);
+      background: linear-gradient(transparent 60%, rgba(255, 64, 160, 0.2) 40%);
+      padding: 0 0.2rem;
+    }
+    
+    /* 関数グラフ表示用スタイル */
+    .function-graph {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    
+    /* 通常のリスト設定 */
+    ul {
+      list-style-type: none;
+    }
+    
+    /* 通常のリストアイテム設定 */
+    ul li {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.8rem;
+    }
+    
+    /* 通常のリストマーカー設定 */
+    ul li::before {
+      content: "•";
+      color: var(--magenta);
+      font-size: 1.5rem;
+      position: absolute;
+      left: 0;
+      top: -0.2rem;
+    }
+    
+    /* オリジナルのスタイルを維持するために、特定のリストはこの設定から除外 */
+    .nav-menu, .nav-menu li {
+      padding-left: 0;
+    }
+    
+    .nav-menu li::before {
+      content: none;
+    }
+    
+    /* 番号付きリストは通常通り表示 */
+    ol {
+      list-style-type: decimal;
+      padding-left: 1.5rem;
+    }
+    
+    ol li {
+      padding-left: 0.5rem;
+    }
+    
+    ol li::before {
+      content: none;
+    }
+    
+    .graph-container {
+      width: 48%;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .graph-image {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .graph-formula {
+      margin-top: 1rem;
+      font-family: 'Courier New', monospace;
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 0.5rem;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    
+    /* 比較表 */
+    .comparison-table {
+      width: 100%;
+      margin: 2rem 0;
+      border-collapse: collapse;
+    }
+    
+    .comparison-table th {
+      background-color: var(--yellow);
+      color: var(--key);
+      padding: 1rem;
+      text-align: left;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .comparison-table td {
+      padding: 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      vertical-align: top;
+    }
+    
+    .comparison-table tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    /* Key Insights */
+    .key-insights {
+      margin: 3rem 0;
+      padding: 2rem;
+      background-color: rgba(0, 216, 232, 0.08);
+      border-radius: 15px;
+    }
+    
+    .insights-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+      color: var(--key);
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .insights-title::after {
+      content: "";
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      border-radius: 3px;
+    }
+    
+    .insight-item {
+      background-color: var(--white);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    .insight-number {
+      width: 2rem;
+      height: 2rem;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .insight-content {
+      flex-grow: 1;
+    }
+    
+    .insight-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+      font-size: 1.2rem;
+    }
+    
+    /* Take Home Message */
+    .take-home {
+      text-align: center;
+      margin: 3rem 0;
+      padding: 2rem;
+      background-color: rgba(255, 230, 0, 0.1);
+      border-radius: 15px;
+    }
+    
+    .take-home-title {
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+      color: var(--key);
+    }
+    
+    .message-box {
+      background-color: var(--white);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      display: inline-block;
+      position: relative;
+      max-width: 80%;
+    }
+    
+    .message-box::before, .message-box::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      z-index: -1;
+    }
+    
+    .message-box::before {
+      top: 3px;
+      left: 3px;
+      background-color: rgba(0, 216, 232, 0.3);
+    }
+    
+    .message-box::after {
+      top: 6px;
+      left: 6px;
+      background-color: rgba(255, 64, 160, 0.2);
+    }
+    
+    .message-content {
+      font-family: var(--accent-font);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--key);
+    }
+    
+    /* 画像コンテナのスタイル */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 50px;
+      height: 50px;
+      background-color: var(--cyan);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1000;
+    }
+    
+    .scroll-top.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .scroll-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <aside class="sidebar">
+    <h2 class="sidebar-title">1-4 ディープラーニングの概要</h2>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="#header" class="nav-link">
+          <i class="fa-solid fa-bolt"></i>活性化関数の概要
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#activation-role" class="nav-link">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>活性化関数の役割
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#sigmoid" class="nav-link">
+          <i class="fa-solid fa-wave-square"></i>シグモイド関数
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#tanh" class="nav-link">
+          <i class="fa-solid fa-water"></i>tanh関数
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#relu" class="nav-link">
+          <i class="fa-solid fa-chart-line"></i>ReLU関数
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#leaky-relu" class="nav-link">
+          <i class="fa-solid fa-chart-line"></i>Leaky ReLU関数
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#softmax" class="nav-link">
+          <i class="fa-solid fa-distribute-spacing-horizontal"></i>ソフトマックス関数
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#vanishing-gradient" class="nav-link">
+          <i class="fa-solid fa-triangle-exclamation"></i>勾配消失問題
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#usage" class="nav-link">
+          <i class="fa-solid fa-code-branch"></i>活性化関数の使い分け
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#key-insights" class="nav-link">
+          <i class="fa-solid fa-lightbulb"></i>Key Insights
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#take-home" class="nav-link">
+          <i class="fa-solid fa-key"></i>Take Home Message
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main>
+    <!-- ヘッダーセクション -->
+    <section id="header" class="header-section">
+      <h1 class="header-title">活性化関数</h1>
+      <p class="header-subtitle">ディープラーニングにおける非線形性の源泉</p>
+      <div class="summary-list">
+        <ul>
+          <li>活性化関数は、ニューラルネットワークに<span class="keyword">非線形性</span>を導入する重要な要素</li>
+          <li>代表的な活性化関数にはシグモイド関数、tanh関数、ReLU関数、Leaky ReLU関数、ソフトマックス関数がある</li>
+          <li>活性化関数の選択は、解決するタスクや学習効率・精度に大きく影響する</li>
+          <li>深層ニューラルネットワークでは勾配消失問題を回避するための活性化関数選択が重要</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 活性化関数の概要 -->
+    <section id="intro">
+      <h2><i class="fa-solid fa-bolt"></i> 活性化関数の概要</h2>
+      <p>
+        <span class="keyword">活性化関数</span>とは、ニューラルネットワークの各ニューロンの出力を決定する関数です。ニューロンへの入力信号の総和（加重和）を受け取り、その値を変換して出力する役割を持っています。
+      </p>
+      
+      <div class="concept-box">
+        <span class="concept-title">活性化関数の位置づけ</span>
+        <p>ニューラルネットワークの処理フローの中で、活性化関数は以下の位置づけにあります：</p>
+        <ol>
+          <li>入力層や隠れ層のニューロンが、前の層からの入力を受け取る</li>
+          <li>各入力と重みの積の総和（加重和）を計算する</li>
+          <li><strong>活性化関数</strong>によってその加重和を変換する</li>
+          <li>変換された値を次の層のニューロンへ出力する</li>
+        </ol>
+      </div>
+      
+
+      <p>
+        活性化関数がないニューラルネットワーク、つまり入力から出力までの変換が全て線形関数のみで構成されている場合、どれだけ層を深くしても結局は一つの線形関数として表現できてしまうため、複雑な問題を解決することができません。活性化関数は非線形性を導入することで、ネットワークに表現力を与える重要な要素なのです。
+      </p>
+    </section>
+
+    <!-- 活性化関数の役割 -->
+    <section id="activation-role">
+      <h2><i class="fa-solid fa-wand-magic-sparkles"></i> 活性化関数の役割</h2>
+      
+      <p>
+        活性化関数はニューラルネットワークにおいて、以下のような重要な役割を持っています。
+      </p>
+      
+      <div class="concept-box">
+        <span class="concept-title">活性化関数の主な役割</span>
+        <ol>
+          <li><strong>非線形性の導入</strong>：複雑なパターンを学習するための非線形変換を提供</li>
+          <li><strong>出力範囲の制御</strong>：出力値を特定の範囲に抑える（例：シグモイド関数は0〜1の範囲）</li>
+          <li><strong>勾配情報の伝播</strong>：誤差逆伝播法による学習を可能にする</li>
+          <li><strong>表現力の向上</strong>：層を重ねることで複雑な関数を近似できるようにする</li>
+        </ol>
+      </div>
+      
+      <div class="important-note">
+        <p><strong>重要ポイント：</strong></p>
+        <p>ディープラーニングにおいて、活性化関数の選択は<span class="keyword">勾配消失問題</span>や学習効率に大きく影響します。特に深いネットワークでは、勾配が消失しにくいReLUやその派生関数が多く使われています。</p>
+      </div>
+      
+      <h3>非線形性の導入</h3>
+      <p>
+        活性化関数の最も重要な役割は、ニューラルネットワークに<span class="keyword">非線形性</span>を導入することです。活性化関数が線形関数（例えば f(x) = ax + b のような形式）の場合、どれだけ層を重ねても、ネットワーク全体としては単なる一つの線形関数になってしまいます。
+      </p>
+      
+      <div class="concept-box">
+        <span class="concept-title">線形関数の問題点</span>
+        <p>
+          線形関数（f(x) = ax + b）だけでは、複数層を重ねる意味がなくなります：<br>
+          例えば2層の線形ネットワークを考えると：<br>
+          f<sub>1</sub>(x) = a<sub>1</sub>x + b<sub>1</sub><br>
+          f<sub>2</sub>(f<sub>1</sub>(x)) = a<sub>2</sub>(a<sub>1</sub>x + b<sub>1</sub>) + b<sub>2</sub> = (a<sub>2</sub>a<sub>1</sub>)x + (a<sub>2</sub>b<sub>1</sub> + b<sub>2</sub>)<br>
+          これは結局、別の係数を持つ一つの線形関数と等価です。
+        </p>
+      </div>
+      
+      <p>
+        非線形の活性化関数を使用することで、ニューラルネットワークはより複雑な関数の近似が可能になり、画像認識や自然言語処理といった複雑なタスクを解決する能力を獲得します。
+      </p>
+      
+      <h3>出力値の範囲の制御</h3>
+      <p>
+        多くの活性化関数は出力値の範囲を特定の区間に制限します。例えば、<span class="keyword">シグモイド関数</span>は出力を0から1の範囲に、<span class="keyword">tanh関数</span>は-1から1の範囲に制限します。この特性は、出力層で確率を表現したい場合や、入力値を正規化したい場合に有用です。
+      </p>
+      
+      <h3>勾配情報の伝播</h3>
+      <p>
+        誤差逆伝播法（バックプロパゲーション）では、出力層から入力層へと誤差勾配を伝播させます。活性化関数は微分可能であることが重要で、その導関数が勾配の計算に使用されます。深いネットワークでは、勾配が消失（非常に小さくなる）または爆発（非常に大きくなる）する問題が発生することがあり、適切な活性化関数の選択がこれらの問題の緩和に役立ちます。
+      </p>
+    </section>
+
+    <!-- シグモイド関数 -->
+    <section id="sigmoid">
+      <h2><i class="fa-solid fa-wave-square"></i> シグモイド関数</h2>
+      
+      <p>
+        <span class="keyword">シグモイド関数 (Sigmoid Function)</span>は、ニューラルネットワークで最も古くから使われてきた活性化関数の一つです。S字型のカーブを描き、任意の実数を0から1の範囲に変換します。
+      </p>
+      
+      <div class="formula-container">
+        <div class="formula">
+          σ(x) = 1 / (1 + e<sup>-x</sup>)
+        </div>
+      </div>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-2_01.png" alt="シグモイド関数のグラフ - 出力範囲は0から1に制限される"> 
+        <figcaption>シグモイド関数のグラフ - 出力範囲は0から1に制限される</figcaption>
+      </div>
+      
+      <div class="concept-box">
+        <span class="concept-title">シグモイド関数の特徴</span>
+        <ul>
+          <li><strong>出力範囲</strong>：0から1の間（確率として解釈可能）</li>
+          <li><strong>微分可能</strong>：滑らかな曲線で、どの点でも微分可能</li>
+          <li><strong>勾配</strong>：x=0付近で最大（0.25）、x値が大きく（または小さく）なるにつれて勾配が小さくなる</li>
+          <li><strong>対称性</strong>：σ(-x) = 1 - σ(x)</li>
+        </ul>
+      </div>
+      
+      <h3>メリット</h3>
+      <ul>
+        <li>出力が0〜1の範囲に収まるため、確率を表現するのに適している</li>
+        <li>滑らかで微分可能な関数であり、理論的な扱いやすさがある</li>
+        <li>バイナリ分類問題の出力層で使われることが多い</li>
+      </ul>
+      
+      <h3>デメリット</h3>
+      <ul>
+        <li><span class="keyword">勾配消失問題</span>：入力値が大きいまたは小さい領域では勾配が非常に小さくなり、深いネットワークでの学習が困難になる</li>
+        <li>出力が常に正（0〜1の範囲）であるため、出力の平均が0にならず、次の層への入力に偏りが生じる</li>
+        <li>指数関数の計算コストが比較的高い</li>
+      </ul>
+      
+      <div class="important-note">
+        <p><strong>勾配消失問題とシグモイド関数：</strong></p>
+        <p>シグモイド関数の導関数は σ'(x) = σ(x)(1 - σ(x)) です。この値は最大でも0.25（x=0のとき）であり、|x|が大きくなると急速に0に近づきます。深いネットワークでは、この小さな勾配が層を経るごとに掛け合わされるため、入力層に近い層では勾配がほぼ0になりやすく、学習が進まなくなります。これが<span class="keyword">勾配消失問題 (Vanishing Gradient Problem)</span>です。</p>
+      </div>
+    </section>
+
+    <!-- tanh関数 -->
+    <section id="tanh">
+      <h2><i class="fa-solid fa-water"></i> tanh関数</h2>
+      
+      <p>
+        <span class="keyword">tanh関数 (双曲線正接関数, Hyperbolic Tangent Function)</span>は、シグモイド関数と形状が似ていますが、出力範囲が-1から1の間に正規化される活性化関数です。
+      </p>
+      
+      <div class="formula-container">
+        <div class="formula">
+          tanh(x) = (e<sup>x</sup> - e<sup>-x</sup>) / (e<sup>x</sup> + e<sup>-x</sup>) = 2σ(2x) - 1
+        </div>
+      </div>
+      
+      <div class="image-container">
+          <img src="img/Gimage_1-4-2_02.png" alt="tanh関数のグラフ">
+        <figcaption>tanh関数のグラフ - 出力範囲は-1から1に制限される</figcaption>
+      </div>
+      
+      <div class="concept-box">
+        <span class="concept-title">tanh関数の特徴</span>
+        <ul>
+          <li><strong>出力範囲</strong>：-1から1の間</li>
+          <li><strong>微分可能</strong>：全域で微分可能で滑らかな曲線</li>
+          <li><strong>勾配</strong>：x=0で最大（1.0）、x値の絶対値が大きくなるにつれて勾配が小さくなる</li>
+          <li><strong>対称性</strong>：原点対称（tanh(-x) = -tanh(x)）</li>
+          <li><strong>シグモイド関数との関係</strong>：tanh(x) = 2σ(2x) - 1</li>
+        </ul>
+      </div>
+      
+      <h3>メリット</h3>
+      <ul>
+        <li>出力の平均が0に近くなるため、次の層のニューロンへの入力のバイアスが小さくなり、学習が効率化される</li>
+        <li>勾配はx=0で1.0であり、シグモイド関数の0.25よりも大きいため、シグモイド関数よりも勾配消失が起きにくい</li>
+        <li>入力が負の場合は負の出力を、正の場合は正の出力を返すため、データの符号情報を保持できる</li>
+      </ul>
+      
+      <h3>デメリット</h3>
+      <ul>
+        <li>依然として<span class="keyword">勾配消失問題</span>が発生する可能性がある（特に深いネットワークの場合）</li>
+        <li>シグモイド関数と同様に、指数関数の計算コストが高い</li>
+        <li>ReLU関数などの現代的な活性化関数と比べると、学習速度が遅くなる傾向がある</li>
+      </ul>
+      
+      <div class="important-note">
+        <p><strong>tanh関数の利用シーン：</strong></p>
+        <p>現代のディープラーニングでは隠れ層の活性化関数としてはReLU系の関数が主流ですが、tanhはRNNやLSTMなどの再帰型ニューラルネットワークで依然として広く使用されています。特に、値を[-1,1]の範囲に正規化したい場合や、入力の正負の情報を保持したい場合に有用です。</p>
+      </div>
+    </section>
+
+    <!-- ReLU関数 -->
+    <section id="relu">
+      <h2><i class="fa-solid fa-chart-line"></i> ReLU関数</h2>
+      
+      <p>
+        <span class="keyword">ReLU関数 (Rectified Linear Unit, 正規化線形関数)</span>は、現代のディープラーニングで最も広く使われている活性化関数の一つです。非常にシンプルな形状で、負の入力を0に、正の入力はそのまま出力します。
+      </p>
+      
+      <div class="formula-container">
+        <div class="formula">
+          ReLU(x) = max(0, x)
+        </div>
+      </div>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-2_03.png" alt="ReLU関数のグラフ">
+        <figcaption>ReLU関数のグラフ - 入力が負の場合は0、正の場合はそのまま出力</figcaption>
+      </div>
+      
+      <div class="concept-box">
+        <span class="concept-title">ReLU関数の特徴</span>
+        <ul>
+          <li><strong>出力範囲</strong>：0以上の任意の正の値</li>
+          <li><strong>微分</strong>：x > 0 の領域では導関数が1、x < 0 では0（x = 0では微分不可能）</li>
+          <li><strong>スパース性</strong>：負の入力に対しては活性化しない（出力が0になる）</li>
+          <li><strong>計算の単純さ</strong>：単純な閾値処理で実装可能で計算コストが低い</li>
+        </ul>
+      </div>
+      
+      <h3>メリット</h3>
+      <ul>
+        <li><strong>勾配消失問題の軽減</strong>：正の入力に対する勾配が常に1のため、深いネットワークでも勾配が消失しにくい</li>
+        <li><strong>計算効率</strong>：シグモイドやtanhと比べて計算が非常に簡単で高速</li>
+        <li><strong>スパース性</strong>：多くのニューロンが活性化しないため、モデルがスパースになり過学習を抑制</li>
+        <li><strong>生物学的妥当性</strong>：実際の神経細胞の挙動により近い（閾値を超えると活性化する特性）</li>
+      </ul>
+      
+      <h3>デメリット</h3>
+      <ul>
+        <li><strong>デッドReLU問題</strong>：入力が常に負の領域に入ってしまうと、そのニューロンは常に0を出力し、勾配も0になるため学習が停止する（ニューロンが「死んでしまう」状態）</li>
+        <li><strong>平均が0にならない</strong>：出力が常に非負なので、次の層のニューロンへの入力分布が偏る</li>
+        <li><strong>x = 0での微分不可能性</strong>：理論的な取り扱いが難しくなる場合がある</li>
+      </ul>
+      
+      <div class="important-note">
+        <p><strong>デッドReLU問題の対策：</strong></p>
+        <p>デッドReLU問題に対処するために、いくつかの対策が考えられます：</p>
+        <ul>
+          <li>適切な重み初期化手法を使用する（例：Heの初期化）</li>
+          <li>学習率を小さく設定する</li>
+          <li>バッチ正規化を使用する</li>
+          <li>LeakyReLUなどの改良版ReLUを使用する</li>
+        </ul>
+      </div>
+      
+      <p>
+        ReLU関数は2010年代以降、ディープラーニングの隠れ層の標準的な活性化関数として広く採用されています。この関数の登場と普及が、深層ニューラルネットワークの学習を効率化し、ディープラーニングの成功に大きな貢献をしたと言われています。
+      </p>
+    </section>
+
+    <!-- Leaky ReLU関数 -->
+    <section id="leaky-relu">
+      <h2><i class="fa-solid fa-chart-line"></i> Leaky ReLU関数</h2>
+      
+      <p>
+        <span class="keyword">Leaky ReLU関数 (Leaky Rectified Linear Unit)</span>は、ReLU関数の変種で、負の入力に対しても小さな勾配を持たせることで、デッドReLU問題を解決するために考案された活性化関数です。
+      </p>
+      
+      <div class="formula-container">
+        <div class="formula">
+          Leaky ReLU(x) = max(αx, x), ここで α は小さな正の定数（一般的に 0.01）
+        </div>
+      </div>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-2_04.png" alt="Leaky ReLU関数のグラフ">
+        <figcaption>Leaky ReLU関数のグラフ - 負の入力に対しても小さな勾配を持つ</figcaption>
+      </div>
+      
+      <div class="concept-box">
+        <span class="concept-title">Leaky ReLU関数の特徴</span>
+        <ul>
+          <li><strong>出力範囲</strong>：全実数（ただし負の入力に対しては係数αで減衰）</li>
+          <li><strong>微分</strong>：x > 0 の領域では導関数が1、x < 0 では α（通常は0.01程度）</li>
+          <li><strong>ReLUとの違い</strong>：負の入力に対して0ではなく小さな負の値を出力する</li>
+        </ul>
+      </div>
+      
+      <h3>メリット</h3>
+      <ul>
+        <li><strong>デッドReLU問題の解決</strong>：負の入力に対しても小さな勾配があるため、ニューロンが「死ぬ」のを防ぐ</li>
+        <li><strong>計算効率</strong>：ReLUと同様に計算コストが低い</li>
+        <li><strong>勾配消失問題の軽減</strong>：正の入力に対する勾配は1で、深いネットワークでも勾配が消失しにくい</li>
+      </ul>
+      
+      <h3>デメリット</h3>
+      <ul>
+        <li>αの値をハイパーパラメータとして選択する必要がある</li>
+        <li>ReLUのような完全なスパース性がなくなる</li>
+        <li>場合によっては、通常のReLUと比較して性能向上が限定的な場合もある</li>
+      </ul>
+      
+      <div class="important-note">
+        <p><strong>ReLUの他の派生形：</strong></p>
+        <p>Leaky ReLU以外にも、ReLUの改良版として以下のような活性化関数があります：</p>
+        <ul>
+          <li><strong>Parametric ReLU (PReLU)</strong>：αをパラメータとして学習するLeaky ReLU</li>
+          <li><strong>Exponential Linear Unit (ELU)</strong>：負の入力に対して指数関数的な曲線を持つ</li>
+          <li><strong>Scaled Exponential Linear Unit (SELU)</strong>：自己正規化ニューラルネットワーク用に設計された関数</li>
+          <li><strong>Swish</strong>：x * sigmoid(x) の形で表される、GoogleのBrainチームによって提案された関数</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ソフトマックス関数 -->
+    <section id="softmax">
+      <h2><i class="fa-solid fa-distribute-spacing-horizontal"></i> ソフトマックス関数</h2>
+      
+      <p>
+        <span class="keyword">ソフトマックス関数 (Softmax Function)</span>は、多クラス分類問題の出力層で広く使用される活性化関数です。複数の出力値を確率分布に変換し、すべての出力の合計が1になるようにします。
+      </p>
+      
+      <div class="formula-container">
+        <div class="formula">
+          softmax(z)<sub>i</sub> = e<sup>z<sub>i</sub></sup> / Σ<sub>j</sub> e<sup>z<sub>j</sub></sup>
+        </div>
+      </div>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-2_05.png" alt="ソフトマックス関数のグラフ">
+        <figcaption>ソフトマックス関数 - 複数の入力値を確率分布に変換する</figcaption>
+      </div>
+      
+      <div class="concept-box">
+        <span class="concept-title">ソフトマックス関数の特徴</span>
+        <ul>
+          <li><strong>出力範囲</strong>：各出力は0〜1の範囲で、すべての出力の合計は1になる</li>
+          <li><strong>確率分布</strong>：出力は確率として解釈でき、最も高い値がそのクラスに属する確率として解釈できる</li>
+          <li><strong>指数関数</strong>：元の値の相対的な大きさを強調する効果がある</li>
+          <li><strong>微分可能</strong>：連続かつ微分可能な関数である</li>
+        </ul>
+      </div>
+      
+      <h3>多クラス分類での利用</h3>
+      <p>
+        ソフトマックス関数は、多クラス分類問題（3つ以上のクラスへの分類）で広く使用されています。例えば、手書き数字を0〜9の10クラスに分類するMNISTのような問題では、出力層の10個のニューロンの値をソフトマックス関数に通すことで、入力画像が各数字である確率を得ることができます。
+      </p>
+      
+      <p>
+        ソフトマックスの出力は確率分布として解釈でき、すべての出力値の合計は1になります。この性質により、<span class="keyword">交差エントロピー損失関数</span>と組み合わせて使用されることが多く、分類問題のモデル学習に適しています。
+      </p>
+      
+      <div class="important-note">
+        <p><strong>ソフトマックスと交差エントロピー：</strong></p>
+        <p>多クラス分類問題では、ソフトマックス関数と交差エントロピー損失関数が一般的に組み合わされて使用されます。この組み合わせは数学的に良い性質を持ち、勾配計算が簡単になるという利点があります。具体的には、予測と真の分布の間の差が直接勾配として現れるため、効率的な学習が可能になります。</p>
+      </div>
+      
+      <h3>シグモイド関数との関係</h3>
+      <p>
+        二値分類問題（クラスAかクラスBかを分類する問題）の場合、ソフトマックス関数は<span class="keyword">シグモイド関数</span>と等価になります。つまり、2クラス分類のケースでソフトマックス関数を使うことは、シグモイド関数を使うことと同じです。
+      </p>
+    </section>
+
+    <!-- 勾配消失問題 -->
+    <section id="vanishing-gradient">
+      <h2><i class="fa-solid fa-triangle-exclamation"></i> 勾配消失問題</h2>
+      
+      <p>
+        <span class="keyword">勾配消失問題 (Vanishing Gradient Problem)</span>は、深層ニューラルネットワークの学習において、誤差逆伝播法（バックプロパゲーション）中に勾配が入力層に近いほど指数関数的に小さくなり、重みの更新が効果的に行われなくなる問題です。
+      </p>
+      
+      <div class="concept-box">
+        <span class="concept-title">勾配消失問題の仕組み</span>
+        <p>
+          誤差逆伝播法では、出力層から入力層に向かって勾配（偏微分値）を伝播させて重みを更新します。この勾配は各層の活性化関数の導関数を掛け合わせて計算されます。<br><br>
+          シグモイド関数やtanh関数などの導関数は、入力の絶対値が大きくなると非常に小さな値になります（シグモイド関数の導関数の最大値は0.25）。深いネットワークでは、これらの小さな値が掛け合わされるため、入力層に近い層では勾配が非常に小さな値になってしまいます。
+        </p>
+      </div>
+      
+
+      <h3>勾配消失問題の影響</h3>
+      <ul>
+        <li><strong>学習の停滞</strong>：入力層に近い層の重みがほとんど更新されなくなり、学習が進まない</li>
+        <li><strong>収束の遅延</strong>：学習速度が極端に遅くなる</li>
+        <li><strong>モデル性能の低下</strong>：十分な学習が行われず、モデルの表現力が低下する</li>
+        <li><strong>深層学習の制約</strong>：深いネットワークを効果的に学習できなくなる</li>
+      </ul>
+      
+      <h3>勾配消失問題への対策</h3>
+      <div class="concept-box">
+        <span class="concept-title">主な対策方法</span>
+        <ol>
+          <li><strong>活性化関数の選択</strong>：ReLUやLeaky ReLUなど、勾配が消失しにくい活性化関数を使用する</li>
+          <li><strong>適切な重み初期化</strong>：Xavier初期化やHe初期化など、活性化関数に適した初期化方法を使用する</li>
+          <li><strong>バッチ正規化</strong>：各層の入力を正規化し、活性化関数の飽和領域に入りにくくする</li>
+          <li><strong>残差接続（スキップ接続）</strong>：ResNetのような短絡接続を使って勾配が直接伝わるパスを確保する</li>
+          <li><strong>ゲート機構</strong>：LSTMやGRUなど、長期依存関係を学習するためのゲート機構を導入する</li>
+        </ol>
+      </div>
+      
+      <div class="important-note">
+        <p><strong>ReLU関数と勾配消失問題：</strong></p>
+        <p>ReLU関数は入力が正の領域では勾配が常に1であるため、正の入力に対しては勾配消失問題が発生しません。これにより、深いネットワークでも学習が効率的に行われるようになり、ディープラーニングの大きなブレイクスルーとなりました。ただし、入力が負の領域では勾配が0になるため、デッドReLU問題には注意が必要です。</p>
+      </div>
+    </section>
+
+    <!-- 活性化関数の使い分け -->
+    <section id="usage">
+      <h2><i class="fa-solid fa-code-branch"></i> 活性化関数の使い分け</h2>
+      
+      <p>
+        ディープラーニングでは、タスクや層の役割に応じて適切な活性化関数を選択することが重要です。ここでは、一般的な活性化関数の使い分けについて説明します。
+      </p>
+      
+      <div class="concept-box">
+        <span class="concept-title">層の役割による使い分け</span>
+        <ul>
+          <li><strong>隠れ層</strong>：ReLU、Leaky ReLU、ELUなどのReLU系関数が一般的</li>
+          <li><strong>出力層（回帰問題）</strong>：線形関数（活性化関数なし）</li>
+          <li><strong>出力層（二値分類）</strong>：シグモイド関数</li>
+          <li><strong>出力層（多クラス分類）</strong>：ソフトマックス関数</li>
+          <li><strong>RNN/LSTM/GRU</strong>：tanh関数やシグモイド関数</li>
+        </ul>
+      </div>
+      
+      <h3>比較表</h3>
+      <div style="overflow-x: auto;">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>活性化関数</th>
+              <th>特徴</th>
+              <th>メリット</th>
+              <th>デメリット</th>
+              <th>一般的な用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>シグモイド関数</td>
+              <td>出力範囲：0～1<br>S字型の曲線</td>
+              <td>・出力を確率として解釈可能<br>・滑らかで微分可能</td>
+              <td>・勾配消失問題<br>・出力の平均が0にならない</td>
+              <td>・二値分類の出力層<br>・古いネットワーク<br>・ゲート機構（LSTM等）</td>
+            </tr>
+            <tr>
+              <td>tanh関数</td>
+              <td>出力範囲：-1～1<br>原点対称のS字型曲線</td>
+              <td>・出力の平均が0に近い<br>・シグモイドより勾配が大きい</td>
+              <td>・依然として勾配消失問題がある<br>・計算コストが高い</td>
+              <td>・RNN系のセル内<br>・正負の情報が重要な場合</td>
+            </tr>
+            <tr>
+              <td>ReLU関数</td>
+              <td>正の入力はそのまま出力<br>負の入力は0</td>
+              <td>・勾配消失問題の軽減<br>・計算効率<br>・スパース性</td>
+              <td>・デッドReLU問題<br>・出力が非負</td>
+              <td>・CNN等の隠れ層<br>・深層ネットワーク全般</td>
+            </tr>
+            <tr>
+              <td>Leaky ReLU関数</td>
+              <td>正の入力はそのまま<br>負の入力は小さく減衰</td>
+              <td>・デッドReLU問題の軽減<br>・勾配消失問題の軽減</td>
+              <td>・ハイパーパラメータ調整<br>・スパース性の減少</td>
+              <td>・デッドReLU問題が懸念される場合<br>・深層ネットワークの隠れ層</td>
+            </tr>
+            <tr>
+              <td>ソフトマックス関数</td>
+              <td>複数の出力を確率分布に変換<br>出力合計が1になる</td>
+              <td>・多クラス分類に適合<br>・確率として解釈可能</td>
+              <td>・計算コストがやや高い<br>・勾配消失の可能性</td>
+              <td>・多クラス分類の出力層</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <h3>実践的な選択指針</h3>
+      <ol>
+        <li><strong>まずは標準的な選択から始める</strong>：隠れ層はReLU、出力層は問題に応じてシグモイドやソフトマックス</li>
+        <li><strong>問題が発生したら代替案を検討</strong>：デッドReLU問題が発生したらLeaky ReLUを試す</li>
+        <li><strong>実験的に比較</strong>：複数の活性化関数を試して、検証データでの性能を比較する</li>
+        <li><strong>計算リソースを考慮</strong>：リソースが限られている場合は、計算効率の高いReLU系を優先</li>
+        <li><strong>ドメイン知識を活用</strong>：問題領域の特性に合わせた選択を検討する</li>
+      </ol>
+      
+      <div class="important-note">
+        <p><strong>近年のトレンド：</strong></p>
+        <p>現代のディープラーニングでは、隠れ層にはReLUやその派生形が広く使われています。特に、画像認識のようなCNNベースのモデルではReLUが標準的です。一方、RNNベースのモデルではtanh関数やLSTM/GRUのようなゲート機構が使われることが多いです。出力層では、タスクに応じた選択が重要で、多クラス分類にはソフトマックス関数が標準的です。</p>
+      </div>
+    </section>
+
+    <!-- Key Insights -->
+    <section id="key-insights" class="key-insights">
+      <h2 class="insights-title"><i class="fa-solid fa-lightbulb"></i> Key Insights</h2>
+      
+      <div class="insight-item">
+        <div class="insight-number">1</div>
+        <div class="insight-content">
+          <h3 class="insight-title">活性化関数は非線形性の源泉</h3>
+          <p>
+            活性化関数がなければ、どれだけ層を深くしても一つの線形関数として表現できてしまいます。活性化関数は非線形性を導入することで、ネットワークに複雑なパターンを学習する能力を与えています。
+          </p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">2</div>
+        <div class="insight-content">
+          <h3 class="insight-title">勾配消失問題と活性化関数の進化</h3>
+          <p>
+            シグモイド関数やtanh関数は勾配消失問題を引き起こしやすく、深いネットワークの学習を困難にします。ReLU系の関数は勾配消失問題を軽減し、ディープラーニング革命の鍵となりました。
+          </p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">3</div>
+        <div class="insight-content">
+          <h3 class="insight-title">タスクに応じた活性化関数の選択</h3>
+          <p>
+            出力層の活性化関数は解決するタスクによって選択します。回帰問題では線形関数、二値分類ではシグモイド関数、多クラス分類ではソフトマックス関数が適しています。隠れ層では、現代的なネットワークではReLU系関数が主流です。
+          </p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">4</div>
+        <div class="insight-content">
+          <h3 class="insight-title">活性化関数の研究は継続中</h3>
+          <p>
+            Swishなどの新しい活性化関数の研究や、自動的に最適な活性化関数を見つける手法（Neural Architecture Search）など、活性化関数に関する研究は今も続いています。特定のタスクやアーキテクチャに最適な活性化関数は、今後も進化していくでしょう。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Take Home Message -->
+    <section id="take-home" class="take-home">
+      <h2 class="take-home-title"><i class="fa-solid fa-key"></i> Take Home Message</h2>
+      
+      <div class="message-box">
+        <p class="message-content">
+          活性化関数はニューラルネットワークに非線形性をもたらし、複雑なパターンの学習を可能にする鍵となる要素です。現代のディープラーニングでは、ReLU系の関数が勾配消失問題を軽減し、深いネットワークの学習を効率化しています。タスクに応じた適切な活性化関数の選択が、モデルの性能と学習効率を大きく左右します。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- スクロールトップボタン -->
+  <div class="scroll-top">
+    <i class="fa-solid fa-chevron-up"></i>
+  </div>
+
+  <script>
+    // スクロールトップボタンの表示・非表示
+    const scrollTopBtn = document.querySelector('.scroll-top');
+    
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('show');
+      } else {
+        scrollTopBtn.classList.remove('show');
+      }
+    });
+    
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // アクティブなナビゲーションアイテムのハイライト
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+    
+    window.addEventListener('scroll', () => {
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        
+        if (pageYOffset >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        const href = link.getAttribute('href').substring(1); // # を除去
+        if (href === current) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // ページ読み込み時に初期化
+    window.addEventListener('DOMContentLoaded', () => {
+      // 各リンクにスムーススクロールのイベントを追加
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 50,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+      
+      // 初期状態でヘッダーリンクをアクティブに
+      const headerLink = document.querySelector('a[href="#header"]');
+      if (headerLink) {
+        headerLink.classList.add('active');
+      }
+    });
+  </script>
+</body>
+</html> 

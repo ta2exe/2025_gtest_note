@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-4-4 正則化</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap');
+
+    :root {
+      /* CMYK カラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      --light-gray: #F5F5F5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* サイドバー */
+    .sidebar {
+      width: 280px;
+      background-color: var(--cyan);
+      padding: 2rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      scrollbar-width: thin;
+      scrollbar-color: var(--magenta) rgba(255, 255, 255, 0.3);
+    }
+
+    /* スクロールバーのスタイル - Webkit ブラウザ用 */
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: var(--magenta);
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background-color: var(--key);
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--white);
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.3rem;
+      color: var(--key);
+      font-weight: 700;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-menu a {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: var(--key);
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: translateX(5px);
+    }
+
+    .sidebar-menu a.active {
+      font-weight: 700;
+      border-left: 4px solid var(--key);
+    }
+
+    .sidebar-menu i {
+      margin-right: 8px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      max-width: calc(100% - 280px);
+    }
+
+    /* セクションスタイル */
+    section {
+      margin-bottom: 4rem;
+      background: var(--white);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--cyan), var(--magenta));
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+      color: var(--key);
+      text-align: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px dotted var(--cyan);
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin: 1.5rem 0 1rem;
+      color: var(--key);
+      border-left: 5px solid var(--magenta);
+      padding-left: 1rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin: 1.5rem 0 1rem;
+      color: var(--dark-gray);
+      display: flex;
+      align-items: center;
+    }
+
+    h3::before {
+      content: '\f0eb';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      margin-right: 0.5rem;
+      color: var(--yellow);
+    }
+
+    h4 {
+      font-size: 1.3rem;
+      margin: 1.2rem 0 0.8rem;
+      color: var(--dark-gray);
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.3rem;
+      display: inline-block;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+
+    /* コンテンツボックス */
+    .content-box {
+      background: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 手書き風ボックス */
+    .handwritten-box {
+      background: var(--light-gray);
+      border: 2px dashed var(--magenta);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      font-family: 'Klee One', cursive;
+      transform: rotate(-0.5deg);
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .handwritten-box::before {
+      content: '📌';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 1.5rem;
+      transform: rotate(20deg);
+    }
+
+    /* キーポイント */
+    .key-point {
+      background-color: rgba(255, 230, 0, 0.15);
+      border-left: 4px solid var(--yellow);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0 5px 5px 0;
+    }
+
+    .key-point-title {
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .key-point-title::before {
+      content: '\f0eb';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      margin-right: 0.5rem;
+      color: var(--yellow);
+    }
+
+    /* リスト */
+    ul, ol {
+      margin: 1rem 0 1rem 1.5rem;
+      list-style-position: inside;
+    }
+
+    ul li, ol li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    /* リスト内のネスト */
+    ul ul, ol ol, ul ol, ol ul {
+      margin-left: 2rem;
+      margin-top: 0.5rem;
+    }
+
+    /* テーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    th {
+      background-color: var(--cyan);
+      color: var(--key);
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    /* 注釈 */
+    .note {
+      background-color: rgba(0, 216, 232, 0.1);
+      border-left: 4px solid var(--cyan);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0 5px 5px 0;
+      font-size: 0.95rem;
+    }
+
+    .note-title {
+      font-weight: 700;
+      color: var(--dark-gray);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .note-title::before {
+      content: '\f05a';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      margin-right: 0.5rem;
+      color: var(--cyan);
+    }
+
+    /* 画像コンテナ */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* マーカースタイル */
+    .marker-yellow {
+      background: linear-gradient(transparent 60%, rgba(255, 230, 0, 0.4) 40%);
+      padding: 0 2px;
+    }
+
+    .marker-cyan {
+      background: linear-gradient(transparent 60%, rgba(0, 216, 232, 0.4) 40%);
+      padding: 0 2px;
+    }
+
+    .marker-magenta {
+      background: linear-gradient(transparent 60%, rgba(255, 64, 160, 0.4) 40%);
+      padding: 0 2px;
+    }
+
+    /* キーワード */
+    .keyword {
+      font-weight: 700;
+      color: var(--magenta);
+      position: relative;
+      display: inline-block;
+    }
+
+    /* 吹き出し */
+    .speech-bubble {
+      position: relative;
+      background: var(--light-gray);
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1.5rem 0 1.5rem 2rem;
+      font-family: 'Klee One', cursive;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      left: -15px;
+      top: 20px;
+      border-width: 8px;
+      border-style: solid;
+      border-color: transparent var(--light-gray) transparent transparent;
+    }
+
+    /* アイコンコンテナ */
+    .icon-container {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 120px;
+      text-align: center;
+    }
+
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 2px solid var(--cyan);
+      transition: all 0.3s ease;
+    }
+
+    .icon-circle:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .icon-circle i {
+      font-size: 2rem;
+      color: var(--key);
+    }
+
+    .icon-text {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+
+    /* フローチャート */
+    .flow-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .flow-item {
+      flex: 1;
+      min-width: 160px;
+      background: var(--white);
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-item:not(:last-child)::after {
+      content: '\f054';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--dark-gray);
+    }
+
+    .flow-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+    }
+
+    .flow-desc {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+    }
+
+    /* フッター */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--dark-gray);
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      text-align: center;
+    }
+
+    /* キーインサイトセクション */
+    .key-insights {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.9) 100%);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .key-insights::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, var(--cyan), var(--magenta), var(--yellow));
+    }
+
+    .key-insights-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.6rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .key-insights-title i {
+      margin-right: 0.5rem;
+      color: var(--yellow);
+    }
+
+    .insight-item {
+      display: flex;
+      margin-bottom: 1.5rem;
+      background: var(--white);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .insight-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--magenta);
+      margin-right: 1rem;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .insight-content {
+      flex: 1;
+    }
+
+    .insight-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--key);
+    }
+
+    /* Take Home Message */
+    .take-home {
+      background: linear-gradient(135deg, rgba(255, 230, 0, 0.1) 0%, rgba(255, 255, 255, 0.9) 100%);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      position: relative;
+    }
+
+    .take-home::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      background: var(--white);
+      border-radius: 50%;
+      box-shadow: 0 -3px 5px rgba(0, 0, 0, 0.05);
+      z-index: -1;
+    }
+
+    .take-home-title {
+      margin-bottom: 1.5rem;
+      font-size: 1.6rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .take-home-title i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+
+    .take-home-message {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: var(--key);
+      line-height: 1.8;
+      padding: 1rem;
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 用語集セクション */
+    .glossary {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.9) 100%);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .glossary-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.6rem;
+      color: var(--key);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .glossary-title i {
+      margin-right: 0.5rem;
+      color: var(--cyan);
+    }
+
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .glossary-table th, .glossary-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .glossary-table th {
+      background-color: var(--cyan);
+      color: var(--key);
+      font-weight: 700;
+    }
+
+    .glossary-term {
+      font-weight: 700;
+      color: var(--key);
+    }
+
+    .glossary-english {
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 1200px) {
+      .main-content {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+
+      .main-content {
+        margin-left: 0;
+        max-width: 100%;
+      }
+
+      .flow-container {
+        flex-direction: column;
+      }
+
+      .flow-item:not(:last-child)::after {
+        content: '\f078';
+        right: 50%;
+        bottom: -20px;
+        top: auto;
+        transform: translateX(50%);
+      }
+    }
+
+    /* スクロールトップボタン */
+    .scroll-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--cyan);
+      color: var(--key);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scroll-top.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+      background: var(--magenta);
+      color: var(--white);
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fas fa-brain"></i> 1-4 ディープラーニングの概要</h2>
+    </div>
+    <div class="sidebar-section">
+
+      <ul class="sidebar-menu" style="margin-top: 1rem;">
+        <li><a href="#title"><i class="fas fa-bookmark"></i> はじめに</a></li>
+        <li><a href="#purpose"><i class="fas fa-bullseye"></i> 正則化の目的</a></li>
+        <li><a href="#l1-l2"><i class="fas fa-superscript"></i> L1・L2正則化</a></li>
+        <li><a href="#dropout"><i class="fas fa-random"></i> ドロップアウト</a></li>
+        <li><a href="#other"><i class="fas fa-th"></i> その他の正則化手法</a></li>
+        <li><a href="#selection"><i class="fas fa-check-square"></i> 正則化手法の選択</a></li>
+        <li><a href="#key-insights"><i class="fas fa-lightbulb"></i> Key Insights</a></li>
+        <li><a href="#take-home"><i class="fas fa-key"></i> Take Home Message</a></li>
+        <li><a href="#glossary"><i class="fas fa-book"></i> 用語集</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div class="main-content">
+    <!-- タイトルセクション -->
+    <section id="title">
+      <h1><i class="fas fa-shield-alt"></i> 1-4-4 正則化</h1>
+      <div class="content-box">
+        <p>このページではディープラーニングにおける<span class="keyword">正則化</span>について学びます。過学習を防ぎ、モデルの汎化性能を向上させるための様々な正則化手法の特徴と適用方法を解説します。</p>
+      </div>
+    </section>
+
+    <!-- 正則化の目的セクション -->
+    <section id="purpose">
+      <h2><i class="fas fa-bullseye"></i> 正則化の目的</h2>
+      
+      <p>ディープラーニングを含む機械学習モデルでは、モデルが訓練データに過剰に適合してしまう<span class="keyword">過学習</span>（Overfitting）という問題がよく発生します。過学習したモデルは訓練データに対しては高い精度を示しますが、未知のデータに対する<span class="keyword">汎化性能</span>が低下してしまいます。</p>
+      
+      <div class="handwritten-box">
+        <p>正則化とは、モデルが訓練データに過度に適合するのを防ぎ、より一般化されたパターンを学習させるための技術です。つまり「複雑すぎるモデルにペナルティを与える」手法といえます。</p>
+      </div>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-4_01.png" alt="過学習と正則化の効果イメージ">
+        <figcaption>過学習したモデルは訓練データの細かなノイズまで学習してしまうが、正則化によって本質的なパターンのみを捉えた適切なモデルを作ることができる</figcaption>
+      </div>
+      
+      <h3>正則化が必要な理由</h3>
+      
+      <div class="key-point">
+        <div class="key-point-title">正則化の必要性</div>
+        <ul>
+          <li>ディープラーニングモデルはパラメータ数が非常に多く、過学習しやすい</li>
+          <li>データ量が限られている場合、特に過学習のリスクが高まる</li>
+          <li>モデルの複雑さを適切に制御することで、より汎用的な予測が可能になる</li>
+          <li>テストデータや実際の運用環境での性能を向上させるために必須</li>
+        </ul>
+      </div>
+      
+      <h3>正則化の役割</h3>
+      
+      <p>正則化手法は以下のような役割を果たします：</p>
+      
+      <div class="flow-container">
+        <div class="flow-item">
+          <div class="flow-title">複雑さの制御</div>
+          <div class="flow-desc">モデルの複雑さに制限を加え、シンプルなモデルを優先する</div>
+        </div>
+        <div class="flow-item">
+          <div class="flow-title">ノイズへの頑健性</div>
+          <div class="flow-desc">データのノイズに対して影響を受けにくいモデルを構築</div>
+        </div>
+        <div class="flow-item">
+          <div class="flow-title">汎化性能の向上</div>
+          <div class="flow-desc">未知のデータに対する予測精度を向上させる</div>
+        </div>
+      </div>
+      
+      <div class="note">
+        <div class="note-title">正則化とバイアス・バリアンストレードオフ</div>
+        <p>正則化はモデルのバリアンス（分散）を減少させる代わりに、バイアス（偏り）を若干増加させる効果があります。この適切なバランスを見つけることが、優れたモデルを作るための鍵となります。</p>
+      </div>
+    </section>
+
+    <!-- L1・L2正則化セクション -->
+    <section id="l1-l2">
+      <h2><i class="fas fa-superscript"></i> L1・L2正則化</h2>
+      
+      <p>重みに対するペナルティを加える正則化手法である<span class="keyword">L1正則化</span>と<span class="keyword">L2正則化</span>は、ディープラーニングで最もよく使われる正則化手法です。これらは損失関数に項を追加することで、重みが大きくなりすぎるのを防ぎます。</p>
+      
+      <h3>L1正則化（Lasso回帰）</h3>
+      
+      <div class="content-box">
+        <p>L1正則化は、損失関数に<span class="marker-yellow">重みの絶対値の和</span>にペナルティ係数を掛けた項を追加します。</p>
+        <p class="text-center">
+          \[L_{regularized} = L_{original} + \lambda \sum_{i} |w_i|\]
+        </p>
+        <p>ここで、\(L_{original}\)は元の損失関数、\(\lambda\)はペナルティの強さを調整するハイパーパラメータ、\(w_i\)は各重みパラメータです。</p>
+      </div>
+      
+      <div class="key-point">
+        <div class="key-point-title">L1正則化の特徴</div>
+        <ul>
+          <li>重要でない特徴の重みを<span class="marker-cyan">完全に0にする</span>効果があり、<span class="keyword">スパース</span>なモデルを作る</li>
+          <li>これにより<span class="marker-magenta">特徴選択</span>の効果も持つ</li>
+          <li>パラメータの数を減らすため、モデルが<span class="marker-yellow">解釈しやすく</span>なる</li>
+          <li>不要な特徴を排除することで、モデルサイズの縮小にも貢献する</li>
+        </ul>
+      </div>
+      
+      <h3>L2正則化（Ridge回帰）</h3>
+      
+      <div class="content-box">
+        <p>L2正則化は、損失関数に<span class="marker-yellow">重みの二乗和</span>にペナルティ係数を掛けた項を追加します。</p>
+        <p class="text-center">
+          \[L_{regularized} = L_{original} + \lambda \sum_{i} w_i^2\]
+        </p>
+        <p>ここで、\(L_{original}\)は元の損失関数、\(\lambda\)はペナルティの強さを調整するハイパーパラメータ、\(w_i\)は各重みパラメータです。</p>
+      </div>
+      
+      <div class="key-point">
+        <div class="key-point-title">L2正則化の特徴</div>
+        <ul>
+          <li>すべての重みを<span class="marker-cyan">全体的に小さく</span>する効果がある</li>
+          <li>重みを完全に0にはせず、全体的に<span class="marker-magenta">滑らかに減少</span>させる</li>
+          <li>多くの場合、<span class="marker-yellow">より安定した解</span>を得ることができる</li>
+          <li>ディープラーニングでは、<span class="keyword">重み減衰</span>（Weight Decay）とも呼ばれる</li>
+        </ul>
+      </div>
+      
+      <h3>L1正則化とL2正則化の比較</h3>
+      
+      <table>
+        <tr>
+          <th>特徴</th>
+          <th>L1正則化</th>
+          <th>L2正則化</th>
+        </tr>
+        <tr>
+          <td>別名</td>
+          <td>Lasso回帰</td>
+          <td>Ridge回帰・重み減衰</td>
+        </tr>
+        <tr>
+          <td>ペナルティ項</td>
+          <td>重みの絶対値の和</td>
+          <td>重みの二乗和</td>
+        </tr>
+        <tr>
+          <td>効果</td>
+          <td>不要な特徴の重みを0にする</td>
+          <td>すべての重みを小さくする</td>
+        </tr>
+        <tr>
+          <td>特徴選択</td>
+          <td>あり（スパースモデル）</td>
+          <td>なし</td>
+        </tr>
+        <tr>
+          <td>適用場面</td>
+          <td>特徴選択が必要な場合<br>モデルサイズを小さくしたい場合</td>
+          <td>モデルの安定性が重要な場合<br>多重共線性がある場合</td>
+        </tr>
+      </table>
+      
+      <div class="speech-bubble">
+        <p>L1正則化とL2正則化は併用することも可能で、これを<span class="keyword">Elastic Net</span>と呼びます。両方の良い特性を活かせるため、実践ではこの組み合わせもよく使われています。</p>
+      </div>
+
+      <div class="image-container">
+        <img src="img/Gimage_1-4-4_02.png" alt="L1正則化とL2正則化の効果の違い">
+        <figcaption>L1正則化（左）は重みをスパースにし、L2正則化（右）は重みを全体的に小さくする</figcaption>
+      </div>
+      
+      <div class="note">
+        <div class="note-title">L0正則化について</div>
+        <p>理論上は<span class="keyword">L0正則化</span>（非ゼロの重みの数を直接ペナルティとする方法）も考えられますが、数学的に最適化が困難なため、実用上はL1正則化の代わりに使われることが多いです。</p>
+      </div>
+    </section>
+
+    <!-- ドロップアウトセクション -->
+    <section id="dropout">
+      <h2><i class="fas fa-random"></i> ドロップアウト</h2>
+      
+      <p><span class="keyword">ドロップアウト</span>（Dropout）はディープラーニングで非常によく使われる正則化手法で、学習時にランダムにニューロンを「休ませる」手法です。この手法はGoogleのHintonらによって2012年に提案され、ディープラーニングの性能向上に大きく貢献しました。</p>
+      
+      <div class="handwritten-box">
+        <p>ドロップアウトは「学習時に各層のニューロンをランダムに一定の確率で無効化する」という非常にシンプルな手法ですが、これがアンサンブル学習のような効果をもたらし、汎化性能を高めます。</p>
+      </div>
+      
+      <div class="image-container">
+        <img src="img/Gimage_1-4-4_03.png" alt="ドロップアウトのイメージ図">
+        <figcaption>ドロップアウトでは学習中にランダムにニューロンを無効化（左）し、推論時にはすべてのニューロンを使用する（右）</figcaption>
+      </div>
+      
+      <h3>ドロップアウトの仕組み</h3>
+      
+      <div class="content-box">
+        <p>ドロップアウトの手順：</p>
+        <ol>
+          <li>学習時、各ニューロンに対して確率pで出力を0にする（ニューロンを休ませる）</li>
+          <li>残りの(1-p)の確率で残るニューロンは通常通り計算を行う</li>
+          <li>推論時（テスト時）には全てのニューロンを有効にするが、各出力に(1-p)を掛けて調整する（または学習時に各出力を1/(1-p)で調整する方法もある）</li>
+        </ol>
+      </div>
+      
+      <div class="key-point">
+        <div class="key-point-title">ドロップアウトの効果</div>
+        <ul>
+          <li><span class="marker-cyan">共適応の防止</span>：ニューロン同士が過度に依存することを防ぐ</li>
+          <li><span class="marker-yellow">アンサンブル効果</span>：異なるネットワーク構造を大量に学習するような効果がある</li>
+          <li><span class="marker-magenta">ノイズへの頑健性</span>：入力や中間層のノイズに対して強くなる</li>
+          <li>特に大規模なネットワークでより効果を発揮する</li>
+        </ul>
+      </div>
+      
+      <h3>ドロップアウト率の選択</h3>
+      
+      <p>ドロップアウト率（無効化する確率p）の選択は重要なハイパーパラメータです：</p>
+      
+      <table>
+        <tr>
+          <th>ドロップアウト率</th>
+          <th>適用場面</th>
+          <th>特徴</th>
+        </tr>
+        <tr>
+          <td>0.2〜0.3</td>
+          <td>入力層に近い層</td>
+          <td>入力情報を多く保持しながら軽い正則化</td>
+        </tr>
+        <tr>
+          <td>0.5</td>
+          <td>中間層・隠れ層</td>
+          <td>標準的な値として広く使われる</td>
+        </tr>
+        <tr>
+          <td>0.5以上</td>
+          <td>過学習が強く出る場合</td>
+          <td>強い正則化効果だが、学習がより困難になる</td>
+        </tr>
+      </table>
+      
+      <div class="note">
+        <div class="note-title">ドロップアウトと他の正則化手法の組み合わせ</div>
+        <p>ドロップアウトはL1/L2正則化などと併用することができ、多くの場合でより高い性能を得られます。特にL2正則化とドロップアウトの組み合わせは、多くのネットワークで標準的に使われています。</p>
+      </div>
+      
+      <div class="speech-bubble">
+        <p>ドロップアウトは訓練時と推論時で異なる動作をすることに注意が必要です。多くのディープラーニングフレームワークでは、モデルの<span class="keyword">train()</span>モードと<span class="keyword">eval()</span>モードでこの切り替えを自動的に行います。</p>
+      </div>
+    </section>
+
+    <!-- その他の正則化手法セクション -->
+    <section id="other">
+      <h2><i class="fas fa-th"></i> その他の正則化手法</h2>
+      
+      <p>L1/L2正則化やドロップアウト以外にも、ディープラーニングでは様々な正則化手法が提案されています。ここでは代表的なものを紹介します。</p>
+      
+      <h3>早期終了（Early Stopping）</h3>
+      
+      <div class="content-box">
+        <p><span class="keyword">早期終了</span>は、検証データセットでの性能がこれ以上向上しなくなったら学習を停止する方法です。これにより、訓練データへの過適合を防ぎます。</p>
+        
+        <div class="image-container">
+          <img src="img/Gimage_1-4-4_04.png" alt="早期終了のイメージ図">
+          <figcaption>訓練誤差は減少し続けるが、検証誤差は途中から増加する。最適な時点で学習を終了させる</figcaption>
+        </div>
+      </div>
+      
+      <h3>データ拡張（Data Augmentation）</h3>
+      
+      <div class="key-point">
+        <div class="key-point-title">データ拡張による正則化</div>
+        <p><span class="keyword">データ拡張</span>は訓練データを人工的に増やす手法で、間接的な正則化効果があります。画像データの場合は回転、反転、拡大縮小、色調変更などが一般的です。</p>
+        <ul>
+          <li>同じデータを何度も学習するよりも、多様なデータで学習することで汎化性能が向上</li>
+          <li>データセットに存在しない変動に対する頑健性を獲得</li>
+          <li>特に画像認識や音声認識で効果的</li>
+        </ul>
+      </div>
+      
+      <h3>ノイズの追加</h3>
+      
+      <p>入力データや重みにノイズを追加することも正則化効果があります：</p>
+      
+      <div class="flow-container">
+        <div class="flow-item">
+          <div class="flow-title">入力ノイズ</div>
+          <div class="flow-desc">入力データにランダムなノイズを加えて学習</div>
+        </div>
+        <div class="flow-item">
+          <div class="flow-title">勾配ノイズ</div>
+          <div class="flow-desc">勾配更新時にノイズを加えて局所解からの脱出を促進</div>
+        </div>
+        <div class="flow-item">
+          <div class="flow-title">ラベルスムージング</div>
+          <div class="flow-desc">正解ラベルに少量のノイズを加え、過度な確信を防ぐ</div>
+        </div>
+      </div>
+      
+      <h3>バッチ正規化（Batch Normalization）</h3>
+      
+      <div class="content-box">
+        <p><span class="keyword">バッチ正規化</span>は各層の活性化値を正規化する手法で、学習の安定化と高速化が主目的ですが、正則化効果もあります。</p>
+        <p>バッチ内のデータについて、平均が0、分散が1になるように正規化します：</p>
+        <p class="text-center">
+          \[ \hat{x}_i = \frac{x_i - \mu_B}{\sqrt{\sigma_B^2 + \epsilon}} \]
+        </p>
+        <p>さらにスケールとシフトのパラメータ（γとβ）を用いて調整します：</p>
+        <p class="text-center">
+          \[ y_i = \gamma \hat{x}_i + \beta \]
+        </p>
+      </div>
+      
+      <div class="note">
+        <div class="note-title">バッチ正規化の正則化効果</div>
+        <p>バッチ正規化はミニバッチごとに統計量が変化するため、ノイズが導入されます。これが正則化として機能し、特に小さいバッチサイズのときに効果が大きくなります。</p>
+      </div>
+      
+      <h3>重み共有（Weight Sharing）</h3>
+      
+      <p><span class="keyword">重み共有</span>は複数の場所で同じ重みパラメータを使用する手法です。最も代表的な例は畳み込みニューラルネットワーク（CNN）における畳み込み操作です。</p>
+      
+      <div class="icon-container">
+        <div class="icon-item">
+          <div class="icon-circle">
+            <i class="fas fa-filter"></i>
+          </div>
+          <div class="icon-text">パラメータ削減</div>
+        </div>
+        <div class="icon-item">
+          <div class="icon-circle">
+            <i class="fas fa-sync-alt"></i>
+          </div>
+          <div class="icon-text">平行移動不変性</div>
+        </div>
+        <div class="icon-item">
+          <div class="icon-circle">
+            <i class="fas fa-compress-arrows-alt"></i>
+          </div>
+          <div class="icon-text">過学習抑制</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 正則化手法の選択セクション -->
+    <section id="selection">
+      <h2><i class="fas fa-check-square"></i> 正則化手法の選択</h2>
+      
+      <p>実際のディープラーニングプロジェクトでは、どの正則化手法を選択し、どのように組み合わせるかが重要な課題となります。以下に、正則化手法を選択する際の考慮点を紹介します。</p>
+      
+      <h3>データセットの規模と特性による選択</h3>
+      
+      <table>
+        <tr>
+          <th>データセットの特性</th>
+          <th>推奨される正則化手法</th>
+        </tr>
+        <tr>
+          <td>小規模なデータセット</td>
+          <td>
+            <ul>
+              <li>データ拡張</li>
+              <li>強めのL2正則化</li>
+              <li>ドロップアウト（高めの確率）</li>
+              <li>転移学習の活用</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>大規模なデータセット</td>
+          <td>
+            <ul>
+              <li>軽いL2正則化</li>
+              <li>バッチ正規化</li>
+              <li>ドロップアウト（中程度の確率）</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>高次元で疎なデータ</td>
+          <td>
+            <ul>
+              <li>L1正則化</li>
+              <li>特徴選択</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>ノイズの多いデータ</td>
+          <td>
+            <ul>
+              <li>バッチ正規化</li>
+              <li>データクリーニング</li>
+              <li>ロバスト学習手法</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+      
+      <h3>モデルアーキテクチャによる選択</h3>
+      
+      <div class="content-box">
+        <p>ネットワークの種類によって効果的な正則化手法は異なります：</p>
+        <ul>
+          <li><span class="keyword">CNN（畳み込みニューラルネットワーク）</span>：ドロップアウト（全結合層に適用）、バッチ正規化、データ拡張</li>
+          <li><span class="keyword">RNN（再帰型ニューラルネットワーク）</span>：ドロップアウト（特殊な適用方法が必要）、L2正則化、勾配クリッピング</li>
+          <li><span class="keyword">Transformer</span>：ドロップアウト、レイヤー正規化、重み共有</li>
+          <li><span class="keyword">GAN（敵対的生成ネットワーク）</span>：スペクトル正規化、勾配ペナルティ</li>
+        </ul>
+      </div>
+      
+      <h3>正則化の組み合わせ戦略</h3>
+      
+      <div class="key-point">
+        <div class="key-point-title">効果的な組み合わせ例</div>
+        <ul>
+          <li>L2正則化 + ドロップアウト：最も一般的で多くの場合に効果的</li>
+          <li>バッチ正規化 + データ拡張：画像認識タスクでよく用いられる</li>
+          <li>早期終了 + L2正則化：シンプルで効果的</li>
+          <li>L1正則化 + L2正則化（Elastic Net）：特徴選択と安定性のバランス</li>
+        </ul>
+      </div>
+      
+      <div class="speech-bubble">
+        <p>正則化手法の効果はタスクやデータセットによって大きく異なります。理論的な予測だけでなく、交差検証を用いた実証的な評価が重要です。</p>
+      </div>
+      
+      <h3>正則化強度の調整</h3>
+      
+      <p>正則化の強さは重要なハイパーパラメータであり、適切に調整する必要があります：</p>
+      
+      <div class="flow-container">
+        <div class="flow-item">
+          <div class="flow-title">弱すぎる正則化</div>
+          <div class="flow-desc">過学習が発生</div>
+        </div>
+        <div class="flow-item">
+          <div class="flow-title">適切な正則化</div>
+          <div class="flow-desc">最適な汎化性能</div>
+        </div>
+        <div class="flow-item">
+          <div class="flow-title">強すぎる正則化</div>
+          <div class="flow-desc">過度の単純化で表現力低下</div>
+        </div>
+      </div>
+      
+      <div class="note">
+        <div class="note-title">ハイパーパラメータ探索のコツ</div>
+        <p>正則化のハイパーパラメータを調整する際は、対数スケールでの探索がおすすめです。例えばL2正則化の係数λは、10^-5, 10^-4, 10^-3, ...といった具合に探索するとよいでしょう。</p>
+      </div>
+    </section>
+
+    <!-- Key Insightsセクション -->
+    <section id="key-insights" class="key-insights">
+      <div class="key-insights-title">
+        <i class="fas fa-lightbulb"></i> Key Insights
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">1</div>
+        <div class="insight-content">
+          <div class="insight-title">正則化の主目的は過学習の防止と汎化性能の向上</div>
+          <p>正則化はモデルが訓練データに過度に適合するのを防ぎ、未知のデータに対する予測性能を向上させます。これはモデルの複雑さに制限を加えることで実現します。</p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">2</div>
+        <div class="insight-content">
+          <div class="insight-title">代表的な正則化手法には特徴と適用場面がある</div>
+          <p>L1正則化はスパースなモデルを作り特徴選択に有効、L2正則化は重みを全体的に小さくして安定性を高め、ドロップアウトはニューロン間の共適応を防ぎます。タスクや目的に応じて適切な手法を選択することが重要です。</p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">3</div>
+        <div class="insight-content">
+          <div class="insight-title">複数の正則化手法の組み合わせが効果的</div>
+          <p>L2正則化とドロップアウト、バッチ正規化とデータ拡張など、異なる特性を持つ正則化手法を組み合わせることで、より高い汎化性能を達成できます。</p>
+        </div>
+      </div>
+      
+      <div class="insight-item">
+        <div class="insight-number">4</div>
+        <div class="insight-content">
+          <div class="insight-title">正則化強度は適切に調整する必要がある</div>
+          <p>正則化が弱すぎると過学習が起き、強すぎるとモデルの表現力が低下します。交差検証を用いて最適な強度を見つけることが重要です。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Take Home Messageセクション -->
+    <section id="take-home" class="take-home">
+      <div class="take-home-title">
+        <i class="fas fa-key"></i> Take Home Message
+      </div>
+      
+      <div class="take-home-message">
+        正則化は「モデルをシンプルに保ち、重要な特徴だけを学習させる」技術です。適切な正則化手法の選択と組み合わせにより、過学習を防ぎつつ高い汎化性能を持つモデルを構築できます。
+      </div>
+    </section>
+
+    <!-- 用語集セクション -->
+    <section id="glossary" class="glossary">
+      <div class="glossary-title">
+        <i class="fas fa-book"></i> 用語集
+      </div>
+      
+      <table class="glossary-table">
+        <tr>
+          <th>用語</th>
+          <th>説明</th>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">正則化</span><br>
+            <span class="glossary-english">Regularization</span>
+          </td>
+          <td>モデルが訓練データに過度に適合するのを防ぎ、汎化性能を高めるための技術</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">L0正則化</span><br>
+            <span class="glossary-english">L0 Regularization</span>
+          </td>
+          <td>非ゼロの重みの数に対してペナルティを課す手法（数学的に最適化が困難）</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">L1正則化</span><br>
+            <span class="glossary-english">L1 Regularization</span>
+          </td>
+          <td>重みの絶対値の和にペナルティを課し、スパースなモデルを作る手法</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">L2正則化</span><br>
+            <span class="glossary-english">L2 Regularization</span>
+          </td>
+          <td>重みの二乗和にペナルティを課し、全体的に小さな重みを持つモデルを作る手法</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">重み減衰</span><br>
+            <span class="glossary-english">Weight Decay</span>
+          </td>
+          <td>L2正則化の実装方法の一つで、各更新ステップで重みを一定割合で小さくする手法</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">ドロップアウト</span><br>
+            <span class="glossary-english">Dropout</span>
+          </td>
+          <td>学習時にランダムにニューロンを無効化し、共適応を防ぐ正則化手法</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">早期終了</span><br>
+            <span class="glossary-english">Early Stopping</span>
+          </td>
+          <td>検証セットの性能が向上しなくなったら学習を停止する手法</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="glossary-term">バッチ正規化</span><br>
+            <span class="glossary-english">Batch Normalization</span>
+          </td>
+          <td>ミニバッチ内のデータを正規化し、学習を安定させる手法（副次的に正則化効果もある）</td>
+        </tr>
+      </table>
+    </section>
+    
+    <!-- フッター -->
+    <footer>
+      <p>1-4-4 正則化 | 作成日: 2024年4月</p>
+      <p>原稿とコード：Claude | 画像：ChatGPT</p>
+    </footer>
+
+    <!-- スクロールトップボタン -->
+    <div class="scroll-top">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+  </div>
+
+  <script>
+    // スクロールトップボタン
+    const scrollTopBtn = document.querySelector('.scroll-top');
+    
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('active');
+      } else {
+        scrollTopBtn.classList.remove('active');
+      }
+    });
+    
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // サイドメニューのアクティブ状態管理
+    const sections = document.querySelectorAll('section');
+    const menuItems = document.querySelectorAll('.sidebar-menu a');
+    
+    window.addEventListener('scroll', () => {
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        
+        if (pageYOffset >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      menuItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === `#${current}`) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

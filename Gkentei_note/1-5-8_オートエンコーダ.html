@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1-5-8 オートエンコーダ | G検定ノート</title>
+  <!-- 絵文字ファビコン -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root {
+      /* CMYKカラーパレット */
+      --cyan: #00D8E8;
+      --magenta: #FF40A0;
+      --yellow: #FFE600;
+      --key: #181818;
+      --dark-gray: #404040;
+      --white: #FFFFFF;
+      
+      /* フォント設定 */
+      --main-font: 'Zen Maru Gothic', sans-serif;
+      --title-font: 'M PLUS Rounded 1c', sans-serif;
+      --handwritten-font: 'Klee One', cursive;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--main-font);
+      background-color: var(--white);
+      color: var(--key);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* サイドメニュー */
+    .side-menu {
+      width: 20%;
+      position: fixed;
+      height: 100vh;
+      background-color: var(--yellow);
+      padding: 2rem 1rem;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    
+    .side-menu::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .side-menu::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+    
+    .side-menu::-webkit-scrollbar-thumb {
+      background-color: var(--cyan);
+      border-radius: 4px;
+    }
+    
+    .side-menu-title {
+      font-family: var(--title-font);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      border-bottom: 2px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+    }
+    
+    .side-menu-list {
+      list-style-type: none;
+    }
+    
+    .side-menu-item {
+      margin-bottom: 0.8rem;
+    }
+    
+    .side-menu-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: var(--key);
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .side-menu-link:hover, .side-menu-link.active {
+      background-color: rgba(255, 255, 255, 0.7);
+      color: var(--magenta);
+      transform: translateX(5px);
+    }
+    
+    .side-menu-link i {
+      margin-right: 0.5rem;
+      color: var(--magenta);
+    }
+    
+    /* メインコンテンツ */
+    .main-content {
+      width: 80%;
+      margin-left: 20%;
+      padding: 2rem 3rem;
+    }
+    
+    /* セクションスタイル */
+    .section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    
+    .section-title {
+      font-family: var(--title-font);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--cyan);
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-title i {
+      color: var(--magenta);
+      margin-right: 0.8rem;
+    }
+    
+    .section-subtitle {
+      font-family: var(--title-font);
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--key);
+      margin: 1.5rem 0 1rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-subtitle i {
+      color: var(--cyan);
+      margin-right: 0.8rem;
+    }
+    
+    /* キーワード */
+    .keyword {
+      font-weight: 700;
+      color: var(--magenta);
+      text-decoration: underline;
+      text-decoration-color: var(--cyan);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+    
+    /* 手書き風ボックス */
+    .handwritten-box {
+      font-family: var(--handwritten-font);
+      background-color: rgba(255, 255, 255, 0.8);
+      border: 2px dashed var(--magenta);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      transform: rotate(-0.5deg);
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .handwritten-box::before {
+      content: "📌";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+    }
+    
+    .handwritten-box-title {
+      font-family: var(--handwritten-font);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--key);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    /* ノートボックス */
+    .note-box {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-left: 4px solid var(--cyan);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .note-box-title {
+      font-weight: 700;
+      color: var(--key);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .note-box-title i {
+      color: var(--cyan);
+      margin-right: 0.5rem;
+    }
+    
+    /* コンセプトカード */
+    .concept-card {
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      transition: transform 0.3s ease;
+    }
+    
+    .concept-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .concept-card-title {
+      font-family: var(--title-font);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--magenta);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--yellow);
+      display: flex;
+      align-items: center;
+    }
+    
+    .concept-card-title i {
+      margin-right: 0.5rem;
+    }
+    
+    /* リスト */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+      list-style-position: inside;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    ul.check-list {
+      list-style-type: none;
+    }
+    
+    ul.check-list li {
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    ul.check-list li i {
+      color: var(--cyan);
+      margin-right: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    
+    /* フロー */
+    .flow-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 2rem 0;
+    }
+    
+    .flow-step {
+      flex: 1;
+      min-width: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    
+    .flow-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: -15px;
+      top: 35px;
+      width: 30px;
+      height: 2px;
+      background-color: var(--cyan);
+      border-top: 2px dashed var(--cyan);
+    }
+    
+    .flow-icon {
+      width: 70px;
+      height: 70px;
+      background-color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 1.5rem;
+      color: var(--magenta);
+    }
+    
+    .flow-title {
+      font-family: var(--title-font);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* 引用 */
+    blockquote {
+      font-style: italic;
+      border-left: 3px solid var(--yellow);
+      padding-left: 1rem;
+      margin: 1.5rem 0;
+      color: var(--dark-gray);
+    }
+    
+    /* テーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background-color: var(--white);
+    }
+    
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    
+    th {
+      background-color: rgba(0, 216, 232, 0.1);
+      font-weight: 700;
+    }
+    
+    /* 用語集 */
+    .glossary {
+      margin: 1.5rem 0;
+    }
+    
+    .term {
+      display: flex;
+      margin-bottom: 1rem;
+      border-bottom: 1px dotted #e0e0e0;
+      padding-bottom: 0.5rem;
+    }
+    
+    .term-name {
+      flex: 0 0 30%;
+      font-weight: 700;
+      color: var(--key);
+    }
+    
+    .term-definition {
+      flex: 0 0 70%;
+      color: var(--dark-gray);
+    }
+    
+    /* 画像コンテナ */
+    .image-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      max-width: 100%;
+    }
+    
+    .image-container img {
+      max-width: 75%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+    }
+    
+    .image-container figcaption {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--dark-gray);
+      font-style: italic;
+      text-align: center;
+      padding: 0 10%;
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--cyan);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* 比較表 */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    
+    .comparison-table th {
+      background-color: rgba(0, 216, 232, 0.2);
+      text-align: center;
+    }
+    
+    .comparison-table th:first-child {
+      background-color: var(--white);
+    }
+    
+    .comparison-table tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* トップへ戻るボタン */
+    .scroll-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background-color: var(--magenta);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      text-decoration: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .scroll-to-top.visible {
+      opacity: 1;
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 1024px) {
+      .side-menu {
+        width: 25%;
+      }
+      
+      .main-content {
+        width: 75%;
+        margin-left: 25%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      
+      .side-menu {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+      }
+      
+      .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 1rem;
+      }
+      
+      .flow-step:not(:last-child)::after {
+        display: none;
+      }
+      
+      .flow-container {
+        flex-direction: column;
+      }
+      
+      .flow-step {
+        margin-bottom: 1.5rem;
+      }
+      
+      .term {
+        flex-direction: column;
+      }
+      
+      .term-name, .term-definition {
+        flex: 0 0 100%;
+      }
+      
+      .term-name {
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- サイドメニュー -->
+  <div class="side-menu">
+    <h2 class="side-menu-title">
+      <i class="fas fa-cube"></i> ディープラーニングの要素技術
+    </h2>
+    <ul class="side-menu-list">
+      <li class="side-menu-item">
+        <a href="#overview" class="side-menu-link">
+          <i class="fas fa-info-circle"></i> 概要
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#autoencoder-basics" class="side-menu-link">
+          <i class="fas fa-project-diagram"></i> オートエンコーダの基本
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#architecture" class="side-menu-link">
+          <i class="fas fa-sitemap"></i> 構造と動作原理
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#types" class="side-menu-link">
+          <i class="fas fa-code-branch"></i> オートエンコーダの種類
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#applications" class="side-menu-link">
+          <i class="fas fa-laptop-code"></i> 応用例
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#training" class="side-menu-link">
+          <i class="fas fa-graduation-cap"></i> 学習方法
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#pretraining" class="side-menu-link">
+          <i class="fas fa-layer-group"></i> 事前学習とファインチューニング
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#key-insights" class="side-menu-link">
+          <i class="fas fa-lightbulb"></i> 重要ポイント
+        </a>
+      </li>
+      <li class="side-menu-item">
+        <a href="#glossary" class="side-menu-link">
+          <i class="fas fa-book"></i> 用語集
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div class="main-content">
+    <!-- 概要セクション -->
+    <section id="overview" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-info-circle"></i> 概要
+      </h2>
+      
+      <p>オートエンコーダは、教師なし学習（または自己教師あり学習）の一種で、入力データを圧縮して特徴を抽出し、その特徴から元のデータを可能な限り正確に復元することを学習するニューラルネットワークです。</p>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダとは？</div>
+        <p>オートエンコーダは<span class="keyword">次元削減</span>と<span class="keyword">特徴学習</span>を行うための強力な道具です。「自分自身を学習する」という特徴があり、入力データと同じ出力を生成することを目指します。この過程で、データの本質的な構造や潜在的なパターンを自動的に見つけ出します。</p>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-cogs"></i> オートエンコーダの基本的な流れ
+      </h3>
+      
+      <div class="flow-container">
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-file-import"></i>
+          </div>
+          <div class="flow-title">入力データ</div>
+          <p>画像、テキスト、音声など様々なデータ</p>
+        </div>
+        
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-compress-arrows-alt"></i>
+          </div>
+          <div class="flow-title">エンコード</div>
+          <p>データを圧縮して特徴を抽出</p>
+        </div>
+        
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-database"></i>
+          </div>
+          <div class="flow-title">潜在表現</div>
+          <p>圧縮された特徴量（潜在変数）</p>
+        </div>
+        
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-expand-arrows-alt"></i>
+          </div>
+          <div class="flow-title">デコード</div>
+          <p>圧縮された特徴から元データを復元</p>
+        </div>
+        
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-file-export"></i>
+          </div>
+          <div class="flow-title">出力データ</div>
+          <p>元の入力データに近い復元データ</p>
+        </div>
+      </div>
+      
+      <div class="image-container">
+        <figure>
+          <img src="img/autoencoder_basic.png" alt="オートエンコーダの基本構造">
+          <figcaption>オートエンコーダの基本構造：エンコーダがデータを圧縮し、デコーダが復元します。中間の潜在表現は元のデータよりも次元が小さくなっています。</figcaption>
+        </figure>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-key"></i> G検定ポイント
+      </h3>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定で押さえるべきポイント
+        </div>
+        <ul class="check-list">
+          <li><i class="fas fa-check"></i> オートエンコーダは<span class="keyword">教師なし学習</span>の一種</li>
+          <li><i class="fas fa-check"></i> <span class="keyword">エンコーダ</span>と<span class="keyword">デコーダ</span>の2つの部分から構成される</li>
+          <li><i class="fas fa-check"></i> 入力と出力が同じになるように学習する（自己再構成）</li>
+          <li><i class="fas fa-check"></i> 中間層（ボトルネック層）が入力よりも小さい次元を持つことで<span class="keyword">次元削減</span>を実現</li>
+          <li><i class="fas fa-check"></i> 主要な応用例：次元削減、特徴抽出、ノイズ除去、異常検知、データ生成など</li>
+          <li><i class="fas fa-check"></i> <span class="keyword">深層学習</span>における<span class="keyword">事前学習</span>の手法として重要</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- オートエンコーダの基本セクション -->
+    <section id="autoencoder-basics" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-project-diagram"></i> オートエンコーダの基本
+      </h2>
+      
+      <p>オートエンコーダの基本的な構成要素と動作原理について詳しく見ていきます。</p>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-puzzle-piece"></i> 基本構成要素
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-compress-arrows-alt"></i> エンコーダ (Encoder)
+        </h3>
+        <p>エンコーダは入力データを受け取り、それを低次元の潜在表現（潜在変数、特徴ベクトル）に変換します。通常は複数の層からなるニューラルネットワークで、層を重ねるごとに徐々に次元を削減していきます。</p>
+        <p>数学的には、エンコーダは次のように表現できます：</p>
+        <p style="text-align: center;">\(z = f(x)\) または \(z = f_{\phi}(x)\)</p>
+        <p>ここで、\(x\)は入力データ、\(z\)は潜在表現、\(f\)はエンコーダ関数、\(\phi\)はエンコーダのパラメータです。</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-expand-arrows-alt"></i> デコーダ (Decoder)
+        </h3>
+        <p>デコーダはエンコーダによって生成された潜在表現を受け取り、それを元の入力データの次元に戻します。エンコーダと逆の構造を持ち、次元を徐々に拡大していきます。</p>
+        <p>数学的には、デコーダは次のように表現できます：</p>
+        <p style="text-align: center;">\(\hat{x} = g(z)\) または \(\hat{x} = g_{\theta}(z)\)</p>
+        <p>ここで、\(z\)は潜在表現、\(\hat{x}\)は再構成された出力データ、\(g\)はデコーダ関数、\(\theta\)はデコーダのパラメータです。</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-database"></i> 潜在空間 (Latent Space)
+        </h3>
+        <p>潜在空間はエンコーダの出力（潜在表現）が存在する空間です。この空間の次元は通常、元のデータの次元よりも小さく、データの本質的な特徴を捉えています。</p>
+        <p>潜在空間の特性：</p>
+        <ul>
+          <li>データの本質的な構造や特徴を表現</li>
+          <li>元のデータよりも低次元（ボトルネック構造）</li>
+          <li>似たデータ点は潜在空間でも近くに位置する傾向がある</li>
+          <li>潜在空間内の補間により、意味のある新しいデータを生成可能</li>
+        </ul>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-bullseye"></i> 学習目標と損失関数
+      </h3>
+      
+      <p>オートエンコーダの学習目標は、入力データ \(x\) と再構成されたデータ \(\hat{x}\) の差を最小化することです。これは再構成誤差（reconstruction error）と呼ばれます。</p>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-calculator"></i> 再構成誤差
+        </div>
+        <p>オートエンコーダの損失関数は通常、次のように表現されます：</p>
+        <p style="text-align: center;">\(L(x, \hat{x}) = L(x, g(f(x)))\)</p>
+        <p>一般的な損失関数としては以下のようなものがあります：</p>
+        <ul>
+          <li><strong>平均二乗誤差（MSE）</strong>: \(L(x, \hat{x}) = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{x}_i)^2\)</li>
+          <li><strong>二項交差エントロピー</strong>: \(L(x, \hat{x}) = -\sum_{i=1}^{n} [x_i \log(\hat{x}_i) + (1-x_i) \log(1-\hat{x}_i)]\)</li>
+        </ul>
+        <p>これらの損失関数を最小化するようにネットワークのパラメータ \(\phi\) と \(\theta\) を調整します。</p>
+      </div>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">なぜボトルネック構造が必要なのか？</div>
+        <p>もし潜在層のサイズが入力と同じかそれ以上だった場合、ネットワークは単に恒等関数（入力をそのまま出力する関数）を学習してしまう可能性があります。これでは意味のある特徴抽出はできません。</p>
+        <p>ボトルネック構造（中間層の次元を小さくすること）により、ネットワークは入力データの最も重要な特徴だけを保持するよう強制されます。これにより、データの本質的な構造を学習することができるのです。</p>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-cog"></i> 活性化関数と非線形性
+      </h3>
+      
+      <p>オートエンコーダでは、エンコーダとデコーダの各層に非線形活性化関数を使用することが重要です。非線形性がなければ、複数の線形層は単一の線形変換と同等になってしまい、複雑なデータの特徴を捉えることができません。</p>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-chart-line"></i> よく使われる活性化関数
+        </h3>
+        <ul>
+          <li><strong>ReLU（Rectified Linear Unit）</strong>: \(f(x) = \max(0, x)\)</li>
+          <li><strong>Sigmoid</strong>: \(f(x) = \frac{1}{1 + e^{-x}}\)</li>
+          <li><strong>Tanh（双曲線正接）</strong>: \(f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}\)</li>
+          <li><strong>Leaky ReLU</strong>: \(f(x) = \max(\alpha x, x)\) (ここで \(\alpha\) は小さな正の数)</li>
+        </ul>
+        <p>活性化関数の選択は、データの性質や問題のドメインに依存します。例えば：</p>
+        <ul>
+          <li>画像データ（ピクセル値は0〜1または0〜255）には、出力層にSigmoid関数がよく使われます</li>
+          <li>中間層にはReLUが一般的に使用されます（勾配消失問題が少ない）</li>
+          <li>変分オートエンコーダ（VAE）では、潜在変数の平均と分散を出力する層に線形活性化関数が使われることがあります</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定ポイント
+        </div>
+        <p>オートエンコーダを理解する上で重要なのは、<span class="keyword">ボトルネック構造</span>によってデータの本質的な特徴を学習するという点です。また、エンコーダとデコーダが<span class="keyword">対称的な構造</span>を持つことが多いですが、これは必須ではありません。オートエンコーダはデータの<span class="keyword">非線形変換</span>を学習するため、活性化関数の非線形性が重要です。</p>
+      </div>
+    </section>
+
+    <!-- 構造と動作原理セクション -->
+    <section id="architecture" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-sitemap"></i> 構造と動作原理
+      </h2>
+      
+      <p>オートエンコーダの詳細な構造と、データがどのように処理されるかについて見ていきます。</p>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-network-wired"></i> ネットワーク構造
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-layer-group"></i> 層構成
+        </h3>
+        <p>一般的なオートエンコーダは次のような層構成を持ちます：</p>
+        <ol>
+          <li><strong>入力層</strong>: 元のデータの次元と同じサイズ</li>
+          <li><strong>エンコーダ層</strong>: 一つ以上の隠れ層で、徐々に次元を削減</li>
+          <li><strong>ボトルネック層</strong>: 最も次元が小さい中間層（潜在表現）</li>
+          <li><strong>デコーダ層</strong>: 一つ以上の隠れ層で、徐々に次元を拡大</li>
+          <li><strong>出力層</strong>: 入力層と同じサイズで、再構成されたデータを出力</li>
+        </ol>
+      </div>
+      
+      <div class="image-container">
+        <figure>
+          <img src="img/autoencoder_structure.png" alt="オートエンコーダの層構造">
+          <figcaption>オートエンコーダの層構造：左側がエンコーダ部分、中央がボトルネック層（潜在表現）、右側がデコーダ部分です。層の幅は各層のニューロン数を表しています。</figcaption>
+        </figure>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-random"></i> 変換プロセス
+      </h3>
+      
+      <div class="flow-container">
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-arrow-right"></i>
+          </div>
+          <div class="flow-title">前方伝播</div>
+          <p>入力からボトルネック層を通って出力まで</p>
+        </div>
+        
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-not-equal"></i>
+          </div>
+          <div class="flow-title">誤差計算</div>
+          <p>入力と出力の差（再構成誤差）</p>
+        </div>
+        
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-arrow-left"></i>
+          </div>
+          <div class="flow-title">逆伝播</div>
+          <p>誤差を用いてパラメータを更新</p>
+        </div>
+        
+        <div class="flow-step">
+          <div class="flow-icon">
+            <i class="fas fa-redo"></i>
+          </div>
+          <div class="flow-title">繰り返し</div>
+          <p>誤差が十分小さくなるまで繰り返す</p>
+        </div>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-cogs"></i> データ変換の数学的表現
+        </div>
+        <p>オートエンコーダにおけるデータ変換は以下のように表現できます：</p>
+        <ol>
+          <li>エンコーダ: \(z = f_{\phi}(x)\)</li>
+          <li>デコーダ: \(\hat{x} = g_{\theta}(z)\)</li>
+          <li>全体: \(\hat{x} = g_{\theta}(f_{\phi}(x))\)</li>
+        </ol>
+        <p>各層での変換は通常、次のような形式になります：</p>
+        <p style="text-align: center;">\(h_{i+1} = \sigma(W_i h_i + b_i)\)</p>
+        <p>ここで、\(h_i\)は\(i\)番目の層の出力（\(h_0 = x\)は入力）、\(W_i\)は重み行列、\(b_i\)はバイアスベクトル、\(\sigma\)は活性化関数です。</p>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-code-branch"></i> アーキテクチャのバリエーション
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-compress"></i> アンダーコンプリート (Undercomplete)
+        </h3>
+        <p>最も基本的なオートエンコーダの形式で、潜在層の次元が入力層よりも小さいもの。データの圧縮を強制し、重要な特徴を学習させるのに適しています。</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-expand"></i> オーバーコンプリート (Overcomplete)
+        </h3>
+        <p>潜在層の次元が入力層よりも大きいもの。単純な恒等関数を学習してしまう可能性があるため、正則化（スパース制約など）が必要になります。</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-network-wired"></i> 深層オートエンコーダ (Deep Autoencoder)
+        </h3>
+        <p>エンコーダとデコーダが複数の隠れ層を持つオートエンコーダ。より複雑な非線形変換を学習できますが、訓練が難しくなる場合があります。</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-project-diagram"></i> 畳み込みオートエンコーダ (Convolutional Autoencoder)
+        </h3>
+        <p>画像データなどの空間的構造を持つデータに適した、畳み込み層を使用したオートエンコーダ。特に画像の特徴抽出やノイズ除去に効果的です。</p>
+      </div>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダの設計ポイント</div>
+        <p>効果的なオートエンコーダを設計する際のポイント：</p>
+        <ul>
+          <li><strong>ボトルネックの大きさ</strong>：小さすぎると情報が失われすぎ、大きすぎると恒等関数になりやすい</li>
+          <li><strong>層の深さ</strong>：深いほど複雑な特徴を捉えられるが、訓練が難しくなる</li>
+          <li><strong>正則化</strong>：過学習を防ぎ、より一般化された特徴を学習させるのに重要</li>
+          <li><strong>活性化関数</strong>：データの性質に合わせて適切に選択する</li>
+          <li><strong>対称性</strong>：エンコーダとデコーダを対称的に設計すると学習が安定することが多い</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定ポイント
+        </div>
+        <p>オートエンコーダの構造において最も重要なのは、<span class="keyword">ボトルネック構造</span>によりデータの圧縮と重要特徴の抽出が行われる点です。また、<span class="keyword">非線形活性化関数</span>の使用により、単純な主成分分析(PCA)などの線形手法よりも複雑なデータ表現が可能になります。深層オートエンコーダは階層的な特徴表現を学習できますが、<span class="keyword">勾配消失問題</span>などの課題があることも理解しておきましょう。</p>
+      </div>
+    </section>
+
+    <!-- オートエンコーダの種類セクション -->
+    <section id="types" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-code-branch"></i> オートエンコーダの種類
+      </h2>
+      
+      <p>オートエンコーダには様々な種類があり、それぞれに異なる特性と用途があります。ここでは代表的なオートエンコーダの種類について詳しく見ていきます。</p>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-chart-bar"></i> 変分オートエンコーダ (Variational Autoencoder, VAE)
+        </h3>
+        <p>変分オートエンコーダは、潜在変数を確率分布としてモデル化する生成モデルの一種です。通常のオートエンコーダと異なり、潜在空間が連続的になるため、新しいデータの生成に適しています。</p>
+        <p><strong>特徴:</strong></p>
+        <ul>
+          <li>潜在変数を確率分布（通常は正規分布）としてモデル化</li>
+          <li>エンコーダは平均ベクトル \(\mu\) と分散ベクトル \(\sigma^2\) を出力</li>
+          <li>損失関数に再構成誤差と<span class="keyword">KLダイバージェンス</span>の項を含む</li>
+          <li>生成モデルとして機能し、学習後に新しいデータを生成可能</li>
+          <li>潜在空間が滑らかで連続的になるため、潜在変数の補間が意味を持つ</li>
+        </ul>
+        <p><strong>数学的定式化:</strong></p>
+        <p>VAEの損失関数は以下のように表されます：</p>
+        <p style="text-align: center;">\(L_{\text{VAE}} = L_{\text{reconstruction}} + \beta \cdot L_{\text{KL}}\)</p>
+        <p>ここで \(L_{\text{reconstruction}}\) は再構成誤差、\(L_{\text{KL}}\) はKLダイバージェンス、\(\beta\) は両者のバランスを調整するハイパーパラメータです。</p>
+        <p>KLダイバージェンス項：</p>
+        <p style="text-align: center;">\(L_{\text{KL}} = \frac{1}{2} \sum_{i=1}^{n} (\mu_i^2 + \sigma_i^2 - \log(\sigma_i^2) - 1)\)</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-layer-group"></i> 積層オートエンコーダ (Stacked Autoencoder)
+        </h3>
+        <p>積層オートエンコーダは、複数の浅いオートエンコーダを積み重ねた構造を持つモデルです。階層的に特徴を学習することができ、深い表現学習に適しています。</p>
+        <p><strong>特徴:</strong></p>
+        <ul>
+          <li>複数の浅いオートエンコーダを積み重ねる</li>
+          <li>層別事前学習（layerwise pretraining）と組み合わせることが多い</li>
+          <li>階層的な特徴表現を学習可能</li>
+          <li>深層ニューラルネットワークの効果的な初期化方法として使用される</li>
+        </ul>
+        <p><strong>学習手順:</strong></p>
+        <ol>
+          <li>第1レベルのオートエンコーダを訓練（入力データ → 第1潜在表現）</li>
+          <li>第1潜在表現を入力として第2レベルのオートエンコーダを訓練</li>
+          <li>以降、必要な深さまで繰り返す</li>
+          <li>すべての層を組み合わせて、エンドツーエンドで微調整（ファインチューニング）</li>
+        </ol>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-filter"></i> ノイズ除去オートエンコーダ (Denoising Autoencoder)
+        </h3>
+        <p>ノイズ除去オートエンコーダは、入力にノイズを加え、元のノイズなしデータを復元するように学習するモデルです。ロバストな特徴学習とノイズ耐性の向上に役立ちます。</p>
+        <p><strong>特徴:</strong></p>
+        <ul>
+          <li>入力データにランダムなノイズを追加（マスキング、ガウスノイズなど）</li>
+          <li>ノイズ入り入力からノイズなし元データへのマッピングを学習</li>
+          <li>過学習を防ぎ、より堅牢な特徴表現を獲得</li>
+          <li>データのクリーニングやノイズ除去タスクに直接応用可能</li>
+        </ul>
+        <p><strong>学習目標:</strong></p>
+        <p style="text-align: center;">\(L(x, g(f(\tilde{x})))\)</p>
+        <p>ここで \(x\) は元の入力、\(\tilde{x}\) はノイズを加えた入力、\(f\) はエンコーダ、\(g\) はデコーダです。</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-compress"></i> スパースオートエンコーダ (Sparse Autoencoder)
+        </h3>
+        <p>スパースオートエンコーダは、潜在表現が疎（スパース）になるように正則化を加えたモデルです。より選択的な特徴抽出と解釈可能性の向上が期待できます。</p>
+        <p><strong>特徴:</strong></p>
+        <ul>
+          <li>潜在層のニューロンが同時に活性化する数を制限</li>
+          <li>L1正則化やKL発散ペナルティなどを用いてスパース性を強制</li>
+          <li>より選択的で解釈可能な特徴表現を学習</li>
+          <li>過学習の抑制にも効果的</li>
+        </ul>
+        <p><strong>損失関数:</strong></p>
+        <p style="text-align: center;">\(L(x, \hat{x}) + \lambda \cdot \Omega(h)\)</p>
+        <p>ここで \(\Omega(h)\) はスパース性を促進する正則化項（例：L1ノルム \(\sum_i |h_i|\)）、\(\lambda\) は正則化の強さを調整するハイパーパラメータです。</p>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-cubes"></i> その他の発展型
+        </h3>
+        <p>オートエンコーダの発展型として、以下のようなモデルも存在します：</p>
+        <ul>
+          <li><strong>Adversarial Autoencoder (AAE)</strong>: GANの考え方を取り入れ、潜在表現が特定の分布に従うよう敵対的に学習</li>
+          <li><strong>Vector Quantized-Variational Autoencoder (VQ-VAE)</strong>: 潜在空間を離散的なコードブックを用いて量子化</li>
+          <li><strong>Contractive Autoencoder</strong>: ヤコビアン行列のフロベニウスノルムを最小化し、小さな入力変化に対して不変な表現を学習</li>
+          <li><strong>Conditional Autoencoder</strong>: ラベルや属性など条件付き情報を利用した生成が可能</li>
+        </ul>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-table"></i> オートエンコーダの種類の比較
+      </h3>
+      
+      <table class="comparison-table">
+        <tr>
+          <th>種類</th>
+          <th>主な特徴</th>
+          <th>潜在空間の性質</th>
+          <th>主な応用例</th>
+        </tr>
+        <tr>
+          <td>基本的なオートエンコーダ</td>
+          <td>ボトルネック構造による次元削減</td>
+          <td>決定論的、連続</td>
+          <td>次元削減、特徴抽出</td>
+        </tr>
+        <tr>
+          <td>変分オートエンコーダ (VAE)</td>
+          <td>確率的モデル、KL正則化</td>
+          <td>確率的、連続、滑らか</td>
+          <td>データ生成、表現学習</td>
+        </tr>
+        <tr>
+          <td>積層オートエンコーダ</td>
+          <td>階層的構造、層別事前学習</td>
+          <td>階層的、連続</td>
+          <td>深層特徴学習、事前学習</td>
+        </tr>
+        <tr>
+          <td>ノイズ除去オートエンコーダ</td>
+          <td>ノイズ添加、堅牢性向上</td>
+          <td>ノイズに対して堅牢</td>
+          <td>ノイズ除去、堅牢な特徴抽出</td>
+        </tr>
+        <tr>
+          <td>スパースオートエンコーダ</td>
+          <td>活性化の制限、正則化</td>
+          <td>疎（スパース）</td>
+          <td>選択的特徴抽出、解釈可能性</td>
+        </tr>
+      </table>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダの種類を選ぶポイント</div>
+        <p>実際のタスクに応じて適切なオートエンコーダを選ぶ際のポイント：</p>
+        <ul>
+          <li><strong>データ生成が必要</strong>なら → <span class="keyword">変分オートエンコーダ</span></li>
+          <li><strong>ノイズの多いデータ</strong>なら → <span class="keyword">ノイズ除去オートエンコーダ</span></li>
+          <li><strong>深い特徴階層を学習</strong>したいなら → <span class="keyword">積層オートエンコーダ</span></li>
+          <li><strong>解釈可能性を重視</strong>するなら → <span class="keyword">スパースオートエンコーダ</span></li>
+          <li><strong>少量のラベル付きデータで分類</strong>するなら → <span class="keyword">積層オートエンコーダ</span>で事前学習してファインチューニング</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定ポイント
+        </div>
+        <p>G検定では特に<span class="keyword">変分オートエンコーダ (VAE)</span>と<span class="keyword">積層オートエンコーダ</span>について理解しておくことが重要です。VAEは確率的生成モデルとして、潜在変数を確率分布としてモデル化する点が特徴です。積層オートエンコーダは層別事前学習との関連で出題されることが多いため、階層的な特徴表現の学習プロセスを押さえておきましょう。また、各種オートエンコーダの特性と主な応用例の対応関係も理解しておくことが大切です。</p>
+      </div>
+    </section>
+
+    <!-- 応用例セクション -->
+    <section id="applications" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-laptop-code"></i> 応用例
+      </h2>
+      
+      <p>オートエンコーダは様々な分野で応用されています。ここでは主要な応用例についてG検定の観点から詳しく見ていきます。</p>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-compress-arrows-alt"></i> 次元削減
+        </h3>
+        <p>オートエンコーダの最も基本的な応用は高次元データの次元削減です。主成分分析(PCA)などの線形手法と比較して、非線形の次元削減が可能な点が強みです。</p>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>非線形の複雑なデータ構造を捉えられる</li>
+          <li>階層的な特徴抽出が可能（積層オートエンコーダの場合）</li>
+          <li>データの特性に応じたカスタマイズが容易</li>
+        </ul>
+        <p><strong>用途:</strong></p>
+        <ul>
+          <li>高次元画像データの可視化</li>
+          <li>大量の文書や遺伝子データなどの圧縮表現</li>
+          <li>他の機械学習アルゴリズムの前処理</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-fingerprint"></i> 特徴抽出
+        </h3>
+        <p>オートエンコーダはデータから有意義な特徴を自動的に抽出する能力を持ちます。エンコーダ部分は特徴抽出器として利用できます。</p>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>手動の特徴エンジニアリングが不要</li>
+          <li>データの潜在的なパターンを自動的に発見</li>
+          <li>ラベルなしデータからも学習可能</li>
+        </ul>
+        <p><strong>用途:</strong></p>
+        <ul>
+          <li>画像認識における前処理</li>
+          <li>音声データからの特徴抽出</li>
+          <li>少量のラベル付きデータしかない場合の事前学習</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-broom"></i> ノイズ除去と復元
+        </h3>
+        <p>ノイズ除去オートエンコーダを用いて、ノイズの多いデータからノイズを除去したり、欠損や損傷したデータを復元したりできます。</p>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>データクリーニングの自動化</li>
+          <li>欠損値の補完や破損データの修復</li>
+          <li>低品質入力からの高品質出力生成</li>
+        </ul>
+        <p><strong>用途:</strong></p>
+        <ul>
+          <li>古い写真や文書の復元</li>
+          <li>医療画像からのノイズ除去</li>
+          <li>音声データのクリーニング</li>
+          <li>欠損値のある時系列データの補完</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-exclamation-triangle"></i> 異常検知
+        </h3>
+        <p>正常なデータだけで訓練されたオートエンコーダは、異常データを入力すると再構成誤差が高くなる性質を利用して、異常検知に応用できます。</p>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>教師なしで異常検知が可能（正常データのみで訓練）</li>
+          <li>複雑なデータパターンの異常も検出可能</li>
+          <li>何が異常かを事前に定義する必要がない</li>
+        </ul>
+        <p><strong>用途:</strong></p>
+        <ul>
+          <li>製造業での不良品検出</li>
+          <li>金融取引の不正検知</li>
+          <li>ネットワークセキュリティでの侵入検知</li>
+          <li>医療診断での異常症例の検出</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-magic"></i> データ生成
+        </h3>
+        <p>変分オートエンコーダ（VAE）などの生成型モデルは、新しいデータサンプルを生成することができます。潜在空間での補間や操作により制御された生成が可能です。</p>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>学習したデータ分布に基づく新しいサンプル生成</li>
+          <li>潜在空間の操作による属性制御</li>
+          <li>データ拡張によるトレーニングデータの増強</li>
+        </ul>
+        <p><strong>用途:</strong></p>
+        <ul>
+          <li>画像生成（顔、アート、製品デザインなど）</li>
+          <li>薬剤設計や分子生成</li>
+          <li>音楽や音声の生成</li>
+          <li>テキスト生成（文章補完、要約など）</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-file-archive"></i> データ圧縮
+        </h3>
+        <p>オートエンコーダによるデータ圧縮は、情報の損失を最小限に抑えながらデータサイズを削減するのに役立ちます。</p>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>データ特性に適応した効率的な圧縮</li>
+          <li>非線形圧縮による高い圧縮率</li>
+          <li>特定のドメインに特化した最適化が可能</li>
+        </ul>
+        <p><strong>用途:</strong></p>
+        <ul>
+          <li>画像や動画の圧縮</li>
+          <li>センサーデータや時系列データの効率的な保存</li>
+          <li>通信帯域の制限がある環境でのデータ転送</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダの実世界での応用例</div>
+        <p>オートエンコーダは様々な実世界の問題に応用されています：</p>
+        <ul>
+          <li><strong>医療画像診断</strong>：MRIやCTスキャンのノイズ除去や特徴抽出、異常検出</li>
+          <li><strong>推薦システム</strong>：ユーザーの嗜好を低次元空間で表現し、類似性に基づく推薦</li>
+          <li><strong>工場の予防保全</strong>：センサーデータから機械の異常を早期に検出</li>
+          <li><strong>顔認識・検索</strong>：顔画像の効率的な表現と検索</li>
+          <li><strong>自然言語処理</strong>：文書の意味表現や要約、翻訳前処理</li>
+        </ul>
+        <p>これらは一部の例に過ぎず、オートエンコーダの応用範囲は今後も拡大し続けるでしょう。</p>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-table"></i> オートエンコーダの応用と使用される種類
+      </h3>
+      
+      <table class="comparison-table">
+        <tr>
+          <th>応用例</th>
+          <th>適したオートエンコーダの種類</th>
+          <th>利点</th>
+        </tr>
+        <tr>
+          <td>次元削減</td>
+          <td>基本的なオートエンコーダ、積層オートエンコーダ</td>
+          <td>非線形次元削減、階層的特徴表現</td>
+        </tr>
+        <tr>
+          <td>特徴抽出</td>
+          <td>積層オートエンコーダ、スパースオートエンコーダ</td>
+          <td>意味のある特徴の自動抽出、表現の解釈可能性</td>
+        </tr>
+        <tr>
+          <td>ノイズ除去</td>
+          <td>ノイズ除去オートエンコーダ</td>
+          <td>堅牢な特徴学習、データクリーニング</td>
+        </tr>
+        <tr>
+          <td>異常検知</td>
+          <td>基本的なオートエンコーダ、変分オートエンコーダ</td>
+          <td>再構成誤差に基づく異常検出、確率的モデル化</td>
+        </tr>
+        <tr>
+          <td>データ生成</td>
+          <td>変分オートエンコーダ (VAE)、Adversarial Autoencoder</td>
+          <td>確率的生成、滑らかな潜在空間</td>
+        </tr>
+        <tr>
+          <td>データ圧縮</td>
+          <td>畳み込みオートエンコーダ、Vector Quantized-VAE</td>
+          <td>領域特化型圧縮、離散的表現</td>
+        </tr>
+      </table>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定ポイント
+        </div>
+        <p>G検定では特に<span class="keyword">次元削減</span>、<span class="keyword">特徴抽出</span>、<span class="keyword">異常検知</span>、<span class="keyword">データ生成</span>の4つの応用例がよく取り上げられます。各応用例に適したオートエンコーダの種類と、なぜその種類が適しているのかを理解しておくことが重要です。また、<span class="keyword">変分オートエンコーダ</span>はデータ生成に特に強みを持つこと、<span class="keyword">積層オートエンコーダ</span>は階層的特徴学習に適していることをしっかり押さえておきましょう。</p>
+      </div>
+    </section>
+
+    <!-- 学習方法セクション -->
+    <section id="training" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-graduation-cap"></i> 学習方法
+      </h2>
+      
+      <p>オートエンコーダの学習は通常のニューラルネットワークとは異なる特徴があります。ここでは様々な学習方法や訓練時の考慮点について詳しく見ていきます。</p>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-clipboard-list"></i> 基本的な学習手順
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-cogs"></i> オートエンコーダの基本的な学習手順
+        </h3>
+        <ol>
+          <li><strong>順伝播</strong>: 入力データをエンコーダに通して潜在表現を得る</li>
+          <li><strong>潜在表現の取得</strong>: エンコーダの出力である潜在表現（中間層の出力）を取得</li>
+          <li><strong>再構成データの生成</strong>: 潜在表現をデコーダに通して再構成データを生成</li>
+          <li><strong>再構成誤差の計算</strong>: 元の入力データと再構成データとの差を計算</li>
+          <li><strong>パラメータ更新</strong>: 再構成誤差を最小化するようにネットワークの重みを更新（逆伝播）</li>
+        </ol>
+        <p>これを多数のデータサンプルについて繰り返し、再構成誤差が収束するまで学習を続けます。</p>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-balance-scale"></i> 損失関数
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-calculator"></i> 再構成誤差
+        </h3>
+        <p>オートエンコーダの基本的な損失関数は再構成誤差です。データの種類に応じて適切な誤差関数を選択します：</p>
+        <ul>
+          <li><strong>平均二乗誤差（MSE）</strong>: 連続値データ（画像のピクセル値など）に適しています。
+            <p style="text-align: center;">\(L_{MSE}(x, \hat{x}) = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{x}_i)^2\)</p>
+          </li>
+          <li><strong>二項交差エントロピー</strong>: バイナリデータ（0または1の値、二値画像など）に適しています。
+            <p style="text-align: center;">\(L_{BCE}(x, \hat{x}) = -\sum_{i=1}^{n} [x_i \log(\hat{x}_i) + (1-x_i) \log(1-\hat{x}_i)]\)</p>
+          </li>
+          <li><strong>VAEの損失関数</strong>: 変分オートエンコーダでは、再構成誤差にKLダイバージェンス項を加えます。
+            <p style="text-align: center;">\(L_{VAE} = L_{reconstruction}(x, \hat{x}) + \beta \cdot D_{KL}(q_{\phi}(z|x) || p(z))\)</p>
+            <p>ここで、\(q_{\phi}(z|x)\)はエンコーダが出力する潜在変数の分布、\(p(z)\)は事前分布（通常は標準正規分布）、\(\beta\)は重み係数です。</p>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダ学習のコツ</div>
+        <p>効果的なオートエンコーダを訓練するためのいくつかのコツ：</p>
+        <ol>
+          <li><strong>過学習を防ぐ</strong>：
+            <ul>
+              <li>ドロップアウトを適用する</li>
+              <li>正則化項（L1/L2正則化）を追加する</li>
+              <li>データ拡張を行う</li>
+            </ul>
+          </li>
+          <li><strong>潜在次元の選択</strong>：
+            <ul>
+              <li>小さすぎると情報が失われる</li>
+              <li>大きすぎると恒等関数になりやすい</li>
+              <li>検証セットを使って最適な次元を探す</li>
+            </ul>
+          </li>
+          <li><strong>学習の安定化</strong>：
+            <ul>
+              <li>バッチ正規化を使用する</li>
+              <li>適切な学習率スケジューリングを行う</li>
+              <li>活性化関数を慎重に選択する</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-layer-group"></i> 層別事前学習
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-stairs"></i> 層別事前学習（Layerwise Pretraining）
+        </h3>
+        <p>特に深いオートエンコーダを訓練する際に有効な方法です。全層を一度に訓練するのではなく、一度に1層ずつ訓練し、その後全体を微調整します。</p>
+        <ol>
+          <li><strong>第1段階</strong>: 最初の層（入力層 → 第1隠れ層 → 入力層）をオートエンコーダとして訓練</li>
+          <li><strong>第2段階</strong>: 第1隠れ層 → 第2隠れ層 → 第1隠れ層をオートエンコーダとして訓練</li>
+          <li><strong>第3段階</strong>: 同様にさらに深い層へと訓練を進める</li>
+          <li><strong>最終段階</strong>: すべての層を組み合わせ、エンドツーエンドで微調整（ファインチューニング）</li>
+        </ol>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-lightbulb"></i> 層別事前学習の利点
+        </div>
+        <p>層別事前学習には以下のような利点があります：</p>
+        <ul>
+          <li>深いネットワークの効果的な初期化が可能</li>
+          <li>勾配消失問題を緩和</li>
+          <li>局所最適解に陥るリスクを低減</li>
+          <li>各層がより意味のある特徴表現を学習しやすい</li>
+          <li>少ないデータでも効果的に学習可能</li>
+        </ul>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-exclamation-triangle"></i> 学習時の課題と対策
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-id-card"></i> 恒等関数問題
+        </h3>
+        <p>潜在層の次元が入力と同じかそれ以上の場合、オートエンコーダは単に入力をそのまま出力する恒等関数を学習してしまう可能性があります。</p>
+        <p><strong>対策:</strong></p>
+        <ul>
+          <li>ボトルネック構造を採用（潜在層を入力より小さくする）</li>
+          <li>スパース制約を加える（L1正則化やKLダイバージェンスペナルティ）</li>
+          <li>ノイズを導入する（ノイズ除去オートエンコーダ）</li>
+          <li>損失関数に正則化項を追加</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-clone"></i> 過学習
+        </h3>
+        <p>特に訓練データが少ない場合、オートエンコーダは訓練データに過度に適合し、汎化性能が低下する可能性があります。</p>
+        <p><strong>対策:</strong></p>
+        <ul>
+          <li>ドロップアウトの導入</li>
+          <li>ウェイトデケイ（L2正則化）の適用</li>
+          <li>データ拡張（回転、スケーリング、ノイズ追加など）</li>
+          <li>早期停止（検証セットの誤差が上昇したら訓練を停止）</li>
+          <li>VAEでのKL正則化</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-level-down-alt"></i> 勾配消失問題
+        </h3>
+        <p>特に深いオートエンコーダでは、逆伝播時に勾配が消失し、ネットワークの初期層の学習が進まなくなる問題があります。</p>
+        <p><strong>対策:</strong></p>
+        <ul>
+          <li>適切な活性化関数の選択（ReLUなど）</li>
+          <li>バッチ正規化の導入</li>
+          <li>残差接続（Residual Connection）の追加</li>
+          <li>層別事前学習の採用</li>
+          <li>適切な重み初期化（Xavier/Glorot初期化、He初期化など）</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定ポイント
+        </div>
+        <p>G検定ではオートエンコーダの学習方法について、特に<span class="keyword">再構成誤差</span>の概念と、<span class="keyword">層別事前学習</span>の仕組みを理解することが重要です。また、<span class="keyword">変分オートエンコーダ</span>の損失関数には再構成誤差とKLダイバージェンスが含まれることも重要なポイントです。学習時の課題として<span class="keyword">恒等関数問題</span>と<span class="keyword">勾配消失問題</span>、およびそれらの対策を押さえておきましょう。</p>
+      </div>
+    </section>
+
+    <!-- 事前学習とファインチューニングセクション -->
+    <section id="pretraining" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-layer-group"></i> 事前学習とファインチューニング
+      </h2>
+      
+      <p>事前学習（pretraining）とファインチューニング（fine-tuning）は、特に深層学習において重要な概念です。オートエンコーダはこれらの手法と密接に関連しています。</p>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-sync-alt"></i> 事前学習
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-brain"></i> 事前学習とは
+        </h3>
+        <p>事前学習とは、特定のタスクに対してモデルを訓練する前に、大量のデータを使用して汎用的な特徴抽出器を学習させることです。</p>
+        <p><strong>目的:</strong></p>
+        <ul>
+          <li>一般的な特徴抽出能力の獲得</li>
+          <li>ニューラルネットワークの良い初期パラメータ値の設定</li>
+          <li>転移学習の基盤作り</li>
+        </ul>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>ラベル付きデータが少ない場合でも高いパフォーマンスを発揮</li>
+          <li>学習の収束が速くなる</li>
+          <li>最終的な性能向上に寄与</li>
+        </ul>
+        <p><strong>主な方法:</strong></p>
+        <ul>
+          <li>自己教師あり学習（Self-supervised learning）</li>
+          <li>教師なし学習（Unsupervised learning）- オートエンコーダ等</li>
+          <li>大規模データセットでの教師あり学習（Supervised learning）</li>
+        </ul>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-sliders-h"></i> ファインチューニング
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-wrench"></i> ファインチューニングとは
+        </h3>
+        <p>ファインチューニングとは、事前学習されたモデルを特定のタスクに合わせて微調整するプロセスです。</p>
+        <p><strong>目的:</strong></p>
+        <ul>
+          <li>事前学習で獲得した一般的特徴を特定タスクに最適化</li>
+          <li>転移学習の実現</li>
+          <li>少量のラベル付きデータでの効率的な学習</li>
+        </ul>
+        <p><strong>メリット:</strong></p>
+        <ul>
+          <li>ゼロからの学習よりも効率的</li>
+          <li>少量のデータでも高い性能を実現可能</li>
+          <li>収束が速い</li>
+        </ul>
+        <p><strong>主な方法:</strong></p>
+        <ul>
+          <li>一部のパラメータのみを調整（浅い層を凍結し、深い層のみを調整）</li>
+          <li>すべてのパラメータを調整（低い学習率で）</li>
+          <li>目標タスク用の新しい層を追加して調整</li>
+        </ul>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-link"></i> オートエンコーダと事前学習
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-cogs"></i> オートエンコーダを用いた事前学習の流れ
+        </h3>
+        <p>オートエンコーダを使った事前学習は以下のような流れで行われます：</p>
+        <ol>
+          <li><strong>大量のラベルなしデータの収集</strong>: 特定のドメイン（画像、テキストなど）のデータを収集</li>
+          <li><strong>オートエンコーダの訓練</strong>: 収集したデータを用いてオートエンコーダを訓練し、特徴抽出器を学習</li>
+          <li><strong>エンコーダ部分の抽出</strong>: 訓練済みオートエンコーダからエンコーダ部分を取り出す</li>
+          <li><strong>分類層の追加</strong>: エンコーダの上に分類層（例：全結合層とソフトマックス層）を追加</li>
+          <li><strong>ファインチューニング</strong>: ラベル付きデータを用いて、エンコーダと分類層を合わせて微調整</li>
+        </ol>
+      </div>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダを使った事前学習の具体例</div>
+        <p>例えば、画像認識タスクにおける事前学習とファインチューニングの流れ：</p>
+        <ol>
+          <li><strong>事前学習フェーズ</strong>:
+            <ul>
+              <li>大量のラベルなし画像データを収集</li>
+              <li>これらの画像を使ってオートエンコーダを訓練</li>
+              <li>オートエンコーダは画像の再構成を学習し、重要な特徴を抽出</li>
+            </ul>
+          </li>
+          <li><strong>ファインチューニングフェーズ</strong>:
+            <ul>
+              <li>訓練済みエンコーダ部分を取り出し、分類層を追加</li>
+              <li>少量のラベル付き画像データを用意</li>
+              <li>このデータでネットワーク全体を微調整（低い学習率で）</li>
+              <li>または、一部の層を固定して残りの層のみを調整</li>
+            </ul>
+          </li>
+        </ol>
+        <p>この方法により、少ないラベル付きデータでも高い認識性能が得られます。</p>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-sitemap"></i> 深層信念ネットワークとの関連
+      </h3>
+      
+      <p>事前学習の文脈では、深層信念ネットワーク（Deep Belief Network, DBN）も重要なアプローチです。DBNは積層制限ボルツマンマシン（RBM）を用いた層別事前学習の先駆けとなりました。</p>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-network-wired"></i> 深層信念ネットワーク (DBN)
+        </h3>
+        <p>深層信念ネットワークは、複数の確率的隠れ変数層から構成される生成モデルです。</p>
+        <p><strong>特徴:</strong></p>
+        <ul>
+          <li>複数の制限ボルツマンマシン (RBM) を積み重ねた構造</li>
+          <li>貪欲層別事前学習 (greedy layer-wise pretraining) を使用</li>
+          <li>生成モデルとしての特性を持つ</li>
+          <li>確率的な潜在変数を使用</li>
+        </ul>
+        <p><strong>応用:</strong></p>
+        <ul>
+          <li>特徴学習</li>
+          <li>次元削減</li>
+          <li>事前学習</li>
+          <li>生成モデル</li>
+        </ul>
+      </div>
+      
+      <table class="comparison-table">
+        <tr>
+          <th>比較項目</th>
+          <th>オートエンコーダ</th>
+          <th>深層信念ネットワーク (DBN)</th>
+        </tr>
+        <tr>
+          <td>基本モデル種類</td>
+          <td>決定論的または確率的ニューラルネットワーク</td>
+          <td>確率的生成モデル</td>
+        </tr>
+        <tr>
+          <td>学習目標</td>
+          <td>入力データの再構成</td>
+          <td>データの確率分布のモデル化</td>
+        </tr>
+        <tr>
+          <td>学習方法</td>
+          <td>通常は誤差逆伝播法</td>
+          <td>制限ボルツマンマシン (RBM) の層別学習</td>
+        </tr>
+        <tr>
+          <td>確率性</td>
+          <td>VAEは確率的、基本型は決定論的</td>
+          <td>本質的に確率的</td>
+        </tr>
+        <tr>
+          <td>事前学習の特徴</td>
+          <td>再構成誤差最小化による特徴抽出</td>
+          <td>データの確率分布を捉える特徴抽出</td>
+        </tr>
+      </table>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-rocket"></i> 事前学習なしのアプローチ
+      </h3>
+      
+      <p>近年の深層学習の発展により、大規模なネットワークは事前学習なしでも直接訓練できるようになってきました。これには以下のような要因があります：</p>
+      
+      <ul>
+        <li>より良い初期化手法（Xavier/Glorot初期化、He初期化など）</li>
+        <li>バッチ正規化やレイヤー正規化などの正規化手法</li>
+        <li>ReLUなどの勾配消失を軽減する活性化関数</li>
+        <li>残差接続（ResNet）やスキップ接続などのアーキテクチャの改良</li>
+        <li>より大量のラベル付きデータの利用可能性</li>
+        <li>より強力なハードウェア（GPU/TPU）</li>
+      </ul>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-chevron-right"></i> エンドツーエンド学習
+        </h3>
+        <p>エンドツーエンド学習は、事前学習なしで直接ネットワーク全体を訓練する方法です。</p>
+        <p><strong>特徴:</strong></p>
+        <ul>
+          <li>入力から出力まで一貫したパイプラインで学習</li>
+          <li>中間表現を明示的に設計する必要がない</li>
+          <li>タスク固有の最適化が可能</li>
+          <li>シンプルな訓練プロセス</li>
+        </ul>
+        <p><strong>課題:</strong></p>
+        <ul>
+          <li>大量のラベル付きデータが必要</li>
+          <li>計算リソースの要求が高い</li>
+          <li>過学習のリスクが高い（特にデータが少ない場合）</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">事前学習の必要性は？</div>
+        <p>では、どのような場合に事前学習が特に有効なのでしょうか？</p>
+        <ul>
+          <li><strong>ラベル付きデータが限られている場合</strong>: 教師なし/自己教師あり事前学習により、少量のラベル付きデータでも高い性能を実現</li>
+          <li><strong>複雑なパターン認識が必要な場合</strong>: 事前学習で基本的なパターン認識能力を獲得し、複雑なタスクに応用</li>
+          <li><strong>計算リソースが限られている場合</strong>: ゼロから大規模モデルを訓練するよりも効率的</li>
+          <li><strong>転移学習が有効な場合</strong>: ある領域で学んだ知識を関連する別の領域に転用する場合</li>
+          <li><strong>特徴の解釈可能性が重要な場合</strong>: 層別事前学習では、各層が意味のある特徴を学習することが多い</li>
+        </ul>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定ポイント
+        </div>
+        <p>G検定では、<span class="keyword">事前学習</span>と<span class="keyword">ファインチューニング</span>の概念を理解し、オートエンコーダがどのように事前学習に使用されるかを把握することが重要です。特に、<span class="keyword">積層オートエンコーダ</span>や<span class="keyword">深層信念ネットワーク</span>が事前学習のための重要なアプローチであることを押さえておきましょう。また、事前学習後のファインチューニングのプロセスも理解しておくことが必要です。</p>
+      </div>
+    </section>
+
+    <!-- 重要ポイントセクション -->
+    <section id="key-insights" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-lightbulb"></i> 重要ポイント
+      </h2>
+      
+      <p>オートエンコーダについて学んできた内容を踏まえて、G検定で押さえておくべき重要なポイントをまとめます。</p>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダの核心</div>
+        <p>オートエンコーダの本質は「データを圧縮して重要な特徴を抽出し、それだけを使って元のデータを復元する」能力にあります。この過程で、ネットワークはデータの重要な構造や特徴を自動的に学習します。</p>
+      </div>
+      
+      <h3 class="section-subtitle">
+        <i class="fas fa-star"></i> G検定で必ず押さえるべきポイント
+      </h3>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-check-circle"></i> ポイント1: オートエンコーダの基本構造と目的
+        </h3>
+        <ul>
+          <li>オートエンコーダは<span class="keyword">エンコーダ</span>と<span class="keyword">デコーダ</span>から構成される</li>
+          <li>入力と同じ出力を生成するように学習する<span class="keyword">教師なし学習</span>（または自己教師あり学習）の一種</li>
+          <li>中間層（潜在層）が入力層よりも少ないノード数を持つことで<span class="keyword">次元削減</span>が行われる</li>
+          <li>主な応用例は<span class="keyword">次元削減</span>、<span class="keyword">特徴抽出</span>、<span class="keyword">ノイズ除去</span>、<span class="keyword">異常検知</span>、<span class="keyword">データ生成</span></li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-check-circle"></i> ポイント2: オートエンコーダの種類
+        </h3>
+        <ul>
+          <li><span class="keyword">変分オートエンコーダ (VAE)</span>: 潜在空間が確率分布としてモデル化され、データ生成に適している</li>
+          <li><span class="keyword">積層オートエンコーダ</span>: 複数の浅いオートエンコーダを積み重ねた構造で、階層的特徴学習が可能</li>
+          <li><span class="keyword">ノイズ除去オートエンコーダ</span>: 入力にノイズを加え、元のデータを復元するように学習</li>
+          <li><span class="keyword">スパースオートエンコーダ</span>: 潜在表現が疎になるように正則化を加える</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-check-circle"></i> ポイント3: 事前学習とファインチューニング
+        </h3>
+        <ul>
+          <li>オートエンコーダは<span class="keyword">事前学習</span>の手法として重要</li>
+          <li><span class="keyword">層別事前学習</span>は積層オートエンコーダや<span class="keyword">深層信念ネットワーク</span>で用いられる</li>
+          <li>事前学習後、特定のタスクに合わせて<span class="keyword">ファインチューニング</span>を行う</li>
+          <li>少量のラベル付きデータしかない場合に特に有効</li>
+        </ul>
+      </div>
+      
+      <div class="concept-card">
+        <h3 class="concept-card-title">
+          <i class="fas fa-check-circle"></i> ポイント4: オートエンコーダの学習
+        </h3>
+        <ul>
+          <li>基本的な学習目標は<span class="keyword">再構成誤差</span>の最小化</li>
+          <li>VAEでは再構成誤差に加えて<span class="keyword">KLダイバージェンス</span>も最小化</li>
+          <li>恒等関数学習を防ぐために、ボトルネック構造や正則化が重要</li>
+          <li>深いネットワークでは<span class="keyword">勾配消失問題</span>に注意</li>
+        </ul>
+      </div>
+      
+      <div class="handwritten-box">
+        <div class="handwritten-box-title">オートエンコーダを深く理解するためのメンタルモデル</div>
+        <p>オートエンコーダを「情報の圧縮と復元を学ぶシステム」と考えると理解しやすいでしょう。このプロセスは以下のように考えられます：</p>
+        <ol>
+          <li>エンコーダは「データから本当に重要な情報だけを抽出する方法」を学習</li>
+          <li>デコーダは「抽出された重要情報からデータ全体を再構築する方法」を学習</li>
+          <li>このプロセスを通じて、データの本質的な構造や特徴が自動的に学習される</li>
+        </ol>
+        <p>これは人間が要約を作る過程にも似ています。長い文章から重要なポイントだけを抽出（エンコード）し、後でそのポイントから元の内容を思い出す（デコード）という作業です。</p>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-exclamation-circle"></i> G検定対策まとめ
+        </div>
+        <p>G検定では、オートエンコーダの概念理解と応用例、特に<span class="keyword">変分オートエンコーダ (VAE)</span>と<span class="keyword">積層オートエンコーダ</span>の特徴、そして<span class="keyword">事前学習</span>および<span class="keyword">ファインチューニング</span>との関連性を中心に出題されることが多いです。これらの概念をしっかりと理解し、それぞれの特徴と違いを説明できるようにしておきましょう。</p>
+      </div>
+    </section>
+
+    <!-- 用語集セクション -->
+    <section id="glossary" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-book"></i> 用語集
+      </h2>
+      
+      <p>オートエンコーダに関連する重要な用語をまとめました。</p>
+      
+      <div class="glossary">
+        <div class="term">
+          <div class="term-name">オートエンコーダ (Autoencoder)</div>
+          <div class="term-definition">入力データを圧縮して特徴を抽出し、その特徴から元のデータを復元することを目的とするニューラルネットワーク。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">エンコーダ (Encoder)</div>
+          <div class="term-definition">入力データを受け取り、より少ない次元の潜在表現に変換するオートエンコーダの前半部分。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">デコーダ (Decoder)</div>
+          <div class="term-definition">潜在表現を受け取り、元のデータの次元に戻すオートエンコーダの後半部分。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">潜在表現 (Latent Representation)</div>
+          <div class="term-definition">エンコーダの出力であり、データの圧縮された特徴が表現された中間層の状態。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">ボトルネック層 (Bottleneck Layer)</div>
+          <div class="term-definition">オートエンコーダの中間にある、最も次元数が小さい層。データの圧縮が最も進んだ状態を表現する。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">再構成誤差 (Reconstruction Error)</div>
+          <div class="term-definition">入力データとオートエンコーダの出力（再構成されたデータ）の間の差異を測る指標。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">アンダーコンプリートオートエンコーダ (Undercomplete Autoencoder)</div>
+          <div class="term-definition">潜在層の次元が入力層よりも小さいオートエンコーダ。データの圧縮を強制する。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">変分オートエンコーダ (Variational Autoencoder, VAE)</div>
+          <div class="term-definition">潜在変数を確率分布としてモデル化したオートエンコーダ。データ生成に適している。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">積層オートエンコーダ (Stacked Autoencoder)</div>
+          <div class="term-definition">複数の浅いオートエンコーダを積み重ねた構造を持つオートエンコーダ。階層的な特徴表現の学習が可能。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">ノイズ除去オートエンコーダ (Denoising Autoencoder)</div>
+          <div class="term-definition">入力にノイズを加え、元のノイズなしデータを復元するように学習するオートエンコーダ。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">スパースオートエンコーダ (Sparse Autoencoder)</div>
+          <div class="term-definition">潜在層のアクティベーションが疎になるように正則化を加えたオートエンコーダ。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">VQ-VAE (Vector Quantized-Variational Autoencoder)</div>
+          <div class="term-definition">ベクトル量子化を使用した変分オートエンコーダ。離散的なコードブックを使用する。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">深層信念ネットワーク (Deep Belief Network, DBN)</div>
+          <div class="term-definition">制限ボルツマンマシン (RBM) を積み重ねた構造を持つ深層生成モデル。層別事前学習の先駆け。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">事前学習 (Pretraining)</div>
+          <div class="term-definition">特定のタスクに対してモデルを訓練する前に、大量のデータを使用して汎用的な特徴抽出器を学習させること。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">ファインチューニング (Fine-tuning)</div>
+          <div class="term-definition">事前学習されたモデルを特定のタスクに合わせて微調整するプロセス。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">層別事前学習 (Layerwise Pretraining)</div>
+          <div class="term-definition">ネットワークの各層を一つずつ順番に学習していく方法。積層オートエンコーダや深層信念ネットワークで使用される。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">KLダイバージェンス (Kullback-Leibler Divergence)</div>
+          <div class="term-definition">二つの確率分布間の距離を測る指標。変分オートエンコーダの損失関数の一部として使用される。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">次元削減 (Dimensionality Reduction)</div>
+          <div class="term-definition">高次元データを低次元空間に変換する技術。オートエンコーダの主要な応用例の一つ。</div>
+        </div>
+        
+        <div class="term">
+          <div class="term-name">異常検知 (Anomaly Detection)</div>
+          <div class="term-definition">通常のパターンから外れたデータを検出する技術。正常データで訓練されたオートエンコーダは異常データの再構成誤差が高くなる特性を利用。</div>
+        </div>
+      </div>
+      
+      <div class="note-box">
+        <div class="note-box-title">
+          <i class="fas fa-info-circle"></i> 用語の関連性
+        </div>
+        <p>これらの用語は互いに関連しています。例えば、変分オートエンコーダ (VAE) はデータ生成に強く、積層オートエンコーダは階層的特徴学習に適しています。事前学習とファインチューニングはオートエンコーダの活用法を表し、層別事前学習は特に深いネットワークを効率的に学習するための手法です。</p>
+      </div>
+    </section>
+
+    <!-- フッターセクション -->
+    <section class="section" style="text-align: center; padding: 1rem; border-top: 1px solid #e0e0e0;">
+      <p style="font-size: 0.9rem; color: var(--dark-gray);">
+        オートエンコーダに関するG検定ノート | 作成日: 2024年4月
+      </p>
+      <p style="font-size: 0.8rem; color: var(--dark-gray);">
+        Content generated with Claude 3.5 Sonnet | Images: DALL-E
+      </p>
+    </section>
+  </div>
+
+  <!-- トップへ戻るボタン -->
+  <a href="#" class="scroll-to-top" id="scroll-to-top">
+    <i class="fas fa-arrow-up"></i>
+  </a>
+
+  <!-- JavaScript -->
+  <script>
+    // スクロール位置に応じてトップへ戻るボタンの表示/非表示を切り替える
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scroll-to-top');
+      if (window.scrollY > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+    
+    // トップへ戻るボタンのクリックイベント
+    document.getElementById('scroll-to-top').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // サイドメニューのスムーススクロール
+    document.querySelectorAll('.side-menu-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 20,
+            behavior: 'smooth'
+          });
+          
+          // アクティブクラスの切り替え
+          document.querySelectorAll('.side-menu-link').forEach(el => {
+            el.classList.remove('active');
+          });
+          this.classList.add('active');
+        }
+      });
+    });
+    
+    // スクロール位置に応じてサイドメニューのアクティブ状態を切り替える
+    window.addEventListener('scroll', function() {
+      const scrollPosition = window.scrollY;
+      const sections = document.querySelectorAll('section');
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        const sectionBottom = sectionTop + section.offsetHeight;
+        const sectionId = section.getAttribute('id');
+        
+        if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+          document.querySelectorAll('.side-menu-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + sectionId) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
